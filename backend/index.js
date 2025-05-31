@@ -41,6 +41,14 @@ app.get('/messages', async(req, res) => {
 
 });
 
+
+
+app.use((err, req, res, next) => {
+  console.log("Server: Middleware logging error stack ...");
+  console.error(err.stack); // Log the stack trace
+  res.status(err.status || 500).send(err.message || "Something broke in the web server !");
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
