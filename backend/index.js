@@ -24,22 +24,37 @@ app.post('/movies', async(req, res) => {
     res.status(201).json("Movie added successfully!");
 })
 
+
 app.get('/screenings', async(req, res) => {
     const screenings = await db.getScreenings()
     res.status(200).json(screenings);
 });
+app.post('/screenings', async(req, res) => {
+    await db.addScreening(req.body);
+    res.status(201).json("Screening added successfully!");
+})
+
 
 app.get('/tickets', async(req, res) => {
     const tickets = await db.getTickets()
     res.status(200).json(tickets);
 
 });
+app.post('/tickets', async(req, res) => {
+    await db.addTicket(req.body);
+    res.status(201).json("Ticket added successfully!");
+})
+
 
 app.get('/messages', async(req, res) => {
     const messages = await db.getMessages()
     res.status(200).json(messages);
 
 });
+app.post('/messages', async(req, res) => {
+    await db.addMessage(req.body);
+    res.status(201).json("Message added successfully!");
+})
 
 
 
