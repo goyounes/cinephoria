@@ -16,6 +16,13 @@ app.get('/movies', async(req, res) => {
     const movies = await db.getMovies()
     res.status(200).json(movies);
 });
+app.post('/movies', async(req, res) => {
+    // const { title, description, releaseDate, genre } = req.body || {"title", "description", "releaseDate", "genre"};
+    // Here you would typically insert the movie into the database
+    // For now, we'll just return the received data
+    await db.addMovie(req.body);
+    res.status(201).json("Movie added successfully!");
+})
 
 app.get('/screenings', async(req, res) => {
     const screenings = await db.getScreenings()
