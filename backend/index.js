@@ -13,47 +13,78 @@ app.get('/', (req, res) => {
 });
 
 app.get('/movies', async(req, res) => {
-    const movies = await db.getMovies()
-    res.status(200).json(movies);
+    try{
+        const movies = await db.getMovies()
+        res.status(200).json(movies);
+    } catch (error) {
+        next(error);
+    }
 });
 app.post('/movies', async(req, res) => {
     // const { title, description, releaseDate, genre } = req.body || {"title", "description", "releaseDate", "genre"};
     // Here you would typically insert the movie into the database
     // For now, we'll just return the received data
-    await db.addMovie(req.body);
-    res.status(201).json("Movie added successfully!");
+    try {
+        await db.addMovie(req.body);
+        res.status(201).json("Movie added successfully!");
+    } catch (error) {
+        next(error);
+    }
 })
 
 
 app.get('/screenings', async(req, res) => {
-    const screenings = await db.getScreenings()
-    res.status(200).json(screenings);
+    try{
+        const screenings = await db.getScreenings()
+        res.status(200).json(screenings);
+    } catch (error) {
+        next(error);
+    }
 });
 app.post('/screenings', async(req, res) => {
-    await db.addScreening(req.body);
-    res.status(201).json("Screening added successfully!");
+    try{
+        await db.addScreening(req.body);
+        res.status(201).json("Screening added successfully!");
+    } catch (error) {
+        next(error);
+    }
 })
 
 
 app.get('/tickets', async(req, res) => {
-    const tickets = await db.getTickets()
-    res.status(200).json(tickets);
+    try{
+        res.status(200).json(tickets);
+        const tickets = await db.getTickets()
+    } catch (error) {
+        next(error);
+    }
 
 });
 app.post('/tickets', async(req, res) => {
-    await db.addTicket(req.body);
-    res.status(201).json("Ticket added successfully!");
+    try{
+        await db.addTicket(req.body);
+        res.status(201).json("Ticket added successfully!");
+    } catch (error) {
+        next(error);
+    }
 })
 
 
 app.get('/messages', async(req, res) => {
-    const messages = await db.getMessages()
-    res.status(200).json(messages);
-
+    try{
+        const messages = await db.getMessages()
+        res.status(200).json(messages);
+    } catch (error) {
+        next(error);
+    }
 });
 app.post('/messages', async(req, res) => {
-    await db.addMessage(req.body);
-    res.status(201).json("Message added successfully!");
+    try{
+        await db.addMessage(req.body);
+        res.status(201).json("Message added successfully!");
+    } catch (error) {
+        next(error);
+    }
 })
 
 
