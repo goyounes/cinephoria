@@ -1,18 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import Home from './pages/Home';
-import Movies from './pages/Movies';
-import Tickets from './pages/Tickets';
-import Screenings from './pages/Screenings'; 
-import Messages from './pages/Messages';
+
+import {Home, Movies, Tickets, Screenings, Messages} from './pages';
 import Footer from './components/Footer';
+import TopNavBar from './components/TopNavBar';
 
 import './App.css'
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
+    <BrowserRouter>
+      <TopNavBar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movies" element={<Movies />}>
@@ -29,8 +28,8 @@ function App() {
           </Route>
           <Route path="/messages" element={<Messages />} />
         </Routes>
-      </BrowserRouter>
       <Footer />
+    </BrowserRouter>
     </div>
   );
 }
