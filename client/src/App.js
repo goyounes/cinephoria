@@ -5,7 +5,9 @@ import Movies from './pages/Movies';
 import Tickets from './pages/Tickets';
 import Screenings from './pages/Screenings'; 
 import Messages from './pages/Messages';
+import Footer from './components/Footer';
 
+import './App.css'
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
         </Routes>
       </BrowserRouter>
+      <Footer />
     </div>
   );
 }
