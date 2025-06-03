@@ -5,7 +5,7 @@ import {Home, Movies, Tickets, Screenings, Messages} from './pages';
 import Footer from './components/Footer';
 import TopNavBar from './components/TopNavBar';
 
-import './App.css'
+import './assets/global.css';
 
 function App() {
   return (
