@@ -38,6 +38,8 @@
 } */
 
 /* header styles */
+
+
 header{
   width: 100%;
   padding: 0.5rem;
@@ -49,6 +51,7 @@ header{
   position: sticky;
   top:0;
   border-bottom: solid 1px #000000;
+    background-color: #9bd4f2;
 }
 header > * {
   display: flex;
@@ -99,3 +102,25 @@ Footer {
   margin-bottom: 0; /* no margin needed since no wrap */
   flex: 1 1 auto;
 }
+
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .highlight {
+      background-color: #e6ffe6 !important;
+    }
+    h1 {
+      margin: 0; /* Remove margin for h1 */
+      font-size: 2.25rem; /* 36px */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
