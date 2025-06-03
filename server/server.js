@@ -1,9 +1,23 @@
 import experess from 'express';
 import cors from 'cors';
-import * as db from './database.js';
+import * as db from './controllers/database.js';
 
 const app = experess();
 const PORT = 8080;
+
+import usersRoutes from  './routes/users.js'
+import moviesRoutes from  './routes/movies.js'
+import screeningsRoutes from  './routes/screenings.js'
+import ticketsRoutes from  './routes/tickets.js'
+import adminRoutes from  './routes/admin.js'
+import authRoutes from  './routes/auth.js'
+
+app.use('/users', usersRoutes);
+app.use('/movies', moviesRoutes);
+app.use('/screenings', screeningsRoutes);
+app.use('/tickets', ticketsRoutes);
+app.use('/admin', adminRoutes);
+app.use('/auth', authRoutes);
 
 app.use(cors());
 app.use(experess.json());
