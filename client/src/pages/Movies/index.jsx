@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import MovieTable from './MoviesTable.jsx'
+import { Link } from 'react-router-dom'
 
 const Movies = () => {
   const [movies, setMovies] = useState([])
@@ -21,6 +22,7 @@ const Movies = () => {
   return (
     <div>
       <h1>Movies table</h1>
+      <Link to={"/movies/create"}><button>Add movie</button></Link> 
       <MovieTable movies={movies}/>
     </div>
   )
