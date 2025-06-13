@@ -15,10 +15,23 @@ router.get("/",async (req,res,next) => {
     }
 })
 
-router.get('/create', (req, res,next) => {
+router.post('/', async(req, res,next) => {
     // res.sendFile("/static/create_user.html",{root:"."})
     // res.status(200).render("pages/create_user.ejs",{DB_API_URL});
-    res.status(200).json({message: "Create user page not implemented yet. Please use the API directly."})
+
+    // res.status(200).json({message: "Create user page not implemented yet. Please use the API directly."})
+    try {
+        const userData = req.body;
+        console.log("user data", userData)
+
+        const response = await axios.post(DB_API_URL+"/users", userData, {
+            headers: {'Content-Type': 'application/json'},
+        });        
+        console.log("response of adding user: ",response)
+    } catch (error) {
+        next(error)
+    }
+
 });
 
 

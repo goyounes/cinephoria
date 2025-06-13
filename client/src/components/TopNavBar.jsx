@@ -18,6 +18,8 @@ const TopNavBar = () => {
         </div>
         <div className="header-right">
             <Link to={"/users"} className="header-icon-link">👤<span>Users</span></Link>
+            <Link to={"/signup"} className="header-icon-link">👤<span>SignUp</span></Link>
+            <Link to={"/signin"} className="header-icon-link">👤<span>Login</span></Link>
             <Link to={"/contact"} className="header-icon-link">📞<span>Contact</span></Link>
         </div>
     </header>

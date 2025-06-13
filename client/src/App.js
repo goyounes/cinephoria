@@ -1,13 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
-import {Home, Movies, Tickets, Screenings, Messages} from './pages';
+import { Home, Movies, Tickets, Screenings, Messages } from './pages';
+import { Signin, Signup } from './pages/Auth';
 import AddMovie from './pages/Movies/AddMovie';
 
 import Footer from './components/Footer';
 import TopNavBar from './components/TopNavBar';
 
 import './assets/global.css';
+import AddUser from './pages/Users/AddUser';
+import Users from './pages/Users/Users';
+
 
 function App() {
   return (
@@ -31,6 +35,15 @@ function App() {
         <Route path="/tickets/:id" element={<Tickets />} />
         {/* Messages */}
         <Route path="/messages" element={<Messages />} />
+        {/* Users */}
+        <Route path="/users" element={<Users />} />
+
+
+
+        <Route path="/signin" element={<Signin />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/admin/users/create" element={<AddUser />} />
+
       </Routes>
       <Footer />
     </BrowserRouter>

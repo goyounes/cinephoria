@@ -1,8 +1,10 @@
+import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AddUser = () => {
   const API_URL = "http://localhost:5000/api/v1";
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_email: '',
     user_password: '',
@@ -28,21 +30,21 @@ const AddUser = () => {
         role_id: Number(formData.role_id),
       };
 
-      const response = await fetch(`${API_URL}/users`, {
+      const response = await axios.post(`${API_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      const result = response.data;
 
-      if (!response.ok) {
-        const err = new Error(result.error?.message || 'An error occurred');
-        err.status = result.error?.status;
-        err.code = result.error?.code;
-        err.details = result.error?.details;
-        throw err;
-      }
+    //   if (!response.ok) {
+    //     const err = new Error(result.error?.message || 'An error occurred');
+    //     err.status = result.error?.status;
+    //     err.code = result.error?.code;
+    //     err.details = result.error?.details;
+    //     throw err;
+    //   }
 
       alert('User added successfully!');
       setFormData({
@@ -53,7 +55,7 @@ const AddUser = () => {
         first_name: '',
         last_name: '',
       });
-      window.location.href = '/users';
+      navigate('/users'); // Redirect to the users page
     } catch (err) {
       alert('Failed to add User: ' + err.message);
     }

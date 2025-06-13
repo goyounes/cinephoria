@@ -1,13 +1,14 @@
+import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const API_URL = "http://localhost:5000/api/v1";
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_email: '',
     user_password: '',
     user_name: '',
-    role_id: '1',
     first_name: '',
     last_name: '',
   });
@@ -24,36 +25,34 @@ const Signup = () => {
     e.preventDefault();
     try {
       const payload = {
-        ...formData,
-        role_id: Number(formData.role_id),
+        ...formData
       };
 
-      const response = await fetch(`${API_URL}/users`, {
+      const response = await axios.post(`${API_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        const err = new Error(result.error?.message || 'An error occurred');
-        err.status = result.error?.status;
-        err.code = result.error?.code;
-        err.details = result.error?.details;
-        throw err;
-      }
-
+      const result = response.data
+    // axios throws an error for non-2xx responses, so we don't need to check response.ok
+    //   if (!response.ok) {
+    //     const err = new Error(result.error?.message || 'An error occurred');
+    //     err.status = result.error?.status;
+    //     err.code = result.error?.code;
+    //     err.details = result.error?.details;
+    //     throw err;
+    //   }
+      console.log("response of adding user: ", response);
       alert('User added successfully!');
       setFormData({
         user_email: '',
         user_password: '',
         user_name: '',
-        role_id: '1',
         first_name: '',
         last_name: '',
       });
-      window.location.href = '/users';
+      navigate('/home'); // Redirect to the users page
     } catch (err) {
       alert('Failed to add User: ' + err.message);
     }
@@ -104,21 +103,6 @@ const Signup = () => {
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role_id">Role:</label>
-              <select
-                id="role_id"
-                name="role_id"
-                value={formData.role_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="1">User</option>
-                <option value="2">Employee</option>
-                <option value="3">Admin</option>
-              </select>
             </div>
           </fieldset>
 
