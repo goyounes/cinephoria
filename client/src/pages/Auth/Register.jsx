@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Signup = () => {
+const Register = () => {
   const API_URL = "http://localhost:5000/api/v1";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -147,4 +147,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Register;
