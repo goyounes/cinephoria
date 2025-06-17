@@ -1,4 +1,4 @@
-import { pool } from "./database";
+import { pool } from "./connect.js";
 
 export async function  getTickets(){
     const q = `SELECT * FROM tickets;`

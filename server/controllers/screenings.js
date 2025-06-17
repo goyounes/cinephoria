@@ -1,4 +1,4 @@
-import { pool } from "./database";
+import { pool } from "./connect.js";
 
 export async function  getScreenings(){
     // This function retrieves raw SCREENINGS TABLE data
@@ -43,7 +43,6 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
         ORDER BY screenings.start_date, screenings.start_time;
     `
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id, movie_id, movie_id])
-    await dbTableLogger("screenings",result_rows)
     return result_rows
 }
 
@@ -63,7 +62,6 @@ export async function getAllScreenings(cinema_id,movie_id){
         ORDER BY screenings.start_date, screenings.start_time;
     `
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id, movie_id, movie_id])
-    // await dbTableLogger("screenings",result_rows)
     return result_rows
 }
 export async function  getQualities(){

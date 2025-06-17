@@ -1,4 +1,4 @@
-import { pool } from "./database";
+import { pool } from "./connect.js";
 
 export async function  getMovies(){
     const q = `SELECT * FROM movies;`
@@ -36,12 +36,6 @@ export async function  getMoviesWithGenres(){
         ON movie_genres.genre_id = genres.genre_id
         GROUP BY movies.movie_id;
     `
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
-
-export async function  getMovies(){
-    const q = `SELECT * FROM movies;`
     const [result_rows] = await pool.query(q);
     return result_rows
 }

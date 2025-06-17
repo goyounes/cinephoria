@@ -1,4 +1,4 @@
-import { pool } from "./database";
+import { pool } from "./connect.js";
 
 export async function  getMessages(){
     const q = `SELECT * FROM messages;`
