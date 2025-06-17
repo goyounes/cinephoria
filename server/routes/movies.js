@@ -1,16 +1,25 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
+import { getMovies, getMoviesWithGenres } from '../controllers/movies.js';
 
 const DB_API_URL = "http://localhost:5000/api/v1"
 
 router.get("/",async (req,res,next) => {
     try {
-        const response = await axios.get(DB_API_URL+"/movies")
-        const movies = response.data
-        console.log("response",response)
-        // res.status(200).render("pages/movies.ejs",{movies})
-        res.status(200).json(response.data)
+        // const response = await axios.get(DB_API_URL+"/movies")
+        // const movies = response.data
+        // console.log("response",response)
+        const movies = await getMoviesWithGenres()
+        res.status(200).json(movies)
+    } catch (error) {
+        next(error)
+    }
+})
+router.post("/Recent",async (req,res,next) => {
+    try {
+        const movies = await getMoviesAddedSince()
+        res.status(200).json(movies)
     } catch (error) {
         next(error)
     }

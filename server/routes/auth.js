@@ -2,12 +2,11 @@ import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
 
-const DB_API_URL = "http://localhost:5000/api/v1"
 
-
-router.get('/', (req, res) => {
-  res.send('auth page');
-});
+import { register, login, logout } from '../controllers/auth.js';
+router.post('/register', register);
+router.post('/login', login);
+router.post('/logout', logout);
  
 // router.delete('/user/:id', (req, res) => {
 //   res.send(`Deleted user ${req.params.id}`);

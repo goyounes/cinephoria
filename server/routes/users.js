@@ -1,15 +1,14 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-
+import { getUsers } from '../controllers/users.js'; // assuming you have a controller to fetch users
 const DB_API_URL = "http://localhost:5000/api/v1"
 
 router.get("/",async (req,res,next) => {
     try {
-        const response = await axios.get(DB_API_URL+"/users",{headers:{'X-Requested-By': 'backend-server'}})
-        const users = response.data
-        // res.status(200).render("pages/users.ejs",{users})
-        res.status(200).json(response.data)
+        // const response = await axios.get(DB_API_URL+"/users",{headers:{'X-Requested-By': 'backend-server'}})
+        const users = await getUsers() // this is a controller function that fetches users from the database
+        res.status(200).json(users)
     } catch (error) {
         next(error)
     }
