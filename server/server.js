@@ -1,12 +1,14 @@
 import experess from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import * as db from './controllers/database.js';
 
 const app = experess();
 const PORT = 8080;
 
-app.use(cors());
 app.use(experess.json());
+app.use(cors());
+app.use(cookieParser());
 
 import usersRoutes from  './routes/users.js'
 import moviesRoutes from  './routes/movies.js'

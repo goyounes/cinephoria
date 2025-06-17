@@ -1,5 +1,6 @@
 import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export async function register (req, res, next) {
     // Validate request body
@@ -12,8 +13,8 @@ export async function register (req, res, next) {
     try {
         // Check if user exists with the provided username
         const q1 = "SELECT * FROM users WHERE user_name = ?";
-        const [result_rows] = await pool.query(q1, [req.body.username]);
-        if (result_rows.length !== 0) return next(new Error("Username already exists"));
+        const [data] = await pool.query(q1, [req.body.username]);
+        if (data.length !== 0) return next(new Error("Username already exists"));
 
         //hash the password
         const salt = bycrpt.genSaltSync(10);
@@ -56,29 +57,30 @@ export async function login (req, res, next) {
 
     try {
         // Check if user exists with the provided username
-        const q1 = "SELECT user_id FROM users WHERE user_name = ?";
-        const [result_rows1] = await pool.query(q1 ,[req.body.username]);
-        
-        if (result_rows1.length === 0) return next(new Error("This username does not exist"));
+        const q1 = "SELECT * FROM users WHERE user_name = ?";
+        const [data1] = await pool.query(q1 ,[req.body.username]);
+        if (data1.length === 0) return next(new Error("This username does not exist"));
 
         // Get the user_id
-        const user_id = result_rows1[0].user_id;
+        const user_id = data1[0].user_id;
 
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
-        const [result_rows2] = await pool.query(q2 ,[user_id]);
+        const [data2] = await pool.query(q2 ,[user_id]);
+        if (data2.length === 0) return next(new Error("No credentials found for this user... desync in the database?"));
 
-        if (result_rows2.length === 0) return next(new Error("No credentials found for this user... desync in the database?"));
-        const passwordHash = result_rows2[0].user_password_hash;
+        // Get the password hash
+        const passwordHash = data2[0].user_password_hash;
 
         //Check the hash
         const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // If everything is fine, return the user_id signed using a JWT token
-        // const token = jwt.sign({ user_id , role_id}, process.env.JWT_SECRET, { expiresIn: '1h' });    
-
-        res.status(200).json({ message: "Login successful", user_id });
+        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret");    
+        res.cookie('accessToken', token, {
+            httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+        }).status(200).json(data1[0]);
     }catch (error) {
         next(error);
     }
@@ -86,5 +88,9 @@ export async function login (req, res, next) {
 }
 export async function logout (req, res, next) {
     //clear the cookie representing the JWT token
-    // res.clearCookie('accesToken');  Assuming you set the JWT token in a cookie named 'accesToken'
+    res.clearCookie('accessToken',{
+        secure: true,
+        sameSite:"none"
+    })
+    .status(200).json({ message: "Logged out successfully" });
 }
