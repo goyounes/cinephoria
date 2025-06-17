@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
 import { Home, Movies, Tickets, Screenings, Messages } from './pages';
-import { Signin, Signup } from './pages/Auth';
+import { Login } from './pages/Auth/Login';
+import { Register } from './pages/Auth/Register';
 import AddMovie from './pages/Movies/AddMovie';
 
 import Footer from './components/Footer';
@@ -40,8 +41,8 @@ function App() {
 
 
 
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/admin/users/create" element={<AddUser />} />
 
       </Routes>
