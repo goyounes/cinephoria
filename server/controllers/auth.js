@@ -77,9 +77,10 @@ export async function login (req, res, next) {
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // If everything is fine, return the user_id signed using a JWT token
-        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret");    
+        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret", { expiresIn: '24h' });    
         res.cookie('accessToken', token, {
             httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
         }).status(200).json(data1[0]);
     }catch (error) {
         next(error);
@@ -94,3 +95,4 @@ export async function logout (req, res, next) {
     })
     .status(200).json({ message: "Logged out successfully" });
 }
+
