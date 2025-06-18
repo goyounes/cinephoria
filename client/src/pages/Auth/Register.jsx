@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';import React from 'react'
 
 const Register = () => {
   const API_URL = "http://localhost:5000/api/v1";
@@ -35,14 +35,7 @@ const Register = () => {
       });
 
       const result = response.data
-    // axios throws an error for non-2xx responses, so we don't need to check response.ok
-    //   if (!response.ok) {
-    //     const err = new Error(result.error?.message || 'An error occurred');
-    //     err.status = result.error?.status;
-    //     err.code = result.error?.code;
-    //     err.details = result.error?.details;
-    //     throw err;
-    //   }
+
       console.log("response of adding user: ", response);
       alert('User added successfully!');
       setFormData({
@@ -147,4 +140,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Register

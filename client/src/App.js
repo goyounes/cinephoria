@@ -2,8 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
 import { Home, Movies, Tickets, Screenings, Messages } from './pages';
-import { Login } from './pages/Auth/Login';
-import { Register } from './pages/Auth/Register';
+
+
 import AddMovie from './pages/Movies/AddMovie';
 
 import Footer from './components/Footer';
@@ -12,6 +12,8 @@ import TopNavBar from './components/TopNavBar';
 import './assets/global.css';
 import AddUser from './pages/Users/AddUser';
 import Users from './pages/Users/Users';
+import Register from './pages/Auth/Register';
+import Login from './pages/Auth/Login';
 
 
 function App() {
@@ -40,9 +42,8 @@ function App() {
         <Route path="/users" element={<Users />} />
 
 
-
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/register" element={<Register />} />
         <Route path="/admin/users/create" element={<AddUser />} />
 
       </Routes>
