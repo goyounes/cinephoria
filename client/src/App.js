@@ -14,40 +14,47 @@ import AddUser from './pages/Users/AddUser';
 import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
 import Login from './pages/Auth/Login';
+import { Container, Box } from '@mui/material';
 
 
 function App() {
   return (
     <div className="App">
-    <BrowserRouter>
-      <TopNavBar />
-      <Routes>
-        {/* Home */}
-        <Route path="/" element={<Home />} />
-        {/* Movies */}
-        <Route path="/movies" element={<Movies />} />
-        <Route path="/movies/create" element={<AddMovie />} />
-        <Route path="/movies/:id" element={<Movies />} />
-        {/* Screenings */}
-        <Route path="/screenings" element={<Screenings />} />
-        <Route path="/screenings/create" element={<Screenings />} />
-        <Route path="/screenings/:id" element={<Screenings />} />
-        {/* Tickets */}
-        <Route path="/tickets" element={<Tickets />} />
-        <Route path="/tickets/create" element={<Tickets />} />
-        <Route path="/tickets/:id" element={<Tickets />} />
-        {/* Messages */}
-        <Route path="/messages" element={<Messages />} />
-        {/* Users */}
-        <Route path="/users" element={<Users />} />
+      <Box display="flex" flexDirection="column" minHeight="100vh">
+        <BrowserRouter>
+          <Container disableGutters maxWidth={false} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }} >
+            <TopNavBar />
+            <Box flex={1} display="flex" flexDirection="column" px={2} py={3}>
+              <Routes>
+                {/* Home */}
+                <Route path="/" element={<Home />} />
+                {/* Movies */}
+                <Route path="/movies" element={<Movies />} />
+                <Route path="/movies/create" element={<AddMovie />} />
+                <Route path="/movies/:id" element={<Movies />} />
+                {/* Screenings */}
+                <Route path="/screenings" element={<Screenings />} />
+                <Route path="/screenings/create" element={<Screenings />} />
+                <Route path="/screenings/:id" element={<Screenings />} />
+                {/* Tickets */}
+                <Route path="/tickets" element={<Tickets />} />
+                <Route path="/tickets/create" element={<Tickets />} />
+                <Route path="/tickets/:id" element={<Tickets />} />
+                {/* Messages */}
+                <Route path="/messages" element={<Messages />} />
+                {/* Users */}
+                <Route path="/users" element={<Users />} />
 
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/register" element={<Register />} />
-        <Route path="/admin/users/create" element={<AddUser />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/register" element={<Register />} />
+                <Route path="/admin/users/create" element={<AddUser />} />
 
-      </Routes>
-      <Footer />
-    </BrowserRouter>
+              </Routes>
+            </Box>
+            <Footer />
+          </Container>
+        </BrowserRouter>
+      </Box>
     </div>
   );
 }

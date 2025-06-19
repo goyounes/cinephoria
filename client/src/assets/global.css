@@ -39,6 +39,15 @@
 
 /* header styles */
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+:root {
+  --cinephoria-accent: #ffffff;
+  --cinephoria-bg: hsl(0, 0%, 100%);         /* optional dark background */
+  --cinephoria-text: #000000;
+}
+
 
 header{
   width: 100%;

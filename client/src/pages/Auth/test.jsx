@@ -1,8 +1,7 @@
 import React from 'react'
-// import { Container } from '@mui/material';
-import { Container, Typography, Box, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Paper , Card} from '@mui/material';
-const Login = () => {
-   return (
+
+const test = () => {
+return (
     <Container maxWidth="sm">
       <Box mt={4}>
         <Typography variant="h4" gutterBottom>
@@ -61,10 +60,38 @@ const Login = () => {
 
           </Card>
 
+          {/* User Information */}
+          <Card elevation={2} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              User Information
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  required
+                  label="First Name"
+                  name="first_name"
+                  placeholder="Given Name"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Last Name"
+                  name="last_name"
+                  placeholder="Family Name"
+                />
+              </Grid>
+            </Grid>
+          </Card>
         </form>
       </Box>
     </Container>
   )
 }
 
-export default Login
+export default test
+

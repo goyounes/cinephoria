@@ -11,6 +11,9 @@ router.get("/",async (req,res,next) => {
         // const movies = response.data
         // console.log("response",response)
         const movies = await getMoviesWithGenres()
+        movies.forEach((movie) => {
+            movie.poster_img = decodeBinaryToBase64(movie.poster_img);
+        });
         res.status(200).json(movies)
     } catch (error) {
         next(error)
@@ -19,6 +22,9 @@ router.get("/",async (req,res,next) => {
 router.post("/Recent",async (req,res,next) => {
     try {
         const movies = await getMoviesAddedSince()
+        movies.forEach((movie) => {
+            movie.poster_img = decodeBinaryToBase64(movie.poster_img);
+        });
         res.status(200).json(movies)
     } catch (error) {
         next(error)
@@ -30,7 +36,7 @@ router.get("/recent",async (req,res,next) => {
         const response = await axios.get(DB_API_URL+"/movies/recent",{headers:{'X-Requested-By': 'backend-server'}})
         const movies = response.data
         // res.status(200).render("pages/movies_recent.ejs",{movies})
-        res.status(200).json(response.data)
+        res.status(200).json(movies)
     } catch (error) {
         next(error)
     }
@@ -57,5 +63,12 @@ router.get("/:id",async (req,res,next) => {
         next(error) // network request or re-thrown error
     }
 })
+
+
+export function decodeBinaryToBase64(data){
+  if (!data) return null;
+  const posterBuffer = Buffer.from(data);
+  return posterBuffer.toString('base64');
+}
 
 export default router;

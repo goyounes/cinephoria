@@ -1,30 +1,114 @@
-import React from 'react'
-import { Link } from "react-router";
-const TopNavBar = () => {
-  return (
-    <header>
-        <div className="header-left">
-            <img src="/cinephoria-sm.png" alt="Cinephoria logo"/>
-            <Link to={"/auth/register"} className="header-icon-link">👤<span>Register</span></Link>
-            <Link to={"/auth/login"} className="header-icon-link">👤<span>Login</span></Link>
-        </div>
-        <div className="header-middle">
-            <Link to={"/home"} className="header-icon-link">🏠<span>Admin</span></Link> 
-            <Link to={"/messages"} className="header-icon-link">✉️<span>Messages</span></Link>
-            <Link to={"/movies/recent"} className="header-icon-link">🆕<span>Recent</span></Link>
-            <Link to={"/movies"} className="header-icon-link">📽️<span>Movies</span></Link>
-            <Link to={"/screenings"} className="header-icon-link">🎞️<span>Screenings</span></Link>
-            <Link to={"/cinemas"} className="header-icon-link">🏛️<span>Cinemas</span></Link>
-            <Link to={"/reservation"} className="header-icon-link">📅<span>Reservation</span></Link>
-            <Link to={"/tickets"} className="header-icon-link">🎟️<span>Tickets</span></Link>
-        </div>
-        <div className="header-right">
-            <Link to={"/users"} className="header-icon-link">👤<span>Users</span></Link>
+import React from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
 
-            <Link to={"/contact"} className="header-icon-link">📞<span>Contact</span></Link>
-        </div>
-    </header>
-  )
+const navLinks = {
+  left: [
+    { to: '/auth/register', icon: '👤', label: 'Register' },
+    { to: '/auth/login', icon: '👤', label: 'Login' },
+  ],
+  middle: [
+    { to: '/home', icon: '🏠', label: 'Admin' },
+    { to: '/messages', icon: '✉️', label: 'Messages' },
+    { to: '/movies/recent', icon: '🆕', label: 'Recent' },
+    { to: '/movies', icon: '📽️', label: 'Movies' },
+    { to: '/screenings', icon: '🎞️', label: 'Screenings' },
+    { to: '/cinemas', icon: '🏛️', label: 'Cinemas' },
+    { to: '/reservation', icon: '📅', label: 'Reservation' },
+    { to: '/tickets', icon: '🎟️', label: 'Tickets' },
+  ],
+  right: [
+    { to: '/users', icon: '👤', label: 'Users' },
+    { to: '/contact', icon: '📞', label: 'Contact' },
+  ],
+};
+
+function NavItem({ to, icon, label }) {
+  return (
+    <Box
+      component={RouterLink}
+      to={to}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textDecoration: 'none',
+        color: 'inherit',
+        cursor: 'pointer',
+        userSelect: 'none',
+        '&:hover': {
+          color: 'primary.main',
+        },
+      }}
+    >
+      <Typography variant="h5" component="span" sx={{ lineHeight: 1 }}>
+        {icon}
+      </Typography>
+      <Typography variant="caption" component="span" sx={{ mt: 0.3 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
 }
 
-export default TopNavBar
+function NavGroup({ items, flexGrow }) {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        justifyContent: 'center',
+        flexGrow,
+      }}
+    >
+      {items.map(({ to, icon, label }) => (
+        <NavItem key={to} to={to} icon={icon} label={label} />
+      ))}
+    </Box>
+  );
+}
+
+const TopNavBar = () => {
+  return (
+    <Box
+      component="header"
+      sx={{
+        p: 1,
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#9bd4f2',
+        position: 'sticky',
+        top: 0,
+        borderBottom: '1px solid #000',
+        userSelect: 'none',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexGrow: 0,
+        }}
+      >
+        <Box
+          component="img"
+          src='cinephoria-sm.png'
+          alt="Cinephoria logo"
+          sx={{ height: 40 }}
+          draggable={false}
+        />
+        <NavGroup items={navLinks.left} flexGrow={0} />
+      </Box>
+
+      <NavGroup items={navLinks.middle} flexGrow={1} />
+
+      <NavGroup items={navLinks.right} flexGrow={0} />
+    </Box>
+  );
+};
+
+export default TopNavBar;

@@ -19,6 +19,7 @@ const MovieTable = (props) => {
         {movies.map((movie) => (
           <tr key={movie.movie_id} className={movie.is_team_pick ? "highlight" : ""}>
             <td>
+                            {console.log(movie.poster_img)}
               {movie.poster_img ? (
                 <img
                   src={`data:${movie.poster_img_type};base64,${movie.poster_img}`}
