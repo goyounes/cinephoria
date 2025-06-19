@@ -41,7 +41,6 @@ function App() {
         {/* Users */}
         <Route path="/users" element={<Users />} />
 
-
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
         <Route path="/admin/users/create" element={<AddUser />} />
