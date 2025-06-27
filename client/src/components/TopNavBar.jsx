@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 
 const navLinks = {
@@ -26,7 +26,7 @@ const navLinks = {
 function NavItem({ to, icon, label }) {
   return (
     <Box
-      component={RouterLink}
+      component={Link}
       to={to}
       sx={{
         display: 'flex',
@@ -41,10 +41,11 @@ function NavItem({ to, icon, label }) {
         },
       }}
     >
-      <Typography variant="h5" component="span" sx={{ lineHeight: 1 }}>
+      <Typography variant="h4" component="span" sx={{ lineHeight: 1 }}>
         {icon}
       </Typography>
-      <Typography variant="caption" component="span" sx={{ mt: 0.3 }}>
+      
+      <Typography variant="h6" component="span" sx={{ mt: 0.3 }}>
         {label}
       </Typography>
     </Box>

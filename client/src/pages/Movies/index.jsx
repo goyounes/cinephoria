@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import MovieTable from './MoviesTable.jsx'
 import { Link } from 'react-router-dom'
+import { Box, Button } from "@mui/material";
 
 const Movies = () => {
   const [movies, setMovies] = useState([])
@@ -20,11 +21,13 @@ const Movies = () => {
   } , [])
   
   return (
-    <div>
-      <h1>Movies table</h1>
-      <Link to={"/movies/create"}><button>Add movie</button></Link> 
+    <Box>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', mt: 4 }}>
+        <h1>Movies table</h1>
+        <Link to={"/movies/create"}><Button variant='contained'>Add movie</Button></Link> 
+      </Box>
       <MovieTable movies={movies}/>
-    </div>
+    </Box>
   )
 
 }

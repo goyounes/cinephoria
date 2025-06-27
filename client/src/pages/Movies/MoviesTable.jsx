@@ -1,5 +1,4 @@
 import React from "react";
-
 const MovieTable = (props) => {
     const { movies } = props;
   return (
