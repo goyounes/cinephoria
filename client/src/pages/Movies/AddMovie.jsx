@@ -1,53 +1,188 @@
-import React from 'react'
+import {useState} from "react";    
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Stack,
+  FormHelperText
+} from "@mui/material";
+
+import ImageUploader from "./ImageUploader";
 
 const AddMovie = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    poster_img: "",
+    description: "",
+    length_hours: 0,
+    length_minutes: 0,
+    length_seconds: 0,
+    age_rating: 0,
+    is_team_pick: "0",
+    score: 0,
+  })
+
+  const handleChange = (e) => {
+    setFormData((prev) => {
+      // console.log(e.target)
+      console.log(prev)
+      console.log("e.target.nam ->",e.target.name,"/ e.target.value ->", e.target.value)
+
+      return {
+      ...prev,
+      [e.target.name]: e.target.value,
+      }
+    });
+  };
+
+
+  const handleNumberChange = (e) => {
+    setFormData((prev) => {
+      // console.log(prev)
+      // console.log("e.target.name ->",e.target.name,"/ e.target.value ->", e.target.value)
+      // console.log("e.target.max ->", e.target.max, "/ e.target.min ->", e.target.min)
+      // console.log(e.target)
+      let newValue = parseInt(e.target.value);
+      if (newValue > parseInt(e.target.max)) newValue = e.target.max
+      if (newValue < parseInt(e.target.min)) newValue = e.target.min
+      return {
+      ...prev,
+      [e.target.name]: newValue,
+      }
+    });
+  };
+
   return (
-    <div class="container-half-center">
-     <h1>Add New Movie</h1>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Add New Movie
+      </Typography>
 
-    <form  id= "NewMovieForm" action="" method="" >
-      <fieldset  class="responsive-grid">  <legend>Movie Details</legend>
-        <div class="form-group">
-          <label for="title">Title:</label>
-          <input type="text" id="title" name="title" placeholder="Movie Title" required></input>
-        </div>
-        <div class="form-group">
-          <label for="poster_img">Poster Image URL:</label>
-          <input type="file" name="poster_img" accept="image/*" />
-          <input type="url" id="poster_img" name="poster_img" placeholder="https://example.com/image.jpg"></input>
-        </div>
-        <div class="form-group">
-          <label for="description">Description:</label>
-          <textarea id="description" name="description" rows="5" placeholder="Movie description..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="length">Length (HH:MM:SS):</label>
-          <input type="time" id="length" name="length" step="1"></input>
-        </div>
-        <div class="form-group">
-          <label for="age_rating">Age Rating:</label>
-          <input type="number" id="age_rating" name="age_rating" min="0" max="21" placeholder="0 ~ 21" required></input>
-        </div>
-        <div class="form-group">
-          <label for="is_team_pick">Team Pick:</label>
-          <select id="is_team_pick" name="is_team_pick">
-            <option value="0">No</option>
-            <option value="1">Yes</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="score">Score :</label>
-          <input type="number" id="score" name="score" step="0.1" min="0" max="9.9" placeholder="0.0 ~ 9.9"></input>
-        </div>
+      <Stack
+        component="form"
+        gap={2}
+        id="NewMovieForm"
+        noValidate
+        // sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+      >
 
-      </fieldset>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <ImageUploader/>
+        </Stack>
+      
+        <TextField
+          required
+          fullWidth
+          label="Title"
+          name="title"
+          placeholder="Movie Title"
+          onChange={handleChange}
+          value={formData.title}
+        />
+            
+        <TextField
+          required
+          fullWidth
+          multiline
+          rows={3}
+          label="Description"
+          name="description"
+          placeholder="Movie description..."
+          onChange={handleChange}
+          value={formData.description}
+        />
 
-      <div class="button-wrapper">
-        <button type="submit" class="btn-primary">Add Movie</button>
-      </div>
-    </form>
-  </div>
-  )
-}
+        <FormControl fullWidth helperText="Movie length in hours, minutes, and seconds">
+          <Stack direction="row" spacing={2} >
+            <TextField
+              required
+              fullWidth
+              label="Hours"
+              name="length_hours"
+              type="number"
+              slotProps={{htmlInput: {min: 0, max: 24}}}
+              onChange={handleNumberChange}
+              value={parseInt(formData.length_hours) || ""}
+              
+            />
+            <TextField
+              fullWidth
+              required
+              label="Minutes"
+              name="length_minutes"
+              type="number"
+              slotProps={{htmlInput: {min: 0, max: 60}}}
+              onChange={handleNumberChange}
+              value={parseInt(formData.length_minutes) || ""}
+            />
+            <TextField
+              fullWidth
+              required
+              label="Seconds"
+              name="length_seconds"
+              type="number"
+              slotProps={{htmlInput: {min: 0, max: 60}}}
+              onChange={handleNumberChange}
+              value={parseInt(formData.length_seconds) || ""}
+            />
+          </Stack>
+          <FormHelperText>Length of the movie</FormHelperText>
+        </FormControl>
 
-export default AddMovie
+        <TextField
+          required
+          fullWidth
+          label="Age Rating"
+          name="age_rating"
+          type="number"
+          helperText="Age rating between 3 and 21"
+          slotProps={{htmlInput: {min: 0, max: 21}}}
+          onChange={handleNumberChange}
+          value={formData.age_rating}
+        />
+
+        <FormControl fullWidth>
+			    <InputLabel id="is_team_pick-label">Team Pick ?</InputLabel>
+          <Select
+            labelId="is_team_pick-label"
+            label="Team Pick ?"
+            name="is_team_pick"
+            defaultValue="0"
+            helperText="score between 0.0 ~ 5.0"
+            onChange={handleChange}
+            value={formData.is_team_pick}
+          >
+            <MenuItem value="0">No</MenuItem>
+            <MenuItem value="1">Yes</MenuItem>
+          </Select>
+          <FormHelperText>Is this movie a favourite among the cinema crew?</FormHelperText>
+        </FormControl>
+
+
+        <TextField
+          required
+          fullWidth
+          label="Score"
+          name="score"
+          type="number"
+          helperText="score between 0.0 ~ 5.0"
+          slotProps={{htmlInput: {step: 0.1, min: 0, max: 5.0}}}
+          // slotProps={{ step: 0.1, min: 0, max: 5.0 }}
+          onChange={handleNumberChange}
+        />
+
+        <Button variant="contained" color="primary" type="submit">
+          Add Movie
+        </Button>
+      </Stack>
+    </Container>
+  );
+};
+
+export default AddMovie;
