@@ -1,6 +1,6 @@
 import React from 'react'
 // import { Container } from '@mui/material';
-import { Container, Typography, Box, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Paper , Card} from '@mui/material';
+import { Container, Typography, Box, Stack, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Paper , Card} from '@mui/material';
 const Login = () => {
    return (
     <Container maxWidth="sm">
@@ -12,11 +12,12 @@ const Login = () => {
         <form id="NewUserForm" method="">
           {/* User Credentials */}
           <Card elevation={2} sx={{ p: 3, mb: 4 }}>
-            <Typography variant="h6" gutterBottom>
+            <Stack spacing={2}>
+
+            <Typography variant="h5" gutterBottom>
               User Credentials
             </Typography>
 
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   required
@@ -25,9 +26,7 @@ const Login = () => {
                   type="email"
                   placeholder="example@mail.com"
                 />
-              </Grid>
 
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   required
@@ -36,9 +35,7 @@ const Login = () => {
                   type="password"
                   placeholder="8 characters minimum"
                 />
-              </Grid>
 
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   required
@@ -46,9 +43,7 @@ const Login = () => {
                   name="user_name"
                   placeholder="Unique Username"
                 />
-              </Grid>
 
-              <Grid item xs={12}>
                 <FormControl fullWidth required>
                   <InputLabel id="role-label">Role</InputLabel>
                   <Select labelId="role-label" name="role_id" label="Role">
@@ -57,12 +52,11 @@ const Login = () => {
                     <MenuItem value={3}>Admin</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-
-          </Card>
-
+            </Stack>
+          </Card>        
         </form>
       </Box>
+
     </Container>
   )
 }
