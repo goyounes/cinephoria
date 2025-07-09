@@ -84,6 +84,7 @@ const TopNavBar = () => {
         top: 0,
         borderBottom: '1px solid #000',
         userSelect: 'none',
+        zIndex: 1000,
       }}
     >
       <Box
