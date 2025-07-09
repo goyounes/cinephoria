@@ -24,7 +24,7 @@ function App() {
         
       <TopNavBar />
 
-      <Container>
+      <Container sx={{ flexGrow: 1, bgcolor: '#F7F7F7'}} >
         <Box flex={1} display="flex" flexDirection="column" px={2} py={3}>
           <Routes>
             {/* Home */}
