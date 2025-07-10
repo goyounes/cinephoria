@@ -2,6 +2,7 @@ import {useState} from "react";
 import {
   Container,
   Box,
+  Card,
   Typography,
   TextField,
   Button,
@@ -10,7 +11,8 @@ import {
   InputLabel,
   FormControl,
   Stack,
-  FormHelperText
+  FormHelperText,
+  CardContent
 } from "@mui/material";
 
 import ImageUploader from "./ImageUploader";
@@ -59,8 +61,11 @@ const AddMovie = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
+  <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
+    <Card elevation={2} sx={{flexGrow: 1 }}>
+    <CardContent>
+
+      <Typography variant="h4" align="center" gutterBottom>
         Add New Movie
       </Typography>
 
@@ -181,7 +186,9 @@ const AddMovie = () => {
           Add Movie
         </Button>
       </Stack>
-    </Container>
+    </CardContent>
+    </Card>
+  </Container>
   );
 };
 
