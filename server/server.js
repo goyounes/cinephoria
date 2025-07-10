@@ -7,7 +7,12 @@ const app = experess();
 const PORT = 8080;
 
 app.use(experess.json());
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // ✅ must be specific, not '*'
+  credentials: true               // ✅ allow cookies and auth headers
+}));
+
 app.use(cookieParser());
 
 import usersRoutes from  './routes/users.js'

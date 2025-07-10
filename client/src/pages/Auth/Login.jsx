@@ -8,8 +8,8 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
-    // password: '',
+    password: '',
+    // email: '',
   });
 
   const handleChange = (e) => {
@@ -27,12 +27,16 @@ const Login = () => {
       console.log(`${API_URL}/auth/login`)
       console.log(formData)
 
-      const response = await axios.post(`${API_URL}/auth/login`, formData);
+      const response = await axios.post(`/auth/login`, formData);
       const result = response.data
       console.log("response of login: ");
       console.log(response)
       alert('Login successful! \nWelcome ' + formData.username);
       // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
+
+      const response2 = await axios.post(`/auth/verify`,{ some: 'data' }, {withCredentials: true});
+      
+      console.log(response2);
       navigate('/home'); // Redirect to the users page
     } catch (err) {
       alert('Failed to add User: ' + err.message);

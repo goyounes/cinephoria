@@ -79,9 +79,13 @@ export async function login (req, res, next) {
         // If everything is fine, return the user_id signed using a JWT token
         const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret", { expiresIn: '24h' });    
         res.cookie('accessToken', token, {
-            httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             // secure: true, // <-- REQUIRED for SameSite=None
             // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
+            
+            httpOnly: false,        // Allow access from JavaScript (XSS risk)
+            secure: false,          // Allow over HTTP (MITM risk)
+            sameSite: 'Lax',        // Allows some cross-site requests
             maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
         }).status(200).json(data1[0]);
     }catch (error) {
@@ -110,10 +114,13 @@ export async function verifyJWT (req, res, next) {
         // if (decoded.role_id == 1) return next(new Error("User"));
         // if (decoded.role_id == 2) return next(new Error("Employee"));
         // if (decoded.role_id == 3) return next(new Error("Admin"));
-        if (decoded.role_id !== 3) return next(new Error("Not Admin"));
+        // if (decoded.role_id == 1) res.status(200).json( {role:"User"});
+        // if (decoded.role_id == 2) res.status(200).json( {role:"Employee"});
+        // if (decoded.role_id == 3) res.status(200).json( {role:"Admin"});
+        if (decoded.role_id !== 3) return next(new Error("Access denied: not admin"));
         console.log(token, decoded);
 
-        // If everything is fine, return the user_id
+        // If everything is fine, continue the request
         next();
     }catch (error) {
         next(error);
