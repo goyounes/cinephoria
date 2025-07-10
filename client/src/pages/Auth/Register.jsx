@@ -7,15 +7,15 @@ const Register = () => {
   const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    user_email: '',
-    user_password: '',
-    user_name: '',
-    first_name: '',
-    last_name: '',
+    email: '',
+    password: '',
+    username: '',
+    firstName: '',
+    lastName: '',
   });
 
   const handleChange = (e) => {
-    console.log("e.target: ", e.target);
+    // console.log("e.target: ", e.target);
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -30,22 +30,21 @@ const Register = () => {
         ...formData
       };
 
-      const response = await axios.post(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+console.log(`${API_URL}/auth/register`)
+console.log(payload)
+
+      const response = await axios.post(`${API_URL}/auth/register`, payload);
 
       const result = response.data
 
       console.log("response of adding user: ", response);
       alert('User added successfully!');
       setFormData({
-        user_email: '',
-        user_password: '',
-        user_name: '',
-        first_name: '',
-        last_name: '',
+        email: '',
+        password: '',
+        username: '',
+        firstName: '',
+        lastName: '',
       });
       navigate('/home'); // Redirect to the users page
     } catch (err) {
@@ -67,42 +66,52 @@ return (
             fullWidth
             required
             label="Email"
-            name="user_email"
+            name="email"
             type="email"
             placeholder="example@mail.com"
+            onChange={handleChange}
+            value={formData.email}
           />
 
           <TextField
             fullWidth
             required
             label="Password"
-            name="user_password"
+            name="password"
             type="password"
             placeholder="8 characters minimum"
+            onChange={handleChange}
+            value={formData.password}
           />
 
           <TextField
             fullWidth
             required
             label="Username"
-            name="user_name"
+            name="username"
             placeholder="Unique Username"
+            onChange={handleChange}
+            value={formData.username}
           />
 
           <TextField
             fullWidth
             required
             label="First Name"
-            name="first_name"
+            name="firstName"
             placeholder="Please enter your first name"
+            onChange={handleChange}
+            value={formData.firstName}
           />
 
           <TextField
             fullWidth
             required
             label="Last Name"
-            name="last_name"
+            name="lastName"
             placeholder="Please enter your last name"
+            onChange={handleChange}
+            value={formData.lastName}
           />
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Register

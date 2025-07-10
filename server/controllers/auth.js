@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 export async function register (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password) {
-        console.log("here")
+        console.log("provided information :", req.body);
         return next(new Error("Username and password are required"));
     }
     
