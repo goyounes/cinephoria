@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { Button, Stack } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
-function ImageUploader() {
+function ImageUploader({ onFileSelect }) {
   const [imagePreview, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
+      onFileSelect(file); // Pass file to parent
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -20,7 +19,7 @@ function ImageUploader() {
   };
 
   return (
-    <Stack >
+    <Stack>
       <input
         accept="image/*"
         id="image-upload"
@@ -36,9 +35,6 @@ function ImageUploader() {
 
       {imagePreview && (
         <Stack mt={2} alignItems="center">
-          {/* <Typography variant="subtitle2" gutterBottom>
-            {imageFile?.name}
-          </Typography> */}
           <img
             src={imagePreview}
             alt="Uploaded preview"
