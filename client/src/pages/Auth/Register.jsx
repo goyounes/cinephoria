@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const Register = () => {
   const API_URL = "http://localhost:8080";
@@ -26,26 +27,14 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        ...formData
-      };
+      console.log(`${API_URL}/auth/register`)
+      console.log(formData)
 
-console.log(`${API_URL}/auth/register`)
-console.log(payload)
-
-      const response = await axios.post(`${API_URL}/auth/register`, payload);
-
+      const response = await axios.post(`${API_URL}/auth/register`, formData);
       const result = response.data
-
       console.log("response of adding user: ", response);
       alert('User added successfully!');
-      setFormData({
-        email: '',
-        password: '',
-        username: '',
-        firstName: '',
-        lastName: '',
-      });
+      // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
       navigate('/home'); // Redirect to the users page
     } catch (err) {
       alert('Failed to add User: ' + err.message);
@@ -113,7 +102,8 @@ return (
             onChange={handleChange}
             value={formData.lastName}
           />
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
+          
+          <Button variant="contained" color="primary" startIcon={<HowToRegIcon />} onClick={handleSubmit}>
             Register
           </Button>
         </Stack>
