@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
-import { Home, Movies, Tickets, Screenings, Messages } from './pages';
+import { Home, Movies, Tickets, Screenings } from './pages';
+import Messages from './pages/Admin/Messages';
 
 
 import AddMovie from './pages/Movies/AddMovie';
