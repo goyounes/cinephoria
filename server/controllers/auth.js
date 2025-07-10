@@ -126,3 +126,43 @@ export async function verifyJWT (req, res, next) {
         next(error);
     }
 }
+
+export async function verifyAdminJWT(req, res, next) {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const decoded = jwt.verify(token, "cinephoria_secret");
+    if (decoded.role_id !== 3) {
+      throw new Error("Access denied: admin only");
+    }
+    req.user = {
+        user_id: decoded.user_id,
+        role_id: decoded.role_id,
+    }; 
+    next();
+  } catch (error) {
+    next(error); 
+  }
+}
+
+export async function verifyAdminJWT(req, res, next) {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const decoded = jwt.verify(token, "cinephoria_secret");
+    if (decoded.role_id < 2) {
+      throw new Error("Access denied: employee or admin only");
+    }
+    req.user = {
+        user_id: decoded.user_id,
+        role_id: decoded.role_id,
+    }; 
+    next();
+  } catch (error) {
+    next(error); 
+  }
+}

@@ -2,7 +2,7 @@ import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
 import { getMessages } from '../controllers/messages.js';
-import  { verifyJWT } from '../controllers/auth.js';
+import  { verifyAdminJWT} from '../controllers/auth.js';
 const DB_API_URL = "http://localhost:5000/api/v1"
 
 router.get('/', (req, res) => {
@@ -13,11 +13,8 @@ router.get('/', (req, res) => {
 //   res.send(`Deleted user ${req.params.id}`);
 // });
 
-router.get("/messages",verifyJWT, async (req,res,next) => {
+router.get("/messages",verifyAdminJWT, async (req,res,next) => {
     try {
-        // const response = await axios.get(DB_API_URL+"/movies")
-        // const movies = response.data
-        // console.log("response",response)
         const messages = await getMessages()
         res.status(200).json(messages)
     } catch (error) {
