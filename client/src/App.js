@@ -14,19 +14,18 @@ import AddUser from './pages/Users/AddUser';
 import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
 import Login from './pages/Auth/Login';
-import { Container, Box } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 
 
 function App() {
   return (
-    <Box display="flex" flexDirection="column" minHeight="100vh">
-    {/* <Container  disableGutters maxWidth={false} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }} > */}
-        
+    <Stack minHeight="100vh">
+       
       <TopNavBar />
 
-      <Container sx={{ flexGrow: 1, bgcolor: '#F7F7F7'}} >
-        <Box flex={1} display="flex" flexDirection="column" px={2} py={3}>
-          <Routes>
+      <Container sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
+        {/* <Stack px={2} py={3}> */}
+          <Routes >
             {/* Home */}
             <Route path="/" element={<Home />} />
             {/* Movies */}
@@ -51,13 +50,12 @@ function App() {
             <Route path="/admin/users/create" element={<AddUser />} />
 
           </Routes>
-        </Box>
+        {/* </Stack> */}
       </Container>
 
       <Footer />
 
-    {/* </Container> */}
-    </Box>
+    </Stack>
   );
 }
 
