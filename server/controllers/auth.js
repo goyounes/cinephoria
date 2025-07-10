@@ -80,6 +80,8 @@ export async function login (req, res, next) {
         const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret", { expiresIn: '24h' });    
         res.cookie('accessToken', token, {
             httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            // secure: true, // <-- REQUIRED for SameSite=None
+            // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
             maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
         }).status(200).json(data1[0]);
     }catch (error) {
@@ -96,3 +98,24 @@ export async function logout (req, res, next) {
     .status(200).json({ message: "Logged out successfully" });
 }
 
+export async function verifyJWT (req, res, next) {
+    // Get the user_id from the JWT token
+    // accesing accessToken from the cookies
+    const token = req.cookies.accessToken;
+    if (!token) return next(new Error("No token provided"));
+    console.log(token)
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, "cinephoria_secret");
+        // if (decoded.role_id == 1) return next(new Error("User"));
+        // if (decoded.role_id == 2) return next(new Error("Employee"));
+        // if (decoded.role_id == 3) return next(new Error("Admin"));
+        if (decoded.role_id !== 3) return next(new Error("Not Admin"));
+        console.log(token, decoded);
+
+        // If everything is fine, return the user_id
+        next();
+    }catch (error) {
+        next(error);
+    }
+}
