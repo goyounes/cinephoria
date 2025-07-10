@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 
 const AddUser = () => {
   const API_URL = "http://localhost:8080/api/v1";
@@ -61,108 +62,65 @@ const AddUser = () => {
     }
   };
 
-  return (
-    <main>
-      <div className="container-half-center">
-        <h1 style={{ textAlign: 'center' }}>Add new user</h1>
-        <form onSubmit={handleSubmit} className="responsive-form">
-          <fieldset className="responsive-grid">
-            <legend>User Credentials</legend>
+return (
+    <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
+      <Card elevation={2} sx={{flexGrow: 1  }}>
+      <CardContent>
+        <Stack component="form" id="LoginForm" spacing={2}>
 
-            <div className="form-group">
-              <label htmlFor="user_email">Email:</label>
-              <input
-                type="email"
-                id="user_email"
-                name="user_email"
-                placeholder="example@mail.com"
-                value={formData.user_email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <Typography variant="h4" align="center" gutterBottom>
+            Register Page
+          </Typography>
 
-            <div className="form-group" style={{ flex: 1 }}>
-              <label htmlFor="user_password">Password:</label>
-              <input
-                type="password"
-                id="user_password"
-                name="user_password"
-                placeholder="8 caractères minimum"
-                value={formData.user_password}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <TextField
+            fullWidth
+            required
+            label="Email"
+            name="user_email"
+            type="email"
+            placeholder="example@mail.com"
+          />
 
-            <div className="form-group">
-              <label htmlFor="user_name">Username:</label>
-              <input
-                type="text"
-                id="user_name"
-                name="user_name"
-                placeholder="Unique User name"
-                value={formData.user_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <TextField
+            fullWidth
+            required
+            label="Password"
+            name="user_password"
+            type="password"
+            placeholder="8 characters minimum"
+          />
 
-            <div className="form-group">
-              <label htmlFor="role_id">Role:</label>
-              <select
-                id="role_id"
-                name="role_id"
-                value={formData.role_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="1">User</option>
-                <option value="2">Employee</option>
-                <option value="3">Admin</option>
-              </select>
-            </div>
-          </fieldset>
+          <TextField
+            fullWidth
+            required
+            label="Username"
+            name="user_name"
+            placeholder="Unique Username"
+          />
 
-          <fieldset className="responsive-grid">
-            <legend>User Information</legend>
+          <TextField
+            fullWidth
+            required
+            label="First Name"
+            name="first_name"
+            placeholder="Please enter your first name"
+          />
 
-            <div className="form-group">
-              <label htmlFor="first_name">First Name:</label>
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                placeholder="Given Name"
-                value={formData.first_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="last_name">Last Name:</label>
-              <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                placeholder="Family Name"
-                value={formData.last_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </fieldset>
-
-          <div className="button-wrapper">
-            <button type="submit" className="btn-primary">
-              Add User
-            </button>
-          </div>
-        </form>
-      </div>
-    </main>
-  );
+          <TextField
+            fullWidth
+            required
+            label="Last Name"
+            name="last_name"
+            placeholder="Please enter your last name"
+          />
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            Register
+          </Button>
+        </Stack>
+      </CardContent>
+      </Card>        
+    </Container>
+  )
 };
 
 export default AddUser;

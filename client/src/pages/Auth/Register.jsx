@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';import React from 'react'
-import { Container, Typography, Stack, TextField, FormControl, InputLabel, Select, MenuItem, Card, CardContent} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 
 const Register = () => {
   const API_URL = "http://localhost:8080";
@@ -104,7 +104,9 @@ return (
             name="last_name"
             placeholder="Please enter your last name"
           />
-
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            Register
+          </Button>
         </Stack>
       </CardContent>
       </Card>        
