@@ -1,6 +1,6 @@
 import { getCinemas, getRooms, getSeats } from "./cinemas.js";
 import { getMessages } from "./messages.js";
-import { getGenres, getMovies, getMoviesWithGenres } from "./movies.js";
+import { addMovie, getGenres, getMovies, getMoviesWithGenres } from "./movies.js";
 import { getAllScreenings, getScreeningQualities, getScreenings, getUpcomingScreenings } from "./screenings.js";
 import { getCheckoutInfo, getTickets } from "./tickets.js";
 import { getUser, getUsers } from "./users.js";
@@ -24,4 +24,6 @@ import { getUser, getUsers } from "./users.js";
 
 // console.table(await getUsers());
 // console.table(await getUser(1));
+
+console.log(await addMovie());
 
