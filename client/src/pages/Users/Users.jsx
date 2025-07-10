@@ -3,8 +3,8 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 
 const Users = () => {
-      const API_URL = "http://localhost:5000/api/v1";
- const [users, setUsers] = useState([]);
+  const API_URL = "http://localhost:8080/api/v1";
+  const [users, setUsers] = useState([]);
   const roles = {
     1: 'user',
     2: 'employee',

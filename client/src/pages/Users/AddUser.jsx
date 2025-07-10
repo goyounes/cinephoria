@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AddUser = () => {
-  const API_URL = "http://localhost:5000/api/v1";
+  const API_URL = "http://localhost:8080/api/v1";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_email: '',
