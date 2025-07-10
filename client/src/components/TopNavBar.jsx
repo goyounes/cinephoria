@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
+import cinephoriaSm from '../assets/cinephoria-sm.png';
+
 
 const navLinks = {
   left: [
@@ -98,7 +100,7 @@ const TopNavBar = () => {
       >
         <Box
           component="img"
-          src='cinephoria-sm.png'
+          src={cinephoriaSm}
           alt="Cinephoria logo"
           sx={{ height: 40 }}
           draggable={false}
