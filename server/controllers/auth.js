@@ -147,7 +147,7 @@ export async function verifyAdminJWT(req, res, next) {
   }
 }
 
-export async function verifyAdminJWT(req, res, next) {
+export async function verifyEmployeeJWT(req, res, next) {
   try {
     const token = req.cookies.accessToken;
     if (!token) {
