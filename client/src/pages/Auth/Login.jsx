@@ -1,6 +1,6 @@
 import React from 'react'
-// import { Container } from '@mui/material';
-import { Container, Typography, Stack, TextField, FormControl, InputLabel, Select, MenuItem, Card, CardContent} from '@mui/material';
+import LoginIcon from '@mui/icons-material/Login';
+import { Container, Typography, Stack, TextField, Button, FormControl, InputLabel, Select, MenuItem, Card, CardContent} from '@mui/material';
 const Login = () => {
    return (
     <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
@@ -46,7 +46,9 @@ const Login = () => {
               <MenuItem value={3}>Admin</MenuItem>
             </Select>
           </FormControl>
-
+          <Button variant="contained" color="primary" type="submit" startIcon={<LoginIcon />}>
+            Login
+          </Button>
         </Stack>
       </CardContent>
       </Card>        
