@@ -9,9 +9,7 @@ export const pool = mysql.createPool({
     database : process.env.MYSQL_DATABASE || "cinephoria",
 }).promise()
 
-console.log("Connected to MySQL database:", process.env.MYSQL_DATABASE);
 
-
-console.log(pool)
-async function testConnection() {    try {        const connection = await pool.getConnection();        console.log("Connected to MySQL!");        connection.release();     } catch (error) {        console.error("Connection failed:", error);    }}
-testConnection();
+// console.log(pool)
+// async function testConnection() {    try {        const connection = await pool.getConnection();        console.log("Connected to MySQL!");        connection.release();     } catch (error) {        console.error("Connection failed:", error);    }}
+// testConnection();

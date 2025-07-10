@@ -13,8 +13,9 @@ export async function  addMovie(m){
     `
     const VALUES = [
         // m.title , // m.poster_img, // m.poster_img_type, // m.description, // m.age_rating, // m.is_team_pick, // m.score, // m.length,"title" , 
-        null, 
-        "png", 
+        "movieTitleHere", 
+        "image blob", 
+        "image/png",
         "description", 
         15, 
         false, 
@@ -28,11 +29,11 @@ export async function  addMovie(m){
 //New  Database Functions
 export async function  getMoviesWithGenres(){
     const q = `
-        SELECT movies.*, GROUP_CONCAT(genres.genre_name SEPARATOR ';')
+        SELECT movies.*, GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres
         FROM movies
-        JOIN movie_genres
+        LEFT JOIN movie_genres
         ON movies.movie_id = movie_genres.movie_id
-        JOIN genres
+        LEFT JOIN genres
         ON movie_genres.genre_id = genres.genre_id
         GROUP BY movies.movie_id;
     `

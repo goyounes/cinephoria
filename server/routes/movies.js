@@ -1,15 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { getMovies, getMoviesWithGenres } from '../controllers/movies.js';
+import { addMovie, getMovies, getMoviesWithGenres } from '../controllers/movies.js';
 
 const DB_API_URL = "http://localhost:5000/api/v1"
 
 router.get("/",async (req,res,next) => {
     try {
-        // const response = await axios.get(DB_API_URL+"/movies")
-        // const movies = response.data
-        // console.log("response",response)
         const movies = await getMoviesWithGenres()
         movies.forEach((movie) => {
             movie.poster_img = decodeBinaryToBase64(movie.poster_img);
@@ -19,7 +16,17 @@ router.get("/",async (req,res,next) => {
         next(error)
     }
 })
-router.post("/Recent",async (req,res,next) => {
+
+router.post("/",async (req,res,next) => {
+    try {
+        const movies = await addMovie()
+        res.status(200).json(movies)
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/recent",async (req,res,next) => {
     try {
         const movies = await getMoviesAddedSince()
         movies.forEach((movie) => {
@@ -31,16 +38,6 @@ router.post("/Recent",async (req,res,next) => {
     }
 })
 
-router.get("/recent",async (req,res,next) => {
-    try {
-        const response = await axios.get(DB_API_URL+"/movies/recent",{headers:{'X-Requested-By': 'backend-server'}})
-        const movies = response.data
-        // res.status(200).render("pages/movies_recent.ejs",{movies})
-        res.status(200).json(movies)
-    } catch (error) {
-        next(error)
-    }
-})
 
 router.get('/create', (req, res,next) => {
     // res.sendFile("/static/create_movie.html",{root:"."})
