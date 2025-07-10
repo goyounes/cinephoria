@@ -1,26 +1,15 @@
 import {useState} from "react";    
 import {
-  Container,
-  Box,
-  Card,
-  Typography,
-  TextField,
-  Button,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Stack,
-  FormHelperText,
-  CardContent
-} from "@mui/material";
-
+  Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel, 
+   FormControl,  Stack,  FormHelperText,  CardContent
+  } from "@mui/material";
+import axios from "axios";
 import ImageUploader from "./ImageUploader";
 
 const AddMovie = () => {
-  const [formData, setFormData] = useState({
+  const [movieData, setMovieData] = useState({
     title: "",
-    poster_img: "",
+    // poster_img: "",
     description: "",
     length_hours: 0,
     length_minutes: 0,
@@ -29,12 +18,14 @@ const AddMovie = () => {
     is_team_pick: "0",
     score: 0,
   })
+  const [imageFile, setImageFile] = useState(null);
+
 
   const handleChange = (e) => {
-    setFormData((prev) => {
+    setMovieData((prev) => {
       // console.log(e.target)
-      console.log(prev)
-      console.log("e.target.nam ->",e.target.name,"/ e.target.value ->", e.target.value)
+      // console.log(prev)
+      // console.log("e.target.nam ->",e.target.name,"/ e.target.value ->", e.target.value)
 
       return {
       ...prev,
@@ -45,7 +36,7 @@ const AddMovie = () => {
 
 
   const handleNumberChange = (e) => {
-    setFormData((prev) => {
+    setMovieData((prev) => {
       // console.log(prev)
       // console.log("e.target.name ->",e.target.name,"/ e.target.value ->", e.target.value)
       // console.log("e.target.max ->", e.target.max, "/ e.target.min ->", e.target.min)
@@ -59,6 +50,30 @@ const AddMovie = () => {
       }
     });
   };
+
+  const handleSubmit = async () => {
+    const data = new FormData();
+    Object.entries(movieData).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+    if (imageFile) {
+      data.append('poster_img', imageFile); // "poster" is the field name
+    }
+    for (const [key, value] of data.entries()) {
+      console.log(key, value);
+    }
+    try {
+      const response = await axios.post('/movies', data);
+      const result = response.data
+      console.log("response of adding movie: ");
+      console.log(response)
+      console.log(result);
+      alert('Movie added successfully!');
+    } catch (error) {
+      alert('Failed to add Movie: ' + error.message);
+    }
+  };
+
 
   return (
   <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
@@ -78,7 +93,7 @@ const AddMovie = () => {
       >
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <ImageUploader/>
+          <ImageUploader onFileSelect={(file) => setImageFile(file)} />
         </Stack>
       
         <TextField
@@ -88,7 +103,7 @@ const AddMovie = () => {
           name="title"
           placeholder="Movie Title"
           onChange={handleChange}
-          value={formData.title}
+          value={movieData.title}
         />
             
         <TextField
@@ -100,8 +115,19 @@ const AddMovie = () => {
           name="description"
           placeholder="Movie description..."
           onChange={handleChange}
-          value={formData.description}
+          value={movieData.description}
         />
+
+        {/* <Autocomplete
+          multiple
+          options={genreOptions}
+          getOptionLabel={(option) => option.label}
+          value={selectedGenres}
+          onChange={(event, newValue) => setSelectedGenres(newValue)}
+          renderInput={(params) => (
+            <TextField {...params} variant="outlined" label="Genres" placeholder="Select genres" />
+          )}
+        /> */}
 
         <FormControl fullWidth helperText="Movie length in hours, minutes, and seconds">
           <Stack direction="row" spacing={2} >
@@ -113,7 +139,7 @@ const AddMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 24}}}
               onChange={handleNumberChange}
-              value={parseInt(formData.length_hours) || ""}
+              value={parseInt(movieData.length_hours) || ""}
               
             />
             <TextField
@@ -124,7 +150,7 @@ const AddMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 60}}}
               onChange={handleNumberChange}
-              value={parseInt(formData.length_minutes) || ""}
+              value={parseInt(movieData.length_minutes) || ""}
             />
             <TextField
               fullWidth
@@ -134,7 +160,7 @@ const AddMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 60}}}
               onChange={handleNumberChange}
-              value={parseInt(formData.length_seconds) || ""}
+              value={parseInt(movieData.length_seconds) || ""}
             />
           </Stack>
           <FormHelperText>Length of the movie</FormHelperText>
@@ -149,7 +175,7 @@ const AddMovie = () => {
           helperText="Age rating between 3 and 21"
           slotProps={{htmlInput: {min: 0, max: 21}}}
           onChange={handleNumberChange}
-          value={formData.age_rating}
+          value={movieData.age_rating}
         />
 
         <FormControl fullWidth>
@@ -161,7 +187,7 @@ const AddMovie = () => {
             defaultValue="0"
             helperText="score between 0.0 ~ 5.0"
             onChange={handleChange}
-            value={formData.is_team_pick}
+            value={movieData.is_team_pick}
           >
             <MenuItem value="0">No</MenuItem>
             <MenuItem value="1">Yes</MenuItem>
@@ -182,7 +208,7 @@ const AddMovie = () => {
           onChange={handleNumberChange}
         />
 
-        <Button variant="contained" color="primary" type="submit">
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
           Add Movie
         </Button>
       </Stack>
