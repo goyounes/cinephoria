@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Box, Typography, Stack } from '@mui/material';
+import { Button, Stack } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 function ImageUploader() {
   const [imagePreview, setImagePreview] = useState(null);
@@ -28,8 +29,8 @@ function ImageUploader() {
         onChange={handleFileChange}
       />
       <label htmlFor="image-upload">
-        <Button variant="contained" component="span">
-          Upload Image
+        <Button variant="contained" component="span" startIcon={<CloudUploadIcon />}>
+          Upload Poster
         </Button>
       </label>
 
