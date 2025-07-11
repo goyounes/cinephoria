@@ -3,7 +3,7 @@ const router = Router();
 import axios from 'axios';
 import { getMessages } from '../controllers/messages.js';
 import  { verifyAdminJWT} from '../controllers/auth.js';
-const DB_API_URL = "http://localhost:5000/api/v1"
+
 
 router.get('/', (req, res) => {
   res.send('Admin dashboard');

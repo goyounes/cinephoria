@@ -5,7 +5,7 @@ import axios from 'axios';
 import multer from 'multer';
 import crypto from 'crypto';
 
-import { addMovie, getMoviesWithGenres } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
@@ -81,24 +81,19 @@ router.get("/recent",async (req,res,next) => {
     }
 })
 
-
-router.get('/create', (req, res,next) => {
-    // res.sendFile("/static/create_movie.html",{root:"."})
-    // res.status(200).render("pages/create_movie.ejs",{DB_API_URL});
-    res.status(200).json({message: "Create movie page not implemented yet. Please use the API directly."})
-
-});
-
-
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for movie with movie_id =",id)
     try {
-        const response = await axios.get(DB_API_URL + "/movies/" + id ,{headers:{'X-Requested-By': 'backend-server'}})
-        const movie = response.data // either a reosurce obj or err obj
-        // if ('error' in movie) throwError (movie.error.message,movie.error.status)
-        // res.status(200).render("pages/one_movie.ejs",{movie})
-        res.status(200).json(response.data)
+        // const response = await axios.get(DB_API_URL + "/movies/" + id ,{headers:{'X-Requested-By': 'backend-server'}})
+        const movie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
+        if (!movie) {
+            const err = new Error("Movie not found");
+            err.status = 404;
+            return next(err); 
+        }
+        movie.poster_img = decodeBinaryToBase64(movie.poster_img);
+        res.status(200).json(movie)
     } catch (error) {
         next(error) // network request or re-thrown error
     }

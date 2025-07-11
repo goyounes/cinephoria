@@ -41,6 +41,21 @@ export async function  getMoviesWithGenres(){
     return result_rows
 }
 
+export async function  getOneMovieWithGenres(id){
+    const q = `
+        SELECT movies.*, GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres
+        FROM movies
+        LEFT JOIN movie_genres
+        ON movies.movie_id = movie_genres.movie_id
+        LEFT JOIN genres
+        ON movie_genres.genre_id = genres.genre_id
+        WHERE movies.movie_id = ?
+        GROUP BY movies.movie_id;
+    `
+    const [result_rows] = await pool.query(q,id);
+    return result_rows[0]
+}
+
 export async function getGenres(){
     const q = `SELECT * FROM genres;`
     const [result_rows] = await pool.query(q);
