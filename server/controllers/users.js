@@ -8,7 +8,7 @@ export async function  getUsers(){
 
 export async function  getUser(user_id){
     const q = `SELECT * FROM users WHERE user_id = ?;`
-    const [result_rows] = await pool.query(q,user_id);
+    const [result_rows] = await pool.query(q,[user_id]);
     return result_rows[0]
 }
 
