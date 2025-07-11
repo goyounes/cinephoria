@@ -1,13 +1,12 @@
 import mysql from "mysql2"
-import dotenv from "dotenv";
-process.env.DOTENV_CONFIG_DEBUG = 'true';
-dotenv.config({ path: './.env' });
+
+//env variables are loaded in the server.js file, by importing the env.js file
 
 export const pool = mysql.createPool({
-    host : process.env.MYSQL_HOST, //|| "localhost",
-    user : process.env.MYSQL_USER,// || "root",
-    password : process.env.MYSQL_PASSWORD,// || "5599",
-    database : process.env.MYSQL_DATABASE// || "cinephoria",
+    host : process.env.MYSQL_HOST, 
+    user : process.env.MYSQL_USER,
+    password : process.env.MYSQL_PASSWORD,
+    database : process.env.MYSQL_DATABASE
 }).promise()
 
 

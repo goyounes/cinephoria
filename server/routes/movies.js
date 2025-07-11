@@ -9,10 +9,6 @@ import { addMovie, getMoviesWithGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex') ; // Generate a random name for the image
 
 const bucketName = process.env.S3_BUCKET_NAME;

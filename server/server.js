@@ -1,7 +1,8 @@
+import './config/env.js';
+
 import experess from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import * as db from './controllers/database.js';
 
 const app = experess();
 const PORT = 8080;
