@@ -40,12 +40,12 @@ router.get("/",async (req,res,next) => {
         next(error)
     }
 })
-// upload.single('file'), 
+
 router.post("/", upload.single('poster_img'), async (req,res,next) => {
     try {
-        console.log("req.body : ",req.body); 
-        console.log("req.file : ",req.file); 
-        console.log("req.file.buffer",req.file.buffer);
+        // console.log("req.body : ",req.body); 
+        // console.log("req.file : ",req.file); 
+        // console.log("req.file.buffer",req.file.buffer);
         const imageName = randomImageName();
         const params = {
             Bucket: bucketName,
@@ -57,11 +57,28 @@ router.post("/", upload.single('poster_img'), async (req,res,next) => {
         const command = new PutObjectCommand(params)
 
         await s3.send(command)
+        console.log("s3 bucket upload successful, movie added to database");
+
+        const result = await addMovie({
+                title : req.body.title, 
+                poster_img : imageName, 
+                poster_img_type : "image/png", 
+                description :   req.body.description,
+                age_rating : req.body.age_rating, 
+                is_team_pick : req.body.is_team_pick , 
+                score :  req.body.score, 
+                length : `${req.body.length_hours}:${req.body.length_minutes}:${req.body.length_seconds}`, //,
+        })
 
         // console.log(req.body); // other form fields
         // const movieData = {}
-        // const response = await addMovie()
-        res.status(200).json("s3 bucket upload successful, movie added to database");
+        res.status(201).json({
+            message: "Movie added successfully",
+            imageName: imageName,
+            movie: req.body,
+            movieInsertResult: result,
+        });
+
     } catch (error) {
         next(error)
     }
