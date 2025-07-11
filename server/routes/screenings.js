@@ -1,8 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreenings} from '../controllers/screenings.js'; 
-const DB_API_URL = "http://localhost:5000/api/v1"
+import {getAllScreenings, getUpcomingScreenings, getScreeningById} from '../controllers/screenings.js'; 
 
 
 // router.get("/",async (req,res,next) => {
@@ -21,6 +20,7 @@ const DB_API_URL = "http://localhost:5000/api/v1"
 //         next(error)
 //     }
 // })
+
 router.get("/",async (req,res,next) => {
     try {
         const screenings = await getAllScreenings()
@@ -30,35 +30,27 @@ router.get("/",async (req,res,next) => {
     }
 })
 
-
-router.get('/create', (req, res,next) => {
-    // res.sendFile("/static/create_screening.html",{root:"."})
-    // res.status(200).render("pages/create_screening.ejs",{DB_API_URL});
-    res.status(200).json({message: "Create screening page not implemented yet. Please use the API directly."})
+router.post('/', (req, res,next) => {
+    // This is a placeholder for the POST route to add a new screening
 });
-
-router.get("/all",async (req,res,next) => {
-    try {
-        const response = await axios.get(DB_API_URL+"/screenings/all",{headers:{'X-Requested-By': 'backend-server'}})
-        const screenings = response.data
-        // res.status(200).render("pages/screenings.ejs",{screenings})
-        res.status(200).json(response.data)
-    } catch (error) {
-        next(error)
-    }
-})
 
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for screening with screening_id =",id)
     try {
-        const response = await axios.get(DB_API_URL + "/screenings/" + id ,{headers:{'X-Requested-By': 'backend-server'}})
-        const screening = response.data // either a reosurce obj or err obj
-        // if ('error' in screening) throwError (screening.error.message,screening.error.status)
-        // res.status(200).render("pages/one_screening.ejs",{screening})
-        res.status(200).json(response.data)
+        const screenings = await getScreeningById(id)
+        res.status(200).json(screenings)
     } catch (error) {
-        next(error) // network request or re-thrown error
+        next(error)
+    }
+})
+
+router.get("/upcoming",async (req,res,next) => {
+    try {
+        const screenings = await getUpcomingScreenings()
+        res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
     }
 })
 

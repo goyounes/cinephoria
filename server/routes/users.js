@@ -4,11 +4,9 @@ import axios from 'axios';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import { getUser, getUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
 import { addUser } from '../controllers/auth.js'; // assuming you have a controller to add users
-const DB_API_URL = "http://localhost:8080"
 
 router.get("/",verifyEmployeeJWT,async (req,res,next) => {
     try {
-        // const response = await axios.get(DB_API_URL+"/users",{headers:{'X-Requested-By': 'backend-server'}})
         const users = await getUsers() // this is a controller function that fetches users from the database
         res.status(200).json(users)
     } catch (error) {

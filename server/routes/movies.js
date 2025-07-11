@@ -29,8 +29,6 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 upload.single('poster_img') // 'poster_img' is the field name in the form
 
-const DB_API_URL = "http://localhost:5000/api/v1"
-
 router.get("/",async (req,res,next) => {
     try {
         const movies = await getMoviesWithGenres()
@@ -85,7 +83,6 @@ router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for movie with movie_id =",id)
     try {
-        // const response = await axios.get(DB_API_URL + "/movies/" + id ,{headers:{'X-Requested-By': 'backend-server'}})
         const movie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
         if (!movie) {
             const err = new Error("Movie not found");
