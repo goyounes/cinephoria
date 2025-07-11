@@ -5,7 +5,7 @@ import axios from 'axios';
 import multer from 'multer';
 import crypto from 'crypto';
 
-import { addMovie, getMovies, getMoviesWithGenres } from '../controllers/movies.js';
+import { addMovie, getMoviesWithGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
@@ -15,18 +15,18 @@ dotenv.config();
 
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex') ; // Generate a random name for the image
 
-const bcuketName = process.env.S3_BUCKET_NAME;
+const bucketName = process.env.S3_BUCKET_NAME;
 const bucketRegion = process.env.S3_BUCKET_REGION;
 const accesKey = process.env.S3_BUCKET_ACCES_KEY;
 const secretAcces_key = process.env.S3_BUCKET_SECRET_ACCES_KEY;
-// console.log(bcuketName, bucketRegion, accesKey, secretAcces_key);   
+// console.log(bucketName, bucketRegion, accesKey, secretAcces_key);   
 
 const s3 = new S3Client({
     credentials: {
         accessKeyId: accesKey,  
         secretAccessKey: secretAcces_key,
     },
-    region: bucketRegion,
+    region: bucketRegion
 })
 
 const storage = multer.memoryStorage()
@@ -54,7 +54,7 @@ router.post("/", upload.single('poster_img'), async (req,res,next) => {
         console.log("req.file.buffer",req.file.buffer);
         const imageName = randomImageName();
         const params = {
-            Bucket: bcuketName,
+            Bucket: bucketName,
             Key: imageName, 
             Body: req.file.buffer, 
             ContentType: req.file.mimetype, // e.g., 'image/png'

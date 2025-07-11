@@ -22,8 +22,9 @@ import { getUser, getUsers } from "./users.js";
 // console.table(await getTickets());
 // console.table(await getCheckoutInfo(1));
 
-// console.table(await getUsers());
-// console.table(await getUser(1));
+console.table(await getUsers());
+console.table(await getUser(1));
 
-console.log(await addMovie());
+// console.log(await addMovie());
 
+process.exit(0);
