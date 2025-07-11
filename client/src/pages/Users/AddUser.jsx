@@ -1,18 +1,18 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
+import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
 
 const AddUser = () => {
-  const API_URL = "http://localhost:8080/api/v1";
+  const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    user_email: '',
-    user_password: '',
-    user_name: '',
-    role_id: '1',
-    first_name: '',
-    last_name: '',
+    email: '',
+    password: '',
+    username: '',
+    firstName: '',
+    firstName: '',
+    role_id: '',
   });
 
   const handleChange = (e) => {
@@ -26,17 +26,13 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        ...formData,
-        role_id: Number(formData.role_id),
-      };
+      // const payload = {
+      //   ...formData,
+      //   role_id: Number(formData.role_id),
+      // };
 
-      const response = await axios.post(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
+      const response = await axios.post(`/users`,formData);
+      console.log(response)
       const result = response.data;
 
     //   if (!response.ok) {
@@ -49,12 +45,12 @@ const AddUser = () => {
 
       alert('User added successfully!');
       setFormData({
-        user_email: '',
-        user_password: '',
-        user_name: '',
-        role_id: '1',
-        first_name: '',
-        last_name: '',
+        email: '',
+        password: '',
+        username: '',
+        firstName: '',
+        firstName: '',
+        role_id: '',
       });
       navigate('/users'); // Redirect to the users page
     } catch (err) {
@@ -76,43 +72,63 @@ return (
             fullWidth
             required
             label="Email"
-            name="user_email"
+            name="email"
             type="email"
             placeholder="example@mail.com"
+            onChange={handleChange}
+            value={formData.email}
           />
 
           <TextField
             fullWidth
             required
             label="Password"
-            name="user_password"
+            name="password"
             type="password"
             placeholder="8 characters minimum"
+            onChange={handleChange}
+            value={formData.password}
           />
 
           <TextField
             fullWidth
             required
             label="Username"
-            name="user_name"
+            name="username"
             placeholder="Unique Username"
+            onChange={handleChange}
+            value={formData.username}
           />
 
           <TextField
             fullWidth
             required
             label="First Name"
-            name="first_name"
+            name="firstName"
             placeholder="Please enter your first name"
+            onChange={handleChange}
+            value={formData.firstName}
           />
 
           <TextField
             fullWidth
             required
             label="Last Name"
-            name="last_name"
+            name="lastName"
             placeholder="Please enter your last name"
+            onChange={handleChange}
+            value={formData.lastName}
           />
+
+          <FormControl fullWidth required>
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select labelId="role-label" name="role_id" label="Role" onChange={handleChange} value={ parseInt(formData.role_id ) || ''}>
+              <MenuItem value={1}>User</MenuItem>
+              <MenuItem value={2}>Employee</MenuItem>
+              <MenuItem value={3}>Admin</MenuItem>
+            </Select>
+          </FormControl>
+
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Register
           </Button>

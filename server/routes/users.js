@@ -1,10 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { getUsers } from '../controllers/users.js'; // assuming you have a controller to fetch users
-const DB_API_URL = "http://localhost:5000/api/v1"
+import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
+import { getUser, getUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
+import { addUser } from '../controllers/auth.js'; // assuming you have a controller to add users
+const DB_API_URL = "http://localhost:8080"
 
-router.get("/",async (req,res,next) => {
+router.get("/",verifyEmployeeJWT,async (req,res,next) => {
     try {
         // const response = await axios.get(DB_API_URL+"/users",{headers:{'X-Requested-By': 'backend-server'}})
         const users = await getUsers() // this is a controller function that fetches users from the database
@@ -14,35 +16,27 @@ router.get("/",async (req,res,next) => {
     }
 })
 
-router.post('/', async(req, res,next) => {
-    // res.sendFile("/static/create_user.html",{root:"."})
-    // res.status(200).render("pages/create_user.ejs",{DB_API_URL});
+// router.post('/', verifyAdminJWT, async(req, res,next) => {
+//     try {
+//         const userData = req.body;
+//         const response = await addUser(userData);        
+//         res.status(201).json({ message: "User registered successfully", user_id });
+//     } catch (error) {
+//         next(error)
+//     }
+// });
 
-    // res.status(200).json({message: "Create user page not implemented yet. Please use the API directly."})
-    try {
-        const userData = req.body;
-        console.log("user data", userData)
-
-        const response = await axios.post(DB_API_URL+"/users", userData, {
-            headers: {'Content-Type': 'application/json'},
-        });        
-        console.log("response of adding user: ",response)
-    } catch (error) {
-        next(error)
-    }
-
-});
+router.post('/', verifyAdminJWT, addUser)
 
 
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for user with user_id =",id)
     try {
-        const response = await axios.get(DB_API_URL + "/users/" + id ,{headers:{'X-Requested-By': 'backend-server'}})
-        const user = response.data  // either a reosurce obj or err obj
+        const user = await getUser(id) // this is a controller function that fetches a user from the database
         // if ('error' in user) throwError (user.error.message,user.error.status)
         // res.status(200).render("pages/one_user.ejs",{user})
-        res.status(200).json(response.data)
+        res.status(200).json(user)
     } catch (error) {
         next(error) // network request or re-thrown error
     }
