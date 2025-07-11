@@ -77,7 +77,7 @@ export async function login (req, res, next) {
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // If everything is fine, return the user_id signed using a JWT token
-        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , "cinephoria_secret", { expiresIn: '24h' });    
+        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , process.env.JWT_SECRET, { expiresIn: '24h' });    
         res.cookie('accessToken', token, {
             // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             // secure: true, // <-- REQUIRED for SameSite=None
@@ -110,7 +110,7 @@ export async function verifyJWT (req, res, next) {
     console.log(token)
     try {
         // Verify the token
-        const decoded = jwt.verify(token, "cinephoria_secret");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         // if (decoded.role_id == 1) return next(new Error("User"));
         // if (decoded.role_id == 2) return next(new Error("Employee"));
         // if (decoded.role_id == 3) return next(new Error("Admin"));
@@ -133,7 +133,7 @@ export async function verifyAdminJWT(req, res, next) {
     if (!token) {
       throw new Error("No token provided");
     }
-    const decoded = jwt.verify(token, "cinephoria_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.role_id !== 3) {
       throw new Error("Access denied: admin only");
     }
@@ -153,7 +153,7 @@ export async function verifyEmployeeJWT(req, res, next) {
     if (!token) {
       throw new Error("No token provided");
     }
-    const decoded = jwt.verify(token, "cinephoria_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.role_id < 2) {
       throw new Error("Access denied: employee or admin only");
     }
