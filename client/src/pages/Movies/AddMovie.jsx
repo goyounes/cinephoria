@@ -16,7 +16,7 @@ const AddMovie = () => {
     length_minutes: 0,
     length_seconds: 0,
     age_rating: 0,
-    is_team_pick: "0",
+    is_team_pick: null,
     score: 0,
   })
   const [imageFile, setImageFile] = useState(null);
@@ -205,10 +205,10 @@ const AddMovie = () => {
             defaultValue="0"
             helperText="score between 0.0 ~ 5.0"
             onChange={handleChange}
-            value={movieData.is_team_pick}
+            value={ (movieData.is_team_pick===null) ?  ""  :  movieData.is_team_pick}
           >
-            <MenuItem value="0">No</MenuItem>
-            <MenuItem value="1">Yes</MenuItem>
+            <MenuItem value={0}>No</MenuItem>
+            <MenuItem value={1}>Yes</MenuItem>
           </Select>
           <FormHelperText>Is this movie a favourite among the cinema crew?</FormHelperText>
         </FormControl>
@@ -236,14 +236,44 @@ const AddMovie = () => {
   );
 };
 
-  const genres = [
-    { id:1, name: 'The Shawshank Redemption'},
-    { id:2, name: 'The Godfather'},
-    { id:3, name: 'The Godfather: Part II'},
-    { id:4, name: 'The Dark Knight'},
-    { id:5, name: '12 Angry Men'},
-    { id:6, name: "Schindler's List"},
-    { id:7, name: 'Pulp Fiction' }
-  ]
+const genres = [
+  { id: 1, name: 'action' },
+  { id: 2, name: 'adventure' },
+  { id: 3, name: 'animation' },
+  { id: 4, name: 'biography' },
+  { id: 5, name: 'comedy' },
+  { id: 6, name: 'crime' },
+  { id: 7, name: 'cult movie' },
+  { id: 8, name: 'disney' },
+  { id: 9, name: 'documentary' },
+  { id: 10, name: 'drama' },
+  { id: 11, name: 'erotic' },
+  { id: 12, name: 'family' },
+  { id: 13, name: 'fantasy' },
+  { id: 14, name: 'film-noir' },
+  { id: 15, name: 'gangster' },
+  { id: 16, name: 'gay and lesbian' },
+  { id: 17, name: 'history' },
+  { id: 18, name: 'horror' },
+  { id: 19, name: 'military' },
+  { id: 20, name: 'music' },
+  { id: 21, name: 'musical' },
+  { id: 22, name: 'mystery' },
+  { id: 23, name: 'nature' },
+  { id: 24, name: 'neo-noir' },
+  { id: 25, name: 'period' },
+  { id: 26, name: 'pixar' },
+  { id: 27, name: 'road movie' },
+  { id: 28, name: 'romance' },
+  { id: 29, name: 'sci-fi' },
+  { id: 30, name: 'short' },
+  { id: 31, name: 'spy' },
+  { id: 32, name: 'super hero' },
+  { id: 33, name: 'thriller' },
+  { id: 34, name: 'visually stunning' },
+  { id: 35, name: 'war' },
+  { id: 36, name: 'western' }
+];
+
 
 export default AddMovie
