@@ -52,18 +52,18 @@ const AddMovie = () => {
   };
 
   const handleSubmit = async () => {
-    const data = new FormData();
+    const formData = new FormData();
     Object.entries(movieData).forEach(([key, value]) => {
-      data.append(key, value);
+      formData.append(key, value);
     });
     if (imageFile) {
-      data.append('poster_img', imageFile); // "poster" is the field name
+      formData.append('poster_img', imageFile); // "poster" is the field name
     }
-    for (const [key, value] of data.entries()) {
+    for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
     try {
-      const response = await axios.post('/movies', data);
+      const response = await axios.post('/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       const result = response.data
       console.log("response of adding movie: ");
       console.log(response)
