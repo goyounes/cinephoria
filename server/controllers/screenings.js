@@ -36,8 +36,7 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
             ? IS NULL OR screenings.cinema_id = ?
         ) AND (
             ? IS NULL OR screenings.movie_id = ?
-        )
-        AND (
+        ) AND (
             screenings.start_date > CURDATE()   OR  (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         )
         ORDER BY screenings.start_date, screenings.start_time;
@@ -64,6 +63,23 @@ export async function getAllScreenings(cinema_id,movie_id){
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id, movie_id, movie_id])
     return result_rows
 }
+
+export async function getScreeningById(screening_id){  
+    const q =  `
+        SELECT screenings.*, cinemas.cinema_name, movies.title
+        FROM screenings
+        JOIN cinemas 
+            ON screenings.cinema_id = cinemas.cinema_id
+        JOIN movies
+            ON screenings.movie_id = movies.movie_id
+        WHERE screenings.screening_id = ?
+        )
+        ORDER BY screenings.start_date, screenings.start_time;
+    `
+    const [result_rows] = await pool.query(q, [screening_id])
+    return result_rows
+}
+
 export async function  getQualities(){
     // This function retrieves raw SCREENINGS TABLE data
     const q = `SELECT * FROM qualities;`
