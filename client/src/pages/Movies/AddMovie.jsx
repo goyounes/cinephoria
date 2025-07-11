@@ -1,7 +1,8 @@
 import {useState} from "react";    
 import {
   Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel, 
-   FormControl,  Stack,  FormHelperText,  CardContent
+   FormControl,  Stack,  FormHelperText,  CardContent,
+   Autocomplete
   } from "@mui/material";
 import axios from "axios";
 import ImageUploader from "./ImageUploader";
@@ -19,6 +20,7 @@ const AddMovie = () => {
     score: 0,
   })
   const [imageFile, setImageFile] = useState(null);
+  const [selectedGenres, setSelectedGenres] = useState([])
 
 
   const handleChange = (e) => {
@@ -59,9 +61,15 @@ const AddMovie = () => {
     if (imageFile) {
       formData.append('poster_img', imageFile); // "poster" is the field name
     }
+    if (selectedGenres) {
+      const selectedGenresArray = selectedGenres.map(genre => genre.name);
+      // console.log(selectedGenresArray)
+      formData.append('selectedGenres', selectedGenresArray); // "poster" is the field name
+    }
     for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
+
     try {
       const response = await axios.post('/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       const result = response.data
@@ -73,6 +81,7 @@ const AddMovie = () => {
       alert('Failed to add Movie: ' + error.message);
     }
   };
+
 
 
   return (
@@ -118,16 +127,25 @@ const AddMovie = () => {
           value={movieData.description}
         />
 
-        {/* <Autocomplete
+        <Autocomplete
           multiple
-          options={genreOptions}
-          getOptionLabel={(option) => option.label}
+          options={genres}
+          getOptionLabel={(option) => option.name}
           value={selectedGenres}
-          onChange={(event, newValue) => setSelectedGenres(newValue)}
+          onChange={(event, newValue) => {
+            setSelectedGenres(newValue)
+            console.log("Selected Genres: ", newValue);
+          }}
+          filterSelectedOptions
           renderInput={(params) => (
-            <TextField {...params} variant="outlined" label="Genres" placeholder="Select genres" />
+            <TextField
+              {...params}
+              label="Movie Genres"
+              placeholder="Add Genres"
+            />
           )}
-        /> */}
+        />
+
 
         <FormControl fullWidth helperText="Movie length in hours, minutes, and seconds">
           <Stack direction="row" spacing={2} >
@@ -218,4 +236,14 @@ const AddMovie = () => {
   );
 };
 
-export default AddMovie;
+  const genres = [
+    { id:1, name: 'The Shawshank Redemption'},
+    { id:2, name: 'The Godfather'},
+    { id:3, name: 'The Godfather: Part II'},
+    { id:4, name: 'The Dark Knight'},
+    { id:5, name: '12 Angry Men'},
+    { id:6, name: "Schindler's List"},
+    { id:7, name: 'Pulp Fiction' }
+  ]
+
+export default AddMovie
