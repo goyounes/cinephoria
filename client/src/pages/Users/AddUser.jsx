@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
 
 const AddUser = () => {
-  const API_URL = "http://localhost:8080";
+  // const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     username: '',
     firstName: '',
-    firstName: '',
+    lastName: '',
     role_id: '',
   });
 
@@ -33,7 +33,7 @@ const AddUser = () => {
 
       const response = await axios.post(`/users`,formData);
       console.log(response)
-      const result = response.data;
+      // const result = response.data;
 
     //   if (!response.ok) {
     //     const err = new Error(result.error?.message || 'An error occurred');
@@ -49,7 +49,7 @@ const AddUser = () => {
         password: '',
         username: '',
         firstName: '',
-        firstName: '',
+        lastName: '',
         role_id: '',
       });
       navigate('/users'); // Redirect to the users page

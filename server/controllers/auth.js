@@ -2,6 +2,12 @@ import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const roleMap = {
+    1: 'user', 
+    2: 'employee',
+    3: 'admin'
+};
+
 export async function register (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password) {
@@ -102,29 +108,25 @@ export async function logout (req, res, next) {
     .status(200).json({ message: "Logged out successfully" });
 }
 
-export async function verifyJWT (req, res, next) {
-    // Get the user_id from the JWT token
-    // accesing accessToken from the cookies
+export async function verifyUserJWT (req, res, next) {
+  try {
     const token = req.cookies.accessToken;
-    if (!token) return next(new Error("No token provided"));
-    console.log(token)
-    try {
-        // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // if (decoded.role_id == 1) return next(new Error("User"));
-        // if (decoded.role_id == 2) return next(new Error("Employee"));
-        // if (decoded.role_id == 3) return next(new Error("Admin"));
-        // if (decoded.role_id == 1) res.status(200).json( {role:"User"});
-        // if (decoded.role_id == 2) res.status(200).json( {role:"Employee"});
-        // if (decoded.role_id == 3) res.status(200).json( {role:"Admin"});
-        if (decoded.role_id !== 3) return next(new Error("Access denied: not admin"));
-        console.log(token, decoded);
-
-        // If everything is fine, continue the request
-        next();
-    }catch (error) {
-        next(error);
+    if (!token) {
+      throw new Error("No token provided");
     }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role_id < 1) {
+      throw new Error("Access denied: you have to be loged in");
+    }
+    req.user = {
+        user_id: decoded.user_id,
+        role_id: decoded.role_id,
+        role_name: roleMap[decoded.role_id],
+    }; 
+    next();
+  } catch (error) {
+    next(error); 
+  }
 }
 
 export async function verifyAdminJWT(req, res, next) {
@@ -140,6 +142,7 @@ export async function verifyAdminJWT(req, res, next) {
     req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
+        role_name: roleMap[decoded.role_id],
     }; 
     next();
   } catch (error) {
@@ -160,6 +163,7 @@ export async function verifyEmployeeJWT(req, res, next) {
     req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
+        role_name: roleMap[decoded.role_id],
     }; 
     next();
   } catch (error) {
