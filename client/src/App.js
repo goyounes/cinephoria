@@ -3,9 +3,11 @@ import { Routes, Route } from 'react-router-dom';
 import Footer from './components/Footer';
 import TopNavBar from './components/TopNavBar';
 
-import { Home, Movies, Tickets, Screenings } from './pages';
+import { Home, Tickets, Screenings } from './pages';
 import Messages from './pages/Admin/Messages';
 import AddMovie from './pages/Movies/AddMovie';
+import Movies from './pages/Movies/Movies';
+import Movie from './pages/Movies/Movie';
 
 
 import './assets/global.css';
@@ -14,7 +16,6 @@ import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
 import Login from './pages/Auth/Login';
 import { Container, Stack } from '@mui/material';
-import Movie from './pages/Movies/Movie';
 
 
 function App() {
