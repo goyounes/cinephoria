@@ -60,7 +60,7 @@ const AddUser = () => {
 
 return (
     <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
-      <Card elevation={2} sx={{flexGrow: 1  }}>
+      <Card elevation={4} sx={{flexGrow: 1  }}>
       <CardContent>
         <Stack component="form" id="LoginForm" spacing={2}>
 
