@@ -8,13 +8,12 @@ export async function  getMovies(){
 export async function  addMovie(movie){
     // const {title, poster_img, description, age_rating, poster_img_type, is_team_pick, score, length} = m
     const q = `
-        INSERT INTO movies (title, poster_img, poster_img_type, description, age_rating, is_team_pick, score, length) 
-        VALUES (?,?,?,?,?,?,?,?);
+        INSERT INTO movies (title, poster_img_name,  description, age_rating, is_team_pick, score, length) 
+        VALUES (?,?,?,?,?,?,?);
     `
     const VALUES = [
         movie.title , 
-        movie.poster_img, 
-        movie.poster_img_type, 
+        movie.poster_img_name, 
         movie.description, //
         movie.age_rating, //
         movie.is_team_pick, //

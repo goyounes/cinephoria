@@ -11,7 +11,6 @@ export async function  addScreening(s){
                VALUES (?,?,?,?,?,?);  
               `
     const VALUES = [
-        // m.title , // m.poster_img, // m.poster_img_type, // m.description, // m.age_rating, // m.is_team_pick, // m.score, // m.length,"title" , 
         /*movie_id : */ 1, 
         /*cinema_id:*/  2, 
         /*room_id:*/    5, 

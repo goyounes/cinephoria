@@ -10,7 +10,6 @@ export async function  addTicket(t){
                VALUES (?,?,?);
               `
     const VALUES = [
-        // m.title , // m.poster_img, // m.poster_img_type, // m.description, // m.age_rating, // m.is_team_pick, // m.score, // m.length,"title" , 
         1,
         5,
         10

@@ -7,7 +7,8 @@ import crypto from 'crypto';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres } from '../controllers/movies.js';
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex') ; // Generate a random name for the image
 
@@ -15,7 +16,6 @@ const bucketName = process.env.S3_BUCKET_NAME;
 const bucketRegion = process.env.S3_BUCKET_REGION;
 const accesKey = process.env.S3_BUCKET_ACCES_KEY;
 const secretAcces_key = process.env.S3_BUCKET_SECRET_ACCES_KEY;
-// console.log(bucketName, bucketRegion, accesKey, secretAcces_key);   
 
 const s3 = new S3Client({
     credentials: {
@@ -27,21 +27,29 @@ const s3 = new S3Client({
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
-upload.single('poster_img') // 'poster_img' is the field name in the form
+upload.single('poster_img_file') // 'poster_img_file' is the field name in the form
 
 router.get("/",async (req,res,next) => {
     try {
         const movies = await getMoviesWithGenres()
-        movies.forEach((movie) => {
-            movie.poster_img = decodeBinaryToBase64(movie.poster_img);
-        });
+
+        for (const movie of movies){
+            const getObjectParams = {
+                Bucket: bucketName,
+                Key: movie.poster_img_name
+            };
+            const command = new GetObjectCommand(getObjectParams);
+            const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
+            movie.imageUrl =  url; // Add the URL to the movie object
+        };
+
         res.status(200).json(movies)
     } catch (error) {
         next(error)
     }
 })
 
-router.post("/", upload.single('poster_img'), async (req,res,next) => {
+router.post("/", upload.single('poster_img_file'), async (req,res,next) => {
     try {
         // console.log("req.body : ",req.body); 
         // console.log("req.file : ",req.file); 
@@ -61,8 +69,7 @@ router.post("/", upload.single('poster_img'), async (req,res,next) => {
 
         const result = await addMovie({
                 title : req.body.title, 
-                poster_img : imageName, 
-                poster_img_type : "image/png", 
+                poster_img_name : imageName, 
                 description :   req.body.description,
                 age_rating : req.body.age_rating, 
                 is_team_pick : req.body.is_team_pick , 
@@ -87,9 +94,17 @@ router.post("/", upload.single('poster_img'), async (req,res,next) => {
 router.get("/recent",async (req,res,next) => {
     try {
         const movies = await getMoviesAddedSince()
-        movies.forEach((movie) => {
-            movie.poster_img = decodeBinaryToBase64(movie.poster_img);
-        });
+
+        for (const movie of movies){
+            const getObjectParams = {
+                Bucket: bucketName,
+                Key: movie.poster_img_name
+            };
+            const command = new GetObjectCommand(getObjectParams);
+            const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
+            movie.imageUrl =  url; // Add the URL to the movie object
+        };
+
         res.status(200).json(movies)
     } catch (error) {
         next(error)
@@ -106,7 +121,15 @@ router.get("/:id",async (req,res,next) => {
             err.status = 404;
             return next(err); 
         }
-        movie.poster_img = decodeBinaryToBase64(movie.poster_img);
+
+        const getObjectParams = {
+            Bucket: bucketName,
+            Key: movie.poster_img_name
+        };
+        const command = new GetObjectCommand(getObjectParams);
+        const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
+        movie.imageUrl =  url; // Add the URL to the movie object
+
         res.status(200).json(movie)
     } catch (error) {
         next(error) // network request or re-thrown error

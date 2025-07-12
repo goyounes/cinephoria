@@ -59,7 +59,7 @@ const AddMovie = () => {
       formData.append(key, value);
     });
     if (imageFile) {
-      formData.append('poster_img', imageFile); // "poster" is the field name
+      formData.append('poster_img_file', imageFile); // "poster" is the field name
     }
     if (selectedGenres) {
       const selectedGenresArray = selectedGenres.map(genre => genre.name);
