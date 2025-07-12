@@ -3,7 +3,7 @@ const router = Router();
 
 import multer from 'multer';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -109,6 +109,15 @@ router.get("/recent",async (req,res,next) => {
     }
 })
 
+router.get("/genres",async (req,res,next) => {
+    try {
+        const genres = await getGenres()
+        res.status(200).json(genres)
+    }   catch (error) {
+        next(error)
+    }
+})
+
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for movie with movie_id =",id)
@@ -135,10 +144,5 @@ router.get("/:id",async (req,res,next) => {
 })
 
 
-export function decodeBinaryToBase64(data){
-  if (!data) return null;
-  const posterBuffer = Buffer.from(data);
-  return posterBuffer.toString('base64');
-}
 
 export default router;

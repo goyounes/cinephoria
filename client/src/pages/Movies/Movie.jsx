@@ -59,62 +59,77 @@ const Movie = (props) => {
 
 
   return (
-    <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', alignItems: 'center'}}>
-      <Card elevation={2} sx={{flexGrow: 1  }}>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Card elevation={4}>
+      <CardContent sx={{ p: 4 }}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
+          {/* Poster */}
+          <Box
+            component="img"
+            src={movie.imageUrl}
+            alt={movie.title}
+            sx={{
+              width: { xs: "100%", md: 300 },
+              height: { xs: "auto", md: 450 },
+              objectFit: "cover",
+              borderRadius: 2,
+            }}
+          />
 
-               <CardContent>
-          <Stack spacing={2}>
-            <Box
-              component="img"
-              src={movie.imageUrl}
-              alt={movie.title}
-              sx={{
-                width: "100%",
-                height: 300,
-                objectFit: "cover",
-                borderRadius: 2,
-              }}
-            />
-            <Typography variant="h5" fontWeight="bold">
+          {/* Info panel */}
+          <Stack spacing={2} flex={1}>
+            <Typography variant="h3" fontWeight="bold">
               {movie.title}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {movie.description}
-            </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Chip label={`Age ${movie.age_rating}+`} variant="outlined" />
-              <Chip label={movie.length} />
-              {movie.is_team_pick === 1 && <Chip label="Team Pick" color="success" />}
+            <Stack direction="row" spacing={2} flexWrap="wrap">
+              <Chip label={`Age ${movie.age_rating}+`} />
+              <Chip label={`Duration: ${movie.length}`} />
+              {movie.is_team_pick === 1 && (
+                <Chip label="Team Pick" color="success" />
+              )}
             </Stack>
 
             <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2">Score:</Typography>
-              <Rating value={parseFloat(movie.score)} precision={0.1} readOnly />
-              <Typography variant="body2">({movie.score})</Typography>
+              <Typography variant="h6">Rating:</Typography>
+              <Rating
+                value={parseFloat(movie.score)}
+                precision={0.1}
+                readOnly
+                size="large"
+              />
+              <Typography variant="body1">({movie.score})</Typography>
             </Stack>
 
             <Divider />
 
+            <Typography variant="body1" color="text.secondary">
+              {movie.description}
+            </Typography>
+
             <Stack direction="row" spacing={1} flexWrap="wrap">
-              {movie.genres.split(";").map((genre) => (
+                {movie.genres ? movie.genres.split(";").map((g) => (
                 <Chip
-                  key={genre}
-                  label={genre}
-                  size="small"
-                  avatar={<Avatar>{genre[0].toUpperCase()}</Avatar>}
+                    key={g}
+                    label={g}
+                    size="small"
+                    avatar={<Avatar>{g[0].toUpperCase()}</Avatar>}
                 />
-              ))}
+                )) : (
+                <Typography variant="body2" color="text.secondary">
+                    No genres available
+                </Typography>
+                )}
             </Stack>
 
-            <Typography variant="caption" color="text.secondary" sx={{ pt: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary">
               Added on {new Date(movie.created_at).toLocaleDateString()}
             </Typography>
           </Stack>
-        </CardContent>
-      </Card>
-    </Container>
-  )
+        </Stack>
+      </CardContent>
+    </Card>
+  </Container>
+);
 }
-
 export default Movie
