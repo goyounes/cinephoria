@@ -4,18 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-import {
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-  Avatar,
-  Box,
-  Divider,
-  Rating,
-} from "@mui/material";
+import { Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating} from "@mui/material";
+import StarsIcon from '@mui/icons-material/Stars';
 
 const Movie = (props) => {
 // const movieData = props.movieData 
@@ -59,7 +49,7 @@ const Movie = (props) => {
 
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container sx={{ flexGrow: 1 , py:4}}>
     <Card elevation={4}>
       <CardContent sx={{ p: 4 }}>
         <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
@@ -86,7 +76,7 @@ const Movie = (props) => {
               <Chip label={`Age ${movie.age_rating}+`} />
               <Chip label={`Duration: ${movie.length}`} />
               {movie.is_team_pick === 1 && (
-                <Chip label="Team Pick" color="success" />
+                <Chip label="Team Pick" color="success" icon={<StarsIcon />}/>
               )}
             </Stack>
 
@@ -103,17 +93,12 @@ const Movie = (props) => {
 
             <Divider />
 
-            <Typography variant="body1" color="text.secondary">
-              {movie.description}
-            </Typography>
-
             <Stack direction="row" spacing={1} flexWrap="wrap">
-                {movie.genres ? movie.genres.split(";").map((g) => (
+                {movie.genres ? movie.genres.split(";").map((genre) => (
                 <Chip
-                    key={g}
-                    label={g}
+                    key={genre}
+                    label={genre}
                     size="small"
-                    avatar={<Avatar>{g[0].toUpperCase()}</Avatar>}
                 />
                 )) : (
                 <Typography variant="body2" color="text.secondary">
@@ -122,7 +107,11 @@ const Movie = (props) => {
                 )}
             </Stack>
 
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" sx={{flexGrow: 1}}>
+              {movie.description}
+            </Typography>
+
+            <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: "end"}}>
               Added on {new Date(movie.created_at).toLocaleDateString()}
             </Typography>
           </Stack>
