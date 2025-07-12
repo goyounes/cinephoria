@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Footer from './components/Footer';
 import TopNavBar from './components/TopNavBar';
+import RealNavBar from './components/RealNavBar';
 
 import { Home, Tickets, Screenings } from './pages';
 import Messages from './pages/Admin/Messages';
@@ -21,7 +22,8 @@ import { Container, Stack } from '@mui/material';
 function App() {
   return (
     <Stack minHeight="100vh">
-       
+      <RealNavBar />
+      {/* <RealNavBar/> */}
       <TopNavBar />
 
       <Container sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
