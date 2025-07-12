@@ -49,7 +49,7 @@ const Movie = (props) => {
 
 
   return (
-    <Container sx={{ flexGrow: 1 , py:4}}>
+    <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column"}}>
     <Card elevation={4}>
       <CardContent sx={{ p: 4 }}>
         <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
@@ -66,7 +66,6 @@ const Movie = (props) => {
             }}
           />
 
-          {/* Info panel */}
           <Stack spacing={2} flex={1}>
             <Typography variant="h3" fontWeight="bold">
               {movie.title}

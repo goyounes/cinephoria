@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import MovieTable from './MoviesTable.jsx'
 import { Link } from 'react-router-dom'
-import { Box, Button } from "@mui/material";
+import { Container, Stack, Button } from "@mui/material";
 
 const Movies = () => {
   const [movies, setMovies] = useState([])
@@ -21,13 +21,53 @@ const Movies = () => {
   } , [])
   
   return (
-    <Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', mt: 4 }}>
+  <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column", alignItems: 'center'}}>
+      <Stack direction="row" sx={{ justifyContent: 'space-between'}}>
         <h1>Movies table</h1>
         <Link to={"/movies/create"}><Button variant='contained'>Add movie</Button></Link> 
-      </Box>
-      <MovieTable movies={movies}/>
-    </Box>
+      </Stack>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Age Rating</th>
+            <th>Team Pick</th>
+            <th>Score</th>
+            <th>Length</th>
+          </tr>
+        </thead>
+        <tbody>
+          {movies.map((movie) => (
+            <tr key={movie.movie_id} className={movie.is_team_pick ? "highlight" : ""}>
+              <td>
+                {/* {console.log(movie.imageUrl)} */}
+                {movie.imageUrl ? (
+                  <img
+                    src={movie.imageUrl} 
+                    alt={`Poster for ${movie.title}`}
+                    style={{ width: "80px", height: "auto", borderRadius: "5px" }}
+                  />
+                ) : (
+                  "N/A"
+                )}
+              </td>
+              <td>
+                <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
+              </td>
+              <td>{movie.description}</td>
+              <td>{movie.age_rating}</td>
+              <td>{movie.is_team_pick ? "Yes" : "No"}</td>
+              <td>{movie.score}</td>
+              <td>{movie.length}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+    </Container>
   )
 
 }
