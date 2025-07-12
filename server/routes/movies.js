@@ -1,16 +1,14 @@
 import { Router } from 'express';
 const router = Router();
 
-import axios from 'axios';
 import multer from 'multer';
-import crypto from 'crypto';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import randomImageName from '../utils/randomImageName.js';
 
-const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex') ; // Generate a random name for the image
 
 const bucketName = process.env.S3_BUCKET_NAME;
 const bucketRegion = process.env.S3_BUCKET_REGION;

@@ -12,12 +12,12 @@ const AddMovie = () => {
     title: "",
     // poster_img: "",
     description: "",
-    length_hours: 0,
-    length_minutes: 0,
-    length_seconds: 0,
-    age_rating: 0,
-    is_team_pick: null,
-    score: 0,
+    length_hours: "",
+    length_minutes: "",
+    length_seconds: "",
+    age_rating: "",
+    is_team_pick: "",
+    score: "",
   })
   const [imageFile, setImageFile] = useState(null);
   const [selectedGenres, setSelectedGenres] = useState([])
@@ -39,10 +39,6 @@ const AddMovie = () => {
 
   const handleNumberChange = (e) => {
     setMovieData((prev) => {
-      // console.log(prev)
-      // console.log("e.target.name ->",e.target.name,"/ e.target.value ->", e.target.value)
-      // console.log("e.target.max ->", e.target.max, "/ e.target.min ->", e.target.min)
-      // console.log(e.target)
       let newValue = parseInt(e.target.value);
       if (newValue > parseInt(e.target.max)) newValue = e.target.max
       if (newValue < parseInt(e.target.min)) newValue = e.target.min
@@ -52,6 +48,20 @@ const AddMovie = () => {
       }
     });
   };
+
+const handleFloatChange = (e) => {
+  const val = e.target.value;
+  if (val === "" || /^\d*\.?\d{0,1}$/.test(val)) {
+    let num = parseFloat(val);
+    const min = e.target.min ? +e.target.min : -Infinity;
+    const max = e.target.max ? +e.target.max : Infinity;
+    if (!isNaN(num)) {
+      if (num > max) num = max;
+      if (num < min) num = min;
+    }
+    setMovieData(prev => ({ ...prev, [e.target.name]: val === "" ? "" : num }));
+  }
+};
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -147,7 +157,7 @@ const AddMovie = () => {
         />
 
 
-        <FormControl fullWidth helperText="Movie length in hours, minutes, and seconds">
+        <FormControl fullWidth >
           <Stack direction="row" spacing={2} >
             <TextField
               required
@@ -181,7 +191,7 @@ const AddMovie = () => {
               value={parseInt(movieData.length_seconds) || ""}
             />
           </Stack>
-          <FormHelperText>Length of the movie</FormHelperText>
+          <FormHelperText>Movie length HH:MM:SS</FormHelperText>
         </FormControl>
 
         <TextField
@@ -202,10 +212,8 @@ const AddMovie = () => {
             labelId="is_team_pick-label"
             label="Team Pick ?"
             name="is_team_pick"
-            defaultValue="0"
-            helperText="score between 0.0 ~ 5.0"
             onChange={handleChange}
-            value={ (movieData.is_team_pick===null) ?  ""  :  movieData.is_team_pick}
+            value={movieData.is_team_pick}
           >
             <MenuItem value={0}>No</MenuItem>
             <MenuItem value={1}>Yes</MenuItem>
@@ -223,7 +231,8 @@ const AddMovie = () => {
           helperText="score between 0.0 ~ 5.0"
           slotProps={{htmlInput: {step: 0.1, min: 0, max: 5.0}}}
           // slotProps={{ step: 0.1, min: 0, max: 5.0 }}
-          onChange={handleNumberChange}
+          onChange={handleFloatChange}
+          value={movieData.score}
         />
 
         <Button variant="contained" color="primary" onClick={handleSubmit}>
