@@ -108,8 +108,8 @@ useEffect(() => {
   }, []);
 
   return (
-  <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column", alignItems: 'center'}}>
-    <Card elevation={2} sx={{flexGrow: 1 }}>
+  <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"row", alignItems: 'center'}}>
+    <Card elevation={4} sx={{flexGrow: 1 }}>
     <CardContent>
 
       <Typography variant="h4" align="center" gutterBottom>
