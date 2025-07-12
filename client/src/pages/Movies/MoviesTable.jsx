@@ -1,4 +1,5 @@
-import React from "react";
+import { Link } from "react-router-dom";
+
 const MovieTable = (props) => {
     const { movies } = props;
   return (
@@ -30,7 +31,7 @@ const MovieTable = (props) => {
               )}
             </td>
             <td>
-              <a href={`/movies/${movie.movie_id}`}>{movie.title}</a>
+              <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
             </td>
             <td>{movie.description}</td>
             <td>{movie.age_rating}</td>

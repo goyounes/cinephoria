@@ -1,14 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-
-import { Home, Movies, Tickets, Screenings } from './pages';
-import Messages from './pages/Admin/Messages';
-
-
-import AddMovie from './pages/Movies/AddMovie';
+import { Routes, Route } from 'react-router-dom';
 
 import Footer from './components/Footer';
 import TopNavBar from './components/TopNavBar';
+
+import { Home, Movies, Tickets, Screenings } from './pages';
+import Messages from './pages/Admin/Messages';
+import AddMovie from './pages/Movies/AddMovie';
+
 
 import './assets/global.css';
 import AddUser from './pages/Users/AddUser';
@@ -16,6 +14,7 @@ import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
 import Login from './pages/Auth/Login';
 import { Container, Stack } from '@mui/material';
+import Movie from './pages/Movies/Movie';
 
 
 function App() {
@@ -32,7 +31,7 @@ function App() {
             {/* Movies */}
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/create" element={<AddMovie />} />
-            <Route path="/movies/:id" element={<Movies />} />
+            <Route path="/movies/:id" element={<Movie />} />
             {/* Screenings */}
             <Route path="/screenings" element={<Screenings />} />
             <Route path="/screenings/create" element={<Screenings />} />
