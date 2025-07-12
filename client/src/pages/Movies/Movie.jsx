@@ -14,20 +14,6 @@ const Movie = (props) => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
 
-//   setMovie({
-//         movie_id: 2,
-//         title: "The Dark Knight",
-//         poster_img_name: "poster_img_2.webp",
-//         description: "When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.",
-//         age_rating: 13,
-//         is_team_pick: 1,
-//         score: "3.7",
-//         length: "01:30:30",
-//         created_at: "2025-07-12T17:32:29.000Z",
-//         genres: "biography;comedy",
-//         imageUrl: "https://cinephoria-bucket.s3.eu-north-1.amazonaws.com/poster_img_2.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4KB5E754URKH6RXB%2F20250712%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20250712T182447Z&X-Amz-Expires=3600&X-Amz-Signature=8b281fc6476d1f459873784a0b39fe064d2a8d7e1c57ee82047e4d0e441f1bd5&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
-//     })
-
   useEffect(() => {
     async function fetchMovie() {
       try {
@@ -44,7 +30,7 @@ const Movie = (props) => {
     fetchMovie();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
+//   if (loading) return <div>Loading...</div>;
   if (!movie) return <div>Movie not found</div>;
 
 
