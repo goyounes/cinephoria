@@ -6,38 +6,59 @@ export async function  getMovies(){
     return result_rows
 }
 export async function  addMovie(movie){
-    // const {title, poster_img, description, age_rating, poster_img_type, is_team_pick, score, length} = m
-    const q = `
-        INSERT INTO movies (title, poster_img_name,  description, age_rating, is_team_pick, score, length) 
-        VALUES (?,?,?,?,?,?,?);
-    `
-    const VALUES = [
-        movie.title , 
-        movie.poster_img_name, 
-        movie.description, //
-        movie.age_rating, //
-        movie.is_team_pick, //
-        movie.score, //
-        movie.length,//
-        // Genres are handled separately in the database
-    ]
-    const [insertResult] = await pool.query(q,VALUES);
 
-    if (!insertResult.insertId) return null //exit and return null if the movie creation failed
-    const insertedMovieId = insertResult.insertId
+    const connection = await pool.getConnection();
 
-    const q2 = `
-        INSERT INTO movie_genres (movie_id, genre_id) 
-        VALUES ?;
-    `
-    const VALUES2 = movie.genres.map( (genre) => [insertedMovieId, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
-    console.log(VALUES2)
-    const [insertResult2] = await pool.query(q2,[VALUES2]);
+    try {
+        await connection.beginTransaction();
 
-    console.log("Insert result from genres --> ",insertResult2)
+        const q = `
+            INSERT INTO movies (title, poster_img_name,  description, age_rating, is_team_pick, score, length) 
+            VALUES (?,?,?,?,?,?,?);
+        `
+        const VALUES = [
+            movie.title , 
+            movie.poster_img_name, 
+            movie.description, //
+            movie.age_rating, //
+            movie.is_team_pick, //
+            movie.score, //
+            movie.length,//
+        ]
+        const [insertResult] = await connection.query(q,VALUES);
 
-    if (!insertResult2.insertId) return null //exit and return null if the movie creation failed
-    return insertResult
+        
+        if (!insertResult.insertId) {//exit and return null if the movie creation failed
+            await connection.rollback();
+            connection.release();
+            return null;
+        }
+
+        const insertedMovieId = insertResult.insertId
+
+        const q2 = `
+            INSERT INTO movie_genres (movie_id, genre_id) 
+            VALUES ?;
+        `
+        const VALUES2 = movie.genres.map( (genre) => [insertedMovieId, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
+        const [insertResult2] = await connection.query(q2,[VALUES2]);
+
+        if (!insertResult2.affectedRows || insertResult2.affectedRows === 0) {
+            await connection.rollback();
+            connection.release();
+            return null;
+        }
+
+        await connection.commit();
+        return insertResult;
+
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    }finally{
+        connection.release();
+    }
+
 }
 
 //New  Database Functions
