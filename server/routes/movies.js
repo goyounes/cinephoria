@@ -2,6 +2,7 @@ import { Router } from 'express';
 const router = Router();
 
 import multer from 'multer';
+import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres } from '../controllers/movies.js';
 
@@ -47,7 +48,7 @@ router.get("/",async (req,res,next) => {
     }
 })
 
-router.post("/", upload.single('poster_img_file'), async (req,res,next) => {
+router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,res,next) => {
     try {
         // console.log("req.body : ",req.body); 
         // console.log("req.file : ",req.file); 
@@ -120,7 +121,7 @@ router.get("/genres",async (req,res,next) => {
 
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
-    console.log("accesing API for movie with movie_id =",id)
+    console.log("accesing DB for movie with movie_id =",id)
     try {
         const movie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
         if (!movie) {
