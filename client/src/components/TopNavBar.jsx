@@ -8,6 +8,7 @@ const navLinks = {
   left: [
     { to: '/auth/register', icon: '👤', label: 'Register' },
     { to: '/auth/login', icon: '👤', label: 'Login' },
+    { to: '/auth/logout', icon: '👤', label: 'Logout' },
   ],
   middle: [
     { to: '/home', icon: '🏠', label: 'Admin' },

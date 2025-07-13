@@ -12,6 +12,7 @@ const Movie = (props) => {
 
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  // eslint-disable-next-line
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

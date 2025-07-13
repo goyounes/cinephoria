@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Box, Container, Typography, Button, Stack } from "@mui/material";
+import { AppBar,  Box, Container, Button, Stack } from "@mui/material";
 import {
   Home as HomeIcon,
   AccountCircle as AccountCircleIcon,

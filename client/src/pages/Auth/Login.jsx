@@ -2,9 +2,10 @@ import axios from 'axios';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, Stack, TextField, Button, FormControl, InputLabel, Select, MenuItem, Card, CardContent} from '@mui/material';
+import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
+// import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+
 const Login = () => {
-  const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
@@ -24,7 +25,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log(`${API_URL}/auth/login`)
+      console.log(`/auth/login`)
       console.log(formData)
 
       const response = await axios.post(`/auth/login`, formData);

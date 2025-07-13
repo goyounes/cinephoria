@@ -15,6 +15,7 @@ import './assets/global.css';
 import AddUser from './pages/Users/AddUser';
 import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
+import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
 import { Container, Stack } from '@mui/material';
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/users" element={<Users />} />
 
             <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/admin/users/create" element={<AddUser />} />
 
