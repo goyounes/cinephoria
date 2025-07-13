@@ -4,7 +4,7 @@ const router = Router();
 import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -176,6 +176,41 @@ router.get("/:id",async (req,res,next) => {
     }
 })
 
+router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
+    const id = req.params.id
+    console.log("Deleting movie with movie_id =",id)
+    try {
+        const movie = await getOneMovieWithGenres(id)
+        const deleteResult = await deleteMovie(id) // either a reosurce obj or err obj
+        console.log("delete result :", deleteResult)
 
+        if (!movie) {
+            const err = new Error("Movie not found");
+            err.status = 404;
+            return next(err); 
+        }
+        
+        //Delete the image
+        console.log(movie)
+        if (movie.poster_img_name && movie.poster_img_name !== "c6074c236342ced850b3a42d6c9eec462614c506952cc6134c29a369a9bbc6aa") { //default Image used
+            try {
+                const deleteParams = {
+                    Bucket: bucketName,
+                    Key: movie.poster_img_name,
+                };
+                const deleteCommand = new DeleteObjectCommand(deleteParams);
+                await s3.send(deleteCommand);
+                console.log(`Image  "${movie.poster_img_name}" deleted from S3`);
+            } catch (deleteError) {
+                console.error("Failed to delete image from S3:", deleteError);
+                next(deleteError);
+            }
+        }
+
+        res.status(204).json({message: "movie deleted succesfully"})
+    } catch (error) {
+        next(error) // network request or re-thrown error
+    }
+})
 
 export default router;

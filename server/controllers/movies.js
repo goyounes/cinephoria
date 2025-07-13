@@ -36,17 +36,19 @@ export async function  addMovie(movie){
 
         const insertedMovieId = insertResult.insertId
 
-        const q2 = `
-            INSERT INTO movie_genres (movie_id, genre_id) 
-            VALUES ?;
-        `
-        const VALUES2 = movie.genres.map( (genre) => [insertedMovieId, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
-        const [insertResult2] = await connection.query(q2,[VALUES2]);
+        if(movie.genres.length > 0){
+            const q2 = `
+                INSERT INTO movie_genres (movie_id, genre_id) 
+                VALUES ?;
+            `
+            const VALUES2 = movie.genres.map( (genre) => [insertedMovieId, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
+            const [insertResult2] = await connection.query(q2,[VALUES2]);
 
-        if (!insertResult2.affectedRows || insertResult2.affectedRows === 0) {
-            await connection.rollback();
-            connection.release();
-            return null;
+            if (!insertResult2.affectedRows || insertResult2.affectedRows === 0) {
+                await connection.rollback();
+                connection.release();
+                return null;
+            }
         }
 
         await connection.commit();
@@ -70,6 +72,7 @@ export async function  getMoviesWithGenres(){
         ON movies.movie_id = movie_genres.movie_id
         LEFT JOIN genres
         ON movie_genres.genre_id = genres.genre_id
+        WHERE movies.isDeleted = FALSE
         GROUP BY movies.movie_id;
     `
     const [result_rows] = await pool.query(q);
@@ -84,10 +87,10 @@ export async function  getOneMovieWithGenres(id){
         ON movies.movie_id = movie_genres.movie_id
         LEFT JOIN genres
         ON movie_genres.genre_id = genres.genre_id
-        WHERE movies.movie_id = ?
+        WHERE movies.movie_id = ? AND movies.isDeleted = FALSE
         GROUP BY movies.movie_id;
     `
-    const [result_rows] = await pool.query(q,id);
+    const [result_rows] = await pool.query(q,[id]);
     return result_rows[0]
 }
 
@@ -97,8 +100,19 @@ export async function getGenres(){
     return result_rows
 }
 
+export async function  deleteMovie(id){
+    const q = `
+        UPDATE movies
+        SET isDeleted = TRUE
+        WHERE movie_id = ? 
+    `
+    const [result_rows] = await pool.query(q,[id]);
+    return result_rows
+}
+
 // export async function getMovieGenres(){
 //     const q = `SELECT * FROM movie_genres;`
 //     const [result_rows] = await pool.query(q);
 //     return result_rows
 // }
+
