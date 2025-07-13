@@ -36,7 +36,7 @@ export async function  addMovie(movie){
 
         const insertedMovieId = insertResult.insertId
 
-        if(movie.genres.length > 0){
+        if(movie.genres?.length > 0){
             const q2 = `
                 INSERT INTO movie_genres (movie_id, genre_id) 
                 VALUES ?;

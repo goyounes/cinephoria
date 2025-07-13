@@ -61,7 +61,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
     
     try {
         if (!req.file){
-            imageName = "c6074c236342ced850b3a42d6c9eec462614c506952cc6134c29a369a9bbc6aa"
+            imageName = "default_poster_img.webp"
         }else{
             imageName = randomImageName();
 
@@ -182,7 +182,6 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     try {
         const movie = await getOneMovieWithGenres(id)
         const deleteResult = await deleteMovie(id) // either a reosurce obj or err obj
-        console.log("delete result :", deleteResult)
 
         if (!movie) {
             const err = new Error("Movie not found");
