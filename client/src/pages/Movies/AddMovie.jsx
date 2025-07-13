@@ -89,7 +89,9 @@ const handleFloatChange = (e) => {
       console.log(result);
       alert('Movie added successfully!');
     } catch (error) {
-      alert('Failed to add Movie: ' + error.message);
+      const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
+      alert("Failed to add movie: " + customMessage);
+      console.log(error)
     }
   };
 

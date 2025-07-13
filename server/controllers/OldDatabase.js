@@ -81,7 +81,7 @@ export async function getTableRow(table_name,id){
 
     const [result] = await pool.query(`SELECT * FROM ${table_name} WHERE ${name_for_id_column} = ${id};`);
     if (result.length === 0)  throwError(`Resource with ID ${id} not found`,404)
-,
+
     await dbTableLogger(table_name,result)
     const selected_row = result[0]
     return selected_row
