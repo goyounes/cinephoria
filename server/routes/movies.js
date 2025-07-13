@@ -53,7 +53,6 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
     if (!req.body.title) {
         const err = new Error("Missing movie title");
         err.status = 400;
-        err.message = "Missing movie title"
         return next(err); 
     }
 
@@ -84,7 +83,6 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
             imageUploaded = true
         }
 
-
         const result = await addMovie({
                 title : req.body.title, 
                 poster_img_name : imageName, 
@@ -95,8 +93,6 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
                 length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`, //,
         })
 
-        // console.log(req.body); // other form fields
-        // const movieData = {}
         res.status(201).json({
             message: "Movie added successfully",
             imageName: imageName,
@@ -106,7 +102,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
 
     } catch (error) {
         //delete the image if the add movie operation fails
-         console.error("Error during movie upload process:", error);
+        console.error("Error during movie upload process:", error);
 
         if (imageUploaded && imageName && imageName !== "default_poster_img.webp") {
             try {

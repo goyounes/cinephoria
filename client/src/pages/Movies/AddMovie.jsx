@@ -23,7 +23,6 @@ const AddMovie = () => {
   const [genresList, setGenresList] = useState([]); // Assuming genres are fetched from an API
   const [selectedGenres, setSelectedGenres] = useState([])
 
-
   const handleChange = (e) => {
     setMovieData((prev) => {
       // console.log(e.target)
@@ -66,16 +65,21 @@ const handleFloatChange = (e) => {
 
   const handleSubmit = async () => {
     const formData = new FormData();
+
     Object.entries(movieData).forEach(([key, value]) => {
       formData.append(key, value);
     });
+
     if (imageFile) {
       formData.append('poster_img_file', imageFile); // "poster" is the field name
     }
+
     if (selectedGenres) {
-      const selectedGenresArray = selectedGenres.map(genre => genre.name);
-      // console.log(selectedGenresArray)
-      formData.append('selectedGenres', selectedGenresArray); // "poster" is the field name
+      const selectedGenresArray = selectedGenres.map(genre => genre.genre_name);
+
+      selectedGenresArray.forEach(genre => {
+        formData.append('selectedGenres[]', genre);
+      });
     }
     for (const [key, value] of formData.entries()) {
       console.log(key, value);
@@ -158,8 +162,8 @@ useEffect(() => {
           getOptionLabel={(option) => option.genre_name}
           value={selectedGenres}
           onChange={(event, newValue) => {
-            setSelectedGenres(newValue)
             console.log("Selected Genres: ", newValue);
+            return setSelectedGenres(newValue)
           }}
           filterSelectedOptions
           renderInput={(params) => (
