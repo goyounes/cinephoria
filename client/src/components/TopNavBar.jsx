@@ -14,7 +14,7 @@ const navLinks = {
     { to: '/home', icon: '🏠', label: 'Admin' },
     { to: '/messages', icon: '✉️', label: 'Messages' },
     { to: '/movies/recent', icon: '🆕', label: 'Recent' },
-    { to: '/movies', icon: '📽️', label: 'Movies' },
+    { to: '/admin/movies', icon: '📽️', label: 'Movies' },
     { to: '/screenings', icon: '🎞️', label: 'Screenings' },
     { to: '/cinemas', icon: '🏛️', label: 'Cinemas' },
     { to: '/reservation', icon: '📅', label: 'Reservation' },

@@ -23,7 +23,7 @@ const Movies = () => {
   <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column"}}>
       <Stack direction="row" sx={{ justifyContent: 'space-between'}}>
         <h1>Movies table</h1>
-        <Link to={"/movies/create"}><Button variant='contained'>Add movie</Button></Link> 
+        <Link to={"/admin/movies/create"}><Button variant='contained'>Add movie</Button></Link> 
       </Stack>
       
       <table>
@@ -54,7 +54,7 @@ const Movies = () => {
                 )}
               </td>
               <td>
-                <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
+                <Link to={`/admin/movies/${movie.movie_id}`}>{movie.title}</Link>
               </td>
               <td>{movie.description}</td>
               <td>{movie.age_rating}</td>
