@@ -32,25 +32,24 @@ const RealMovies = () => {
       <Grid container spacing={3}>
         {movies.map((movie) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={movie.movie_id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              {movie.imageUrl ? (
-                <CardMedia
-                  component="img"
-                  height="300"
-                  image={movie.imageUrl}
-                  alt={`Poster for ${movie.title}`}
-                />
-              ) : (
-                <CardMedia
-                  component="div"
-                  sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'grey.200' }}
-                >
-                  <Typography variant="body2" color="text.secondary">No Image</Typography>
-                </CardMedia>
-              )}
-              <CardContent>
-                <Typography variant="h6" component={Link} to={`/admin/movies/${movie.movie_id}`} sx={{ textDecoration: 'none', color: 'inherit' }}>
-                  {movie.title}
+            <Card sx={{ height: '100%', width:"225px", display: 'flex', flexDirection: 'column'}}>
+
+              <CardMedia
+                component="img"
+                image={movie.imageUrl}
+                alt={`Poster for ${movie.title}`}
+              />
+
+              <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                <Typography variant="subtitle2" component={Link} to={`/admin/movies/${movie.movie_id}`}
+                 sx={{ textDecoration: 'none', color: 'inherit',
+                  height: '3rem',           // forces the height to 2 lines
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'block',   
+                  }}
+                 >
+                    {movie.title} and somemore
                 </Typography>
               </CardContent>
             </Card>
