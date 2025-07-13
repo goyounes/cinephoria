@@ -59,14 +59,7 @@ const RealMovies = () => {
                     height: '75px',  // or your desired height
               }}>
                 <Typography variant="subtitle2"
-                 sx={{ textDecoration: 'none', color: 'inherit',
-                  textAlign:'center',
-                  // height: '3rem',           // forces the height to 2 lines
-                  // overflow: 'hidden',
-                  // textOverflow: 'ellipsis',
-                  // display: 'block',   
-                  }}
-                 >
+                 sx={{ textDecoration: 'none', color: 'inherit', textAlign:'center'}}>
                     {movie.title}
                 </Typography>
               </CardContent>
