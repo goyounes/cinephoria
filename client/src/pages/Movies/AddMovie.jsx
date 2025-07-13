@@ -24,16 +24,9 @@ const AddMovie = () => {
   const [selectedGenres, setSelectedGenres] = useState([])
 
   const handleChange = (e) => {
-    setMovieData((prev) => {
-      // console.log(e.target)
-      // console.log(prev)
-      // console.log("e.target.nam ->",e.target.name,"/ e.target.value ->", e.target.value)
+    const { name, value } = e.target;
+    setMovieData( (prev)=>({...prev, [name]: value}) )
 
-      return {
-      ...prev,
-      [e.target.name]: e.target.value,
-      }
-    });
   };
 
 
