@@ -110,6 +110,75 @@ export async function  deleteMovie(id){
     return result_rows
 }
 
+export async function updateMovie(id,movie){
+
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const updateQuery = `
+            UPDATE movies
+            SET 
+              title = ?, 
+              description = ?,
+              age_rating = ?, 
+              is_team_pick = ?, 
+              score = ?, 
+              length = ?
+            WHERE movie_id = ? ;
+        `
+        const VALUES = [
+            movie.title , 
+            movie.description, //
+            movie.age_rating, //
+            movie.is_team_pick, //
+            movie.score, //
+            movie.length,//
+            id,
+        ]
+        await connection.query(updateQuery,VALUES);
+
+        if (movie.poster_img_name) {
+            const imageQuery = `
+                UPDATE movies
+                SET poster_img_name = ?
+                WHERE movie_id = ?;
+            `;
+            await connection.query(imageQuery, [movie.poster_img_name, id]);
+        }
+        
+        //Delete all existing genres
+        const deleteQuery = ` DELETE FROM movie_genres WHERE movie_id = ?; `
+        await connection.query(deleteQuery,[id]);
+
+        if(movie.genres?.length > 0){
+            const insertQuery = `
+                INSERT INTO movie_genres (movie_id, genre_id) 
+                VALUES ?;
+            `
+            const VALUES3 = movie.genres.map( (genre) => [id, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
+            const [insertResult2] = await connection.query(insertQuery,[VALUES3]);
+
+            if (!insertResult2.affectedRows || insertResult2.affectedRows === 0) {
+                await connection.rollback();
+                connection.release();
+                return null;
+            }
+        }
+
+        await connection.commit();
+
+        return movie
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    }finally{
+        connection.release();
+    }
+
+
+}
 // export async function getMovieGenres(){
 //     const q = `SELECT * FROM movie_genres;`
 //     const [result_rows] = await pool.query(q);

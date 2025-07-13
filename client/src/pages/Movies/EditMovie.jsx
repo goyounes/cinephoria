@@ -101,39 +101,38 @@ const EditMovie = () => {
 
     const handleSubmit = async () => {//Change the code so that it uses axios.put(/movies/${id}) instead of axios.post' 
         
-        // const formData = new FormData();
+        const formData = new FormData();
 
-        // Object.entries(movieData).forEach(([key, value]) => {
-        //   formData.append(key, value);
-        // });
+        Object.entries(movieData).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
 
-        // if (imageFile) {
-        //   formData.append('poster_img_file', imageFile); // "poster" is the field name
-        // }
+        if (imageFile) {
+          formData.append('poster_img_file', imageFile); // "poster" is the field name
+        }
 
-        // if (selectedGenres) {
-        //   const selectedGenresArray = selectedGenres.map(genre => genre.genre_id);
+        if (selectedGenres) {
+          const selectedGenresArray = selectedGenres.map(genre => genre.genre_id);
 
-        //   selectedGenresArray.forEach(genre => {
-        //     formData.append('selectedGenres[]', genre);
-        //   });
-        // }
-        // for (const [key, value] of formData.entries()) {
-        //   console.log(key, value);
-        // }
+          selectedGenresArray.forEach(genre => {
+            formData.append('selectedGenres[]', genre);
+          });
+        }
+        for (const [key, value] of formData.entries()) {
+          console.log(key, value);
+        }
 
-        // try {
-        //   const response = await axios.post('/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
-        //   const result = response.data
-        //   console.log("response of adding movie: ");
-        //   console.log(response)
-        //   console.log(result);
-        //   alert('Movie added successfully!');
-        // } catch (error) {
-        //   const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
-        //   alert("Failed to add movie: " + customMessage);
-        //   console.log(error)
-        // }
+        try {
+          const response = await axios.put(`/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
+          console.log("response of updating movie: ");
+          console.log(response)
+          console.log(response.data);
+          alert('Movie updated successfully!');
+        } catch (error) {
+          const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
+          alert("Failed to update movie: " + customMessage);
+          console.log(error)
+        }
     };
 
 

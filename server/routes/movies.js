@@ -4,7 +4,7 @@ const router = Router();
 import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -184,6 +184,92 @@ router.get("/:id",async (req,res,next) => {
         next(error) // network request or re-thrown error
     }
 })
+
+router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (req,res,next) => {
+    const id = req.params.id
+    console.log(req.body)
+    if (!req.body.title) {
+        const err = new Error("Missing movie title");
+        err.status = 400;
+        return next(err); 
+    }
+
+    let imageName
+    let imageUploaded = false
+    
+    try {
+
+        if (!req.file) { // We dont do anything if there is no image uploaded
+            // console log error here
+            // const copyParams = {
+            //     Bucket: bucketName,
+            //     CopySource: `${bucketName}/default_poster_img.webp`, 
+            //     Key: imageName, 
+            //     ContentType: 'image/webp',
+            //     MetadataDirective: 'REPLACE', 
+            // };
+            // const copyCommand = new CopyObjectCommand(copyParams);
+            // await s3.send(copyCommand);
+            // console.log(`Copied default image to S3 as "${imageName} successfully"`);
+        }else{
+            imageName = randomImageName(); 
+            const resizedImageBuffer = await sharp(req.file.buffer)
+                .resize(225, 300)
+                .toFormat('webp')
+                .toBuffer();
+
+            const params = {
+                Bucket: bucketName,
+                Key: imageName, 
+                Body: resizedImageBuffer, 
+                ContentType: req.file.mimetype, // e.g., 'image/png'
+            }
+            const command = new PutObjectCommand(params)
+
+            await s3.send(command)
+            console.log("s3 bucket upload successful");
+        }
+        imageUploaded = true
+
+        const result = await updateMovie(id,{
+                title : req.body.title, 
+                poster_img_name : imageName || "", //empty string if we didnt define imageName which is the case when we don't find any file to upload...
+                description :   req.body.description,
+                age_rating : req.body.age_rating || 0, 
+                is_team_pick : req.body.is_team_pick || 0, 
+                score :  req.body.score || 0, 
+                length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`,
+                genres : req.body.selectedGenres
+        })
+
+        res.status(201).json({
+            message: "Movie added successfully to the database",
+            imageName: imageName,
+            movie: req.body,
+            movieInsertResult: result,
+        });
+
+    } catch (error) {
+        //delete the image if the add movie operation fails
+        console.error("Error during movie upload process:", error);
+
+        if (imageUploaded && imageName && imageName !== "default_poster_img.webp") {
+            try {
+                const deleteParams = {
+                    Bucket: bucketName,
+                    Key: imageName,
+                };
+                const deleteCommand = new DeleteObjectCommand(deleteParams);
+                await s3.send(deleteCommand);
+                console.log(`Rolled back image upload: ${imageName} deleted from S3`);
+            } catch (deleteError) {
+                console.error("Failed to delete image from S3 after operation failure:", deleteError);
+            }
+        }
+        next(error); 
+    }
+})
+
 
 router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     const id = req.params.id
