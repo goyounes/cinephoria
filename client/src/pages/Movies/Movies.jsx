@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { Container, Stack, Button } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {
@@ -27,7 +28,8 @@ const Movies = () => {
       await axios.delete(`/movies/${id}`);
       await fetchMovies();
     } catch (error) {
-      console.error("Error deleting movie:", error);
+      console.error("Error deleting movie with id: " + id , error);
+      alert("Error deleting movie with id: " + id +"\n" + error?.response?.data?.error?.message)
     }
   }
   
@@ -79,6 +81,12 @@ const Movies = () => {
                   <Button onClick={() => {HandleDeleteButton(movie.movie_id)}}>
                     <DeleteIcon/>
                   </Button>
+
+                  <Link to={`/admin/movies/${movie.movie_id}/edit`} style={{ textDecoration: 'none' }}>
+                    <Button>
+                      <EditNoteIcon />
+                    </Button>
+                  </Link>
                 </Stack>
               </td>
             </tr>

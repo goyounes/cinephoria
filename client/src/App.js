@@ -19,6 +19,7 @@ import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
 import { Container, Stack } from '@mui/material';
 import RealMovies from './pages/Movies/RealMovies';
+import EditMovie from './pages/Movies/EditMovie';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <Route path="/admin/movies" element={<Movies />} />
             <Route path="/admin/movies/create" element={<AddMovie />} />
             <Route path="/admin/movies/:id" element={<Movie />} />
+            <Route path="/admin/movies/:id/edit" element={<EditMovie />} />
             {/* Screenings */}
             <Route path="/screenings" element={<Screenings />} />
             <Route path="/screenings/create" element={<Screenings />} />

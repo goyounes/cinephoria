@@ -10,7 +10,6 @@ import ImageUploader from "./ImageUploader";
 const AddMovie = () => {
   const [movieData, setMovieData] = useState({
     title: "",
-    // poster_img: "",
     description: "",
     length_hours: "",
     length_minutes: "",
@@ -256,45 +255,5 @@ useEffect(() => {
   </Container>
   );
 };
-
-// const genresList = [
-//   { id: 1, name: 'action' },
-//   { id: 2, name: 'adventure' },
-//   { id: 3, name: 'animation' },
-//   { id: 4, name: 'biography' },
-//   { id: 5, name: 'comedy' },
-//   { id: 6, name: 'crime' },
-//   { id: 7, name: 'cult movie' },
-//   { id: 8, name: 'disney' },
-//   { id: 9, name: 'documentary' },
-//   { id: 10, name: 'drama' },
-//   { id: 11, name: 'erotic' },
-//   { id: 12, name: 'family' },
-//   { id: 13, name: 'fantasy' },
-//   { id: 14, name: 'film-noir' },
-//   { id: 15, name: 'gangster' },
-//   { id: 16, name: 'gay and lesbian' },
-//   { id: 17, name: 'history' },
-//   { id: 18, name: 'horror' },
-//   { id: 19, name: 'military' },
-//   { id: 20, name: 'music' },
-//   { id: 21, name: 'musical' },
-//   { id: 22, name: 'mystery' },
-//   { id: 23, name: 'nature' },
-//   { id: 24, name: 'neo-noir' },
-//   { id: 25, name: 'period' },
-//   { id: 26, name: 'pixar' },
-//   { id: 27, name: 'road movie' },
-//   { id: 28, name: 'romance' },
-//   { id: 29, name: 'sci-fi' },
-//   { id: 30, name: 'short' },
-//   { id: 31, name: 'spy' },
-//   { id: 32, name: 'super hero' },
-//   { id: 33, name: 'thriller' },
-//   { id: 34, name: 'visually stunning' },
-//   { id: 35, name: 'war' },
-//   { id: 36, name: 'western' }
-// ];
-
 
 export default AddMovie
