@@ -7,6 +7,12 @@ import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/mate
 import { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 // import {FormControl,  TextField, InputLabel, Select, MenuItem,} from '@mui/material';
+const roleMap = {
+    1: 'user', 
+    2: 'employee',
+    3: 'admin'
+};
+
 const Logout = () =>  {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
@@ -23,7 +29,7 @@ const Logout = () =>  {
             const token = getCookie('accessToken');
             if (token) {
                 const decoded = jwtDecode(token);
-                setUsername(`User ID: ${decoded.user_id} (Role: ${decoded.role_id})`);
+                setUsername(`${roleMap[decoded.role_id]} --> User ID: ${decoded.user_id} (Role: ${decoded.role_id}) `);
             } else {
                 setUsername("Guest");
             }
