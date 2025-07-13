@@ -22,6 +22,21 @@ export async function  addMovie(movie){
         // Genres are handled separately in the database
     ]
     const [insertResult] = await pool.query(q,VALUES);
+
+    if (!insertResult.insertId) return null //exit and return null if the movie creation failed
+    const insertedMovieId = insertResult.insertId
+
+    const q2 = `
+        INSERT INTO movie_genres (movie_id, genre_id) 
+        VALUES ?;
+    `
+    const VALUES2 = movie.genres.map( (genre) => [insertedMovieId, genre] ) //[[1,5], [1,25], [1,30]] // [movie_id,genre_id]
+    console.log(VALUES2)
+    const [insertResult2] = await pool.query(q2,[VALUES2]);
+
+    console.log("Insert result from genres --> ",insertResult2)
+
+    if (!insertResult2.insertId) return null //exit and return null if the movie creation failed
     return insertResult
 }
 

@@ -61,7 +61,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
     
     try {
         if (!req.file){
-            imageName = "default_poster_img.webp"
+            imageName = "c6074c236342ced850b3a42d6c9eec462614c506952cc6134c29a369a9bbc6aa"
         }else{
             imageName = randomImageName();
 
@@ -90,7 +90,8 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
                 age_rating : req.body.age_rating || 0, 
                 is_team_pick : req.body.is_team_pick || 0, 
                 score :  req.body.score || 0, 
-                length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`, //,
+                length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`,
+                genres : req.body.selectedGenres
         })
 
         res.status(201).json({

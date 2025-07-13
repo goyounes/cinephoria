@@ -68,7 +68,7 @@ const handleFloatChange = (e) => {
     }
 
     if (selectedGenres) {
-      const selectedGenresArray = selectedGenres.map(genre => genre.genre_name);
+      const selectedGenresArray = selectedGenres.map(genre => genre.genre_id);
 
       selectedGenresArray.forEach(genre => {
         formData.append('selectedGenres[]', genre);

@@ -46,7 +46,7 @@ const Movie = (props) => {
             src={movie.imageUrl}
             alt={movie.title}
             sx={{
-              width: { xs: "100%", md: 300 },
+              width: { xs: "100%", md: 338 },
               height: { xs: "auto", md: 450 },
               objectFit: "cover",
               borderRadius: 2,
@@ -87,7 +87,7 @@ const Movie = (props) => {
                     size="small"
                 />
                 )) : (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" hidden>
                     No genres available
                 </Typography>
                 )}
