@@ -53,18 +53,23 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
         // console.log("req.body : ",req.body); 
         // console.log("req.file : ",req.file); 
         // console.log("req.file.buffer",req.file.buffer);
-        const imageName = randomImageName();
-        const params = {
-            Bucket: bucketName,
-            Key: imageName, 
-            Body: req.file.buffer, 
-            ContentType: req.file.mimetype, // e.g., 'image/png'
+        let imageName
+        if (!req.file){
+            imageName = "default_poster_img.webp"
+        }else{
+            imageName = randomImageName();
+            const params = {
+                Bucket: bucketName,
+                Key: imageName, 
+                Body: req.file.buffer, 
+                ContentType: req.file.mimetype, // e.g., 'image/png'
+            }
+            const command = new PutObjectCommand(params)
+
+            await s3.send(command)
+            console.log("s3 bucket upload successful, movie added to database");
         }
 
-        const command = new PutObjectCommand(params)
-
-        await s3.send(command)
-        console.log("s3 bucket upload successful, movie added to database");
 
         const result = await addMovie({
                 title : req.body.title, 
