@@ -6,8 +6,9 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres } from '../controllers/movies.js';
 
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
 
 
@@ -49,25 +50,38 @@ router.get("/",async (req,res,next) => {
 })
 
 router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,res,next) => {
+    if (!req.body.title) {
+        const err = new Error("Missing movie title");
+        err.status = 400;
+        err.message = "Missing movie title"
+        return next(err); 
+    }
+
+    let imageName
+    let imageUploaded = false
+    
     try {
-        // console.log("req.body : ",req.body); 
-        // console.log("req.file : ",req.file); 
-        // console.log("req.file.buffer",req.file.buffer);
-        let imageName
         if (!req.file){
             imageName = "default_poster_img.webp"
         }else{
             imageName = randomImageName();
+
+            const resizedImageBuffer = await sharp(req.file.buffer)
+                .resize(225, 300)
+                .toFormat('webp')
+                .toBuffer();
+
             const params = {
                 Bucket: bucketName,
                 Key: imageName, 
-                Body: req.file.buffer, 
+                Body: resizedImageBuffer, 
                 ContentType: req.file.mimetype, // e.g., 'image/png'
             }
             const command = new PutObjectCommand(params)
 
             await s3.send(command)
             console.log("s3 bucket upload successful, movie added to database");
+            imageUploaded = true
         }
 
 
@@ -75,10 +89,10 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
                 title : req.body.title, 
                 poster_img_name : imageName, 
                 description :   req.body.description,
-                age_rating : req.body.age_rating, 
-                is_team_pick : req.body.is_team_pick , 
-                score :  req.body.score, 
-                length : `${req.body.length_hours}:${req.body.length_minutes}:${req.body.length_seconds}`, //,
+                age_rating : req.body.age_rating || 0, 
+                is_team_pick : req.body.is_team_pick || 0, 
+                score :  req.body.score || 0, 
+                length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`, //,
         })
 
         // console.log(req.body); // other form fields
@@ -91,7 +105,23 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
         });
 
     } catch (error) {
-        next(error)
+        //delete the image if the add movie operation fails
+         console.error("Error during movie upload process:", error);
+
+        if (imageUploaded && imageName && imageName !== "default_poster_img.webp") {
+            try {
+                const deleteParams = {
+                    Bucket: bucketName,
+                    Key: imageName,
+                };
+                const deleteCommand = new DeleteObjectCommand(deleteParams);
+                await s3.send(deleteCommand);
+                console.log(`Rolled back image upload: ${imageName} deleted from S3`);
+            } catch (deleteError) {
+                console.error("Failed to delete image from S3 after operation failure:", deleteError);
+            }
+        }
+        next(error); 
     }
 })
 
