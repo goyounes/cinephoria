@@ -6,7 +6,7 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie } from '../controllers/movies.js';
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
@@ -60,11 +60,20 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
     let imageUploaded = false
     
     try {
-        if (!req.file){
-            imageName = "default_poster_img.webp"
-        }else{
-            imageName = randomImageName();
 
+        imageName = randomImageName(); 
+        if (!req.file) {
+            const copyParams = {
+                Bucket: bucketName,
+                CopySource: `${bucketName}/default_poster_img.webp`, 
+                Key: imageName, 
+                ContentType: 'image/webp',
+                MetadataDirective: 'REPLACE', 
+            };
+            const copyCommand = new CopyObjectCommand(copyParams);
+            await s3.send(copyCommand);
+            console.log(`Copied default image to S3 as "${imageName} successfully"`);
+        }else{
             const resizedImageBuffer = await sharp(req.file.buffer)
                 .resize(225, 300)
                 .toFormat('webp')
@@ -79,9 +88,9 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
             const command = new PutObjectCommand(params)
 
             await s3.send(command)
-            console.log("s3 bucket upload successful, movie added to database");
-            imageUploaded = true
+            console.log("s3 bucket upload successful");
         }
+        imageUploaded = true
 
         const result = await addMovie({
                 title : req.body.title, 
@@ -95,7 +104,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
         })
 
         res.status(201).json({
-            message: "Movie added successfully",
+            message: "Movie added successfully to the database",
             imageName: imageName,
             movie: req.body,
             movieInsertResult: result,

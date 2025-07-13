@@ -2,22 +2,34 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { Container, Stack, Button } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {
   const [movies, setMovies] = useState([])
+  let navigate = useNavigate();
+
+  const fetchMovies = async () => {
+    try {
+      const response = await axios.get('/movies');
+      setMovies(response.data);
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await axios.get('/movies');
-        setMovies(response.data);
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-      }
-    };
-
     fetchMovies();
   } , [])
+
+  const HandleDeleteButton = async (id)=>{
+    try {
+      await axios.delete(`/movies/${id}`);
+      await fetchMovies();
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+    }
+  }
   
   return (
   <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column"}}>
@@ -36,6 +48,7 @@ const Movies = () => {
             <th>Team Pick</th>
             <th>Score</th>
             <th>Length</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -61,6 +74,13 @@ const Movies = () => {
               <td>{movie.is_team_pick ? "Yes" : "No"}</td>
               <td>{movie.score}</td>
               <td>{movie.length}</td>
+              <td>
+                <Stack direction={"row"}>
+                  <Button onClick={() => {HandleDeleteButton(movie.movie_id)}}>
+                    <DeleteIcon/>
+                  </Button>
+                </Stack>
+              </td>
             </tr>
           ))}
         </tbody>
