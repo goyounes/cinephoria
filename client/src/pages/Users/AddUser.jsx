@@ -31,7 +31,7 @@ const AddUser = () => {
       //   role_id: Number(formData.role_id),
       // };
 
-      const response = await axios.post(`/users`,formData);
+      const response = await axios.post(`/api/users`,formData);
       console.log(response)
       // const result = response.data;
 

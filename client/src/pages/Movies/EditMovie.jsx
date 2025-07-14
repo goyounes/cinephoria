@@ -121,7 +121,7 @@ const EditMovie = () => {
         }
 
         try {
-          const response = await axios.put(`/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
+          const response = await axios.put(`/api/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
           console.log("response of updating movie: ");
           console.log(response)
           console.log(response.data);

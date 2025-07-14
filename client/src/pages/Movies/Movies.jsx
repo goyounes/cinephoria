@@ -25,7 +25,7 @@ const Movies = () => {
 
   const HandleDeleteButton = async (id)=>{
     try {
-      await axios.delete(`/movies/${id}`);
+      await axios.delete(`/api/movies/${id}`);
       await fetchMovies();
     } catch (error) {
       console.error("Error deleting movie with id: " + id , error);

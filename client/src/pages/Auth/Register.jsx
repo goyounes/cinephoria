@@ -30,7 +30,7 @@ const Register = () => {
       console.log(`${API_URL}/auth/register`)
       console.log(formData)
 
-      const response = await axios.post(`${API_URL}/auth/register`, formData);
+      const response = await axios.post(`/api/auth/register`, formData);
       const result = response.data
       console.log("response of adding user: ", response);
       alert('User added successfully!');

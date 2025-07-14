@@ -49,14 +49,14 @@ const Logout = () =>  {
     e.preventDefault();
     try {
 
-      const response = await axios.post(`/auth/logout`);
+      const response = await axios.post(`/api/auth/logout`);
 
       console.log("response of logout: ");
       console.log(response.status)
       alert('Logout successful! \nGoodbye \n\nServer response code : '+ String(response.status));
       // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
 
-      const response2 = await axios.post(`/auth/verify`, {withCredentials: true});
+      const response2 = await axios.post(`/api/auth/verify`, {withCredentials: true});
       
       console.log(response2);
       navigate('/home'); // Redirect to the users page

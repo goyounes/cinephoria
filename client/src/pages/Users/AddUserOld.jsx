@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AddUser = () => {
-  const API_URL = "http://localhost:8080/api/v1";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_email: '',
@@ -30,7 +29,7 @@ const AddUser = () => {
         role_id: Number(formData.role_id),
       };
 
-      const response = await axios.post(`${API_URL}/users`, {
+      const response = await axios.post(`/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

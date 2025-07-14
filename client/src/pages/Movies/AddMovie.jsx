@@ -78,7 +78,7 @@ const handleFloatChange = (e) => {
     }
 
     try {
-      const response = await axios.post('/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
+      const response = await axios.post('/api/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       const result = response.data
       console.log("response of adding movie: ");
       console.log(response)
