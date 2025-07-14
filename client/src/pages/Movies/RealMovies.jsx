@@ -81,19 +81,13 @@ const RealMovies = () => {
         <Button size="large" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
           Find movie
         </Button>
-        <ModalWrapper
-          fullScreen={true}
+        <SearchMovieModal
           open={m_1_Open}
           onClose={() => setM_1_Open(false)}
-        >
-          {/* This Modal should probabily wrap a search movie component inside and let it handle it's own state etc. */}
-          {/* <SearchMovieModal></SearchMovieModal> */}
-          <SearchMovieModal
-            selectedGenres={selectedGenres}
-            setSelectedGenres={setSelectedGenres}
-            handleM2ValidateExit={handleM2ValidateExit}
-          ></SearchMovieModal>
-        </ModalWrapper>
+          selectedGenres={selectedGenres}
+          setSelectedGenres={setSelectedGenres}
+          handleM2ValidateExit={handleM2ValidateExit}
+        />
 
         <Button size="large" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
           Filter by genres
