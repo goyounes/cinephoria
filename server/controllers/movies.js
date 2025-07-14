@@ -66,7 +66,10 @@ export async function  addMovie(movie){
 //New  Database Functions
 export async function  getMoviesWithGenres(){
     const q = `
-        SELECT movies.*, GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres
+        SELECT 
+            movies.*, 
+            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres,
+            GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
         FROM movies
         LEFT JOIN movie_genres
         ON movies.movie_id = movie_genres.movie_id
@@ -81,7 +84,10 @@ export async function  getMoviesWithGenres(){
 
 export async function  getOneMovieWithGenres(id){
     const q = `
-        SELECT movies.*, GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres
+        SELECT 
+            movies.*,
+            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres,
+            GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
         FROM movies
         LEFT JOIN movie_genres
         ON movies.movie_id = movie_genres.movie_id
@@ -90,6 +96,7 @@ export async function  getOneMovieWithGenres(id){
         WHERE movies.movie_id = ? AND movies.isDeleted = FALSE
         GROUP BY movies.movie_id;
     `
+    
     const [result_rows] = await pool.query(q,[id]);
     return result_rows[0]
 }
@@ -202,21 +209,38 @@ export async function getUpcomingMovies(cinema_id){    //How to handle filters q
 
 export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle filters query
     const q = `
-        SELECT 
-            movies.*,
-            screenings.* 
+  		SELECT 
+			movies.*,
+			screenings.*,
+            genre_agg.genres,
+            genre_agg.genres_ids
         FROM screenings
-        JOIN cinemas ON screenings.cinema_id = cinemas.cinema_id
-        JOIN movies ON screenings.movie_id = movies.movie_id
+        JOIN cinemas 
+            ON screenings.cinema_id = cinemas.cinema_id
+        JOIN movies 
+            ON screenings.movie_id = movies.movie_id
+        LEFT JOIN (
+			SELECT 
+				movie_genres.movie_id,
+				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres,
+				GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
+			FROM movie_genres
+			JOIN genres ON movie_genres.genre_id = genres.genre_id
+			GROUP BY movie_genres.movie_id
+        ) AS genre_agg ON movies.movie_id = genre_agg.movie_id
+
         WHERE 
-            ( ? IS NULL OR screenings.cinema_id = ?)
-            AND
-            (
+            ( @cinema_id IS NULL OR screenings.cinema_id =  @cinema_id)
+            AND (
                 screenings.start_date > CURDATE()
-                OR 
-                (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
+                OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
             )
-        ORDER BY movies.movie_id, screenings.cinema_id, screenings.room_id, screenings.start_date, screenings.start_time;
+        ORDER BY 
+            movies.movie_id, 
+            screenings.cinema_id, 
+            screenings.room_id, 
+            screenings.start_date, 
+            screenings.start_time;
     `
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id])
     return result_rows

@@ -51,12 +51,19 @@ const EditMovie = () => {
                 is_team_pick: data.is_team_pick,
                 score: data.score,
             })
-            const genresArr = data.genres.split(";")
-            const genresArray = genresArr.map((genre_name) => (
-                {genre_id: getGenreIdByName(genresList, genre_name)  ,
-                 genre_name:genre_name}
-                ))
-            setSelectedGenres(genresArray)
+            if (data.genres_ids?.length>0){
+              console.log(genresList)
+              const genresArr = data.genres_ids.split(";")
+              const genresArray = genresArr.map((genre_id) => (
+                {
+                  genre_id: genre_id, 
+                  genre_name: genresList[genre_id-1].genre_name
+                }
+              ))
+              console.log(genresArray)
+              setSelectedGenres(genresArray)
+            }
+
         } catch (err) {
           console.error("Failed to fetch movie:", err);
         } 

@@ -4,7 +4,7 @@ const router = Router();
 import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie, getUpcomingMovies } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie, getUpcomingMovies, getUpcomingMoviesWithGenres } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -153,7 +153,7 @@ router.get("/recent",async (req,res,next) => {
 
 router.get("/upcoming",async (req,res,next) => {
     try {
-        const movies = await getUpcomingMovies()
+        const movies = await getUpcomingMoviesWithGenres()
 
         for (const movie of movies){
             const getObjectParams = {
