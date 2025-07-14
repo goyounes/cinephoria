@@ -2,26 +2,61 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 // import { Container, Stack, Button } from "@mui/material";
-import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, Stack, CardActionArea } from "@mui/material"
+import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, Stack, CardActionArea, Autocomplete, TextField } from "@mui/material"
 
 const RealMovies = () => {
   const [movies, setMovies] = useState([])
 
+  const [cinemas, setCinemas] = useState([]);
+  const [selectedCinema, setSelectedCinema] = useState(null);
+
+  const [genres, setGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('/movies');
-        setMovies(response.data);
+        const [moviesRes, cinemaRes, genreRes] = await Promise.all([
+          axios.get('/movies'),
+          axios.get('/cinemas'),   // adjust endpoint
+          axios.get('/movies/genres'), // adjust endpoint
+        ]);
+        setMovies(moviesRes.data);
+        setCinemas(cinemaRes.data);
+        setGenres(genreRes.data);
       } catch (error) {
-        console.error('Error fetching movies:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchMovies();
-  } , [])
-
+    fetchData();
+  }, []);
+//Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
+
+      <Stack direction="row" spacing={2} mb={3} alignItems="center">
+        <Autocomplete
+          options={cinemas}
+          getOptionLabel={(option) => option.cinema_name}
+          isOptionEqualToValue={(option, value) => option.cinema_id === value.cinema_id}
+          value={selectedCinema}
+          onChange={(event, newValue) => setSelectedCinema(newValue)}
+          renderInput={(params) => <TextField {...params} label="Select Cinema" />}
+          sx={{ width: 300 }}
+        />
+
+        <Autocomplete
+          multiple
+          options={genres}
+          getOptionLabel={(option) => option.genre_name}
+          value={selectedGenres}
+          onChange={(event, newValue) => setSelectedGenres(newValue)}
+          renderInput={(params) => <TextField {...params} label="Filter by Genres" />}
+          sx={{ width: 300 }}
+        />
+      </Stack>
+
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">Airing now</Typography>
       </Stack>
