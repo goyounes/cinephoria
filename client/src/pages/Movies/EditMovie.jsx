@@ -8,10 +8,6 @@ import {
 import axios from "axios";
 import ImageUploader from "./ImageUploader";
 
-function getGenreIdByName(genres, name) {
-  const genre = genres.find(g => g.genre_name.toLowerCase() === name.toLowerCase());
-  return genre ? genre.genre_id : null;
-}
 
 const EditMovie = () => {
     //Load movie with id = 
@@ -53,6 +49,7 @@ const EditMovie = () => {
             })
             if (data.genres?.length>0){
               setSelectedGenres(data.genres)
+              console.log(data.genres)
             }
 
         } catch (err) {
@@ -192,14 +189,17 @@ const EditMovie = () => {
 
         <Autocomplete
           multiple
+          filterSelectedOptions
+          openOnFocus
+          disableCloseOnSelect
           options={genresList}
           getOptionLabel={(option) => option.genre_name}
+          isOptionEqualToValue={(option, value) => option.genre_id === value.genre_id}//MUI compares obj in genresList to obj in my FetchedMovies data, this being a === comparision the diffrent obj refrence makes it fail.
           value={selectedGenres}
           onChange={(event, newValue) => {
             console.log("Selected Genres: ", newValue);
             return setSelectedGenres(newValue)
           }}
-          filterSelectedOptions
           renderInput={(params) => (
             <TextField
               {...params}

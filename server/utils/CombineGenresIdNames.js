@@ -5,15 +5,11 @@ function CombineGenresIdNames(movies){
         }
         const ids = movie.genres_ids.split(';');
         const names = movie.genres_names.split(';');
-        // console.log(ids,names)
         const genresArr = ids.map((id, i) => ({
             genre_id: Number(id),
             genre_name: names[i]
         }));
-        // console.log(genresArr)
-        const newMovieArr = { ...movie, genres: genresArr}
-        console.log(newMovieArr)
-        return newMovieArr;
+        return { ...movie, genres: genresArr};
     });
 }
 

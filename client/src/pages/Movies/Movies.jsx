@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom'
 import { Container, Stack, Button } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {
   const [movies, setMovies] = useState([])
-  let navigate = useNavigate();
+  // let navigate = useNavigate();
 
   const fetchMovies = async () => {
     try {

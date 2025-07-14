@@ -29,7 +29,6 @@ const Login = () => {
       console.log(formData)
 
       const response = await axios.post(`/api/auth/login`, formData);
-      const result = response.data
       console.log("response of login: ");
       console.log(response)
       alert('Login successful! \nWelcome ' + formData.username);

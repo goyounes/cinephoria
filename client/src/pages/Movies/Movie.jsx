@@ -79,11 +79,12 @@ const Movie = (props) => {
 
             <Divider />
 
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-                {movie.genres ? movie.genres.split(";").map((genre) => (
+            <Stack direction="row" gap="8px" flexWrap="wrap" rowGap={1}>
+              {/* {console.log(movie.genres)} */}
+                {movie.genres ? movie.genres.map((genre) => (
                 <Chip
-                    key={genre}
-                    label={genre}
+                    key={genre.genre_id}
+                    label={genre.genre_name}
                     size="small"
                 />
                 )) : (

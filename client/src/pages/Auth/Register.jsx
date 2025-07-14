@@ -31,7 +31,6 @@ const Register = () => {
       console.log(formData)
 
       const response = await axios.post(`/api/auth/register`, formData);
-      const result = response.data
       console.log("response of adding user: ", response);
       alert('User added successfully!');
       // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
