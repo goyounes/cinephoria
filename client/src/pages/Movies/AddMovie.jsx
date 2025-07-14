@@ -178,7 +178,7 @@ useEffect(() => {
               label="Hours"
               name="length_hours"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 24}}}
+              slotProps={{htmlInput: {min: 0, max: 23}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_hours) || ""}
               
@@ -189,7 +189,7 @@ useEffect(() => {
               label="Minutes"
               name="length_minutes"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 60}}}
+              slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_minutes) || ""}
             />
@@ -199,7 +199,7 @@ useEffect(() => {
               label="Seconds"
               name="length_seconds"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 60}}}
+              slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_seconds) || ""}
             />

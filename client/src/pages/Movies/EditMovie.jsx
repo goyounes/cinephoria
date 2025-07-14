@@ -218,7 +218,7 @@ const EditMovie = () => {
               label="Hours"
               name="length_hours"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 24}}}
+              slotProps={{htmlInput: {min: 0, max: 23}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_hours) || ""}
               
@@ -229,7 +229,7 @@ const EditMovie = () => {
               label="Minutes"
               name="length_minutes"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 60}}}
+              slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_minutes) || ""}
             />
@@ -239,7 +239,7 @@ const EditMovie = () => {
               label="Seconds"
               name="length_seconds"
               type="number"
-              slotProps={{htmlInput: {min: 0, max: 60}}}
+              slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
               value={parseInt(movieData.length_seconds) || ""}
             />
