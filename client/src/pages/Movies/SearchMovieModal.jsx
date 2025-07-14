@@ -16,30 +16,22 @@ const fullScreenStyle = {
 
 const SearchMovieModal = ({modalOpen, setModalOpen}) => {
     // const [modalOpen, setModalOpen] = useState(false);
+    // eslint-disable-next-line
     const [movies, setMovies] = useState([]);
     const [selectedGenres, setSelectedGenres] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchMovies = async () => {
             try {
-                const moviesRes = await axios.get("/movies")
+                const moviesRes = await axios.get("/api/movies")
                 setMovies(moviesRes.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
 
-        fetchData();
+        fetchMovies();
     }, []);
-    //Modal config
-
-    // const handleM2ValidateExit = () => {
-    //     setM_2_Open(false);
-    // };
-    // const handleM2Exit = () => {
-    //     setM_2_Open(false);
-    //     setSelectedGenres([]);
-    // };
 
   return (
     <Modal open={modalOpen} onClose={() => {setModalOpen(false)}} >

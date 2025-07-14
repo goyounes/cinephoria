@@ -3,7 +3,6 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 
 const Users = () => {
-  const API_URL = "http://localhost:8080/api/v1";
   const [users, setUsers] = useState([]);
   const roles = {
     1: 'user',
@@ -14,7 +13,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${API_URL}/users`);
+        const response = await axios.get(`/api/users`);
         const data = response.data
         setUsers(data);
       } catch (error) {

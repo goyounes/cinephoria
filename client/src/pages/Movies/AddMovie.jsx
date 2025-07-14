@@ -95,7 +95,7 @@ const handleFloatChange = (e) => {
 useEffect(() => {
     async function fetchGenres() {  
       try {
-        const res = await axios.get('/movies/genres'); 
+        const res = await axios.get('/api/movies/genres'); 
         const data = res.data;
         setGenresList(data);  
       } catch (err) {

@@ -26,9 +26,9 @@ const RealMovies = () => {
     const fetchData = async () => {
       try {
         const [moviesRes, cinemaRes, genreRes] = await Promise.all([
-          axios.get("/movies"),
-          axios.get("/cinemas"), // adjust endpoint
-          axios.get("/movies/genres"), // adjust endpoint
+          axios.get("/api/movies"),
+          axios.get("/api/cinemas"), // adjust endpoint
+          axios.get("/api/movies/genres"), // adjust endpoint
         ]);
         setMovies(moviesRes.data);
         setCinemas(cinemaRes.data);

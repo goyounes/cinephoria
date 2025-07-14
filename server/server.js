@@ -24,13 +24,13 @@ import adminRoutes from  './routes/admin.js'
 import authRoutes from  './routes/auth.js'
 import cinemasRoutes from  './routes/cinemas.js'
 
-app.use('/users', usersRoutes);
-app.use('/movies', moviesRoutes);
-app.use('/screenings', screeningsRoutes);
-app.use('/tickets', ticketsRoutes);
-app.use('/admin', adminRoutes);
-app.use('/auth', authRoutes);
-app.use('/cinemas', cinemasRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/movies', moviesRoutes);
+app.use('/api/screenings', screeningsRoutes);
+app.use('/api/tickets', ticketsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/cinemas', cinemasRoutes);
 
 
 

@@ -18,7 +18,7 @@ const Movie = (props) => {
   useEffect(() => {
     async function fetchMovie() {
       try {
-        const res = await axios.get(`/movies/${id}`);
+        const res = await axios.get(`/api/movies/${id}`);
         const data = res.data
         setMovie(data);
       } catch (err) {

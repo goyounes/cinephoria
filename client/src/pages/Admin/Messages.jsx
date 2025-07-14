@@ -40,7 +40,7 @@ const Messages = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get('/admin/messages');
+        const response = await axios.get('/api/admin/messages');
         console.log('Fetched messages:', response.data);
         setMessages(response.data);
       } catch (error) {

@@ -37,7 +37,7 @@ const EditMovie = () => {
     useEffect(() => {
       async function fetchMovie() {
         try {
-            const res = await axios.get(`/movies/${id}`);
+            const res = await axios.get(`/api/movies/${id}`);
             const data = res.data
             setMovie(data);
             const [hours,minutes,seconds]= data.length.split(":")
@@ -139,7 +139,7 @@ const EditMovie = () => {
     useEffect(() => {
         async function fetchGenres() {  
         try {
-            const res = await axios.get('/movies/genres'); 
+            const res = await axios.get('/api/movies/genres'); 
             const data = res.data;
             setGenresList(data);  
         } catch (err) {
