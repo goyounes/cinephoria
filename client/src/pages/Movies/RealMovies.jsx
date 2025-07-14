@@ -41,7 +41,7 @@ const RealMovies = () => {
     fetchData();
   }, []);
   //Modal config
-  const [m_1_Open, setM_1_Open] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [m_2_Open, setM_2_Open] = useState(false);
   const handleM2ValidateExit = () => {
@@ -78,16 +78,10 @@ const RealMovies = () => {
         {/* <Button size='large'>Filters</Button> */}
         {/* <BasicModal></BasicModal> */}
 
-        <Button size="large" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
+        <Button size="large" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
           Find movie
         </Button>
-        <SearchMovieModal
-          open={m_1_Open}
-          onClose={() => setM_1_Open(false)}
-          selectedGenres={selectedGenres}
-          setSelectedGenres={setSelectedGenres}
-          handleM2ValidateExit={handleM2ValidateExit}
-        />
+        <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen}/>
 
         <Button size="large" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
           Filter by genres

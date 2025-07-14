@@ -1,18 +1,7 @@
-import React from 'react';
-import {
-  Modal,
-  Box,
-  Container,
-  IconButton,
-  Typography,
-  Stack,
-  Button,
-  TextField,
-  Autocomplete,
-  Divider
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
+import {useState, useEffect} from 'react';
+import {  Modal,  Box,  Container, Stack,  Button,  TextField,  Autocomplete,  Divider} from '@mui/material';
+import {/* Search as SearchIcon,*/ Close as CloseIcon} from '@mui/icons-material';
+import axios from 'axios';
 
 const fullScreenStyle = {
   position: 'fixed',
@@ -25,10 +14,35 @@ const fullScreenStyle = {
   overflowY: 'auto',
 };
 
-const SearchMovieModal = ({  open,  onClose,  selectedGenres,  setSelectedGenres,  handleM2ValidateExit,}) => {
+const SearchMovieModal = ({modalOpen, setModalOpen}) => {
+    // const [modalOpen, setModalOpen] = useState(false);
+    const [movies, setMovies] = useState([]);
+    const [selectedGenres, setSelectedGenres] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const moviesRes = await axios.get("/movies")
+                setMovies(moviesRes.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+    //Modal config
+
+    // const handleM2ValidateExit = () => {
+    //     setM_2_Open(false);
+    // };
+    // const handleM2Exit = () => {
+    //     setM_2_Open(false);
+    //     setSelectedGenres([]);
+    // };
 
   return (
-    <Modal open={open} onClose={onClose} >
+    <Modal open={modalOpen} onClose={() => {setModalOpen(false)}} >
         <Box sx={{ ...fullScreenStyle, position: 'relative', display:"flex"}}>
             <Container sx={{flexGrow: 1, py:4, bgcolor: '#F7F7F7'}}>
                 <Stack spacing={2} direction="row" sx={{mb:4}}>
@@ -45,14 +59,7 @@ const SearchMovieModal = ({  open,  onClose,  selectedGenres,  setSelectedGenres
                         )}
                     />
 
-                    <Button
-                        startIcon={<CloseIcon />}
-                        // onClick={handleM2ValidateExit}
-                        onClick={onClose}
-                        size="large"
-                        aria-label="close"
-                    >
-                    </Button>
+                    <Button startIcon={<CloseIcon />} onClick={() => {setModalOpen(false)}} size="large" aria-label="close" ></Button>
                 </Stack>
 
                 <Divider></Divider>
