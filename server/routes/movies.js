@@ -4,7 +4,7 @@ const router = Router();
 import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie } from '../controllers/movies.js';
+import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie, getUpcomingMovies } from '../controllers/movies.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -151,6 +151,26 @@ router.get("/recent",async (req,res,next) => {
     }
 })
 
+router.get("/upcoming",async (req,res,next) => {
+    try {
+        const movies = await getUpcomingMovies()
+
+        for (const movie of movies){
+            const getObjectParams = {
+                Bucket: bucketName,
+                Key: movie.poster_img_name
+            };
+            const command = new GetObjectCommand(getObjectParams);
+            const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
+            movie.imageUrl =  url; // Add the URL to the movie object
+        };
+
+        res.status(200).json(movies)
+    } catch (error) {
+        next(error)
+    }
+})
+
 router.get("/genres",async (req,res,next) => {
     try {
         const genres = await getGenres()
@@ -191,7 +211,7 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
     if (!req.body.title) {
         const err = new Error("Missing movie title");
         err.status = 400;
-        return next(err); 
+        return next(err);
     }
 
     let imageName
@@ -306,5 +326,8 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
         next(error) // network request or re-thrown error
     }
 })
+
+
+
 
 export default router;
