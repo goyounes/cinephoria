@@ -1,4 +1,4 @@
-import { AppBar,  Box, Container, Button, Stack } from "@mui/material";
+import { AppBar,  Box, Container, Button, Stack, Toolbar } from "@mui/material";
 import {
   Home as HomeIcon,
   AccountCircle as AccountCircleIcon,
@@ -8,6 +8,8 @@ import {
 } from "@mui/icons-material";
 import { Link } from 'react-router-dom';
 import cinephoriaSm from '../assets/cinephoria-sm.png';
+import black_logo_3 from '../assets/black_logo_3.png';
+import white_logo_3 from '../assets/white_logo_3.png';
 
 const NavButton = ({ label, Icon, to }) => (
   <Button
@@ -15,12 +17,7 @@ const NavButton = ({ label, Icon, to }) => (
     to={to}
     color="inherit"
     aria-label={label}
-    sx={{
-      flexDirection: "column",
-      minWidth: 80,
-      py: 1,
-      textTransform: "none",
-    }}
+    sx={{ flexDirection: "column" }}
   >
     <Icon fontSize="large" />
     {label}
@@ -30,30 +27,15 @@ const NavButton = ({ label, Icon, to }) => (
 
 const RealNavBar = () => {
   return (
-    <AppBar position="static" color="primary" elevation={0}>
-      <Container
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',  // <-- This centers vertically
-        }}
-      >
-            <Button component={Link}  to="/" color="inherit"    sx={{
-                  p: 1,           
-                  minWidth: 100,  
-                  height: 72,     
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}             
-            >
+    <AppBar position="sticky" color="primary" elevation={0}>
+      <Container>
+      <Toolbar sx={{flexGrow:1 , display:"flex", alignItems:"stretch", justifyContent:"space-between"}}>
+            <Button component={Link}  to="/" color="inherit" >
               <Box
                 component="img"
-                src={cinephoriaSm}
+                src={black_logo_3}
                 alt="Cinephoria logo"
-                sx={{ height: 40, display: "block" }}
-                draggable={false}
+                sx={{ height: 60}}
               />
             </Button>
 
@@ -64,6 +46,8 @@ const RealNavBar = () => {
           <NavButton label="Movies" Icon={MovieIcon} to="/movies" />
           <NavButton label="Contact" Icon={ContactMailIcon} to="/contact" />
         </Stack>
+
+      </Toolbar>
       </Container>
     </AppBar>
   );

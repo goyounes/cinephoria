@@ -29,7 +29,7 @@ function App() {
       {/* <RealNavBar/> */}
       <TopNavBar />
 
-      <Container sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
+      <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
           <Routes >
             {/* Home */}
