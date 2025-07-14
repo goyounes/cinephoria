@@ -68,7 +68,7 @@ export async function  getMoviesWithGenres(){
     const q = `
         SELECT 
             movies.*, 
-            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres,
+            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres_names,
             GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
         FROM movies
         LEFT JOIN movie_genres
@@ -86,7 +86,7 @@ export async function  getOneMovieWithGenres(id){
     const q = `
         SELECT 
             movies.*,
-            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres,
+            GROUP_CONCAT(genres.genre_name SEPARATOR ';') as genres_names,
             GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
         FROM movies
         LEFT JOIN movie_genres
@@ -212,7 +212,7 @@ export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle
   		SELECT 
 			movies.*,
 			screenings.*,
-            genre_agg.genres,
+            genre_agg.genres_names,
             genre_agg.genres_ids
         FROM screenings
         JOIN cinemas 
@@ -222,7 +222,7 @@ export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle
         LEFT JOIN (
 			SELECT 
 				movie_genres.movie_id,
-				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres,
+				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres_names,
 				GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
 			FROM movie_genres
 			JOIN genres ON movie_genres.genre_id = genres.genre_id
