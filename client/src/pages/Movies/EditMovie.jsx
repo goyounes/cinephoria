@@ -51,17 +51,8 @@ const EditMovie = () => {
                 is_team_pick: data.is_team_pick,
                 score: data.score,
             })
-            if (data.genres_ids?.length>0){
-              console.log(genresList)
-              const genresArr = data.genres_ids.split(";")
-              const genresArray = genresArr.map((genre_id) => (
-                {
-                  genre_id: genre_id, 
-                  genre_name: genresList[genre_id-1].genre_name
-                }
-              ))
-              console.log(genresArray)
-              setSelectedGenres(genresArray)
+            if (data.genres?.length>0){
+              setSelectedGenres(data.genres)
             }
 
         } catch (err) {

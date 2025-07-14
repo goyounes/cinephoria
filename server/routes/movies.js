@@ -10,6 +10,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, Copy
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
+import { CombineGenresIdNames } from '../utils/index.js';
 
 
 const bucketName = process.env.S3_BUCKET_NAME;
@@ -31,8 +32,9 @@ upload.single('poster_img_file') // 'poster_img_file' is the field name in the f
 
 router.get("/",async (req,res,next) => {
     try {
-        const movies = await getMoviesWithGenres()
-
+        const rawMovies = await getMoviesWithGenres()
+        const movies = CombineGenresIdNames(rawMovies)
+        console.log("new movies ",movies)
         for (const movie of movies){
             const getObjectParams = {
                 Bucket: bucketName,
@@ -133,8 +135,8 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
 
 router.get("/recent",async (req,res,next) => {
     try {
-        const movies = await getMoviesAddedSince()
-
+        const rawMovies = await getMoviesAddedSince()
+        const movies = CombineGenresIdNames(rawMovies)
         for (const movie of movies){
             const getObjectParams = {
                 Bucket: bucketName,
@@ -153,8 +155,8 @@ router.get("/recent",async (req,res,next) => {
 
 router.get("/upcoming",async (req,res,next) => {
     try {
-        const movies = await getUpcomingMoviesWithGenres()
-
+        const rawMovies = await getUpcomingMoviesWithGenres()
+        const movies = CombineGenresIdNames(rawMovies)
         for (const movie of movies){
             const getObjectParams = {
                 Bucket: bucketName,
@@ -184,7 +186,9 @@ router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing DB for movie with movie_id =",id)
     try {
-        const movie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
+        const rawMovie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
+        const movie =  CombineGenresIdNames([rawMovie])[0] //cheated by submiting an array to the function and then taking the one elment out
+        // console.log(movie)
         if (!movie) {
             const err = new Error("Movie not found");
             err.status = 404;
