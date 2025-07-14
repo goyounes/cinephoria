@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-// import { Container, Stack, Button } from "@mui/material";
-import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, Stack, CardActionArea, Autocomplete, TextField } from "@mui/material"
+// import { CardActionArea, Box  } from "@mui/material";
+import { Container, Grid, Card, CardMedia, CardContent, Typography, Button, Stack,  Autocomplete, TextField, } from "@mui/material"
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+// import BasicModal from '../../components/BasicModal'
+import ModalWrapper from '../../components/ModalWrapper'
 
 const RealMovies = () => {
   const [movies, setMovies] = useState([])
@@ -31,12 +34,22 @@ const RealMovies = () => {
 
     fetchData();
   }, []);
+  //Modal config
+  const [modal_2_Open, setModal_2_Open] = useState(false);
+  const handleOpenButton = () => setModal_2_Open(true);
+  const handleExit =() => {
+    setModal_2_Open(false);
+    setSelectedGenres([]);
+  }
+  const handleValidateExit  = () => {
+    setModal_2_Open(false);
+  }
 //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
 
-      <Stack direction="row" spacing={2} mb={3} alignItems="center">
-        <Autocomplete
+      <Stack direction="row" spacing={2} mb={3} alignItems="center"> 
+        {/* <Autocomplete
           options={cinemas}
           getOptionLabel={(option) => option.cinema_name}
           isOptionEqualToValue={(option, value) => option.cinema_id === value.cinema_id}
@@ -44,18 +57,68 @@ const RealMovies = () => {
           onChange={(event, newValue) => setSelectedCinema(newValue)}
           renderInput={(params) => <TextField {...params} label="Select Cinema" />}
           sx={{ width: 300 }}
-        />
+        /> */}
+        <FormControl sx={{ width: 300 }}>
+            <InputLabel id="cinema-select-label">Select Cinema</InputLabel>
+            <Select
+              labelId="cinema-select-label"
+              value={selectedCinema ? selectedCinema.cinema_id : ''}
+              label="Select Cinema"
+              onChange={(e) => {
+                const selected = cinemas.find(c => c.cinema_id === e.target.value);
+                setSelectedCinema(selected || null);
+              }}
+            >
+              {cinemas.map((cinema) => (
+                <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                  {cinema.cinema_name}
+                </MenuItem>
+              ))}
+            </Select>
+        </FormControl>
+        <Button size='large'>Find movie</Button>
+        {/* <Button size='large'>Filters</Button> */}
+        {/* <BasicModal></BasicModal> */}
 
-        <Autocomplete
-          multiple
-          options={genres}
-          getOptionLabel={(option) => option.genre_name}
-          value={selectedGenres}
-          onChange={(event, newValue) => setSelectedGenres(newValue)}
-          renderInput={(params) => <TextField {...params} label="Filter by Genres" />}
-          sx={{ width: 300 }}
-        />
+        <Button onClick={handleOpenButton}>Filter by genres</Button>
+        <ModalWrapper width={500} open={modal_2_Open} onClose={handleExit}>
+          <Stack spacing={2}>
+            <Typography variant='h6' gutterBottom>
+              Filter by genres
+            </Typography> 
+            <Autocomplete
+              multiple
+              filterSelectedOptions
+              openOnFocus
+              options={genres}
+              getOptionLabel={(option) => option.genre_name}
+              value={selectedGenres}
+              onChange={(event, newValue) => setSelectedGenres(newValue)}
+              renderInput={(params) => (
+                <TextField {...params} placeholder="Add genres" />
+              )}
+            />
+            <Button variant='contained' onClick={handleValidateExit}>
+              Validate
+            </Button>
+          </Stack>
+        </ModalWrapper>
+          {/* <Autocomplete
+            multiple
+            filterSelectedOptions
+            openOnFocus
+            disableCloseOnSelect
+            limitTags={1}
+            options={genres}
+            getOptionLabel={(option) => option.genre_name}
+            value={selectedGenres}
+            onChange={(event, newValue) => setSelectedGenres(newValue)}
+            renderInput={(params) => <TextField {...params} label="Filter by Genres" />}
+            sx={{ width: 300 }} 
+          /> */}
       </Stack>
+
+
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">Airing now</Typography>
