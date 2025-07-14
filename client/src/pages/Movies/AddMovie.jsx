@@ -150,6 +150,9 @@ useEffect(() => {
 
         <Autocomplete
           multiple
+          filterSelectedOptions
+          openOnFocus
+          disableCloseOnSelect
           options={genresList}
           getOptionLabel={(option) => option.genre_name}
           value={selectedGenres}
@@ -157,7 +160,6 @@ useEffect(() => {
             console.log("Selected Genres: ", newValue);
             return setSelectedGenres(newValue)
           }}
-          filterSelectedOptions
           renderInput={(params) => (
             <TextField
               {...params}
