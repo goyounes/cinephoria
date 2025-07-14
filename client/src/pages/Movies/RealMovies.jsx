@@ -54,83 +54,68 @@ const RealMovies = () => {
   //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
-      <Stack direction="row" spacing={2} mb={3} alignItems="center">
-        <FormControl sx={{ width: 300 }}>
-          <InputLabel id="cinema-select-label">Select Cinema</InputLabel>
-          <Select
-            labelId="cinema-select-label"
-            value={selectedCinema ? selectedCinema.cinema_id : ""}
-            label="Select Cinema"
-            onChange={(e) => {
-              const selected = cinemas.find(
-                (c) => c.cinema_id === e.target.value
-              );
-              setSelectedCinema(selected || null);
-            }}
-          >
-            {cinemas.map((cinema) => (
-              <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
-                {cinema.cinema_name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        {/* <Button size='large'>Filters</Button> */}
-        {/* <BasicModal></BasicModal> */}
 
-        <Button size="large" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
-          Find movie
-        </Button>
-        <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen}/>
+      <Card   sx={{p:2, mb: 2}}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          
+          <FormControl sx={{ width: 300 }}>
+              <InputLabel id="cinema-select-label">Cinema</InputLabel>
+              <Select
+                labelId="cinema-select-label"
+                value={selectedCinema ? selectedCinema.cinema_id : ""}
+                label="Cinema"
+                onChange={(e) => {
+                  const selected = cinemas.find(
+                    (c) => c.cinema_id === e.target.value
+                  );
+                  setSelectedCinema(selected || null);
+                }}
+              >
+                {cinemas.map((cinema) => (
+                  <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                    {cinema.cinema_name}
+                  </MenuItem>
+                ))}
+              </Select>
+          </FormControl>
 
-        <Button size="large" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
-          Filter by genres
-        </Button>
-        <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
-          <Stack spacing={2}>
-            <Typography variant="h6" gutterBottom>
-              Filter by genres
-            </Typography>
-            <Autocomplete
-              multiple
-              filterSelectedOptions
-              openOnFocus
-              options={genres}
-              getOptionLabel={(option) => option.genre_name}
-              value={selectedGenres}
-              onChange={(event, newValue) => setSelectedGenres(newValue)}
-              renderInput={(params) => (
-                <TextField {...params} placeholder="Add genres" />
-              )}
-            />
-            <Button variant="contained" onClick={handleM2ValidateExit}>
-              Validate
-            </Button>
-          </Stack>
-        </ModalWrapper>
-        {/* <Autocomplete
-            multiple
-            filterSelectedOptions
-            openOnFocus
-            disableCloseOnSelect
-            limitTags={1}
-            options={genres}
-            getOptionLabel={(option) => option.genre_name}
-            value={selectedGenres}
-            onChange={(event, newValue) => setSelectedGenres(newValue)}
-            renderInput={(params) => <TextField {...params} label="Filter by Genres" />}
-            sx={{ width: 300 }} 
-          /> */}
-      </Stack>
+          {/* <Button size='large'>Filters</Button> */}
+          {/* <BasicModal></BasicModal> */}
+          <Button size="large" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
+            Find movie
+          </Button>
+          <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen}/>
 
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h5">Airing now</Typography>
-      </Stack>
+          <Button size="large" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
+            Filter by genres
+          </Button>
+          <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
+            <Stack spacing={2}>
+              <Typography variant="h6" gutterBottom>
+                Filter by genres
+              </Typography>
+              <Autocomplete
+                multiple
+                filterSelectedOptions
+                openOnFocus
+                options={genres}
+                getOptionLabel={(option) => option.genre_name}
+                value={selectedGenres}
+                onChange={(event, newValue) => setSelectedGenres(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} placeholder="Add genres" />
+                )}
+              />
+              <Button variant="contained" onClick={handleM2ValidateExit}>
+                Validate
+              </Button>
+            </Stack>
+          </ModalWrapper>
+        
+        </Stack>
+      </Card>
+
+      <Typography variant="h5" gutterBottom>Airing now</Typography>
 
       <Grid container spacing={3}>
         {movies.map((movie) => (
@@ -174,7 +159,7 @@ const RealMovies = () => {
                 }}
               >
                 <Typography
-                  variant="subtitle"
+                  variant="body1"
                   sx={{ fontWeight: "bold", textAlign: "center" }}
                 >
                   {movie.title}
