@@ -23,10 +23,7 @@ const RealMovies = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Movies</Typography>
-        <Link to="/admin/movies/create">
-          <Button variant="contained">Add movie</Button>
-        </Link>
+        <Typography variant="h5">Airing now</Typography>
       </Stack>
 
       <Grid container spacing={3}>
@@ -58,8 +55,8 @@ const RealMovies = () => {
                     justifyContent: 'center', // optional horizontal centering
                     height: '75px',  // or your desired height
               }}>
-                <Typography variant="subtitle2"
-                 sx={{ textDecoration: 'none', color: 'inherit', textAlign:'center'}}>
+                <Typography variant="subtitle"
+                 sx={{fontWeight: "bold" ,textAlign:'center'}}>
                     {movie.title}
                 </Typography>
               </CardContent>
@@ -72,3 +69,16 @@ const RealMovies = () => {
 }
 
 export default RealMovies
+//Fetch movies that have upcoming Screenings
+
+  // Cinéma : affichage uniquement des films d’un cinéma spécifique 
+  // Genre : affichage des cinémas ayant uniquement le genre spécifié 
+  // Jour : il est possible de spécifier un jour de préférence afin d’avoir 
+
+// Seulement les films ayant une séance le jour donné. 
+// Enfin, au clic sur un film, nous pouvons visualiser toutes les séances disponibles, l’utilisateur 
+// verra juste le jour de chaque séance avec l’heure de début et de fin suivi de la qualité. Il est 
+// important de spécifier à cette étape le prix de chaque qualité afin qu’il puisse se faire une idée 
+// de la tarification. 
+// Il peut sélectionner une séance, mais il sera redirigé vers la page « réservation », avec le 
+// cinéma, la séance et le film préremplis.
