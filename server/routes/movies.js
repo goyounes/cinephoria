@@ -34,7 +34,6 @@ router.get("/",async (req,res,next) => {
     try {
         const rawMovies = await getMoviesWithGenres()
         const movies = CombineGenresIdNames(rawMovies)
-        console.log("new movies ",movies)
         for (const movie of movies){
             const getObjectParams = {
                 Bucket: bucketName,
@@ -211,7 +210,7 @@ router.get("/:id",async (req,res,next) => {
 
 router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (req,res,next) => {
     const id = req.params.id
-    console.log(req.body)
+    // console.log(req.body)
     if (!req.body.title) {
         const err = new Error("Missing movie title");
         err.status = 400;
