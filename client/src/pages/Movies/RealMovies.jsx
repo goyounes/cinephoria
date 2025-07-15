@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import { CardActionArea, Box  } from "@mui/material";
+import { CardActionArea, Box  } from "@mui/material";
 import {  Container,  Stack, Grid, 
   Card,  CardMedia,  CardContent,
   Typography,  Button, IconButton,  Autocomplete,  TextField,
@@ -21,26 +21,30 @@ const RealMovies = () => {
   const [cinemas, setCinemas] = useState([]);
   const [selectedCinema, setSelectedCinema] = useState(null);
 
-  const [genres, setGenres] = useState([]);
+  const [genresList, setGenresList] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
+  const [showPicker, setShowPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  console.log([movies,uniqueMovies,cinemas,selectedCinema,genresList,selectedGenres])
+  console.log([selectedCinema,selectedGenres,selectedDate])
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [moviesRes, cinemaRes, genreRes] = await Promise.all([
-          axios.get("/api/movies/upcoming"),
-          axios.get("/api/cinemas"), // adjust endpoint
-          axios.get("/api/movies/genres"), // adjust endpoint
+          axios.get("/api/movies/upcoming"), // + selectedCinema && `:${selectedCinema.cinema_id}`),  //decided to filter list in JS instead of fetchig data again
+          axios.get("/api/cinemas"), 
+          axios.get("/api/movies/genres"), 
         ]);
         setMovies(moviesRes.data);
         setCinemas(cinemaRes.data);
-        setGenres(genreRes.data);
-        //reate uniqueMovies array for the cards display
+        setGenresList(genreRes.data);
+        //create uniqueMovies array for the cards display
         const seenIds = new Set();
         const unique = moviesRes.data.filter((movie) => {
           if (seenIds.has(movie.movie_id)) return false;
-          seenIds.add(movie.movie_id);
-          return true;
+          seenIds.add(movie.movie_id);     return true;
         });
         setUniqueMovies(unique);
 
@@ -51,6 +55,10 @@ const RealMovies = () => {
 
     fetchData();
   }, []);
+  useEffect(() => {
+
+  },[selectedCinema,selectedGenres,selectedDate])
+
   //Modal config
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -62,11 +70,10 @@ const RealMovies = () => {
     setM_2_Open(false);
     setSelectedGenres([]);
   };
-  const [showPicker, setShowPicker] = useState(false);
 
-  const [date, setDate] = useState(null);
+
   const handleDateChange = (newValue) => {
-    setDate(newValue);
+    setSelectedDate(newValue);
     if (newValue === null) {
       setShowPicker(false);
     }
@@ -119,7 +126,7 @@ const RealMovies = () => {
                 multiple
                 filterSelectedOptions
                 openOnFocus
-                options={genres}
+                options={genresList}
                 getOptionLabel={(option) => option.genre_name}
                 value={selectedGenres}
                 onChange={(event, newValue) => setSelectedGenres(newValue)}
@@ -133,81 +140,82 @@ const RealMovies = () => {
             </Stack>
           </ModalWrapper>
 
-          {!showPicker ? (
-            <Button size="large" variant="outlined" startIcon={<EventIcon />} onClick={() => setShowPicker(true)}>
-              Pick a Date
-            </Button>
-          ) : (<>
-              <BasicDatePicker value={date} onChange={handleDateChange} />
-              <IconButton
-                aria-label="Clear date"
-                onClick={() => {
-                  setDate(null);
-                  setShowPicker(false);
-                }}
-              >
-                <ClearIcon />
-              </IconButton>
-            </>)
-          }
+{!showPicker ? (
+                <Button size="large" variant="outlined" startIcon={<EventIcon />} onClick={() => setShowPicker(true)}>
+                  Pick a Date
+                </Button>
+              ) : ( <>
+                <BasicDatePicker value={selectedDate} onChange={handleDateChange} />
+                <IconButton
+                  aria-label="Clear date"
+                  onClick={() => {
+                    setSelectedDate(null);
+                    setShowPicker(false);
+                  }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </>)
+}
         </Stack>
       </Card>
 
       <Typography variant="h5" gutterBottom>Airing now</Typography>
 
-      <Grid container spacing={3}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 0,               // spacing between cards
+        justifyContent: 'space-between',  // left-align cards, change as needed
+      }}
+    >
         {uniqueMovies.map((movie) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={movie.movie_id}>
-            <Card
-              component={Link}
-              to={`/movies/${movie.movie_id}`}
+        <Box key={movie.movie_id} sx={{width: 225,  flexShrink: 0}}>
+          <Card
+            component={Link}
+            to={`/movies/${movie.movie_id}`}
+            sx={{
+              textDecoration: 'none',
+              color: 'inherit',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.03)',
+                boxShadow: 6,
+              },
+              width: '100%',  // card fills the Box width
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={movie.imageUrl}
+              alt={`Poster for ${movie.title}`}
+              sx={{ width: '100%', height: 300, objectFit: 'cover' }}
+            />
+            <CardContent
               sx={{
-                textDecoration: "none",
-                color: "inherit",
-                height: "100%",
-                width: "225px",
-                display: "flex",
-                flexDirection: "column",
-                transition:
-                  "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.03)",
-                  boxShadow: 6,
-                },
+                p: 1,
+                '&:last-child': { pb: 1 },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 75,
               }}
             >
-              {/* <CardActionArea
-                sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', cursor: 'pointer' }}
-              ></CardActionArea> */}
-
-              <CardMedia
-                component="img"
-                image={movie.imageUrl}
-                alt={`Poster for ${movie.title}`}
-                sx={{ width: 225, height: 300, objectFit: 'cover' }}
-              />
-
-              <CardContent
-                sx={{
-                  p: 1,
-                  "&:last-child": { pb: 1 },
-                  display: "flex",
-                  alignItems: "center", // vertical centering
-                  justifyContent: "center", // optional horizontal centering
-                  height: "75px", // or your desired height
-                }}
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 'bold', textAlign: 'center' }}
               >
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", textAlign: "center" }}
-                >
-                  {movie.title}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                {movie.title}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      ))}
+    </Box>
     </Container>
   );
 };
