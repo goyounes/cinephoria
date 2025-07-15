@@ -159,15 +159,16 @@ const RealMovies = () => {
 }
         </Stack>
       </Card>
-
+      
       <Typography variant="h5" gutterBottom>Airing now</Typography>
 
+{/* Displaying movies below */}
     <Box
       sx={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: 0,               // spacing between cards
-        justifyContent: 'space-between',  // left-align cards, change as needed
+        gap: 2,               // spacing between cards
+        justifyContent: 'flex-start',  // left-align cards, change as needed
       }}
     >
         {uniqueMovies.map((movie) => (
