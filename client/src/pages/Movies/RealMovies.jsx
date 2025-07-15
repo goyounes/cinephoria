@@ -1,8 +1,8 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { CardActionArea, Box  } from "@mui/material";
-import {  Container,  Stack, Grid, 
+// import { CardActionArea} from "@mui/material";
+import {  Container,  Stack, Box, 
   Card,  CardMedia,  CardContent,
   Typography,  Button, IconButton,  Autocomplete,  TextField,
   FormControl, InputLabel, Select, MenuItem} 
@@ -12,72 +12,117 @@ import {Search as SearchIcon, Tune as TuneIcon, Event as EventIcon, Clear as Cle
 import ModalWrapper from "../../components/ModalWrapper";
 import SearchMovieModal from "./SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
+import dayjs from 'dayjs';
+
+const hasAnyGenre = (movie,selectedGenres) => {
+  for (const genre of movie.genres){
+    for (const selectedGenre of selectedGenres){
+      if((genre.genre_id)===(selectedGenre.genre_id)){
+        return true
+      }
+    }
+  }
+  return false
+}
+
+const filterAndUniqueMovies = (movies, { selectedCinema, selectedGenres, selectedDate }) => {
+  const alreadyIncludedInFinalList = new Set();
+
+  return movies.filter((movie) => {
+    if (alreadyIncludedInFinalList.has(movie.movie_id))  return false
+
+    if (selectedCinema && movie.cinema_id !== selectedCinema.cinema_id) {
+      return false;
+    }
+    if (selectedGenres.length > 0 ) {
+        if( ! movie.genres.length > 0) return false //if movie doesnt have any genre, it's discarded directly
+        
+        const genreFound = hasAnyGenre(movie,selectedGenres)
+        if (!genreFound) return false
+    }
+
+    if (selectedDate && !dayjs(movie.startDate).isSame(dayjs(selectedDate), 'day')) {
+      // 2025-10-14T22:00:00.000Z
+      return false;
+    }
+
+    console.log(selectedDate)
+    alreadyIncludedInFinalList.add(movie.movie_id);
+    return true;
+    
+
+
+  });
+};
 
 
 const RealMovies = () => {
-  const [movies, setMovies] = useState([]);
-  const [uniqueMovies, setUniqueMovies] = useState([]);
+    const [movies, setMovies] = useState([]);
 
-  const [cinemas, setCinemas] = useState([]);
-  const [selectedCinema, setSelectedCinema] = useState(null);
+    const [cinemas, setCinemas] = useState([]);
+    const [selectedCinema, setSelectedCinema] = useState(null);
 
-  const [genresList, setGenresList] = useState([]);
-  const [selectedGenres, setSelectedGenres] = useState([]);
+    const [genresList, setGenresList] = useState([]);
+    const [selectedGenres, setSelectedGenres] = useState([]);
 
-  const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+    const [showPicker, setShowPicker] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
 
-  console.log([movies,uniqueMovies,cinemas,selectedCinema,genresList,selectedGenres])
-  console.log([selectedCinema,selectedGenres,selectedDate])
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [moviesRes, cinemaRes, genreRes] = await Promise.all([
-          axios.get("/api/movies/upcoming"), // + selectedCinema && `:${selectedCinema.cinema_id}`),  //decided to filter list in JS instead of fetchig data again
-          axios.get("/api/cinemas"), 
-          axios.get("/api/movies/genres"), 
-        ]);
-        setMovies(moviesRes.data);
-        setCinemas(cinemaRes.data);
-        setGenresList(genreRes.data);
-        //create uniqueMovies array for the cards display
-        const seenIds = new Set();
-        const unique = moviesRes.data.filter((movie) => {
-          if (seenIds.has(movie.movie_id)) return false;
-          seenIds.add(movie.movie_id);     return true;
-        });
-        setUniqueMovies(unique);
+    const filteredMovies = useMemo(() => {
+      return filterAndUniqueMovies(movies, { selectedCinema, selectedGenres, selectedDate });
+    }, [movies, selectedCinema, selectedGenres, selectedDate]);
 
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    // console.log(movies)
+    // console.log([movies,filteredMovies,cinemas,selectedCinema,genresList,selectedGenres])
+    // console.log("selected genres arr", selectedGenres)
+    console.log([selectedCinema,selectedDate])
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [moviesRes, cinemaRes, genreRes] = await Promise.all([
+            axios.get("/api/movies/upcoming"), // + selectedCinema && `:${selectedCinema.cinema_id}`),  //decided to filter list in JS instead of fetchig data again
+            axios.get("/api/cinemas"), 
+            axios.get("/api/movies/genres"), 
+          ]);
+          setMovies(moviesRes.data);
+          // setCinemas([{ cinema_id: null, cinema_name: "All Cinemas" },...cinemaRes.data]);
+          setCinemas(cinemaRes.data);
+          setGenresList(genreRes.data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+      fetchData();
+    }, []);
+
+    // Debug log (remove in production)
+    // console.log("debug details")
+    // console.log({
+    //   moviesCount: movies.length,
+    //   filteredCount: filteredMovies.length,
+    //   selectedCinema,
+    //   selectedGenres,
+    //   selectedDate,
+    // });
+
+    //Modal config
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const [m_2_Open, setM_2_Open] = useState(false);
+    const handleM2ValidateExit = () => {
+      setM_2_Open(false);
+    };
+    const handleM2Exit = () => {
+      setM_2_Open(false);
+      setSelectedGenres([]);
     };
 
-    fetchData();
-  }, []);
-  useEffect(() => {
 
-  },[selectedCinema,selectedGenres,selectedDate])
-
-  //Modal config
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const [m_2_Open, setM_2_Open] = useState(false);
-  const handleM2ValidateExit = () => {
-    setM_2_Open(false);
-  };
-  const handleM2Exit = () => {
-    setM_2_Open(false);
-    setSelectedGenres([]);
-  };
-
-
-  const handleDateChange = (newValue) => {
-    setSelectedDate(newValue);
-    if (newValue === null) {
-      setShowPicker(false);
-    }
-  };
+    const handleDateChange = (newValue) => {
+      console.log("New value:", newValue)
+      setSelectedDate(newValue);
+    };
   //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
@@ -98,7 +143,10 @@ const RealMovies = () => {
                   setSelectedCinema(selected || null);
                 }}
               >
-                {cinemas.map((cinema) => (
+                <MenuItem value="">
+                  None
+                </MenuItem>
+                {cinemas.map(cinema => (
                   <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
                     {cinema.cinema_name}
                   </MenuItem>
@@ -171,7 +219,7 @@ const RealMovies = () => {
         justifyContent: 'flex-start',  // left-align cards, change as needed
       }}
     >
-        {uniqueMovies.map((movie) => (
+        {filteredMovies.map((movie) => (
         <Box key={movie.movie_id} sx={{width: 225,  flexShrink: 0}}>
           <Card
             component={Link}
