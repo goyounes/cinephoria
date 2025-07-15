@@ -1,26 +1,26 @@
 import { Routes, Route } from 'react-router-dom';
+import './assets/global.css';
 
-import Footer from './components/Footer';
-import TopNavBar from './components/TopNavBar';
-import RealNavBar from './components/RealNavBar';
+import Footer from './components/Layout/Footer';
+import TopNavBar from './components/Layout/TopNavBar';
+import RealNavBar from './components/Layout/RealNavBar';
+
+import AdminMessages from './pages/AdminDashboard/AdminMessages';
+import AdminMovies from './pages/AdminDashboard/Movies/AdminMovies';
+import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
+import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
+import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
+import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 
 import { Home, Tickets, Screenings } from './pages';
-import Messages from './pages/Admin/Messages';
-import AddMovie from './pages/Movies/AddMovie';
 import Movies from './pages/Movies/Movies';
 import Movie from './pages/Movies/Movie';
 
-
-import './assets/global.css';
-import AddUser from './pages/Users/AddUser';
-import Users from './pages/Users/Users';
 import Register from './pages/Auth/Register';
 import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
-import { Container, Stack } from '@mui/material';
-import RealMovies from './pages/Movies/RealMovies';
-import EditMovie from './pages/Movies/EditMovie';
 
+import { Container, Stack } from '@mui/material';
 
 function App() {
   return (
@@ -35,11 +35,11 @@ function App() {
             {/* Home */}
             <Route path="/" element={<Home />} />
             {/* Movies */}
-            <Route path="/movies" element={<RealMovies />} />
+            <Route path="/movies" element={<Movies />} />
 
-            <Route path="/admin/movies" element={<Movies />} />
-            <Route path="/admin/movies/create" element={<AddMovie />} />
-            <Route path="/admin/movies/:id/edit" element={<EditMovie />} />
+            <Route path="/admin/movies" element={<AdminMovies />} />
+            <Route path="/admin/movies/create" element={<AdminAddMovie />} />
+            <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
             <Route path="/movies/:id" element={<Movie />} />
             {/* Screenings */}
             <Route path="/screenings" element={<Screenings />} />
@@ -50,14 +50,14 @@ function App() {
             <Route path="/tickets/create" element={<Tickets />} />
             <Route path="/tickets/:id" element={<Tickets />} />
             {/* Messages */}
-            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages" element={<AdminMessages />} />
             {/* Users */}
-            <Route path="/users" element={<Users />} />
+            <Route path="/users" element={<AdminUsers />} />
 
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
-            <Route path="/admin/users/create" element={<AddUser />} />
+            <Route path="/admin/users/create" element={<AdminAddUser />} />
 
           </Routes>
         {/* </Stack> */}

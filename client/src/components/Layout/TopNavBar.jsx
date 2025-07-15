@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
-import cinephoriaSm from '../assets/cinephoria-sm.png';
 
 
 const navLinks = {
@@ -81,13 +80,14 @@ const TopNavBar = () => {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         backgroundColor: '#9bd4f2',
         position: 'sticky',
         top: 0,
         borderBottom: '1px solid #000',
         userSelect: 'none',
         zIndex: 1000,
+        gap:5
       }}
     >
       <Box
@@ -99,19 +99,12 @@ const TopNavBar = () => {
           flexGrow: 0,
         }}
       >
-        <Box
-          component="img"
-          src={cinephoriaSm}
-          alt="Cinephoria logo"
-          sx={{ height: 40 }}
-          draggable={false}
-        />
-        <NavGroup items={navLinks.left} flexGrow={0} />
+        <NavGroup items={navLinks.left} />
       </Box>
 
-      <NavGroup items={navLinks.middle} flexGrow={1} />
+      <NavGroup items={navLinks.middle}  />
 
-      <NavGroup items={navLinks.right} flexGrow={0} />
+      <NavGroup items={navLinks.right}  />
     </Box>
   );
 };

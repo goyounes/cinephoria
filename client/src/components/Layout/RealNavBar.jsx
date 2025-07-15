@@ -7,7 +7,7 @@ import {
   ContactMail as ContactMailIcon
 } from "@mui/icons-material";
 import { Link } from 'react-router-dom';
-import black_logo_3 from '../assets/black_logo_3.png';
+import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
 // import cinephoriaSm from '../assets/cinephoria-sm.png';
 

@@ -5,7 +5,7 @@ import {
    Autocomplete
   } from "@mui/material";
 import axios from "axios";
-import ImageUploader from "./ImageUploader";
+import ImageUploader from "../../../components/ImageUploader";
 
 const AddMovie = () => {
   const [movieData, setMovieData] = useState({
