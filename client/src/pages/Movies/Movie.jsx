@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef} from 'react';
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams , useLocation} from 'react-router-dom';
 import axios from 'axios';
 
 import {Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating, Button} from "@mui/material";
@@ -8,14 +8,29 @@ import StarsIcon from '@mui/icons-material/Stars';
 import DownArrow from '@mui/icons-material/KeyboardDoubleArrowDown';
 import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
 
-const Movie = (props) => {
-// const movieData = props.movieData 
-
+const Movie = () => {
+  // const setting = 
   const { id } = useParams();
+  const location = useLocation()
+  const screeningsRef = useRef(null);
+
   const [movie, setMovie] = useState(null);
-  // eslint-disable-next-line
+
   const [loading, setLoading] = useState(true);
   const [showScreenings, setShowScreenings] = useState(false)
+
+
+  // Show screenings and scroll down
+  useEffect(() => {
+        setShowScreenings(location.pathname.endsWith("/screenings"));
+  }, [location.pathname]);
+  useEffect(() => {
+    if (showScreenings && screeningsRef.current) {
+      requestAnimationFrame(() => {
+        screeningsRef.current.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+  }, [showScreenings]);
 
   useEffect(() => {
     async function fetchMovie() {
@@ -130,7 +145,7 @@ const Movie = (props) => {
       </Stack>
 
       {showScreenings && 
-      <Card elevation={4}>
+      <Card ref={screeningsRef} elevation={4}>
         <CardContent sx={{ p: 4 }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
             {/* Poster */}

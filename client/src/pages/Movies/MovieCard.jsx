@@ -4,14 +4,10 @@ import { Box ,Card, CardMedia, Stack, Typography } from "@mui/material";
 
 const MovieCard = ({movie}) => {
   return (
-    <Box
-      sx={{
-        width: 225,
-      }}
-    >
+    <Box sx={{width: 225}}>
       <Card
         component={Link}
-        to={`/movies/${movie.movie_id}`}
+        to={`/movies/${movie.movie_id}/screenings`}
         sx={{
           textDecoration: "none",
           color: "inherit",
