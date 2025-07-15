@@ -14,9 +14,6 @@ const BasicDatePicker = () => {
             label="Basic date picker"
             value={value}
             onChange={setValue}
-            renderInput={(params) => (
-                <TextField {...params} focused variant="outlined" />
-            )}
         />
     </LocalizationProvider>
   );
