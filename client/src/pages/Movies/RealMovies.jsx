@@ -14,6 +14,15 @@ import SearchMovieModal from "./SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
 import dayjs from 'dayjs';
 
+const ScreeningDays =[
+      '2025-07-19',
+      '2025-07-20',
+      '2025-07-21',
+      '2025-07-22',
+      '2025-07-23',
+      '2025-07-26',
+    ]
+
 const hasAnyGenre = (movie,selectedGenres) => {
   for (const genre of movie.genres){
     for (const selectedGenre of selectedGenres){
@@ -46,18 +55,23 @@ const filterAndUniqueMovies = (movies, { selectedCinema, selectedGenres, selecte
     console.log("movie.start_date for this movie",movie.start_date)
     console.log(selectedDate && !dayjs(movie.start_date).isSame(selectedDate, 'day'))
 
-    if (selectedDate && !dayjs(movie.start_date).isSame(selectedDate, 'day')) {
-      // 2025-10-14T22:00:00.000Z
-      return false;
-    }
-
-
+    // if (selectedDate) {
+    //   const formattedSelectedDate = selectedDate.format('YYYY-MM-DD');
+    //   const movieDate = dayjs(movie.start_date).format('YYYY-MM-DD');
+    //   if (formattedSelectedDate !== movieDate) {
+    //     return false;
+    //   }
+    // }
     
     alreadyIncludedInFinalList.add(movie.movie_id);
     return true;
-    
+  });
+};
 
-
+const filteredMoviesOnDay = (formattedDate, movies) => {
+  return movies.filter((movie) => {
+    const movieDate = dayjs(movie.start_date).format('YYYY-MM-DD');
+    return movieDate === formattedDate;
   });
 };
 
@@ -73,19 +87,33 @@ const RealMovies = () => {
 
     const [showPicker, setShowPicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
-    const intilizePicker = () => {
-      setSelectedDate(dayjs())
-      setShowPicker(true)
-    }
+
   
     const filteredMovies = useMemo(() => {
       return filterAndUniqueMovies(movies, { selectedCinema, selectedGenres, selectedDate });
     }, [movies, selectedCinema, selectedGenres, selectedDate]);
 
+    const allowedScreeningDates = useMemo(() => {
+      const dateSet = new Set();
+
+      for (const movie of filteredMovies) {
+        if (movie.start_date) {
+          const dateOnly = dayjs(movie.start_date).format('YYYY-MM-DD');
+          dateSet.add(dateOnly);
+        }
+      }
+
+      return Array.from(dateSet).sort(); // Sorted array of unique dates
+    }, [filteredMovies]);
+
+    const FormatedDate = dayjs(selectedDate).format('YYYY-MM-DD');
+    // console.log("selectedDate",selectedDate, "formatedDate",FormatedDate)
+    const moviesToDisplay = selectedDate ? filteredMoviesOnDay(FormatedDate, filteredMovies) : filteredMovies;
+    console.log("allowed dates = > ",allowedScreeningDates)
     // console.log(movies)
     // console.log([movies,filteredMovies,cinemas,selectedCinema,genresList,selectedGenres])
     // console.log("selected genres arr", selectedGenres)
-    console.log([selectedCinema,selectedDate])
+    // console.log([selectedCinema,selectedDate])
 
     useEffect(() => {
       const fetchData = async () => {
@@ -117,7 +145,7 @@ const RealMovies = () => {
     // });
 
     //Modal config
-    const [modalOpen, setModalOpen] = useState(false);
+    const [m_1_Open, setM_1_Open] = useState(false);
 
     const [m_2_Open, setM_2_Open] = useState(false);
     const handleM2ValidateExit = () => {
@@ -128,6 +156,10 @@ const RealMovies = () => {
       setSelectedGenres([]);
     };
 
+    const intilizePicker = () => {
+      setSelectedDate(dayjs(allowedScreeningDates[0]))
+      setShowPicker(true)
+    }
   //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
@@ -161,11 +193,11 @@ const RealMovies = () => {
 
           {/* <Button size='large'>Filters</Button> */}
           {/* <BasicModal></BasicModal> */}
-          <Button  size="large" variant="outlined" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
+          <Button  size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
             Find movie
           </Button>
           
-          <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen}/>
+          <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open}/>
 
           <Button size="large" variant="outlined" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
             Filter by genres
@@ -198,7 +230,7 @@ const RealMovies = () => {
                   Pick a Date
                 </Button>
               ) : ( <>
-                <BasicDatePicker value={selectedDate} onChange={ (newValue) => setSelectedDate(newValue) } />
+                <BasicDatePicker allowedDates={allowedScreeningDates}  value={selectedDate} onChange={ (newValue) => setSelectedDate(newValue)} />
                 <IconButton
                   aria-label="Clear date"
                   onClick={() => {
@@ -224,7 +256,7 @@ const RealMovies = () => {
         justifyContent: 'flex-start',  // left-align cards, change as needed
       }}
     >
-        {filteredMovies.map((movie) => (
+        {moviesToDisplay.map((movie) => (
         <Box key={movie.movie_id} sx={{width: 225,  flexShrink: 0}}>
           <Card
             component={Link}
