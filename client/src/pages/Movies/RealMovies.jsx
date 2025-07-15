@@ -41,12 +41,18 @@ const filterAndUniqueMovies = (movies, { selectedCinema, selectedGenres, selecte
         if (!genreFound) return false
     }
 
-    if (selectedDate && !dayjs(movie.startDate).isSame(dayjs(selectedDate), 'day')) {
+    selectedDate && movie.startDate && console.log(" ============ comparision function of dates =============")
+    console.log("selectedDate : ",selectedDate)
+    console.log("movie.start_date for this movie",movie.start_date)
+    console.log(selectedDate && !dayjs(movie.start_date).isSame(selectedDate, 'day'))
+
+    if (selectedDate && !dayjs(movie.start_date).isSame(selectedDate, 'day')) {
       // 2025-10-14T22:00:00.000Z
       return false;
     }
 
-    console.log(selectedDate)
+
+    
     alreadyIncludedInFinalList.add(movie.movie_id);
     return true;
     
@@ -67,7 +73,11 @@ const RealMovies = () => {
 
     const [showPicker, setShowPicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
-
+    const intilizePicker = () => {
+      setSelectedDate(dayjs())
+      setShowPicker(true)
+    }
+  
     const filteredMovies = useMemo(() => {
       return filterAndUniqueMovies(movies, { selectedCinema, selectedGenres, selectedDate });
     }, [movies, selectedCinema, selectedGenres, selectedDate]);
@@ -118,11 +128,6 @@ const RealMovies = () => {
       setSelectedGenres([]);
     };
 
-
-    const handleDateChange = (newValue) => {
-      console.log("New value:", newValue)
-      setSelectedDate(newValue);
-    };
   //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
@@ -189,11 +194,11 @@ const RealMovies = () => {
           </ModalWrapper>
 
 {!showPicker ? (
-                <Button size="large" variant="outlined" startIcon={<EventIcon />} onClick={() => setShowPicker(true)}>
+                <Button size="large" variant="outlined" startIcon={<EventIcon />} onClick={intilizePicker}>
                   Pick a Date
                 </Button>
               ) : ( <>
-                <BasicDatePicker value={selectedDate} onChange={handleDateChange} />
+                <BasicDatePicker value={selectedDate} onChange={ (newValue) => setSelectedDate(newValue) } />
                 <IconButton
                   aria-label="Clear date"
                   onClick={() => {
