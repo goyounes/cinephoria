@@ -7,7 +7,7 @@ import {  Container,  Stack, Grid,
   Typography,  Button,   Autocomplete,  TextField,
   FormControl, InputLabel, Select, MenuItem} 
   from "@mui/material";
-import {Search as SearchIcon, Tune as TuneIcon }from '@mui/icons-material';
+import {Search as SearchIcon, Tune as TuneIcon, Event as EventIcon  }from '@mui/icons-material';
 // import BasicModal from '../../components/BasicModal'
 import ModalWrapper from "../../components/ModalWrapper";
 import SearchMovieModal from "./SearchMovieModal";
@@ -52,6 +52,7 @@ const RealMovies = () => {
     setM_2_Open(false);
     setSelectedGenres([]);
   };
+  const [showPicker, setShowPicker] = useState(false);
   //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
@@ -59,7 +60,7 @@ const RealMovies = () => {
       <Card   sx={{p:2, mb: 2}}>
         <Stack direction="row" spacing={2} alignItems="stretch">
           
-          <FormControl sx={{ width: 300 }}>
+          <FormControl sx={{ flexGrow:1 }}>
               <InputLabel id="cinema-select-label">Cinema</InputLabel>
               <Select 
                 labelId="cinema-select-label"
@@ -114,7 +115,16 @@ const RealMovies = () => {
             </Stack>
           </ModalWrapper>
 
-          <BasicDatePicker/>
+          {!showPicker && (
+            <Button
+              size="large"
+              startIcon={<EventIcon />}
+              onClick={() => setShowPicker(true)}
+            >
+              Pick a Date
+            </Button>
+          )}
+          {showPicker && <BasicDatePicker />}
         
         </Stack>
       </Card>
