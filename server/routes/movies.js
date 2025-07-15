@@ -11,6 +11,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
 import { CombineGenresIdNames } from '../utils/index.js';
+import { getUpcomingScreenings } from '../controllers/screenings.js';
 
 
 const bucketName = process.env.S3_BUCKET_NAME;
@@ -330,7 +331,17 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     }
 })
 
+router.get("/:id/screenings", async (req,res,next) => {
+    const movie_id = req.params.id
+    try {
+        const screenings = await getUpcomingScreenings(null,movie_id )
+        console.log("screenigs =>",screenings)
+        res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
+    }
 
+})
 
 
 export default router;
