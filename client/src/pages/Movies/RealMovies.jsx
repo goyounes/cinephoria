@@ -14,15 +14,6 @@ import SearchMovieModal from "./SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
 import dayjs from 'dayjs';
 
-const ScreeningDays =[
-      '2025-07-19',
-      '2025-07-20',
-      '2025-07-21',
-      '2025-07-22',
-      '2025-07-23',
-      '2025-07-26',
-    ]
-
 const hasAnyGenre = (movie,selectedGenres) => {
   for (const genre of movie.genres){
     for (const selectedGenre of selectedGenres){
@@ -49,72 +40,60 @@ const filterAndUniqueMovies = (movies, { selectedCinema, selectedGenres, selecte
         const genreFound = hasAnyGenre(movie,selectedGenres)
         if (!genreFound) return false
     }
-
-    selectedDate && movie.startDate && console.log(" ============ comparision function of dates =============")
-    console.log("selectedDate : ",selectedDate)
-    console.log("movie.start_date for this movie",movie.start_date)
-    console.log(selectedDate && !dayjs(movie.start_date).isSame(selectedDate, 'day'))
-
-    // if (selectedDate) {
-    //   const formattedSelectedDate = selectedDate.format('YYYY-MM-DD');
-    //   const movieDate = dayjs(movie.start_date).format('YYYY-MM-DD');
-    //   if (formattedSelectedDate !== movieDate) {
-    //     return false;
-    //   }
-    // }
-    
+   
     alreadyIncludedInFinalList.add(movie.movie_id);
     return true;
   });
 };
 
-const filteredMoviesOnDay = (formattedDate, movies) => {
+const filterMoviesForSelectedDate = (formattedDate, movies) => {
   return movies.filter((movie) => {
     const movieDate = dayjs(movie.start_date).format('YYYY-MM-DD');
     return movieDate === formattedDate;
   });
 };
 
+const getAllowedScreeningDates = (movies) => {
+  const dateSet = new Set();
+
+  for (const movie of movies) {
+    if (movie.start_date) {
+      const dateOnly = dayjs(movie.start_date).format('YYYY-MM-DD');
+      dateSet.add(dateOnly);
+    }
+  }
+
+  return Array.from(dateSet).sort();
+};
+
+
 
 const RealMovies = () => {
     const [movies, setMovies] = useState([]);
-
     const [cinemas, setCinemas] = useState([]);
-    const [selectedCinema, setSelectedCinema] = useState(null);
-
     const [genresList, setGenresList] = useState([]);
+    
+    const [selectedCinema, setSelectedCinema] = useState(null);
     const [selectedGenres, setSelectedGenres] = useState([]);
-
-    const [showPicker, setShowPicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
 
-  
+    const [showPicker, setShowPicker] = useState(false);
+    const intilizePicker = () => {
+      setSelectedDate(dayjs(allowedScreeningDates[0]))
+      setShowPicker(true)
+    }
+
+
     const filteredMovies = useMemo(() => {
       return filterAndUniqueMovies(movies, { selectedCinema, selectedGenres, selectedDate });
     }, [movies, selectedCinema, selectedGenres, selectedDate]);
 
-    const allowedScreeningDates = useMemo(() => {
-      const dateSet = new Set();
-
-      for (const movie of filteredMovies) {
-        if (movie.start_date) {
-          const dateOnly = dayjs(movie.start_date).format('YYYY-MM-DD');
-          dateSet.add(dateOnly);
-        }
-      }
-
-      return Array.from(dateSet).sort(); // Sorted array of unique dates
-    }, [filteredMovies]);
+    const allowedScreeningDates = useMemo(() => getAllowedScreeningDates(filteredMovies), [filteredMovies]);
 
     const FormatedDate = dayjs(selectedDate).format('YYYY-MM-DD');
-    // console.log("selectedDate",selectedDate, "formatedDate",FormatedDate)
-    const moviesToDisplay = selectedDate ? filteredMoviesOnDay(FormatedDate, filteredMovies) : filteredMovies;
-    console.log("allowed dates = > ",allowedScreeningDates)
-    // console.log(movies)
-    // console.log([movies,filteredMovies,cinemas,selectedCinema,genresList,selectedGenres])
-    // console.log("selected genres arr", selectedGenres)
-    // console.log([selectedCinema,selectedDate])
+    const moviesToDisplay = !selectedDate ?  filteredMovies : filterMoviesForSelectedDate(FormatedDate, filteredMovies);
 
+    //Initial Movie Screenings Data Fetch
     useEffect(() => {
       const fetchData = async () => {
         try {
@@ -124,7 +103,6 @@ const RealMovies = () => {
             axios.get("/api/movies/genres"), 
           ]);
           setMovies(moviesRes.data);
-          // setCinemas([{ cinema_id: null, cinema_name: "All Cinemas" },...cinemaRes.data]);
           setCinemas(cinemaRes.data);
           setGenresList(genreRes.data);
         } catch (error) {
@@ -134,15 +112,6 @@ const RealMovies = () => {
       fetchData();
     }, []);
 
-    // Debug log (remove in production)
-    // console.log("debug details")
-    // console.log({
-    //   moviesCount: movies.length,
-    //   filteredCount: filteredMovies.length,
-    //   selectedCinema,
-    //   selectedGenres,
-    //   selectedDate,
-    // });
 
     //Modal config
     const [m_1_Open, setM_1_Open] = useState(false);
@@ -156,11 +125,6 @@ const RealMovies = () => {
       setSelectedGenres([]);
     };
 
-    const intilizePicker = () => {
-      setSelectedDate(dayjs(allowedScreeningDates[0]))
-      setShowPicker(true)
-    }
-  //Read Screenings as this is the next step and check server side operations
   return (
     <Container sx={{ py: 4 }}>
 
