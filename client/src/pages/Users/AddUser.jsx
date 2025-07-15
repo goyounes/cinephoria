@@ -65,7 +65,7 @@ return (
         <Stack component="form" id="LoginForm" spacing={2}>
 
           <Typography variant="h4" align="center" gutterBottom>
-            Register Page
+            Create New User Page
           </Typography>
 
           <TextField
@@ -130,7 +130,7 @@ return (
           </FormControl>
 
           <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Register
+            Add User
           </Button>
         </Stack>
       </CardContent>

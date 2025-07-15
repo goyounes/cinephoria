@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { Button } from '@mui/material';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -29,7 +30,7 @@ const Users = () => {
       <div className="container-3of4-center">
         <div className="users-header">
           <h1>Users List</h1>
-          <Link className="button-link" to="/admin/users/create">Add User</Link>
+          <Link to="/admin/users/create"><Button variant='contained'>Add movie</Button></Link>
         </div>
         <table>
           <thead>
@@ -45,10 +46,10 @@ const Users = () => {
           <tbody>
             {users.map(user => (
               <tr key={user.user_id}>
+                <td>{user.user_id}</td>
                 <td>
-                  <Link to={`/users/${user.user_id}`}>{user.user_id}</Link>
+                  <Link to={`/users/${user.user_id}`}>{user.user_name}</Link>
                 </td>
-                <td>{user.user_name}</td>
                 <td>{user.user_email}</td>
                 <td>{user.first_name}</td>
                 <td>{user.last_name}</td>
