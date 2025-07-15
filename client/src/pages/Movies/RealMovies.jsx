@@ -86,6 +86,10 @@ const RealMovies = () => {
       setSelectedDate(dayjs(allowedScreeningDates[0]))
       setShowPicker(true)
     }
+    const clearPicker = () => {
+      setSelectedDate(null);
+      setShowPicker(false);
+    }
 
 
     const filteredMovies = useMemo(() => {
@@ -135,7 +139,7 @@ const RealMovies = () => {
       <Card   sx={{p:2, mb: 2}}>
         <Stack direction="row" spacing={2} alignItems="stretch">
           
-          <FormControl sx={{ /*flexGrow:1*/width:360 , height: '100%'}}>
+          <FormControl sx={{ /*flexGrow:1*/width:360}}>
               <InputLabel id="cinema-select-label">Cinema</InputLabel>
               <Select 
                 labelId="cinema-select-label"
@@ -147,15 +151,15 @@ const RealMovies = () => {
                   );
                   setSelectedCinema(selected || null);
                 }}
-                sx={{ height: '100%'}}
+                sx={{height:"100%"}}
               >
                 <MenuItem value="">
                   None
                 </MenuItem>
                 {cinemas.map(cinema => (
-                  <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
-                    {cinema.cinema_name}
-                  </MenuItem>
+                <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                  {cinema.cinema_name}
+                </MenuItem>
                 ))}
               </Select>
           </FormControl>
@@ -166,16 +170,11 @@ const RealMovies = () => {
           <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
             Find movie
           </ResponsiveIconButton>
-
-
-          {/* <Button  size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
-            <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Find movie</Box>
-          </Button> */}
           
           <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open}/>
 
           <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
-            <Box sx={{ display:{ xs: 'none', md: 'inline' }}}>Filter by genres</Box>
+              Filter by genres
           </ResponsiveIconButton>
           <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
             <Stack spacing={2}>
@@ -200,30 +199,21 @@ const RealMovies = () => {
             </Stack>
           </ModalWrapper>
 
-{!showPicker ? (
-                <ResponsiveIconButton size="large" variant="outlined" startIcon={<EventIcon />} onClick={intilizePicker}
-                  sx={{
-                    '& .MuiButton-startIcon': {
-                      marginRight: { xs: 0, md: 1 }, // Remove spacing on small screens
-                    },
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Box sx={{ display:{ xs: 'none', md: 'inline' }}}>Pick a Date</Box>
-                </ResponsiveIconButton>
-              ) : ( <>
-                <BasicDatePicker allowedDates={allowedScreeningDates}  value={selectedDate} onChange={ (newValue) => setSelectedDate(newValue)} />
-                <IconButton
-                  aria-label="Clear date"
-                  onClick={() => {
-                    setSelectedDate(null);
-                    setShowPicker(false);
-                  }}
-                >
+          {!showPicker ? (
+              <ResponsiveIconButton size="large" variant="outlined" startIcon={<EventIcon />} onClick={intilizePicker}>
+                Pick a Date
+              </ResponsiveIconButton>
+            ) : (<>
+              <Box>
+                <BasicDatePicker allowedDates={allowedScreeningDates}  value={selectedDate} onChange={setSelectedDate} sx={{ height: '100%'}} />
+              </Box>
+                <IconButton aria-label="Clear date" onClick={clearPicker}>
                   <ClearIcon />
                 </IconButton>
-              </>)
-}
+            </>
+            )
+          }
+
         </Stack>
       </Card>
       
