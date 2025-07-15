@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-import { Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating} from "@mui/material";
+import {Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating} from "@mui/material";
 import StarsIcon from '@mui/icons-material/Stars';
 
 const Movie = (props) => {
@@ -23,6 +23,7 @@ const Movie = (props) => {
       } catch (err) {
         console.error("Failed to fetch movie:", err);
       } finally {
+        // setInterval(() => {setLoading(false);}, 500)
         setLoading(false);
       }
     }
@@ -30,81 +31,117 @@ const Movie = (props) => {
     fetchMovie();
   }, [id]);
 
-//   if (loading) return <div>Loading...</div>;
-  // if (!movie) return <div>Movie not found</div>;
+ return (
+    <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: "column" }}>
+      <Card elevation={4}>
+        <CardContent sx={{ p: 4 }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
+            {/* Poster */}
+            {loading ? (
+              <Skeleton
+                variant="rectangular"
+                sx={{
+                  width: { xs: "100%", md: 338 },
+                  height: { xs: 300, md: 450 },
+                  borderRadius: 2
+                }}
+              />
+            ) : (
+              <Box
+                component="img"
+                src={movie.imageUrl}
+                alt={movie.title}
+                sx={{
+                  width: { xs: "100%", md: 338 },
+                  height: { xs: "auto", md: 450 },
+                  objectFit: "cover",
+                  borderRadius: 2,
+                }}
+              />
+            )}
 
+            <Stack spacing={2} flex={1}>
+              {loading ? (
+                <MovieCardSkeleton/>
+              ) : (
+                <>
+                  <Typography variant="h3" fontWeight="bold">
+                    {movie.title}
+                  </Typography>
 
-  return (
-    <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column"}}>
-    <Card elevation={4}>
-      <CardContent sx={{ p: 4 }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-          {/* Poster  Box(image) + Stack(Contents)*/}
-          <Box
-            component="img"
-            src={movie.imageUrl}
-            alt={movie.title}
-            sx={{
-              width: { xs: "100%", md: 338 },
-              height: { xs: "auto", md: 450 },
-              objectFit: "cover",
-              borderRadius: 2,
-            }}
-          />
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    <Chip label={`Age ${movie.age_rating}+`} />
+                    <Chip label={`Duration: ${movie.length}`} />
+                    {movie.is_team_pick === 1 && (
+                      <Chip label="Team Pick" color="success" icon={<StarsIcon />} />
+                    )}
+                  </Stack>
 
-          <Stack spacing={2} flex={1}>
-            <Typography variant="h3" fontWeight="bold">
-              {movie.title}
-            </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="h6">Rating:</Typography>
+                    <Rating
+                      value={parseFloat(movie.score)}
+                      precision={0.1}
+                      readOnly
+                      size="large"
+                    />
+                    <Typography variant="body1">({movie.score})</Typography>
+                  </Stack>
 
-            <Stack direction="row" spacing={2} flexWrap="wrap">
-              <Chip label={`Age ${movie.age_rating}+`} />
-              <Chip label={`Duration: ${movie.length}`} />
-              {movie.is_team_pick === 1 && (
-                <Chip label="Team Pick" color="success" icon={<StarsIcon />}/>
+                  <Divider />
+
+                  <Stack direction="row" gap="8px" flexWrap="wrap" rowGap={1}>
+                    {movie.genres?.map((genre) => (
+                      <Chip
+                        key={genre.genre_id}
+                        label={genre.genre_name}
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+
+                  <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
+                    {movie.description}
+                  </Typography>
+
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: "end" }}>
+                    Added on {new Date(movie.created_at).toLocaleDateString()}
+                  </Typography>
+                </>
               )}
             </Stack>
-
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="h6">Rating:</Typography>
-              <Rating
-                value={parseFloat(movie.score)}
-                precision={0.1}
-                readOnly
-                size="large"
-              />
-              <Typography variant="body1">({movie.score})</Typography>
-            </Stack>
-
-            <Divider />
-
-            <Stack direction="row" gap="8px" flexWrap="wrap" rowGap={1}>
-              {/* {console.log(movie.genres)} */}
-                {movie.genres ? movie.genres.map((genre) => (
-                <Chip
-                    key={genre.genre_id}
-                    label={genre.genre_name}
-                    size="small"
-                />
-                )) : (
-                <Typography variant="body2" color="text.secondary" hidden>
-                    No genres available
-                </Typography>
-                )}
-            </Stack>
-
-            <Typography variant="body1" color="text.secondary" sx={{flexGrow: 1}}>
-              {movie.description}
-            </Typography>
-
-            <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: "end"}}>
-              Added on {new Date(movie.created_at).toLocaleDateString()}
-            </Typography>
           </Stack>
+        </CardContent>
+      </Card>
+    </Container>
+  );
+};
+
+const MovieCardSkeleton = () => {
+  return (<>
+        <Skeleton variant="text" height={48} width="70%" />
+
+        <Stack direction="row" spacing={1}>
+          <Skeleton variant="rounded" width={90} height={32} />
+          <Skeleton variant="rounded" width={120} height={32} />
+          <Skeleton variant="rounded" width={100} height={32} />
         </Stack>
-      </CardContent>
-    </Card>
-  </Container>
-);
-}
-export default Movie
+
+        <Skeleton variant="text" width="30%" height={28} />
+        <Skeleton variant="text" width="25%" height={24} />
+
+        <Divider />
+
+        <Stack direction="row" gap={1} flexWrap="wrap" rowGap={1}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" width={70} height={28} />
+          ))}
+        </Stack>
+
+        <Skeleton variant="rectangular" height={100} sx={{ mt: 2 }} />
+  </>
+  );
+};
+
+
+export default Movie;
