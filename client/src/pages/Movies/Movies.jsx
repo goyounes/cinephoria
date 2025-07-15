@@ -69,7 +69,7 @@ const Movies = () => {
                 )}
               </td>
               <td>
-                <Link to={`/admin/movies/${movie.movie_id}`}>{movie.title}</Link>
+                <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
               </td>
               <td>{movie.description}</td>
               <td>{movie.age_rating}</td>

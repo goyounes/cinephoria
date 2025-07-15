@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";    
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel, 
    FormControl,  Stack,  FormHelperText,  CardContent,
@@ -10,6 +10,7 @@ import ImageUploader from "./ImageUploader";
 
 
 const EditMovie = () => {
+    const navigate = useNavigate()
     //Load movie with id = 
     const { id } = useParams();
     // eslint-disable-next-line
@@ -123,6 +124,7 @@ const EditMovie = () => {
           console.log(response)
           console.log(response.data);
           alert('Movie updated successfully!');
+          navigate(`/movies/${id}`)
         } catch (error) {
           const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
           alert("Failed to update movie: " + customMessage);

@@ -39,8 +39,8 @@ function App() {
 
             <Route path="/admin/movies" element={<Movies />} />
             <Route path="/admin/movies/create" element={<AddMovie />} />
-            <Route path="/admin/movies/:id" element={<Movie />} />
             <Route path="/admin/movies/:id/edit" element={<EditMovie />} />
+            <Route path="/movies/:id" element={<Movie />} />
             {/* Screenings */}
             <Route path="/screenings" element={<Screenings />} />
             <Route path="/screenings/create" element={<Screenings />} />

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState, useEffect } from 'react';
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams } from 'react-router-dom';
@@ -32,7 +31,7 @@ const Movie = (props) => {
   }, [id]);
 
 //   if (loading) return <div>Loading...</div>;
-  if (!movie) return <div>Movie not found</div>;
+  // if (!movie) return <div>Movie not found</div>;
 
 
   return (
@@ -40,7 +39,7 @@ const Movie = (props) => {
     <Card elevation={4}>
       <CardContent sx={{ p: 4 }}>
         <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-          {/* Poster */}
+          {/* Poster  Box(image) + Stack(Contents)*/}
           <Box
             component="img"
             src={movie.imageUrl}
