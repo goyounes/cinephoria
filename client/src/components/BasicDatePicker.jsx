@@ -5,11 +5,8 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 
 const BasicDatePicker = ({value,onChange, allowedDates}) => {
-    // const [value,setValue] = useState(null)
-    console.log("BasicDatePicker current value = ", value)
-
+    // console.log("BasicDatePicker current value = ", value)
     const allowedDatesFromated = allowedDates.map(dateStr => dayjs(dateStr).format('YYYY-MM-DD'));
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker

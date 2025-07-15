@@ -13,6 +13,10 @@ import ModalWrapper from "../../components/ModalWrapper";
 import SearchMovieModal from "./SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
 import dayjs from 'dayjs';
+import ResponsiveIconButton from "../../components/ResponsiveIconButton";
+
+
+
 
 const hasAnyGenre = (movie,selectedGenres) => {
   for (const genre of movie.genres){
@@ -131,7 +135,7 @@ const RealMovies = () => {
       <Card   sx={{p:2, mb: 2}}>
         <Stack direction="row" spacing={2} alignItems="stretch">
           
-          <FormControl sx={{ flexGrow:1 }}>
+          <FormControl sx={{ /*flexGrow:1*/width:360 , height: '100%'}}>
               <InputLabel id="cinema-select-label">Cinema</InputLabel>
               <Select 
                 labelId="cinema-select-label"
@@ -143,6 +147,7 @@ const RealMovies = () => {
                   );
                   setSelectedCinema(selected || null);
                 }}
+                sx={{ height: '100%'}}
               >
                 <MenuItem value="">
                   None
@@ -157,15 +162,21 @@ const RealMovies = () => {
 
           {/* <Button size='large'>Filters</Button> */}
           {/* <BasicModal></BasicModal> */}
-          <Button  size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
+
+          <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
             Find movie
-          </Button>
+          </ResponsiveIconButton>
+
+
+          {/* <Button  size="large" variant="outlined" onClick={() => setM_1_Open(true)}  startIcon={<SearchIcon />}>
+            <Box sx={{ display: { xs: 'none', md: 'inline' } }}>Find movie</Box>
+          </Button> */}
           
           <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open}/>
 
-          <Button size="large" variant="outlined" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
-            Filter by genres
-          </Button>
+          <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
+            <Box sx={{ display:{ xs: 'none', md: 'inline' }}}>Filter by genres</Box>
+          </ResponsiveIconButton>
           <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
             <Stack spacing={2}>
               <Typography variant="h6" gutterBottom>
@@ -190,9 +201,16 @@ const RealMovies = () => {
           </ModalWrapper>
 
 {!showPicker ? (
-                <Button size="large" variant="outlined" startIcon={<EventIcon />} onClick={intilizePicker}>
-                  Pick a Date
-                </Button>
+                <ResponsiveIconButton size="large" variant="outlined" startIcon={<EventIcon />} onClick={intilizePicker}
+                  sx={{
+                    '& .MuiButton-startIcon': {
+                      marginRight: { xs: 0, md: 1 }, // Remove spacing on small screens
+                    },
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Box sx={{ display:{ xs: 'none', md: 'inline' }}}>Pick a Date</Box>
+                </ResponsiveIconButton>
               ) : ( <>
                 <BasicDatePicker allowedDates={allowedScreeningDates}  value={selectedDate} onChange={ (newValue) => setSelectedDate(newValue)} />
                 <IconButton
