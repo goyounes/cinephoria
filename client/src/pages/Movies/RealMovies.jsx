@@ -11,6 +11,7 @@ import {Search as SearchIcon, Tune as TuneIcon }from '@mui/icons-material';
 // import BasicModal from '../../components/BasicModal'
 import ModalWrapper from "../../components/ModalWrapper";
 import SearchMovieModal from "./SearchMovieModal";
+import BasicDatePicker from "../../components/BasicDatePicker";
 
 
 const RealMovies = () => {
@@ -56,11 +57,11 @@ const RealMovies = () => {
     <Container sx={{ py: 4 }}>
 
       <Card   sx={{p:2, mb: 2}}>
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="stretch">
           
           <FormControl sx={{ width: 300 }}>
               <InputLabel id="cinema-select-label">Cinema</InputLabel>
-              <Select
+              <Select 
                 labelId="cinema-select-label"
                 value={selectedCinema ? selectedCinema.cinema_id : ""}
                 label="Cinema"
@@ -81,12 +82,13 @@ const RealMovies = () => {
 
           {/* <Button size='large'>Filters</Button> */}
           {/* <BasicModal></BasicModal> */}
-          <Button size="large" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
+          <Button  size="large" variant="outlined" onClick={() => setModalOpen(true)}  startIcon={<SearchIcon />}>
             Find movie
           </Button>
+          
           <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen}/>
 
-          <Button size="large" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
+          <Button size="large" variant="outlined" onClick={() => setM_2_Open(true)}  startIcon={<TuneIcon />}>
             Filter by genres
           </Button>
           <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
@@ -111,6 +113,8 @@ const RealMovies = () => {
               </Button>
             </Stack>
           </ModalWrapper>
+
+          <BasicDatePicker/>
         
         </Stack>
       </Card>
