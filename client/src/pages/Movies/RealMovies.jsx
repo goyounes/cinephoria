@@ -184,6 +184,7 @@ const RealMovies = () => {
                 component="img"
                 image={movie.imageUrl}
                 alt={`Poster for ${movie.title}`}
+                sx={{ width: 225, height: 300, objectFit: 'cover' }}
               />
 
               <CardContent
