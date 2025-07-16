@@ -5,13 +5,13 @@ import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getGenres, deleteMovie, updateMovie, getUpcomingMovies, getUpcomingMoviesWithGenres } from '../controllers/movies.js';
+import { getUpcomingScreenings , getAllScreenings} from '../controllers/screenings.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
 import { CombineGenresIdNames } from '../utils/index.js';
-import { getUpcomingScreenings } from '../controllers/screenings.js';
 
 
 const bucketName = process.env.S3_BUCKET_NAME;
@@ -31,7 +31,7 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 upload.single('poster_img_file') // 'poster_img_file' is the field name in the form
 
-router.get("/",async (req,res,next) => {
+router.get("/", async (req,res,next) => {
     try {
         const rawMovies = await getMoviesWithGenres()
         const movies = CombineGenresIdNames(rawMovies)
@@ -340,7 +340,17 @@ router.get("/:id/screenings", async (req,res,next) => {
     } catch (error) {
         next(error)
     }
+})
 
+router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
+    const movie_id = req.params.id
+    try {
+        const screenings = await getAllScreenings(null,movie_id )
+        console.log("screenigs =>",screenings)
+        res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
+    }
 })
 
 
