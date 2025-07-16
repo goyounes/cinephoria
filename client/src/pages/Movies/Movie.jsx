@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 
-import {  Container, Card,  CardContent,  Typography,  Stack,  Button,  Box,} from "@mui/material";
+import {  Container, Typography, Button} from "@mui/material";
 import {  KeyboardDoubleArrowDown as DownArrow,  KeyboardDoubleArrowUp as UpArrow,} from "@mui/icons-material";
 
 import MovieDetails from "./MovieDetails";
@@ -17,7 +17,6 @@ const Movie = () => {
 
   const [movie, setMovie] = useState(null);
   const [screenings, setScreenings] = useState([]);
-  const [isEmployee, setIsEmployee] = useState(false);
   // const [loadingScreenings, setLoadingScreenings] = useState(true);
   const [loadingMovie, setLoadingMovie] = useState(true);
   const [showScreenings, setShowScreenings] = useState(false);
@@ -53,17 +52,15 @@ const Movie = () => {
     const fetchScreenings = async () => {
       try {
         await axios.post("/api/auth/verify/employee");
-        setIsEmployee(true);
         const { data } = await axios.get(`/api/movies/${id}/screenings/all`);
         setScreenings(data);
       } catch {
-        setIsEmployee(false);
-        try {
-          const { data } = await axios.get(`/api/movies/${id}/screenings`);
-          setScreenings(data);
-        } catch (err) {
-          console.error("Failed to fetch screenings:", err);
-        }
+         try {
+            const { data } = await axios.get(`/api/movies/${id}/screenings`);
+            setScreenings(data);
+         } catch (err) {
+            console.error("Failed to fetch screenings:", err);
+         }
       }
     };
     fetchScreenings();
