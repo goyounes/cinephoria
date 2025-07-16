@@ -107,23 +107,25 @@ const DateScreenings = ({ screenings}) => {
           <ArrowBackIosIcon fontSize="small" />
         </IconButton>
 
-        {days.map(({ date }, idx) => {
-          const isSelected = idx === selectedIndex;
-          const hasScreenings = (screeningsMap[date] || []).length > 0;
+{days.map(({ date, dayjsDate }, idx) => {
+  const isSelected = idx === selectedIndex;
+  const hasScreenings = (screeningsMap[date] || []).length > 0;
+  const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
 
-          return (
-            <Button 
-               disableRipple
-               key={date}
-               variant={isSelected ? "contained" : "outlined"}
-               onClick={() => hasScreenings && setSelectedIndex(idx)}
-               disabled={!hasScreenings}
-               sx={{ minWidth: 80 }}
-            >
-              {date}
-            </Button>
-          );
-        })}
+  return (
+    <Button 
+      disableRipple
+      key={date}
+      variant={isSelected ? "contained" : "outlined"}
+      onClick={() => hasScreenings && setSelectedIndex(idx)}
+      disabled={!hasScreenings}
+      sx={{ minWidth: 80, flexDirection: "column", py: 1 }}
+    >
+      <Typography variant="body2" >{date}</Typography>
+      <Typography variant="caption">{dayName}</Typography>
+    </Button>
+  );
+})}
 
         <IconButton onClick={() => {handleNext()}} disabled={!infiniteScroll && page >= maxPage}>
           <ArrowForwardIosIcon fontSize="small" />
