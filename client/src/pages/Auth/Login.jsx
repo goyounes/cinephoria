@@ -37,11 +37,12 @@ const Login = () => {
       const response2 = await axios.post(`/api/auth/verify`,{ some: 'data' }, {withCredentials: true});
       
       console.log(response2);
-      navigate('/home'); // Redirect to the users page
+      navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
     } catch (err) {
       alert('Failed to add User: ' + err.message);
     }
   };
+  //TODO:Change redirection page
 
    return (
     <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"row", alignItems: 'center'}}>

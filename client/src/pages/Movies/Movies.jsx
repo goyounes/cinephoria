@@ -18,61 +18,83 @@ import MovieCard from "./MovieCard";
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "./utils"
 
 
-const RealMovies = () => {
-    const [movies, setMovies] = useState([]);
-    const [cinemas, setCinemas] = useState([]);
-    const [genresList, setGenresList] = useState([]);
-    const [allMovies, setAllMovies] = useState([]);
+const Movies = () => {
+   const [movies, setMovies] = useState([]);
+   const [cinemas, setCinemas] = useState([]);
+   const [genresList, setGenresList] = useState([]);
+   const [allMovies, setAllMovies] = useState([]);
 
-    const [selectedCinema, setSelectedCinema] = useState(null);
-    const [selectedGenres, setSelectedGenres] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
+   const [selectedCinema, setSelectedCinema] = useState(null);
+   const [selectedGenres, setSelectedGenres] = useState([]);
+   const [selectedDate, setSelectedDate] = useState(null);
 
-    const [showPicker, setShowPicker] = useState(false);
-    const intilizePicker = () => {
-      setSelectedDate(dayjs(allowedScreeningDates[0]));
-      setShowPicker(true);
-    };
-    const clearPicker = () => {
-      setSelectedDate(null);
-      setShowPicker(false);
-    };
+   const [showPicker, setShowPicker] = useState(false);
+   const intilizePicker = () => {
+   setSelectedDate(dayjs(allowedScreeningDates[0]));
+   setShowPicker(true);
+   };
+   const clearPicker = () => {
+   setSelectedDate(null);
+   setShowPicker(false);
+   };
 
-    const filteredMovies = useMemo(() => {
-      return filterAndUniqueMovies(movies, {selectedCinema,selectedGenres});
-    }, [movies, selectedCinema, selectedGenres]);
+   const filteredMovies = useMemo(
+      () => filterAndUniqueMovies(movies, {selectedCinema,selectedGenres}),
+      [movies, selectedCinema, selectedGenres]
+   );
 
-    const allowedScreeningDates = useMemo(
+   const allowedScreeningDates = useMemo(
       () => getAllowedScreeningDates(filteredMovies),
       [filteredMovies]
-    );
+   );
 
-    const FormatedDate = dayjs(selectedDate).format("YYYY-MM-DD");
-    const moviesToDisplay = !selectedDate
-      ? filteredMovies
-      : filterMoviesForSelectedDate(FormatedDate, filteredMovies);
+   const FormatedDate = dayjs(selectedDate).format("YYYY-MM-DD");
+   const moviesToDisplay = !selectedDate
+   ? filteredMovies
+   : filterMoviesForSelectedDate(FormatedDate, filteredMovies);
 
-    //Initial Movies Screenings Data Fetch
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const [moviesRes, cinemaRes, genreRes, allMoviesRes] =
-            await Promise.all([
-              axios.get("/api/movies/upcoming"),
-              axios.get("/api/cinemas"),
-              axios.get("/api/movies/genres"),
-              axios.get("/api/movies"),
-            ]);
-          setMovies(moviesRes.data);
-          setCinemas(cinemaRes.data);
-          setGenresList(genreRes.data);
-          setAllMovies(allMoviesRes.data);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
+   //Initial Movies Screenings Data Fetch
+   useEffect(() => {
+   const fetchInitialData = async () => {
+      try {
+         // First, check if user is admin
+         let isAdmin = false;
+         try {
+         await axios.post("/api/auth/verify/employee");
+         isAdmin = true;
+         } catch {
+         isAdmin = false;
+         }
+
+         // Fetch data depending on user role
+         const [moviesRes, cinemaRes, genreRes] = await Promise.all([
+         axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
+         axios.get("/api/cinemas"),
+         axios.get("/api/movies/genres"),
+         ]);
+
+         setMovies(moviesRes.data);
+         setCinemas(cinemaRes.data);
+         setGenresList(genreRes.data);
+      } catch (error) {
+         console.error("Error fetching initial data:", error);
+      }
+   };
+   fetchInitialData();
+   }, []);
+
+   useEffect(() => {
+      const fetchAllMovies = async () => {
+         try {
+            const res = await axios.get("/api/movies");
+            setAllMovies(res.data);
+         } catch (err) {
+            console.error("Error fetching all movies:", err);
+         }
       };
-      fetchData();
-    }, []);
+
+      fetchAllMovies();
+      }, []);
 
     //Modal config
     const [m_1_Open, setM_1_Open] = useState(false);
@@ -194,4 +216,4 @@ const RealMovies = () => {
   );
 };
 
-export default RealMovies;
+export default Movies;
