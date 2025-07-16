@@ -9,26 +9,17 @@ import { addMovie,  getGenres, deleteMovie, updateMovie,
     getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres } 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getAllScreenings} from '../controllers/screenings.js';
+import {s3, bucketName} from "../awsS3Client.js"
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
+
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
 import { CombineGenresIdNames } from '../utils/index.js';
 
 
-const bucketName = process.env.S3_BUCKET_NAME;
-const bucketRegion = process.env.S3_BUCKET_REGION;
-const accesKey = process.env.S3_BUCKET_ACCES_KEY;
-const secretAcces_key = process.env.S3_BUCKET_SECRET_ACCES_KEY;
 
-const s3 = new S3Client({
-    credentials: {
-        accessKeyId: accesKey,  
-        secretAccessKey: secretAcces_key,
-    },
-    region: bucketRegion
-})
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
