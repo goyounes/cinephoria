@@ -195,8 +195,7 @@ export async function getUpcomingMovies(cinema_id){    //How to handle filters q
         JOIN movies ON screenings.movie_id = movies.movie_id
         WHERE 
             ( ? IS NULL OR screenings.cinema_id = ?)
-            AND
-            (
+            AND (
                 screenings.start_date > CURDATE()
                 OR 
                 (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
@@ -231,10 +230,11 @@ export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle
 
         WHERE 
             ( @cinema_id IS NULL OR screenings.cinema_id =  @cinema_id)
-            AND (
-                screenings.start_date > CURDATE()
-                OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
-            )
+        AND (
+            screenings.start_date > CURDATE() OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
+        ) AND (
+			screenings.start_date < CURDATE() + INTERVAL 14 DAY
+        )
         ORDER BY 
             movies.movie_id, 
             screenings.cinema_id, 
