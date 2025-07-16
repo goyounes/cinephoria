@@ -1,20 +1,37 @@
 import React, { useState, useMemo, useEffect } from "react";
-import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import dayjs from "dayjs";
 import { Stack, Button, Box, Typography, IconButton } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-import { useNavigate } from "react-router-dom";
 
-const DateScreenings = ({ screeningsByDay}) => {
+function groupScreeningsByDayByRoom(screenings) {
+  const groupedByDate = {};
+  for (const screening of screenings) {
+    const date = dayjs(screening.start_date).format("DD/MM/YYYY");
+
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+
+    groupedByDate[date].push(screening);
+  }
+  return Object.keys(groupedByDate).map((date) => ({
+    date,
+    screenings: groupedByDate[date],
+  }));
+}
+
+
+const DateScreenings = ({ screenings}) => {
    const [isEmployee, setIsEmployee] = useState(false);
    let infiniteScroll = isEmployee 
    console.log("isEmployee",isEmployee,"infintyScrool",infiniteScroll)
    const navigate = useNavigate()
    
    const checkEmployeeStatus = async () => {
-         console.log("checking status")
          try {
             await axios.post("/api/auth/verify/employee");
             setIsEmployee(true);
@@ -29,23 +46,26 @@ const DateScreenings = ({ screeningsByDay}) => {
       excuteAsyncFunc ();
    }, []);
 
-   const daysPerPage = 7;
-   const totalDays = infiniteScroll ? Infinity : 14; // limit to 14 days if infiniteScroll off
+   const screeningsByDay = useMemo(() => groupScreeningsByDayByRoom(screenings), [screenings])
+
+   const DAYS_PER_PAGE = 7;
+   const LIMITED_TOTAL_DAYS = 14;
+   const totalDays = infiniteScroll ? Infinity : LIMITED_TOTAL_DAYS; // limit to 14 days if infiniteScroll off
 
    // For infinite scroll: startDate moves freely.
    // For limited: startDate fixed to today + (page * daysPerPage)
    const today = dayjs().startOf("day");
-   const maxPage = infiniteScroll ? Infinity : Math.floor(totalDays / daysPerPage) - 1;
+   const maxPage = infiniteScroll ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
 
    const [page, setPage] = useState(0);
    const [selectedIndex, setSelectedIndex] = useState(-1);
 
    // Compute start date based on infiniteScroll flag and page number
-   const startDate = today.add(page * daysPerPage, "day");
+   const startDate = today.add(page * DAYS_PER_PAGE, "day");
 
    // Prepare visible days array for current page
    const days = useMemo(() => {
-      return [...Array(daysPerPage)].map((_, i) => {
+      return [...Array(DAYS_PER_PAGE)].map((_, i) => {
          const date = startDate.add(i, "day");
          return {
          dayjsDate: date,

@@ -10,24 +10,6 @@ import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
 import DateScreenings from './DateScreenings';
 
 import dayjs from 'dayjs';
-function groupScreeningsByDayByRoom(screenings) {
-  const groupedByDate = {};
-
-  for (const screening of screenings) {
-    const date = dayjs(screening.start_date).format("DD/MM/YYYY");
-
-    if (!groupedByDate[date]) {
-      groupedByDate[date] = [];
-    }
-
-    groupedByDate[date].push(screening);
-  }
-
-  return Object.keys(groupedByDate).map((date) => ({
-    date,
-    screenings: groupedByDate[date],
-  }));
-}
 
 
 const Movie = () => {
@@ -89,12 +71,6 @@ const Movie = () => {
 
       fetchData();
     }, [id]);
-
-
-    const screeningsByDay = useMemo(() => {
-      return groupScreeningsByDayByRoom(screenings);
-    }, [screenings]);
-
     
  return (
     <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: 'column' }}>
@@ -200,7 +176,7 @@ const Movie = () => {
             </Typography>
 
             {/* {screenings && screenings.length > 0 ? ( */}
-              <DateScreenings screeningsByDay={screeningsByDay} infiniteScroll={isEmployee} />
+              <DateScreenings screenings={screenings} infiniteScroll={isEmployee} />
             {/* ) : ( */}
               {/* <Typography variant="body1" color="text.secondary">
                 This movie is not on the schedule right now.
