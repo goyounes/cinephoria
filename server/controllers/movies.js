@@ -245,6 +245,44 @@ export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id])
     return result_rows
 }
+
+export async function getAllUpcomingMoviesWithGenres(cinema_id){    //How to handle filters query
+    const q = `
+  		SELECT 
+			movies.*,
+			screenings.*,
+            genre_agg.genres_names,
+            genre_agg.genres_ids
+        FROM screenings
+        JOIN cinemas 
+            ON screenings.cinema_id = cinemas.cinema_id
+        JOIN movies 
+            ON screenings.movie_id = movies.movie_id
+        LEFT JOIN (
+			SELECT 
+				movie_genres.movie_id,
+				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres_names,
+				GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
+			FROM movie_genres
+			JOIN genres ON movie_genres.genre_id = genres.genre_id
+			GROUP BY movie_genres.movie_id
+        ) AS genre_agg ON movies.movie_id = genre_agg.movie_id
+
+        WHERE 
+            ( @cinema_id IS NULL OR screenings.cinema_id =  @cinema_id)
+        AND (
+            screenings.start_date > CURDATE() OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
+        )
+        ORDER BY 
+            movies.movie_id, 
+            screenings.cinema_id, 
+            screenings.room_id, 
+            screenings.start_date, 
+            screenings.start_time;
+    `
+    const [result_rows] = await pool.query(q, [cinema_id, cinema_id])
+    return result_rows
+}
 // export async function getMovieGenres(){
 //     const q = `SELECT * FROM movie_genres;`
 //     const [result_rows] = await pool.query(q);
