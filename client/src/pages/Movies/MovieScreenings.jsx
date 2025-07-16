@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
-import { Stack, Button, Box, Typography, IconButton } from "@mui/material";
+import { Stack, Button, Box, Typography, IconButton, Card, CardContent } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
@@ -25,7 +25,7 @@ function groupScreeningsByDayByRoom(screenings) {
 }
 
 
-const DateScreenings = ({ screenings}) => {
+const MovieScreenings = ({ screenings}) => {
    const [isEmployee, setIsEmployee] = useState(false);
    let infiniteScroll = isEmployee 
    console.log("isEmployee",isEmployee,"infintyScrool",infiniteScroll)
@@ -105,80 +105,92 @@ const DateScreenings = ({ screenings}) => {
    };
 
   return (
-    <Box>
-      <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-        <IconButton onClick={() => {handlePrev()}} disabled={!infiniteScroll && page <= 0}>
-          <ArrowBackIosIcon fontSize="small" />
-        </IconButton>
+    <Card elevation={4}>
+      <CardContent sx={{p: 4}}>
+        <Typography variant="h4" mb={3}>
+          Screenings
+        </Typography>
 
-{days.map(({ date, dayjsDate }, idx) => {
-  const isSelected = idx === selectedIndex;
-  const hasScreenings = (screeningsMap[date] || []).length > 0;
-  const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
+         <Box>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+            <IconButton onClick={() => {handlePrev()}} disabled={!infiniteScroll && page <= 0}>
+               <ArrowBackIosIcon fontSize="small" />
+            </IconButton>
 
-  return (
-    <Button 
-      disableRipple
-      key={date}
-      variant={isSelected ? "contained" : "outlined"}
-      onClick={() => hasScreenings && setSelectedIndex(idx)}
-      disabled={!hasScreenings}
-      sx={{ minWidth: 80, flexDirection: "column", py: 1 }}
-    >
-      <Typography variant="body2" >{date}</Typography>
-      <Typography variant="caption">{dayName}</Typography>
-    </Button>
-  );
-})}
+               {days.map(({ date, dayjsDate }, idx) => {
+               const isSelected = idx === selectedIndex;
+               const hasScreenings = (screeningsMap[date] || []).length > 0;
+               const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
 
-        <IconButton onClick={() => {handleNext()}} disabled={!infiniteScroll && page >= maxPage}>
-          <ArrowForwardIosIcon fontSize="small" />
-        </IconButton>
-      </Stack>
+               return (
+                  <Button 
+                     disableRipple
+                     key={date}
+                     variant={isSelected ? "contained" : "outlined"}
+                     onClick={() => hasScreenings && setSelectedIndex(idx)}
+                     disabled={!hasScreenings}
+                     sx={{ minWidth: 80, flexDirection: "column", py: 1 }}
+                  >
+                     <Typography variant="body2" >{date}</Typography>
+                     <Typography variant="caption">{dayName}</Typography>
+                  </Button>
+               );
+               })}
 
-      <Box>
-         {console.log("screeningsByDay in DataScreening",screeningsByDay)}
-         {selectedIndex === -1 ? (
-            screeningsByDay?.length === 0 ? ( 
-               <Typography variant="body1" color="text.secondary" gutterBottom>
-                  This movie is not on the schedule right now
-               </Typography>
-            )  :  (
-               <Typography variant="h6" gutterBottom>
-                  Please select a date
-               </Typography>
-            )
-        ) : (
-          <>
-            <Typography variant="h6" gutterBottom>
-              Screenings for {days[selectedIndex]?.date}
-            </Typography>
+            <IconButton onClick={() => {handleNext()}} disabled={!infiniteScroll && page >= maxPage}>
+               <ArrowForwardIosIcon fontSize="small" />
+            </IconButton>
+            </Stack>
 
-            {(screeningsMap[days[selectedIndex]?.date] || []).length === 0 && (
-              <Typography>No screenings available.</Typography>
+            <Box>
+               {console.log("screeningsByDay in DataScreening",screeningsByDay)}
+               {selectedIndex === -1 ? (
+                  screeningsByDay?.length === 0 ? ( 
+                     <Typography variant="body1" color="text.secondary" gutterBottom>
+                        This movie is not on the schedule right now
+                     </Typography>
+                  )  :  (
+                     <Typography variant="h6" gutterBottom>
+                        Please select a date
+                     </Typography>
+                  )
+            ) : (
+               <>
+                  <Typography variant="h6" gutterBottom>
+                  Screenings for {days[selectedIndex]?.date}
+                  </Typography>
+
+                  {(screeningsMap[days[selectedIndex]?.date] || []).length === 0 && (
+                  <Typography>No screenings available.</Typography>
+                  )}
+
+                  {(screeningsMap[days[selectedIndex]?.date] || []).map((screening) => (
+                  <Box
+                     key={screening.screening_id}
+                     sx={{
+                        p: 1,
+                        mb: 1,
+                        border: "1px solid #ccc",
+                        borderRadius: 1,
+                     }}
+                  >
+                     <Typography>
+                        {screening.start_time} - {screening.end_time} @ {screening.cinema_name} (Room{" "}
+                        {screening.room_id})
+                     </Typography>
+                  </Box>
+                  ))}
+               </>
             )}
+            </Box>
+         </Box>
+        {console.log(screenings)}
+      </CardContent>
+    </Card>
 
-            {(screeningsMap[days[selectedIndex]?.date] || []).map((screening) => (
-              <Box
-                key={screening.screening_id}
-                sx={{
-                  p: 1,
-                  mb: 1,
-                  border: "1px solid #ccc",
-                  borderRadius: 1,
-                }}
-              >
-                <Typography>
-                  {screening.start_time} - {screening.end_time} @ {screening.cinema_name} (Room{" "}
-                  {screening.room_id})
-                </Typography>
-              </Box>
-            ))}
-          </>
-        )}
-      </Box>
-    </Box>
+
+
   );
 };
 
-export default DateScreenings;
+export default MovieScreenings;

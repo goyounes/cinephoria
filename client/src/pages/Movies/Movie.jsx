@@ -1,234 +1,94 @@
-import { useState, useEffect, useMemo, useRef} from 'react';
+import { useState, useEffect, useMemo, useRef } from "react";
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
-import { useParams , useLocation} from 'react-router-dom';
-import axios from 'axios';
+import { useParams, useLocation } from "react-router-dom";
+import axios from "axios";
 
-import { Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating, Button} from "@mui/material";
-import { Stars as StarsIcon,
-  KeyboardDoubleArrowDown as DownArrow, 
-  KeyboardDoubleArrowUp as UpArrow } from '@mui/icons-material';
-import MovieScreenings from './MovieScreenings';
+import {  Container, Card,  CardContent,  Typography,  Stack,  Button,  Box,} from "@mui/material";
+import {  KeyboardDoubleArrowDown as DownArrow,  KeyboardDoubleArrowUp as UpArrow,} from "@mui/icons-material";
 
-import dayjs from 'dayjs';
-
+import MovieDetails from "./MovieDetails";
+import MovieScreenings from "./MovieScreenings";
 
 const Movie = () => {
-  // const setting = 
-    const { id } = useParams();
-    const location = useLocation()
-    const screeningsRef = useRef(null);
+  // const setting =
+  const { id } = useParams();
+  const location = useLocation();
+  const screeningsRef = useRef(null);
 
-    const [movie, setMovie] = useState(null);
-    const [screenings, setScreenings] = useState([]);
-    const [isEmployee, setIsEmployee] = useState(false);
-    // const [loadingScreenings, setLoadingScreenings] = useState(true);
-    const [loadingMovie, setLoadingMovie] = useState(true);
-    const [showScreenings, setShowScreenings] = useState(false)
+  const [movie, setMovie] = useState(null);
+  const [screenings, setScreenings] = useState([]);
+  const [isEmployee, setIsEmployee] = useState(false);
+  // const [loadingScreenings, setLoadingScreenings] = useState(true);
+  const [loadingMovie, setLoadingMovie] = useState(true);
+  const [showScreenings, setShowScreenings] = useState(false);
 
-    // Show screenings and scroll down
-    useEffect(() => {
-          setShowScreenings(location.pathname.endsWith("/screenings"));
-    }, [location.pathname]);
-    useEffect(() => {
-      if (!loadingMovie && showScreenings && screeningsRef.current) {
-        requestAnimationFrame(() => {
-          screeningsRef.current.scrollIntoView({ behavior: "smooth" });
-        });
-      }
-    }, [loadingMovie, showScreenings]);
+  // Show screenings and scroll down
+  useEffect(() => {
+    setShowScreenings(location.pathname.endsWith("/screenings"));
+  }, [location.pathname]);
+  useEffect(() => {
+    if (!loadingMovie && showScreenings && screeningsRef.current) {
+      requestAnimationFrame(() => {
+        screeningsRef.current.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+  }, [loadingMovie, showScreenings]);
 
    useEffect(() => {
-   const fetchMovie = async () => {
-      try {
-         const { data } = await axios.get(`/api/movies/${id}`);
-         setMovie(data);
-      } catch (err) {
-         console.error("Failed to fetch movie:", err);
-      } finally {
-         setLoadingMovie(false);
-      }
-   };
-
-   fetchMovie();
-   }, [id]);
-
-   // Fetch screenings — depends on admin status
-   useEffect(() => {
-   const fetchScreenings = async () => {
-      try {
-         await axios.post("/api/auth/verify/employee");
-         setIsEmployee(true);
-         const { data } = await axios.get(`/api/movies/${id}/screenings/all`);
-         setScreenings(data);
-      } catch {
-         setIsEmployee(false);
+      const fetchMovie = async () => {
          try {
-         const { data } = await axios.get(`/api/movies/${id}/screenings`);
-         setScreenings(data);
+            const { data } = await axios.get(`/api/movies/${id}`);
+            setMovie(data);
          } catch (err) {
-         console.error("Failed to fetch public screenings:", err);
+            console.error("Failed to fetch movie:", err);
+         } finally {
+            setLoadingMovie(false);
          }
-      }
-   };
-
-   fetchScreenings();
+      };
+      fetchMovie();
    }, [id]);
-    
- return (
-    <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: 'column' }}>
-      <Card elevation={4}>
-        <CardContent sx={{ p: 4 }}>
-          {loadingMovie ? (
-            <MovieSkeleton />
-          ) : (
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
-              {/* Poster */}
-              <Box
-                component="img"
-                src={movie.imageUrl}
-                alt={movie.title}
-                sx={{
-                  width: { xs: '100%', md: 338 },
-                  height: { xs: 'auto', md: 450 },
-                  objectFit: 'cover',
-                  borderRadius: 2,
-                }}
-              />
 
-              <Stack spacing={2} flex={1}>
-                <Typography variant="h3" fontWeight="bold">
-                  {movie.title}
-                </Typography>
+  // Fetch screenings — depends on admin status
+  useEffect(() => {
+    const fetchScreenings = async () => {
+      try {
+        await axios.post("/api/auth/verify/employee");
+        setIsEmployee(true);
+        const { data } = await axios.get(`/api/movies/${id}/screenings/all`);
+        setScreenings(data);
+      } catch {
+        setIsEmployee(false);
+        try {
+          const { data } = await axios.get(`/api/movies/${id}/screenings`);
+          setScreenings(data);
+        } catch (err) {
+          console.error("Failed to fetch screenings:", err);
+        }
+      }
+    };
+    fetchScreenings();
+  }, [id]);
 
-                <Stack direction="row" spacing={2} flexWrap="wrap">
-                  <Chip label={`Age ${movie.age_rating}+`} />
-                  <Chip label={`Duration: ${movie.length}`} />
-                  {movie.is_team_pick === 1 && (
-                    <Chip label="Team Pick" color="success" icon={<StarsIcon />} />
-                  )}
-                </Stack>
+  return (
+    <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column" }}>
+      {loadingMovie ? null : movie ? (
+         <>
+            <MovieDetails movie={movie} loadingMovie={loadingMovie} />
 
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Typography variant="h6">Rating:</Typography>
-                  <Rating
-                    value={parseFloat(movie.score)}
-                    precision={0.1}
-                    readOnly
-                    size="large"
-                  />
-                  <Typography variant="body1">({movie.score})</Typography>
-                </Stack>
-
-                <Divider />
-
-                <Stack direction="row" gap="8px" flexWrap="wrap" rowGap={1}>
-                  {movie.genres?.map((genre) => (
-                    <Chip key={genre.genre_id} label={genre.genre_name} size="small" />
-                  ))}
-                </Stack>
-
-                <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
-                  {movie.description}
-                </Typography>
-
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ textAlign: 'end' }}
-                >
-                  Added on {dayjs(movie.created_at).format('YYYY-MM-DD')}
-                </Typography>
-              </Stack>
-            </Stack>
-          )}
-        </CardContent>
-      </Card>
-
-      <Stack>
-        {!showScreenings && (
-          <Button
-            variant="text"
-            disableRipple
-            startIcon={<DownArrow />}
-            onClick={() => {
-              setShowScreenings(true);
-            }}
-          >
-            Show Screenings
-          </Button>
-        )}
-        {showScreenings && (
-          <Button
-            disableRipple
-            startIcon={<UpArrow />}
-            onClick={() => {
-              setShowScreenings(false);
-            }}
-          >
-            Hide Screenings
-          </Button>
-        )}
-      </Stack>
-
-      {showScreenings && (
-        <Card ref={screeningsRef} elevation={4}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h4" mb={3}>
-              Screenings
-            </Typography>
-
-            {/* {screenings && screenings.length > 0 ? ( */}
-              <MovieScreenings screenings={screenings} infiniteScroll={isEmployee} />
-            {/* ) : ( */}
-              {/* <Typography variant="body1" color="text.secondary">
-                This movie is not on the schedule right now.
-              </Typography> */}
-            {/* )} */}
-            {console.log(screenings)}
-          </CardContent>
-        </Card>
+            {!showScreenings ? (
+               <Button disableRipple startIcon={<DownArrow />} onClick={() => setShowScreenings(true)}>Show Screenings</Button>
+            ) : (<>
+               <Button disableRipple startIcon={<UpArrow />} onClick={() => setShowScreenings(false)}>Hide Screenings</Button>
+               <MovieScreenings screenings={screenings} ref={screeningsRef} />
+            </>)}
+        </>
+      ) : (
+        <Typography variant="h6" color="error">
+          This movie does not exist
+        </Typography>
       )}
     </Container>
   );
 };
-
-const MovieSkeleton = () => (
-  <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
-    {/* Poster skeleton */}
-    <Skeleton
-      variant="rectangular"
-      sx={{
-        width: { xs: '100%', md: 338 },
-        height: { xs: 300, md: 450 },
-        borderRadius: 2,
-      }}
-    />
-
-    {/* Details skeleton */}
-    <Stack spacing={2} flex={1}>
-      <Skeleton variant="text" height={48} width="70%" />
-
-      <Stack direction="row" spacing={1}>
-        <Skeleton variant="rounded" width={90} height={32} />
-        <Skeleton variant="rounded" width={120} height={32} />
-        <Skeleton variant="rounded" width={100} height={32} />
-      </Stack>
-
-      <Skeleton variant="text" width="30%" height={28} />
-      <Skeleton variant="text" width="25%" height={24} />
-
-      <Divider />
-
-      <Stack direction="row" gap={1} flexWrap="wrap" rowGap={1}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} variant="rounded" width={70} height={28} />
-        ))}
-      </Stack>
-
-      <Skeleton variant="rectangular" height={100} sx={{ mt: 2 }} />
-    </Stack>
-  </Stack>
-);
-
 
 export default Movie;
