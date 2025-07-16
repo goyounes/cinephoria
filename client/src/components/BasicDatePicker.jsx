@@ -14,7 +14,7 @@ const BasicDatePicker = ({ value, onChange, allowedDates }) => {
         label="Pick a Date"
         value={value}
         onChange={onChange}
-        format="ddd DD/MM/YYYY"
+        format="ddd DD-MM-YYYY"
         shouldDisableDate={(date) => {
           const formatted = date.format('YYYY-MM-DD');
           return !allowedDatesFormatted.includes(formatted);
