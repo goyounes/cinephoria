@@ -1,9 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreenings, getUpcomingScreenings, getAllScreeningById} from '../controllers/screenings.js'; 
+import {getAllScreenings, getUpcomingScreenings, getUpcomingScreeningById, getAllScreeningById} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
+// Code below will be needed when eventally i have a screening dashboard for admins that needs filter functions
 // router.get("/",async (req,res,next) => {
 //     const cinema_id = req.query.cinema_id || null;
 //     const movie_id = req.query.movie_id || null;
@@ -47,7 +48,7 @@ router.get("/upcoming/:id", async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for upcoming screening with screening_id =",id)
     try {
-        const screenings = await getUpcomingScreeningById()
+        const screenings = await getUpcomingScreeningById(id)
         res.status(200).json(screenings)
     } catch (error) {
         next(error)
@@ -55,7 +56,7 @@ router.get("/upcoming/:id", async (req,res,next) => {
 })
 
 
-router.get("/:id", verifyEmployeeJWT ,async (req,res,next) => {
+router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for screening with screening_id =",id)
     try {
@@ -65,7 +66,5 @@ router.get("/:id", verifyEmployeeJWT ,async (req,res,next) => {
         next(error)
     }
 })
-
-
 
 export default router;
