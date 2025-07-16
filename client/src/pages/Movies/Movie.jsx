@@ -27,7 +27,7 @@ import dayjs from 'dayjs';
 function groupScreeningsByDay(screenings) {
   return Object.entries(
     screenings.reduce((acc, screening) => {
-      const dateKey = dayjs(screening.start_date).format("DD/MM/YYYY"); // ✅ Consistent format
+      const dateKey = dayjs(screening.start_date).format("DD/MM/YYYY");
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(screening);
       return acc;
@@ -48,8 +48,7 @@ const Movie = () => {
     const [movie, setMovie] = useState(null);
     const [screenings, setScreenings] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [loadingScreenings, setLoadingScreenings] = useState(true);
-
+    // const [loadingScreenings, setLoadingScreenings] = useState(true);
     const [loadingMovie, setLoadingMovie] = useState(true);
     const [showScreenings, setShowScreenings] = useState(false)
 
@@ -93,7 +92,7 @@ const Movie = () => {
           }
         } finally {
           setLoadingMovie(false);
-          setLoadingScreenings(false);
+          // setLoadingScreenings(false);
         }
       };
 

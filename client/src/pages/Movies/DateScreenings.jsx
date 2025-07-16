@@ -1,10 +1,25 @@
 import React, { useState, useMemo } from "react";
 import dayjs from "dayjs";
+import axios from "axios";
 import { Stack, Button, Box, Typography, IconButton } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
+import { useNavigate } from "react-router-dom";
+
 const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
+    const [isAdmin, setIsAdmin] = useState(infiniteScroll);
+    const navigate = useNavigate()
+    const checkAdminStatus = async () => {
+        try {
+            await axios.post("/api/auth/verify/admin");
+            setIsAdmin(true);
+        } catch {
+            setIsAdmin(false);
+            navigate(0);
+        }
+    };
+
   const daysPerPage = 7;
   const totalDays = infiniteScroll ? Infinity : 14; // limit to 14 days if infiniteScroll off
 
@@ -40,22 +55,26 @@ const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
   }, [screeningsByDay]);
 
   // Handlers with limits if infiniteScroll = false
-  const handleNext = () => {
-    if (!infiniteScroll && page >= maxPage) return;
-    setPage((p) => p + 1);
-    setSelectedIndex(-1);
-  };
+    const handleNext = async () => {
+    if (!isAdmin && page >= maxPage) return;
+        const newPage = page + 1;
+        setPage(newPage);
+        setSelectedIndex(-1);
+        await checkAdminStatus(); // Re-check admin
+    };
 
-  const handlePrev = () => {
-    if (!infiniteScroll && page <= 0) return;
-    setPage((p) => p - 1);
-    setSelectedIndex(-1);
-  };
+    const handlePrev = async () => {
+    if (!isAdmin && page <= 0) return;
+        const newPage = page - 1;
+        setPage(newPage);
+        setSelectedIndex(-1);
+        await checkAdminStatus(); // Re-check admin
+    };
 
   return (
     <Box>
       <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-        <IconButton onClick={handlePrev} disabled={!infiniteScroll && page <= 0}>
+        <IconButton onClick={() => {handlePrev()}} disabled={!infiniteScroll && page <= 0}>
           <ArrowBackIosIcon fontSize="small" />
         </IconButton>
 
@@ -76,7 +95,7 @@ const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
           );
         })}
 
-        <IconButton onClick={handleNext} disabled={!infiniteScroll && page >= maxPage}>
+        <IconButton onClick={() => {handleNext()}} disabled={!infiniteScroll && page >= maxPage}>
           <ArrowForwardIosIcon fontSize="small" />
         </IconButton>
       </Stack>
