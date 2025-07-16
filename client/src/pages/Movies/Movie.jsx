@@ -9,32 +9,23 @@ import DownArrow from '@mui/icons-material/KeyboardDoubleArrowDown';
 import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
 import DateScreenings from './DateScreenings';
 
-
-// function groupScreeningsByDay(screenings) {
-//   return Object.entries(
-//     screenings.reduce((acc, screening) => {
-//       const dateKey = new Date(screening.start_date).toLocaleDateString();
-//       if (!acc[dateKey]) acc[dateKey] = [];
-//       acc[dateKey].push(screening);
-//       return acc;
-//     }, {})
-//   ).map(([date, screeningsForDate]) => ({
-//     date,
-//     screenings: screeningsForDate,
-//   }));
-// }
 import dayjs from 'dayjs';
-function groupScreeningsByDay(screenings) {
-  return Object.entries(
-    screenings.reduce((acc, screening) => {
-      const dateKey = dayjs(screening.start_date).format("DD/MM/YYYY");
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(screening);
-      return acc;
-    }, {})
-  ).map(([date, screeningsForDate]) => ({
+function groupScreeningsByDayByRoom(screenings) {
+  const groupedByDate = {};
+
+  for (const screening of screenings) {
+    const date = dayjs(screening.start_date).format("DD/MM/YYYY");
+
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+
+    groupedByDate[date].push(screening);
+  }
+
+  return Object.keys(groupedByDate).map((date) => ({
     date,
-    screenings: screeningsForDate,
+    screenings: groupedByDate[date],
   }));
 }
 
@@ -101,7 +92,7 @@ const Movie = () => {
 
 
     const screeningsByDay = useMemo(() => {
-      return groupScreeningsByDay(screenings);
+      return groupScreeningsByDayByRoom(screenings);
     }, [screenings]);
 
     
@@ -179,7 +170,7 @@ const Movie = () => {
                   </Typography>
 
                   <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: "end" }}>
-                    Added on {new Date(movie.created_at).toLocaleDateString()}
+                    Added on {dayjs(movie.created_at).format('YYYY-MM-DD')}
                   </Typography>
                 </>
               )}

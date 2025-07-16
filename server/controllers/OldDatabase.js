@@ -193,8 +193,37 @@ export const deleteMovie = async(id) => softDeleteTableRow("movies",id)
 
 
 // Advanced functionality
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+dayjs.extend(utc);
+dayjs.extend(timezone);
+export async function getRecentMovies() {
+  const WEDNESDAY_DAY_CODE = 3; // Wednesday
 
-export async function getRecentMovies(){
+  // Get current date/time in Europe/Paris timezone
+  const todayInParis = dayjs().tz('Europe/Paris');
+  const todayDayCode = todayInParis.day();
+
+  // Calculate offset to last Wednesday
+  const offset = (todayDayCode - WEDNESDAY_DAY_CODE + 7) % 7;
+
+  // Get last Wednesday date in Paris timezone, at start of day (midnight)
+  const lastWednesday = todayInParis.subtract(offset, 'day').startOf('day');
+
+  // Format for MySQL DATETIME ('YYYY-MM-DD HH:mm:ss')
+  const date_in_mysql_format = lastWednesday.format('YYYY-MM-DD HH:mm:ss');
+
+  // Query movies created after last Wednesday (Paris time)
+  const [result_rows] = await pool.query(`
+    SELECT * FROM movies 
+    WHERE created_at > ?;
+  `, [date_in_mysql_format]);
+
+  await dbTableLogger('movies', result_rows);
+  return result_rows;
+}
+export async function getRecentMoviesOLD(){
     const today = new Date();
     const lastWednesdayDate = new Date()
 
