@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import dayjs from "dayjs";
 import axios from "axios";
 import { Stack, Button, Box, Typography, IconButton } from "@mui/material";
@@ -7,18 +7,27 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import { useNavigate } from "react-router-dom";
 
-const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
-   const [isAdmin, setIsAdmin] = useState(infiniteScroll);
+const DateScreenings = ({ screeningsByDay}) => {
+   const [isEmployee, setIsEmployee] = useState(false);
+   let infiniteScroll = isEmployee 
+   console.log("isEmployee",isEmployee,"infintyScrool",infiniteScroll)
    const navigate = useNavigate()
-   const recheckAdminStatus = async () => {
+   
+   const checkEmployeeStatus = async () => {
+         console.log("checking status")
          try {
-            await axios.post("/api/auth/verify/admin");
-            setIsAdmin(true);
+            await axios.post("/api/auth/verify/employee");
+            setIsEmployee(true);
          } catch {
-            setIsAdmin(false);
-            navigate(0);
+            setIsEmployee(false);
          }
    };
+   useEffect(() => {
+      const excuteAsyncFunc  = async () => {
+         await checkEmployeeStatus();
+      };
+      excuteAsyncFunc ();
+   }, []);
 
    const daysPerPage = 7;
    const totalDays = infiniteScroll ? Infinity : 14; // limit to 14 days if infiniteScroll off
@@ -56,19 +65,19 @@ const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
 
    // Handlers with limits if infiniteScroll = false
    const handleNext = async () => {
-   if (!isAdmin && page >= maxPage) return;
+      if (!isEmployee && page >= maxPage) return;
       const newPage = page + 1;
       setPage(newPage);
       setSelectedIndex(-1);
-      isAdmin && await recheckAdminStatus(); // Re-check admin
+      isEmployee && await checkEmployeeStatus() && navigate(0); // Re-check admin
    };
 
    const handlePrev = async () => {
-   if (!isAdmin && page <= 0) return;
+      if (!isEmployee && page <= 0) return;
       const newPage = page - 1;
       setPage(newPage);
       setSelectedIndex(-1);
-      isAdmin && await recheckAdminStatus(); // Re-check admin
+      isEmployee && await checkEmployeeStatus() && navigate(0); // Re-check admin
    };
 
   return (
@@ -83,12 +92,13 @@ const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
           const hasScreenings = (screeningsMap[date] || []).length > 0;
 
           return (
-            <Button
-              key={date}
-              variant={isSelected ? "contained" : "outlined"}
-              onClick={() => hasScreenings && setSelectedIndex(idx)}
-              disabled={!hasScreenings}
-              sx={{ minWidth: 80 }}
+            <Button 
+               disableRipple
+               key={date}
+               variant={isSelected ? "contained" : "outlined"}
+               onClick={() => hasScreenings && setSelectedIndex(idx)}
+               disabled={!hasScreenings}
+               sx={{ minWidth: 80 }}
             >
               {date}
             </Button>
@@ -101,10 +111,17 @@ const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
       </Stack>
 
       <Box>
-        {selectedIndex === -1 ? (
-          <Typography variant="h6" gutterBottom>
-            Please select a date
-          </Typography>
+         {console.log("screeningsByDay in DataScreening",screeningsByDay)}
+         {selectedIndex === -1 ? (
+            screeningsByDay?.length === 0 ? ( 
+               <Typography variant="body1" color="text.secondary" gutterBottom>
+                  This movie is not on the schedule right now
+               </Typography>
+            )  :  (
+               <Typography variant="h6" gutterBottom>
+                  Please select a date
+               </Typography>
+            )
         ) : (
           <>
             <Typography variant="h6" gutterBottom>

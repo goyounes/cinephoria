@@ -38,7 +38,7 @@ const Movie = () => {
 
     const [movie, setMovie] = useState(null);
     const [screenings, setScreenings] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isEmployee, setIsEmployee] = useState(false);
     // const [loadingScreenings, setLoadingScreenings] = useState(true);
     const [loadingMovie, setLoadingMovie] = useState(true);
     const [showScreenings, setShowScreenings] = useState(false)
@@ -48,19 +48,19 @@ const Movie = () => {
           setShowScreenings(location.pathname.endsWith("/screenings"));
     }, [location.pathname]);
     useEffect(() => {
-      if (showScreenings && screeningsRef.current) {
+      if (!loadingMovie && showScreenings && screeningsRef.current) {
         requestAnimationFrame(() => {
           screeningsRef.current.scrollIntoView({ behavior: "smooth" });
         });
       }
-    }, [showScreenings]);
+    }, [loadingMovie, showScreenings]);
 
     useEffect(() => {
       const fetchData = async () => {
         try {
           // 1. Check admin
-          await axios.post("/api/auth/verify/admin");
-          setIsAdmin(true);
+          await axios.post("/api/auth/verify/employee");
+          setIsEmployee(true);
           // 2. Fetch all screenings (admin)
           const [movieRes, screeningsRes] = await Promise.all([
             axios.get(`/api/movies/${id}`),
@@ -70,7 +70,7 @@ const Movie = () => {
           setScreenings(screeningsRes.data);
         } catch (err) {
           // 3. Not admin — fallback
-          setIsAdmin(false);
+          setIsEmployee(false);
           try {
             const [movieRes, screeningsRes] = await Promise.all([
               axios.get(`/api/movies/${id}`),
@@ -199,13 +199,13 @@ const Movie = () => {
               Screenings
             </Typography>
 
-            {screenings && screenings.length > 0 ? (
-              <DateScreenings screeningsByDay={screeningsByDay} infiniteScroll={isAdmin} />
-            ) : (
-              <Typography variant="body1" color="text.secondary">
-                No screenings available.
-              </Typography>
-            )}
+            {/* {screenings && screenings.length > 0 ? ( */}
+              <DateScreenings screeningsByDay={screeningsByDay} infiniteScroll={isEmployee} />
+            {/* ) : ( */}
+              {/* <Typography variant="body1" color="text.secondary">
+                This movie is not on the schedule right now.
+              </Typography> */}
+            {/* )} */}
             {console.log(screenings)}
           </CardContent>
         </Card>
