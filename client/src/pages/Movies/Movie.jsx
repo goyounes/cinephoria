@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useMemo, useRef} from 'react';
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams , useLocation} from 'react-router-dom';
 import axios from 'axios';
@@ -7,6 +7,22 @@ import {Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  B
 import StarsIcon from '@mui/icons-material/Stars';
 import DownArrow from '@mui/icons-material/KeyboardDoubleArrowDown';
 import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
+import DateScreenings from './DateScreenings';
+
+
+function groupScreeningsByDay(screenings) {
+  return Object.entries(
+    screenings.reduce((acc, screening) => {
+      const dateKey = new Date(screening.start_date).toLocaleDateString();
+      if (!acc[dateKey]) acc[dateKey] = [];
+      acc[dateKey].push(screening);
+      return acc;
+    }, {})
+  ).map(([date, screeningsForDate]) => ({
+    date,
+    screenings: screeningsForDate,
+  }));
+}
 
 const Movie = () => {
   // const setting = 
@@ -32,23 +48,35 @@ const Movie = () => {
     }
   }, [showScreenings]);
 
-  useEffect(() => {
-    async function fetchMovie() {
-      try {
-        const res = await axios.get(`/api/movies/${id}`);
-        const data = res.data
-        setMovie(data);
-      } catch (err) {
-        console.error("Failed to fetch movie:", err);
-      } finally {
+    const [screenings, setScreenings] = useState([])
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [moviesRes, screeningsRes] =
+            await Promise.all([
+              axios.get(`/api/movies/${id}`),
+              axios.get(`/api/movies/${id}/screenings`),
+            ]);
+          setMovie(moviesRes.data);
+          setScreenings(screeningsRes.data);
+          // console.log(moviesRes.data)
+          // console.log(screeningsRes.data)
+          console.log(groupScreeningsByDay(screeningsRes.data))
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
         // setInterval(() => {setLoading(false);}, 500)
         setLoading(false);
       }
-    }
+      };
+      fetchData();
+    }, []);
 
-    fetchMovie();
-  }, [id]);
+      const screeningsByDay = useMemo(() => {
+        return groupScreeningsByDay(screenings);
+      }, [screenings]);
 
+    
  return (
     <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: "column" }}>
       <Card elevation={4}>
@@ -147,82 +175,17 @@ const Movie = () => {
       {showScreenings && 
       <Card ref={screeningsRef} elevation={4}>
         <CardContent sx={{ p: 4 }}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-            {/* Poster */}
-            {loading ? (
-              <Skeleton
-                variant="rectangular"
-                sx={{
-                  width: { xs: "100%", md: 338 },
-                  height: { xs: 300, md: 450 },
-                  borderRadius: 2
-                }}
-              />
-            ) : (
-              <Box
-                component="img"
-                src={movie.imageUrl}
-                alt={movie.title}
-                sx={{
-                  width: { xs: "100%", md: 338 },
-                  height: { xs: "auto", md: 450 },
-                  objectFit: "cover",
-                  borderRadius: 2,
-                }}
-              />
-            )}
+          <Typography variant="h4" mb={3}>
+            Screenings
+          </Typography>
 
-            <Stack spacing={2} flex={1}>
-              {loading ? (
-                <MovieDetailsSkeleton/>
-              ) : (
-                <>
-                  <Typography variant="h3" fontWeight="bold">
-                    {movie.title}
-                  </Typography>
-
-                  <Stack direction="row" spacing={2} flexWrap="wrap">
-                    <Chip label={`Age ${movie.age_rating}+`} />
-                    <Chip label={`Duration: ${movie.length}`} />
-                    {movie.is_team_pick === 1 && (
-                      <Chip label="Team Pick" color="success" icon={<StarsIcon />} />
-                    )}
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="h6">Rating:</Typography>
-                    <Rating
-                      value={parseFloat(movie.score)}
-                      precision={0.1}
-                      readOnly
-                      size="large"
-                    />
-                    <Typography variant="body1">({movie.score})</Typography>
-                  </Stack>
-
-                  <Divider />
-
-                  <Stack direction="row" gap="8px" flexWrap="wrap" rowGap={1}>
-                    {movie.genres?.map((genre) => (
-                      <Chip
-                        key={genre.genre_id}
-                        label={genre.genre_name}
-                        size="small"
-                      />
-                    ))}
-                  </Stack>
-
-                  <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
-                    {movie.description}
-                  </Typography>
-
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: "end" }}>
-                    Added on {new Date(movie.created_at).toLocaleDateString()}
-                  </Typography>
-                </>
-              )}
-            </Stack>
-          </Stack>
+          {screenings && screenings.length > 0 ? (
+            <DateScreenings screeningsByDay={screeningsByDay} />
+          ) : (
+            <Typography variant="body1" color="text.secondary">
+              No screenings available.
+            </Typography>
+          )}
         </CardContent>
       </Card>
 }
