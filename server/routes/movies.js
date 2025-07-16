@@ -4,7 +4,10 @@ const router = Router();
 import multer from 'multer';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
-import { addMovie, getOneMovieWithGenres, getMoviesWithGenres, getAllUpcomingMoviesWithGenres, getGenres, deleteMovie, updateMovie, getUpcomingMovies, getUpcomingMoviesWithGenres } from '../controllers/movies.js';
+import { addMovie,  getGenres, deleteMovie, updateMovie, 
+    getOneMovieWithGenres, getMoviesWithGenres,
+    getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres } 
+    from '../controllers/movies.js';
 import { getUpcomingScreenings , getAllScreenings} from '../controllers/screenings.js';
 
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
@@ -173,7 +176,7 @@ router.get("/upcoming",async (req,res,next) => {
     }
 })
 
-router.get("/upcoming/all",async (req,res,next) => {
+router.get("/upcoming/all",verifyEmployeeJWT ,async (req,res,next) => {
     try {
         const rawMovies = await getAllUpcomingMoviesWithGenres()
         const movies = CombineGenresIdNames(rawMovies)
@@ -366,7 +369,7 @@ router.get("/:id/screenings", async (req,res,next) => {
 router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     const movie_id = req.params.id
     try {
-        const screenings = await getAllScreenings(null,movie_id )
+        const screenings = await getUpcomingScreenings(null,movie_id )
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
     } catch (error) {
