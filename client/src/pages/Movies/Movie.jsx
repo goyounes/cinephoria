@@ -10,10 +10,24 @@ import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
 import DateScreenings from './DateScreenings';
 
 
+// function groupScreeningsByDay(screenings) {
+//   return Object.entries(
+//     screenings.reduce((acc, screening) => {
+//       const dateKey = new Date(screening.start_date).toLocaleDateString();
+//       if (!acc[dateKey]) acc[dateKey] = [];
+//       acc[dateKey].push(screening);
+//       return acc;
+//     }, {})
+//   ).map(([date, screeningsForDate]) => ({
+//     date,
+//     screenings: screeningsForDate,
+//   }));
+// }
+import dayjs from 'dayjs';
 function groupScreeningsByDay(screenings) {
   return Object.entries(
     screenings.reduce((acc, screening) => {
-      const dateKey = new Date(screening.start_date).toLocaleDateString();
+      const dateKey = dayjs(screening.start_date).format("DD/MM/YYYY"); // ✅ Consistent format
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(screening);
       return acc;
@@ -24,57 +38,72 @@ function groupScreeningsByDay(screenings) {
   }));
 }
 
+
 const Movie = () => {
   // const setting = 
-  const { id } = useParams();
-  const location = useLocation()
-  const screeningsRef = useRef(null);
+    const { id } = useParams();
+    const location = useLocation()
+    const screeningsRef = useRef(null);
 
-  const [movie, setMovie] = useState(null);
+    const [movie, setMovie] = useState(null);
+    const [screenings, setScreenings] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [loadingScreenings, setLoadingScreenings] = useState(true);
 
-  const [loading, setLoading] = useState(true);
-  const [showScreenings, setShowScreenings] = useState(false)
+    const [loadingMovie, setLoadingMovie] = useState(true);
+    const [showScreenings, setShowScreenings] = useState(false)
 
+    // Show screenings and scroll down
+    useEffect(() => {
+          setShowScreenings(location.pathname.endsWith("/screenings"));
+    }, [location.pathname]);
+    useEffect(() => {
+      if (showScreenings && screeningsRef.current) {
+        requestAnimationFrame(() => {
+          screeningsRef.current.scrollIntoView({ behavior: "smooth" });
+        });
+      }
+    }, [showScreenings]);
 
-  // Show screenings and scroll down
-  useEffect(() => {
-        setShowScreenings(location.pathname.endsWith("/screenings"));
-  }, [location.pathname]);
-  useEffect(() => {
-    if (showScreenings && screeningsRef.current) {
-      requestAnimationFrame(() => {
-        screeningsRef.current.scrollIntoView({ behavior: "smooth" });
-      });
-    }
-  }, [showScreenings]);
-
-    const [screenings, setScreenings] = useState([])
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const [moviesRes, screeningsRes] =
-            await Promise.all([
-              axios.get(`/api/movies/${id}`),
-              axios.get(`/api/movies/${id}/screenings`),
-            ]);
-          setMovie(moviesRes.data);
+          // 1. Check admin
+          await axios.post("/api/auth/verify/admin");
+          setIsAdmin(true);
+          // 2. Fetch all screenings (admin)
+          const [movieRes, screeningsRes] = await Promise.all([
+            axios.get(`/api/movies/${id}`),
+            axios.get(`/api/movies/${id}/screenings/all`)
+          ]);
+          setMovie(movieRes.data);
           setScreenings(screeningsRes.data);
-          // console.log(moviesRes.data)
-          // console.log(screeningsRes.data)
-          console.log(groupScreeningsByDay(screeningsRes.data))
-        } catch (error) {
-          console.error("Error fetching data:", error);
+        } catch (err) {
+          // 3. Not admin — fallback
+          setIsAdmin(false);
+          try {
+            const [movieRes, screeningsRes] = await Promise.all([
+              axios.get(`/api/movies/${id}`),
+              axios.get(`/api/movies/${id}/screenings`)
+            ]);
+            setMovie(movieRes.data);
+            setScreenings(screeningsRes.data);
+          } catch (innerErr) {
+            console.error("Error fetching movie or screenings:", innerErr);
+          }
         } finally {
-        // setInterval(() => {setLoading(false);}, 500)
-        setLoading(false);
-      }
+          setLoadingMovie(false);
+          setLoadingScreenings(false);
+        }
       };
-      fetchData();
-    }, []);
 
-      const screeningsByDay = useMemo(() => {
-        return groupScreeningsByDay(screenings);
-      }, [screenings]);
+      fetchData();
+    }, [id]);
+
+
+    const screeningsByDay = useMemo(() => {
+      return groupScreeningsByDay(screenings);
+    }, [screenings]);
 
     
  return (
@@ -83,7 +112,7 @@ const Movie = () => {
         <CardContent sx={{ p: 4 }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
             {/* Poster */}
-            {loading ? (
+            {loadingMovie ? (
               <Skeleton
                 variant="rectangular"
                 sx={{
@@ -107,7 +136,7 @@ const Movie = () => {
             )}
 
             <Stack spacing={2} flex={1}>
-              {loading ? (
+              {loadingMovie ? (
                 <MovieDetailsSkeleton/>
               ) : (
                 <>
@@ -180,7 +209,7 @@ const Movie = () => {
           </Typography>
 
           {screenings && screenings.length > 0 ? (
-            <DateScreenings screeningsByDay={screeningsByDay} />
+             <DateScreenings screeningsByDay={screeningsByDay} infiniteScroll={isAdmin} />
           ) : (
             <Typography variant="body1" color="text.secondary">
               No screenings available.

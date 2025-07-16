@@ -4,12 +4,24 @@ import { Stack, Button, Box, Typography, IconButton } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-const DateScreenings = ({ screeningsByDay }) => {
-  const [startDate, setStartDate] = useState(dayjs().startOf("day"));
-  const [selectedIndex, setSelectedIndex] = useState(-1); // no selection initially
+const DateScreenings = ({ screeningsByDay, infiniteScroll = false }) => {
+  const daysPerPage = 7;
+  const totalDays = infiniteScroll ? Infinity : 14; // limit to 14 days if infiniteScroll off
 
+  // For infinite scroll: startDate moves freely.
+  // For limited: startDate fixed to today + (page * daysPerPage)
+  const today = dayjs().startOf("day");
+  const maxPage = infiniteScroll ? Infinity : Math.floor(totalDays / daysPerPage) - 1;
+
+  const [page, setPage] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  // Compute start date based on infiniteScroll flag and page number
+  const startDate = today.add(page * daysPerPage, "day");
+
+  // Prepare visible days array for current page
   const days = useMemo(() => {
-    return [...Array(7)].map((_, i) => {
+    return [...Array(daysPerPage)].map((_, i) => {
       const date = startDate.add(i, "day");
       return {
         dayjsDate: date,
@@ -18,6 +30,7 @@ const DateScreenings = ({ screeningsByDay }) => {
     });
   }, [startDate]);
 
+  // Map date => screenings for quick lookup
   const screeningsMap = useMemo(() => {
     const map = {};
     screeningsByDay.forEach(({ date, screenings }) => {
@@ -26,20 +39,23 @@ const DateScreenings = ({ screeningsByDay }) => {
     return map;
   }, [screeningsByDay]);
 
+  // Handlers with limits if infiniteScroll = false
   const handleNext = () => {
-    setStartDate(startDate.add(7, "day"));
-    setSelectedIndex(-1); // reset selection on page change
+    if (!infiniteScroll && page >= maxPage) return;
+    setPage((p) => p + 1);
+    setSelectedIndex(-1);
   };
 
   const handlePrev = () => {
-    setStartDate(startDate.subtract(7, "day"));
-    setSelectedIndex(-1); // reset selection on page change
+    if (!infiniteScroll && page <= 0) return;
+    setPage((p) => p - 1);
+    setSelectedIndex(-1);
   };
 
   return (
     <Box>
       <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-        <IconButton onClick={handlePrev}>
+        <IconButton onClick={handlePrev} disabled={!infiniteScroll && page <= 0}>
           <ArrowBackIosIcon fontSize="small" />
         </IconButton>
 
@@ -60,7 +76,7 @@ const DateScreenings = ({ screeningsByDay }) => {
           );
         })}
 
-        <IconButton onClick={handleNext}>
+        <IconButton onClick={handleNext} disabled={!infiniteScroll && page >= maxPage}>
           <ArrowForwardIosIcon fontSize="small" />
         </IconButton>
       </Stack>
