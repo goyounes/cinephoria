@@ -8,7 +8,7 @@ import { addMovie,  getGenres, deleteMovie, updateMovie,
     getOneMovieWithGenres, getMoviesWithGenres,
     getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres } 
     from '../controllers/movies.js';
-import { getUpcomingScreenings , getAllScreenings} from '../controllers/screenings.js';
+import { getUpcomingScreenings , getAllUpcomingScreenings, getAllScreenings} from '../controllers/screenings.js';
 import {s3, bucketName} from "../awsS3Client.js"
 
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
@@ -127,6 +127,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
     }
 })
 
+//Not used yet..
 router.get("/recent",async (req,res,next) => {
     try {
         const rawMovies = await getMoviesAddedSince()
@@ -197,6 +198,29 @@ router.get("/genres",async (req,res,next) => {
     }
 })
 
+router.get("/:id/screenings", async (req,res,next) => {
+    const movie_id = req.params.id
+    try {
+        const screenings = await getUpcomingScreenings(null,movie_id )
+        console.log("screenigs =>",screenings)
+        res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
+    const movie_id = req.params.id
+    try {
+        const screenings = await getAllUpcomingScreenings(null,movie_id )
+        console.log("screenigs =>",screenings)
+        res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
+    }
+})
+
+// Movie resource own links
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing DB for movie with movie_id =",id)
@@ -309,7 +333,6 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
     }
 })
 
-
 router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     const id = req.params.id
     console.log("Deleting movie with movie_id =",id)
@@ -343,28 +366,6 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
         res.status(204).json({message: "movie deleted succesfully"})
     } catch (error) {
         next(error) // network request or re-thrown error
-    }
-})
-
-router.get("/:id/screenings", async (req,res,next) => {
-    const movie_id = req.params.id
-    try {
-        const screenings = await getUpcomingScreenings(null,movie_id )
-        console.log("screenigs =>",screenings)
-        res.status(200).json(screenings)
-    } catch (error) {
-        next(error)
-    }
-})
-
-router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
-    const movie_id = req.params.id
-    try {
-        const screenings = await getUpcomingScreenings(null,movie_id )
-        console.log("screenigs =>",screenings)
-        res.status(200).json(screenings)
-    } catch (error) {
-        next(error)
     }
 })
 
