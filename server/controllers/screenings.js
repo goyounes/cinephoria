@@ -38,7 +38,7 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
         ) AND (
             screenings.start_date > CURDATE()   OR  (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         ) AND (
-			screenings.start_date <= CURDATE() + INTERVAL 14 DAY
+			screenings.start_date < CURDATE() + INTERVAL 14 DAY
         )
         ORDER BY screenings.start_date, screenings.start_time;
     `
@@ -57,7 +57,7 @@ export async function getUpcomingScreeningById(screening_id){    //How to handle
         WHERE (
             screenings.start_date > CURDATE()   OR  (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         ) AND (
-			screenings.start_date <= CURDATE() + INTERVAL 14 DAY
+			screenings.start_date < CURDATE() + INTERVAL 14 DAY
         ) AND (
             screenings.screening_id = ?
         )
