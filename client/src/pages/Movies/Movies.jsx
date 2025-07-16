@@ -19,6 +19,9 @@ import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningD
 
 
 const Movies = () => {
+   //TODO: Change the code so that it's understood that we are getting Screenings. and tht they have full movie data in them for each one.
+   //eventually, this will become the recived movies list should group Movies and an array for each that has all screening data inside, 
+   //This can be done in the server endopint level , but the code from this point onwards has to evolve accordingly
    const [movies, setMovies] = useState([]);
    const [cinemas, setCinemas] = useState([]);
    const [genresList, setGenresList] = useState([]);

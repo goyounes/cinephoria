@@ -3,11 +3,11 @@ import { useState, useEffect, useMemo, useRef} from 'react';
 import { useParams , useLocation} from 'react-router-dom';
 import axios from 'axios';
 
-import {Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating, Button} from "@mui/material";
-import StarsIcon from '@mui/icons-material/Stars';
-import DownArrow from '@mui/icons-material/KeyboardDoubleArrowDown';
-import UpArrow from '@mui/icons-material/KeyboardDoubleArrowUp';
-import DateScreenings from './DateScreenings';
+import { Skeleton, Container,  Card,  CardContent,  Typography,  Stack,  Chip,  Box,  Divider,  Rating, Button} from "@mui/material";
+import { Stars as StarsIcon,
+  KeyboardDoubleArrowDown as DownArrow, 
+  KeyboardDoubleArrowUp as UpArrow } from '@mui/icons-material';
+import MovieScreenings from './MovieScreenings';
 
 import dayjs from 'dayjs';
 
@@ -176,7 +176,7 @@ const Movie = () => {
             </Typography>
 
             {/* {screenings && screenings.length > 0 ? ( */}
-              <DateScreenings screenings={screenings} infiniteScroll={isEmployee} />
+              <MovieScreenings screenings={screenings} infiniteScroll={isEmployee} />
             {/* ) : ( */}
               {/* <Typography variant="body1" color="text.secondary">
                 This movie is not on the schedule right now.

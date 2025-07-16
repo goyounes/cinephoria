@@ -32,11 +32,14 @@ const DateScreenings = ({ screenings}) => {
    const navigate = useNavigate()
    
    const checkEmployeeStatus = async () => {
+    console.log("checking")
          try {
             await axios.post("/api/auth/verify/employee");
             setIsEmployee(true);
+            return true
          } catch {
             setIsEmployee(false);
+            return false
          }
    };
    useEffect(() => {
@@ -89,7 +92,7 @@ const DateScreenings = ({ screenings}) => {
       const newPage = page + 1;
       setPage(newPage);
       setSelectedIndex(-1);
-      isEmployee && await checkEmployeeStatus() && navigate(0); // Re-check admin
+      isEmployee &&  !await checkEmployeeStatus() && navigate(0); // Re-check admin
    };
 
    const handlePrev = async () => {
@@ -97,7 +100,8 @@ const DateScreenings = ({ screenings}) => {
       const newPage = page - 1;
       setPage(newPage);
       setSelectedIndex(-1);
-      isEmployee && await checkEmployeeStatus() && navigate(0); // Re-check admin
+      isEmployee && !await checkEmployeeStatus() && navigate(0); // Re-check admin
+      console.log("went back, now checking admin status")
    };
 
   return (
