@@ -37,40 +37,42 @@ const Movie = () => {
       }
     }, [loadingMovie, showScreenings]);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          // 1. Check admin
-          await axios.post("/api/auth/verify/employee");
-          setIsEmployee(true);
-          // 2. Fetch all screenings (admin)
-          const [movieRes, screeningsRes] = await Promise.all([
-            axios.get(`/api/movies/${id}`),
-            axios.get(`/api/movies/${id}/screenings/all`)
-          ]);
-          setMovie(movieRes.data);
-          setScreenings(screeningsRes.data);
-        } catch (err) {
-          // 3. Not admin — fallback
-          setIsEmployee(false);
-          try {
-            const [movieRes, screeningsRes] = await Promise.all([
-              axios.get(`/api/movies/${id}`),
-              axios.get(`/api/movies/${id}/screenings`)
-            ]);
-            setMovie(movieRes.data);
-            setScreenings(screeningsRes.data);
-          } catch (innerErr) {
-            console.error("Error fetching movie or screenings:", innerErr);
-          }
-        } finally {
-          setLoadingMovie(false);
-          // setLoadingScreenings(false);
-        }
-      };
+   useEffect(() => {
+   const fetchMovie = async () => {
+      try {
+         const { data } = await axios.get(`/api/movies/${id}`);
+         setMovie(data);
+      } catch (err) {
+         console.error("Failed to fetch movie:", err);
+      } finally {
+         setLoadingMovie(false);
+      }
+   };
 
-      fetchData();
-    }, [id]);
+   fetchMovie();
+   }, [id]);
+
+   // Fetch screenings — depends on admin status
+   useEffect(() => {
+   const fetchScreenings = async () => {
+      try {
+         await axios.post("/api/auth/verify/employee");
+         setIsEmployee(true);
+         const { data } = await axios.get(`/api/movies/${id}/screenings/all`);
+         setScreenings(data);
+      } catch {
+         setIsEmployee(false);
+         try {
+         const { data } = await axios.get(`/api/movies/${id}/screenings`);
+         setScreenings(data);
+         } catch (err) {
+         console.error("Failed to fetch public screenings:", err);
+         }
+      }
+   };
+
+   fetchScreenings();
+   }, [id]);
     
  return (
     <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: 'column' }}>
