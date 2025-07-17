@@ -11,7 +11,7 @@ export const hasAnyGenre = (movie, selectedGenres) => {
   return false;
 };
 
-export const filterAndUniqueMovies = (movies, { selectedCinema, selectedGenres}) => {
+export const filterAndUniqueMovies = (movies, { selectedCinema = null, selectedGenres = []}) => {
   const alreadyIncludedInFinalList = new Set();
 
   return movies.filter((movie) => {
@@ -86,4 +86,21 @@ export function groupScreenings(screenings) {
   }
   // console.log(groupedByDateByLocation);
   return groupedByDateByLocation;
+}
+
+
+export function groupScreeningsByMovie(screenings) {
+  const grouped = {};
+
+  for (const screening of screenings) {
+    const { movie_id } = screening;
+
+    if (!grouped[movie_id]) {
+      grouped[movie_id] = [];
+    }
+
+    grouped[movie_id].push(screening);
+  }
+
+  return grouped;
 }
