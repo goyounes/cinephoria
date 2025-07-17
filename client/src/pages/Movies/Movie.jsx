@@ -16,7 +16,7 @@ const Movie = () => {
   const screeningsRef = useRef(null);
 
   const [movie, setMovie] = useState(null);
-  const [screenings, setScreenings] = useState([]);
+
   // const [loadingScreenings, setLoadingScreenings] = useState(true);
   const [loadingMovie, setLoadingMovie] = useState(true);
   const [showScreenings, setShowScreenings] = useState(false);
@@ -47,24 +47,6 @@ const Movie = () => {
       fetchMovie();
    }, [id]);
 
-  // Fetch screenings — depends on admin status
-  useEffect(() => {
-    const fetchScreenings = async () => {
-      try {
-        await axios.post("/api/auth/verify/employee");
-        const { data } = await axios.get(`/api/movies/${id}/screenings/all`);
-        setScreenings(data);
-      } catch {
-         try {
-            const { data } = await axios.get(`/api/movies/${id}/screenings`);
-            setScreenings(data);
-         } catch (err) {
-            console.error("Failed to fetch screenings:", err);
-         }
-      }
-    };
-    fetchScreenings();
-  }, [id]);
 
   return (
       <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column" }}>
@@ -87,7 +69,7 @@ const Movie = () => {
                </Button>
 
                {showScreenings && (
-               <MovieScreenings screenings={screenings} ref={screeningsRef} />
+               <MovieScreenings movieId={id} ref={screeningsRef}  />
                )}
             </>
          )}
