@@ -1,7 +1,7 @@
 import axios from "axios";
 import dayjs from "dayjs";
-import { useEffect, useState, useMemo ,useRef} from "react";
-
+import { useEffect, useState, useMemo ,useRef } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import {
 Container,  Stack,  Box, Card,  
 Typography,  Button,  IconButton, Divider,
@@ -15,7 +15,7 @@ import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates, groupScreeningsByMovie} from "./utils"
 import MovieScreenings from "./components/MovieScreenings";
-import { useLocation } from 'react-router-dom';
+import MovieDetails from "./components/MovieDetails";
 
 
 const Reservation = () => {
@@ -34,7 +34,7 @@ const Reservation = () => {
 
    const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(screenings), [screenings])
 
-   console.log("Selected Screenings",screeningsToDisplay)
+   console.log("ScreeningsTo Display Map",screeningsToDisplay)
    // const screenings = 
 
    const filteredMovies = useMemo(
@@ -43,31 +43,20 @@ const Reservation = () => {
    );
    const moviesToDisplay = filteredMovies
    
-   useEffect(() => {
-      // Assuming URL structure: /reservation/:id/screenings
-      const pathParts = location.pathname.split("/"); // ['', 'reservation', '2', 'screenings']
-      const reservationIndex = pathParts.indexOf("reservation");
 
-      // if (reservationIndex !== -1 && pathParts.length > reservationIndex + 2) {
-      //    const id = pathParts[reservationIndex + 1];
-      //    setSelectedMovie(id);
-      // }
-   }, [location.pathname, setSelectedMovieId]);
-
-
-   useEffect(() => {
-      if (selectedMovieId && screeningsRef.current) {
-         requestAnimationFrame(() => {
-         screeningsRef.current.scrollIntoView({ behavior: "smooth" });
-         });
-      }
-   }, [selectedMovieId]);
+      const { id } = useParams();
+      console.log(first)
+      useEffect(() => {
+         const parsedId = parseInt(id);
+         if (!isNaN(parsedId)) {
+            setSelectedMovieId(parsedId);
+         }
+      }, [id]); // ✅ Watching id
 
    //Initial Movies Screenings Data Fetch
    useEffect(() => {
    const fetchInitialData = async () => {
       try {
-         // First, check if user is admin
          let isAdmin = false;
          try {
             await axios.post("/api/auth/verify/employee");
@@ -75,13 +64,11 @@ const Reservation = () => {
          } catch {
             isAdmin = false;
          }
-
          // Fetch data depending on user role
-         const [moviesRes, cinemaRes, genreRes] = await Promise.all([
+         const [moviesRes, cinemaRes] = await Promise.all([
          axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
          axios.get("/api/cinemas"),
          ]);
-
          setScreenings(moviesRes.data);
          setCinemas(cinemaRes.data);
       } catch (error) {
@@ -151,16 +138,19 @@ return (
 
       <Stack gap={2} justifyContent="flex-start" direction="row" flexWrap="wrap">
       {moviesToDisplay.map((movie) => (
-         <MovieCard to={`/reservation/${movie.movie_id}/screenings`} 
+         <MovieCard to={`/reservation/${movie.movie_id}`} 
             key={movie.movie_id} 
             movie={movie} 
-            onClick={() => {setSelectedMovieId(movie.movie_id)}}
          />
          ))}
       </Stack>
-
       {selectedMovieId !== -1 && (
-      <MovieScreenings  screenings={screeningsToDisplay[selectedMovieId]} ref={screeningsRef} />
+         <MovieDetails movie={screeningsToDisplay[selectedMovieId][0]} loadingMovie={false} />
+      )}
+
+      {selectedMovieId !== -1 && console.log(screeningsToDisplay[selectedMovieId])}
+      {selectedMovieId !== -1 && (
+         <MovieScreenings  screenings={screeningsToDisplay[selectedMovieId] } ref={screeningsRef} />     
       )}
 
 

@@ -15,7 +15,7 @@ const MovieScreenings = ({ screenings }) => {
   const [isEmployee, setIsEmployee] = useState(false);
   let infiniteScroll = isEmployee;
   const navigate = useNavigate();
-
+   console.log("recived screenings",screenings )
   const checkEmployeeStatus = async () => {
     try {
       await axios.post("/api/auth/verify/employee");
@@ -195,7 +195,7 @@ const ScreeningsList = ({ screeningsByLocation }) => {
 
                   <Stack spacing={2}>
                      {Object.entries(cinemaData).map(([roomId, roomData]) => {
-                        if (!roomData.screenings) return null;
+                        if (!roomData?.screenings) return null;
 
                         return (
                            <Stack id="Room_Screenings" key={roomId} direction="row" sx={{ flexWrap: "wrap", gap: 1 }}> 
