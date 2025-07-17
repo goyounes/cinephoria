@@ -34,7 +34,7 @@ const MessagesList = ({ messages }) => {
   );
 };
 
-const Messages = () => {
+const AdminMessages = () => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -61,4 +61,4 @@ const Messages = () => {
   );
 };
 
-export default Messages;
+export default AdminMessages;

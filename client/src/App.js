@@ -11,8 +11,9 @@ import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
 import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
 import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
+import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 
-import { Home, Tickets, Screenings } from './pages';
+import { Home, Screenings } from './pages';
 import Movies from './pages/Movies/Movies';
 import Movie from './pages/Movies/Movie';
 
@@ -46,9 +47,9 @@ function App() {
             <Route path="/screenings/create" element={<Screenings />} />
             <Route path="/screenings/:id" element={<Screenings />} />
             {/* Tickets */}
-            <Route path="/tickets" element={<Tickets />} />
-            <Route path="/tickets/create" element={<Tickets />} />
-            <Route path="/tickets/:id" element={<Tickets />} />
+            <Route path="/tickets" element={<AdminTickets />} />
+            <Route path="/tickets/create" element={<AdminTickets />} />
+            <Route path="/tickets/:id" element={<AdminTickets />} />
             {/* Messages */}
             <Route path="/messages" element={<AdminMessages />} />
             {/* Users */}
