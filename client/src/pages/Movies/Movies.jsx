@@ -113,6 +113,8 @@ const Movies = () => {
 
   return (
     <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column", gap: 1}}>
+      <Typography variant="h3">Movies</Typography>
+
       <Card sx={{ p: 2 }}>
         <Stack direction="row" spacing={2} alignItems="stretch">
           <FormControl sx={{ width: 360 }}>
