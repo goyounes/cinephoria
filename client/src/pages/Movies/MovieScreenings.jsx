@@ -93,80 +93,84 @@ const MovieScreenings = ({ screenings }) => {
   return (
     <Card elevation={4}>
       <CardContent sx={{ p: 4 }}>
-        <Typography variant="h4" mb={3}>
-          Screenings
-        </Typography>
+         <Typography variant="h4" mb={3}>
+            Screenings
+         </Typography>
 
-        <Box>
-          <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+
+         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
             <IconButton
-              onClick={() => {
-                handlePrev();
-              }}
-              disabled={!infiniteScroll && page <= 0}
+            onClick={() => {
+               handlePrev();
+            }}
+            disabled={!infiniteScroll && page <= 0}
             >
-              <ArrowBackIosIcon fontSize="small" />
+            <ArrowBackIosIcon fontSize="small" />
             </IconButton>
 
             {days.map(({ date, dayjsDate }, idx) => {
-              const isSelected = idx === selectedIndex;
-              const hasScreenings = screeningDates.includes(date);
-              const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
+            const isSelected = idx === selectedIndex;
+            const hasScreenings = screeningDates.includes(date);
+            const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
 
-              return (
-                <Button
+            return (
+               <Button
                   disableRipple
                   key={date}
                   variant={isSelected ? "contained" : "outlined"}
                   onClick={() => hasScreenings && setSelectedIndex(idx)}
                   disabled={!hasScreenings}
                   sx={{ minWidth: 80, flexDirection: "column", py: 1 }}
-                >
+               >
                   <Typography variant="body2">{date}</Typography>
                   <Typography variant="caption">{dayName}</Typography>
-                </Button>
-              );
+               </Button>
+            );
             })}
 
             <IconButton
-              onClick={() => {
-                handleNext();
-              }}
-              disabled={!infiniteScroll && page >= maxPage}
+            onClick={() => {
+               handleNext();
+            }}
+            disabled={!infiniteScroll && page >= maxPage}
             >
-              <ArrowForwardIosIcon fontSize="small" />
+            <ArrowForwardIosIcon fontSize="small" />
             </IconButton>
-          </Stack>
+         </Stack>
 
-          <Box>
-            {selectedIndex === -1 ? (
-              screeningsByDay?.length === 0 ? (
-                <Typography variant="body1" color="text.secondary" gutterBottom>
+         <Stack>
+            {Object.keys(screeningsByDay || {}).length === 0 && (
+               <Typography variant="body1" color="text.secondary" gutterBottom>
                   This movie is not on the schedule right now
-                </Typography>
-              ) : (
-                <Typography variant="h6" gutterBottom>
-                  Please select a date
-                </Typography>
-              )
-            ) : (
-              <>
-                <Typography variant="h6" gutterBottom>
-                  Screenings for {days[selectedIndex]?.date}
-                </Typography>
-
-                {(screeningsMap[days[selectedIndex]?.date] || []).length ===
-                  0 && <Typography>No screenings available.</Typography>}
-
-                <ScreeningsList
-                  screeningsByLocation={
-                    screeningsMap[days[selectedIndex]?.date]
-                  }
-                />
-              </>
+               </Typography>
             )}
-          </Box>
-        </Box>
+
+            {Object.keys(screeningsByDay || {}).length !== 0 && selectedIndex === -1 && (
+               <Typography variant="h6" gutterBottom>
+                  Please select a date
+               </Typography>
+            )}
+
+            {Object.keys(screeningsByDay || {}).length !== 0 && selectedIndex !== -1 && (() => {
+               const selectedDate = days[selectedIndex]?.date;
+               const screenings = screeningsMap[selectedDate] || [];
+
+               return (
+                  <>
+                  <Typography variant="h6" gutterBottom>
+                     Screenings for {selectedDate}
+                  </Typography>
+
+                  {screenings.length === 0 ? (
+                     <Typography>No screenings available.</Typography>
+                  ) : (
+                     <ScreeningsList screeningsByLocation={screenings} />
+                  )}
+                  </>
+               );
+            })()}
+         </Stack>
+
       </CardContent>
     </Card>
   );
@@ -178,36 +182,34 @@ const ScreeningsList = ({ screeningsByLocation }) => {
   if (!screeningsByLocation) return null;
 
   return (
-    <>
-      {Object.entries(screeningsByLocation).map(([cinemaId, cinemaData]) => {
-        if (typeof cinemaData !== "object" || !cinemaData.cinema_id)
-          return null;
+      <Stack spacing={1}>
+         {Object.entries(screeningsByLocation).map(([cinemaId, cinemaData]) => {
+            if (typeof cinemaData !== "object" || !cinemaData.cinema_id) return null;
 
-        return (
-          <Box key={cinemaId} sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
-              Cinema: {cinemaData.cinema_name}
-            </Typography>
+            return (
+               <Stack id="Cinema_Screenings" key={cinemaId} >
 
-            {Object.entries(cinemaData).map(([roomId, roomData]) => {
-              if (!roomData.screenings) return null;
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "bold"}}>
+                     Cinema: {cinemaData.cinema_name}
+                  </Typography>
 
-              return (
-                <Stack
-                  key={roomId}
-                  direction="row"
-                  sx={{ mb: 2, flexWrap: "wrap", gap: 2 }}
-                >
-                  {roomData.screenings.map((screening, i) => (
-                    <ScreeningButton key={screening.screening_id} screening={screening} room_name={roomData.room_name}/>
-                  ))}
-                </Stack>
-              );
-            })}
-          </Box>
-        );
-      })}
-    </>
+                  <Stack spacing={2}>
+                     {Object.entries(cinemaData).map(([roomId, roomData]) => {
+                        if (!roomData.screenings) return null;
+
+                        return (
+                           <Stack id="Room_Screenings" key={roomId} direction="row" sx={{ flexWrap: "wrap", gap: 1 }}> 
+                              {roomData.screenings.map((screening) => (
+                                 <ScreeningButton key={screening.screening_id} screening={screening} room_name={roomData.room_name}/>
+                              ))}
+                           </Stack>
+                        );
+                     })}                     
+                  </Stack>              
+               </Stack>
+         );
+         })}
+      </Stack>
   );
 };
 
