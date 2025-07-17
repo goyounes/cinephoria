@@ -2,12 +2,14 @@
 import { Link } from "react-router-dom";
 import { Box ,Card, CardMedia, Stack, Typography } from "@mui/material";
 
-const MovieCard = ({movie}) => {
+const MovieCard = ({movie,to}) => {
+  const Component = to ? Link : "div";
+
   return (
     <Box sx={{width: 225}}>
       <Card
-        component={Link}
-        to={`/movies/${movie.movie_id}/screenings`}
+        component={Component}
+        {...(to ? { to } : {})}
         sx={{
           textDecoration: "none",
           color: "inherit",
