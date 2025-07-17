@@ -67,24 +67,31 @@ const Movie = () => {
   }, [id]);
 
   return (
-    <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column" }}>
-      {loadingMovie ? null : movie ? (
-         <>
-            <MovieDetails movie={movie} loadingMovie={loadingMovie} />
+      <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column" }}>
+         {loadingMovie && <MovieDetails movie={null} loadingMovie={true} />}
 
-            {!showScreenings ? (
-               <Button disableRipple startIcon={<DownArrow />} onClick={() => setShowScreenings(true)}>Show Screenings</Button>
-            ) : (<>
-               <Button disableRipple startIcon={<UpArrow />} onClick={() => setShowScreenings(false)}>Hide Screenings</Button>
+         {!loadingMovie && !movie && (
+            <Typography variant="h6">This movie does not exist</Typography>
+         )}
+
+         {!loadingMovie && movie && (
+            <>
+               <MovieDetails movie={movie} loadingMovie={false} />
+
+               <Button
+               disableRipple
+               startIcon={showScreenings ? <UpArrow /> : <DownArrow />}
+               onClick={() => setShowScreenings((prev) => !prev)}
+               >
+               {showScreenings ? "Hide Screenings" : "Show Screenings"}
+               </Button>
+
+               {showScreenings && (
                <MovieScreenings screenings={screenings} ref={screeningsRef} />
-            </>)}
-        </>
-      ) : (
-        <Typography variant="h6" >
-          This movie does not exist
-        </Typography>
-      )}
-    </Container>
+               )}
+            </>
+         )}
+      </Container>
   );
 };
 

@@ -1,8 +1,16 @@
-import { Card, CardContent, Stack, Box, Typography, Chip, Rating , Skeleton, Divider} from '@mui/material';
-import {  Stars as StarsIcon} from "@mui/icons-material";
-
-
-import dayjs from 'dayjs';
+import {
+  Card,
+  CardContent,
+  Stack,
+  Box,
+  Typography,
+  Chip,
+  Rating,
+  Skeleton,
+  Divider,
+} from "@mui/material";
+import { Stars as StarsIcon } from "@mui/icons-material";
+import dayjs from "dayjs";
 
 const MovieSkeleton = () => (
   <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
@@ -42,25 +50,14 @@ const MovieSkeleton = () => (
   </Stack>
 );
 
-
-const MovieDetails = ({movie, loadingMovie}) => {
-return (
-    <Card elevation={4}>
-      <CardContent
-        sx={{
-          p: 4,
-        }}
-      >
+const MovieDetails = ({ movie, loadingMovie }) => {
+  return (
+    <Card elevation={4}> 
+      <CardContent sx={{ p: 4}}>
         {loadingMovie ? (
           <MovieSkeleton />
         ) : (
-          <Stack
-            direction={{
-              xs: "column",
-              md: "row",
-            }}
-            spacing={4}
-          >
+          <Stack direction={{xs: "column",md: "row"}} spacing={4}>
             {/* Poster */}
             <Box
               component="img"
@@ -145,6 +142,6 @@ return (
       </CardContent>
     </Card>
   );
-}
+};
 
-export default MovieDetails
+export default MovieDetails;
