@@ -7,32 +7,53 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 
-function groupScreeningsByDayByRoom(screenings) {
-  const groupedByDate = {};
+function groupScreenings(screenings) {
+   // Group by Days
+  const groupedByDateObj = {};
   for (const screening of screenings) {
     const date = dayjs(screening.start_date).format("DD/MM/YYYY");
 
-    if (!groupedByDate[date]) {
-      groupedByDate[date] = [];
+    if (!groupedByDateObj[date]) {
+      groupedByDateObj[date] = [];
     }
 
-    groupedByDate[date].push(screening);
+    groupedByDateObj[date].push(screening);
   }
-  return Object.keys(groupedByDate).map((date) => ({
-    date,
-    screenings: groupedByDate[date],
-  }));
+//   console.log("Screenings Arr",screenings)
+//   console.log("grouped by date HashMap", groupedByDateObj)
+const groupedByDateArr = Object.keys(groupedByDateObj).map((date) => ({
+   date,
+   screenings: groupedByDateObj[date],
+}));
+//   console.log("grouped by date Array", groupedByDateArr)
+   const groupedByDateByLocation = {}
+   for (const dateStr in groupedByDateObj) {
+      const groupedByLocation = {}
+      const screenings = groupedByDateObj[dateStr];
+      for (const screening of screenings){
+         const {cinema_id, room_id} = screening
+         if (!groupedByLocation[cinema_id]) {
+            groupedByLocation[cinema_id] = {};
+            // console.log("grouped by location",groupedByLocation)
+         }
+         if (!groupedByLocation[cinema_id][room_id]){
+            groupedByLocation[cinema_id][room_id] = []
+         }
+         groupedByLocation[cinema_id][room_id].push(screening);
+      }
+      groupedByDateByLocation[dateStr] = groupedByLocation
+   }
+   console.log(groupedByDateByLocation)
+  return groupedByDateArr
 }
 
 
 const MovieScreenings = ({ screenings}) => {
    const [isEmployee, setIsEmployee] = useState(false);
    let infiniteScroll = isEmployee 
-   console.log("isEmployee",isEmployee,"infintyScrool",infiniteScroll)
    const navigate = useNavigate()
    
    const checkEmployeeStatus = async () => {
-    console.log("checking")
          try {
             await axios.post("/api/auth/verify/employee");
             setIsEmployee(true);
@@ -49,7 +70,7 @@ const MovieScreenings = ({ screenings}) => {
       excuteAsyncFunc ();
    }, []);
 
-   const screeningsByDay = useMemo(() => groupScreeningsByDayByRoom(screenings), [screenings])
+   const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings])
 
    const DAYS_PER_PAGE = 7;
    const LIMITED_TOTAL_DAYS = 14;
@@ -101,7 +122,6 @@ const MovieScreenings = ({ screenings}) => {
       setPage(newPage);
       setSelectedIndex(-1);
       isEmployee && !await checkEmployeeStatus() && navigate(0); // Re-check admin
-      console.log("went back, now checking admin status")
    };
 
   return (
@@ -143,7 +163,6 @@ const MovieScreenings = ({ screenings}) => {
             </Stack>
 
             <Box>
-               {console.log("screeningsByDay in DataScreening",screeningsByDay)}
                {selectedIndex === -1 ? (
                   screeningsByDay?.length === 0 ? ( 
                      <Typography variant="body1" color="text.secondary" gutterBottom>
@@ -184,7 +203,6 @@ const MovieScreenings = ({ screenings}) => {
             )}
             </Box>
          </Box>
-        {console.log(screenings)}
       </CardContent>
     </Card>
 
