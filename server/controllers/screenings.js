@@ -25,12 +25,23 @@ export async function  addScreening(s){
 //New  Database Functions
 export async function getUpcomingScreenings(cinema_id,movie_id){    //How to handle filters query
     const q = `
-        SELECT screenings.*, cinemas.cinema_name, movies.title
+        SELECT screenings.*, cinemas.cinema_name, movies.title, quality_agg.qualities_ids, quality_agg.qualities_names
         FROM screenings
         JOIN cinemas 
             ON screenings.cinema_id = cinemas.cinema_id
         JOIN movies
             ON screenings.movie_id = movies.movie_id
+
+        LEFT JOIN (
+            SELECT 
+				screening_qualities.screening_id,
+                GROUP_CONCAT(qualities.quality_id SEPARATOR ';') AS qualities_ids,
+				GROUP_CONCAT(qualities.quality_name SEPARATOR ';') AS qualities_names
+			FROM screening_qualities
+			JOIN qualities ON screening_qualities.quality_id = qualities.quality_id
+			GROUP BY screening_qualities.screening_id
+        )    AS quality_agg ON screenings.screening_id = quality_agg.screening_id
+
         WHERE (
             ? IS NULL OR screenings.cinema_id = ?
         ) AND (
@@ -47,12 +58,23 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
 }
 export async function getAllUpcomingScreenings(cinema_id,movie_id){    //How to handle filters query
     const q = `
-        SELECT screenings.*, cinemas.cinema_name, movies.title
+        SELECT screenings.*, cinemas.cinema_name, movies.title, quality_agg.qualities_ids, quality_agg.qualities_names
         FROM screenings
         JOIN cinemas 
             ON screenings.cinema_id = cinemas.cinema_id
         JOIN movies
             ON screenings.movie_id = movies.movie_id
+
+        LEFT JOIN (
+            SELECT 
+				screening_qualities.screening_id,
+                GROUP_CONCAT(qualities.quality_id SEPARATOR ';') AS qualities_ids,
+				GROUP_CONCAT(qualities.quality_name SEPARATOR ';') AS qualities_names
+			FROM screening_qualities
+			JOIN qualities ON screening_qualities.quality_id = qualities.quality_id
+			GROUP BY screening_qualities.screening_id
+        )    AS quality_agg ON screenings.screening_id = quality_agg.screening_id
+
         WHERE (
             ? IS NULL OR screenings.cinema_id = ?
         ) AND (

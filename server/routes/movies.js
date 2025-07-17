@@ -17,6 +17,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
 import randomImageName from '../utils/randomImageName.js';
 import { CombineGenresIdNames } from '../utils/index.js';
+import { CombineQualitiesIdNames } from '../utils/index.js';
 
 
 
@@ -201,7 +202,8 @@ router.get("/genres",async (req,res,next) => {
 router.get("/:id/screenings", async (req,res,next) => {
     const movie_id = req.params.id
     try {
-        const screenings = await getUpcomingScreenings(null,movie_id )
+        const rawScreenings = await getUpcomingScreenings(null,movie_id )
+        const screenings = CombineQualitiesIdNames(rawScreenings)
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
     } catch (error) {
@@ -212,7 +214,8 @@ router.get("/:id/screenings", async (req,res,next) => {
 router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     const movie_id = req.params.id
     try {
-        const screenings = await getAllUpcomingScreenings(null,movie_id )
+        const rawScreenings = await getAllUpcomingScreenings(null,movie_id )
+        const screenings = CombineQualitiesIdNames(rawScreenings)
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
     } catch (error) {
