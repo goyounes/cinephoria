@@ -16,6 +16,8 @@ import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 import { Home, Screenings } from './pages';
 import Movies from './pages/Movies/Movies';
 import Movie from './pages/Movies/Movie';
+import Reservation from './pages/Movies/Reservation';
+
 
 import Register from './pages/Auth/Register';
 import Logout  from './pages/Auth/Logout';
@@ -36,6 +38,7 @@ function App() {
             {/* Home */}
             <Route path="/" element={<Home />} />
             {/* Movies */}
+            <Route path="/reservation/*" element={<Reservation />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id/*" element={<Movie />} />
 

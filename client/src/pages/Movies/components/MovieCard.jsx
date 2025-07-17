@@ -1,12 +1,11 @@
-// import 
 import { Link } from "react-router-dom";
-import { Box ,Card, CardMedia, Stack, Typography } from "@mui/material";
+import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 
-const MovieCard = ({movie,to}) => {
+const MovieCard = ({ movie, to, onClick }) => {
   const Component = to ? Link : "div";
 
   return (
-    <Box sx={{width: 225}}>
+    <Box sx={{ width: 225 }} onClick={onClick} role="button">
       <Card
         component={Component}
         {...(to ? { to } : {})}
@@ -21,7 +20,8 @@ const MovieCard = ({movie,to}) => {
             transform: "scale(1.03)",
             boxShadow: 6,
           },
-          width: "100%", // card fills the Box width
+          width: "100%",
+          cursor: "pointer",
         }}
       >
         <CardMedia
@@ -48,7 +48,6 @@ const MovieCard = ({movie,to}) => {
       </Card>
     </Box>
   );
-}
+};
 
-
-export default MovieCard
+export default MovieCard;
