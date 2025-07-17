@@ -13,7 +13,7 @@ import ModalWrapper from "../../components/ModalWrapper";
 import SearchMovieModal from "./SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
 import ResponsiveIconButton from "../../components/ResponsiveIconButton";
-import MovieCard from "./MovieCard";
+import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "./utils"
 

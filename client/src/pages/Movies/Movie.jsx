@@ -6,8 +6,8 @@ import axios from "axios";
 import {  Container, Typography, Button} from "@mui/material";
 import {  KeyboardDoubleArrowDown as DownArrow,  KeyboardDoubleArrowUp as UpArrow,} from "@mui/icons-material";
 
-import MovieDetails from "./MovieDetails";
-import MovieScreenings from "./MovieScreenings";
+import MovieDetails from "./components/MovieDetails";
+import MovieScreenings from "./components/MovieScreenings";
 
 const Movie = () => {
   // const setting =

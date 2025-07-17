@@ -2,13 +2,13 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
-import { groupScreenings } from "./utils";
+import { groupScreenings } from "../utils";
 
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import {Stack, Button, Box, Typography, IconButton, Card, CardContent} from "@mui/material";
 
-import ScreeningButton from "./components/ScreeningButton";
+import ScreeningButton from "./ScreeningButton";
 
 
 const MovieScreenings = ({ screenings }) => {
