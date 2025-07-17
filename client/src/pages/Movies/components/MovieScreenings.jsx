@@ -6,7 +6,7 @@ import { groupScreenings } from "../utils";
 
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import {Stack, Button, Box, Typography, IconButton, Card, CardContent} from "@mui/material";
+import {Stack, Button, Typography, IconButton, Card, CardContent} from "@mui/material";
 
 import ScreeningButton from "./ScreeningButton";
 
