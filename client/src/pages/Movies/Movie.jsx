@@ -80,7 +80,7 @@ const Movie = () => {
             </>)}
         </>
       ) : (
-        <Typography variant="h6" color="error">
+        <Typography variant="h6" >
           This movie does not exist
         </Typography>
       )}
