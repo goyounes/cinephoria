@@ -7,46 +7,80 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 
-function groupScreenings(screenings) {
-   // Group by Days
-  const groupedByDateObj = {};
-  for (const screening of screenings) {
-    const date = dayjs(screening.start_date).format("DD/MM/YYYY");
+// function groupScreenings(screenings) {
+//    // Group by Days
+//   const groupedByDateObj = {};
+//   for (const screening of screenings) {
+//     const date = dayjs(screening.start_date).format("DD/MM/YYYY");
 
-    if (!groupedByDateObj[date]) {
-      groupedByDateObj[date] = [];
-    }
+//     if (!groupedByDateObj[date]) {
+//       groupedByDateObj[date] = [];
+//     }
 
-    groupedByDateObj[date].push(screening);
-  }
-//   console.log("Screenings Arr",screenings)
-//   console.log("grouped by date HashMap", groupedByDateObj)
-const groupedByDateArr = Object.keys(groupedByDateObj).map((date) => ({
-   date,
-   screenings: groupedByDateObj[date],
-}));
-//   console.log("grouped by date Array", groupedByDateArr)
+//     groupedByDateObj[date].push(screening);
+//   }
+// //   console.log("Screenings Arr",screenings)
+// //   console.log("grouped by date HashMap", groupedByDateObj)
+// const groupedByDateArr = Object.keys(groupedByDateObj).map((date) => ({
+//    date,
+//    screenings: groupedByDateObj[date],
+// }));
+// //   console.log("grouped by date Array", groupedByDateArr)
+//    const groupedByDateByLocation = {}
+//    for (const dateStr in groupedByDateObj) {
+//       const groupedByLocation = {}
+//       const screenings = groupedByDateObj[dateStr];
+//       for (const screening of screenings){
+//          const {cinema_id, room_id} = screening
+//          if (!groupedByLocation[cinema_id]) {
+//             groupedByLocation[cinema_id] = {};
+//             // console.log("grouped by location",groupedByLocation)
+//          }
+//          if (!groupedByLocation[cinema_id][room_id]){
+//             groupedByLocation[cinema_id][room_id] = []
+//          }
+//          groupedByLocation[cinema_id][room_id].push(screening);
+//       }
+//       groupedByDateByLocation[dateStr] = groupedByLocation
+//    }
+//    console.log(groupedByDateByLocation)
+//   return groupedByDateArr
+// }
+function groupScreeningsNew(screenings){
    const groupedByDateByLocation = {}
-   for (const dateStr in groupedByDateObj) {
-      const groupedByLocation = {}
-      const screenings = groupedByDateObj[dateStr];
-      for (const screening of screenings){
-         const {cinema_id, room_id} = screening
-         if (!groupedByLocation[cinema_id]) {
-            groupedByLocation[cinema_id] = {};
-            // console.log("grouped by location",groupedByLocation)
-         }
-         if (!groupedByLocation[cinema_id][room_id]){
-            groupedByLocation[cinema_id][room_id] = []
-         }
-         groupedByLocation[cinema_id][room_id].push(screening);
-      }
-      groupedByDateByLocation[dateStr] = groupedByLocation
-   }
-   console.log(groupedByDateByLocation)
-  return groupedByDateArr
-}
 
+   for (const screening of screenings) {
+      const dateStr = dayjs(screening.start_date).format("DD/MM/YYYY")
+      const { cinema_id, cinema_name, room_id } = screening
+      // Initialize date bucket
+      if (!groupedByDateByLocation[dateStr]) {
+         groupedByDateByLocation[dateStr] = {}
+      }
+
+
+      const dateGroup = groupedByDateByLocation[dateStr]
+      // Initialize cinema bucket with metadata
+      if (!dateGroup[cinema_id]) {
+         dateGroup[cinema_id] = {
+            cinema_id,
+            cinema_name
+         }
+      }
+
+      const cinemaGroup = dateGroup[cinema_id]
+      // Initialize room bucket with metadata
+      if (!cinemaGroup[room_id]) {
+         cinemaGroup[room_id] = {
+            room_id,
+            room_name: `Room ${room_id}`, // or extract real room name if available
+            screenings: []
+         }
+      }
+
+      cinemaGroup[room_id].screenings.push(screening)
+   }
+   return groupedByDateByLocation 
+}
 
 const MovieScreenings = ({ screenings}) => {
    const [isEmployee, setIsEmployee] = useState(false);
@@ -70,7 +104,7 @@ const MovieScreenings = ({ screenings}) => {
       excuteAsyncFunc ();
    }, []);
 
-   const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings])
+   const screeningsByDay = useMemo(() => groupScreeningsNew(screenings), [screenings])
 
    const DAYS_PER_PAGE = 7;
    const LIMITED_TOTAL_DAYS = 14;
