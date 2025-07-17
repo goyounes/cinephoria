@@ -79,6 +79,7 @@ function groupScreeningsNew(screenings){
 
       cinemaGroup[room_id].screenings.push(screening)
    }
+   console.log(groupedByDateByLocation)
    return groupedByDateByLocation 
 }
 
@@ -105,6 +106,7 @@ const MovieScreenings = ({ screenings}) => {
    }, []);
 
    const screeningsByDay = useMemo(() => groupScreeningsNew(screenings), [screenings])
+   const screeningDates = useMemo(() => Object.keys(screeningsByDay), [screeningsByDay]);
 
    const DAYS_PER_PAGE = 7;
    const LIMITED_TOTAL_DAYS = 14;
@@ -133,13 +135,7 @@ const MovieScreenings = ({ screenings}) => {
    }, [startDate]);
 
    // Map date => screenings for quick lookup
-   const screeningsMap = useMemo(() => {
-      const map = {};
-      screeningsByDay.forEach(({ date, screenings }) => {
-         map[date] = screenings;
-      });
-      return map;
-   }, [screeningsByDay]);
+   const screeningsMap = screeningsByDay || {};
 
    // Handlers with limits if infiniteScroll = false
    const handleNext = async () => {
@@ -173,7 +169,7 @@ const MovieScreenings = ({ screenings}) => {
 
                {days.map(({ date, dayjsDate }, idx) => {
                const isSelected = idx === selectedIndex;
-               const hasScreenings = (screeningsMap[date] || []).length > 0;
+               const hasScreenings = screeningDates.includes(date);
                const dayName = dayjsDate.format("dddd"); // Mon, Tue, etc.
 
                return (
@@ -217,22 +213,7 @@ const MovieScreenings = ({ screenings}) => {
                   <Typography>No screenings available.</Typography>
                   )}
 
-                  {(screeningsMap[days[selectedIndex]?.date] || []).map((screening) => (
-                  <Box
-                     key={screening.screening_id}
-                     sx={{
-                        p: 1,
-                        mb: 1,
-                        border: "1px solid #ccc",
-                        borderRadius: 1,
-                     }}
-                  >
-                     <Typography>
-                        {screening.start_time} - {screening.end_time} @ {screening.cinema_name} (Room{" "}
-                        {screening.room_id})
-                     </Typography>
-                  </Box>
-                  ))}
+                  <ScreeningsList screeningsByLocation={screeningsMap[days[selectedIndex]?.date]} />
                </>
             )}
             </Box>
@@ -242,6 +223,51 @@ const MovieScreenings = ({ screenings}) => {
 
 
 
+  );
+};
+
+const ScreeningsList = ({ screeningsByLocation }) => {
+  if (!screeningsByLocation) return null;
+
+  return (
+    <>
+      {Object.entries(screeningsByLocation).map(([cinemaId, cinemaData]) => {
+        // cinemaData contains cinema_id, cinema_name, plus rooms keyed by room_id
+        if (typeof cinemaData !== "object" || !cinemaData.cinema_id) return null;
+
+        return (
+          <Box key={cinemaId} sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+              Cinema: {cinemaData.cinema_name}
+            </Typography>
+            {Object.entries(cinemaData).map(([roomId, roomData]) => {
+              if (!roomData.screenings) return null;
+
+              return (
+                <Box key={roomId} sx={{ ml: 2, mb: 1 }}>
+                  <Typography variant="subtitle2">Room: {roomData.room_name}</Typography>
+                  {roomData.screenings.map((screening) => (
+                    <Box
+                      key={screening.screening_id}
+                      sx={{
+                        p: 1,
+                        mb: 1,
+                        border: "1px solid #ccc",
+                        borderRadius: 1,
+                      }}
+                    >
+                      <Typography>
+                        {screening.start_time} - {screening.end_time}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              );
+            })}
+          </Box>
+        );
+      })}
+    </>
   );
 };
 
