@@ -10,7 +10,7 @@ import { Stack, Button, Typography, IconButton, Card, CardContent } from "@mui/m
 
 import ScreeningButton from "./ScreeningButton";
 
-const MovieScreenings = ({ movieId }) => {
+const MovieScreenings = ({ movieId, nbrOfTickets = 0}) => {
   const [screenings, setScreenings] = useState([]);
   const [isEmployee, setIsEmployee] = useState(false);
   let infiniteScroll = isEmployee;
@@ -178,7 +178,7 @@ const MovieScreenings = ({ movieId }) => {
                 {screeningsForDate.length === 0 ? (
                   <Typography>No screenings available.</Typography>
                 ) : (
-                  <ScreeningsList screeningsByLocation={screeningsForDate} />
+                  <ScreeningsList screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
                 )}
               </>
             );
@@ -189,7 +189,7 @@ const MovieScreenings = ({ movieId }) => {
   );
 };
 
-const ScreeningsList = ({ screeningsByLocation }) => {
+const ScreeningsList = ({ screeningsByLocation, nbrOfTickets }) => {
   if (!screeningsByLocation) return null;
 
   return (
@@ -204,13 +204,23 @@ const ScreeningsList = ({ screeningsByLocation }) => {
             </Typography>
 
             <Stack spacing={2}>
-              {Object.entries(cinemaData).map(([roomId, roomData]) => {
+            {Object.entries(cinemaData).map(([roomId, roomData]) => {
                 if (!roomData?.screenings) return null;
+
+                const visibleScreenings = roomData.screenings.filter(
+                  (screening) => screening.seats_left >= nbrOfTickets
+                );
+
+                if (visibleScreenings.length === 0) return null;
 
                 return (
                   <Stack id="Room_Screenings" key={roomId} direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-                    {roomData.screenings.map((screening) => (
-                      <ScreeningButton key={screening.screening_id} screening={screening} room_name={roomData.room_name} />
+                    {visibleScreenings.map((screening) => (
+                      <ScreeningButton
+                        key={screening.screening_id}
+                        screening={screening}
+                        room_name={roomData.room_name}
+                      />
                     ))}
                   </Stack>
                 );
