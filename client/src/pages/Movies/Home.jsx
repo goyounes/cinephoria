@@ -23,61 +23,21 @@ const Home = () => {
    const { id } = useParams();
 
    const [movies, setMovies] = useState([]);
-   const [cinemas, setCinemas] = useState([]);
-   
-   const [selectedCinema, setSelectedCinema] = useState(null);
+  
    const [selectedMovieId, setSelectedMovieId] = useState(-1);
 
-   const [nbrOfTickets, setNbrOfTickets] = useState(1);
    const [modalOpen, setModalOpen] = useState(false);
 
-
-   const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(movies), [movies]);
-
-   const moviesToDisplay = useMemo(
-      () => filterAndUniqueMovies(movies, { selectedCinema }),
-      [movies, selectedCinema]
-   );
-
    // Parse ID from route and set selectedMovieId
-   useEffect(() => {
-      const parsedId = parseInt(id);
-      if (!isNaN(parsedId)) {
-         setSelectedMovieId(parsedId);
-      }
-   }, [id]);
 
-      useEffect(() => {
-      if (selectedMovieId !== -1 && screeningsToDisplay[selectedMovieId] ) {
-         setTimeout(() => {
-            window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-            });
-         }, 100);
-      }
-      }, [selectedMovieId, screeningsToDisplay]);
    // Initial fetch
    useEffect(() => {
       const fetchInitialData = async () => {
          try {
-            let isAdmin = false;
-            try {
-               await axios.post("/api/auth/verify/employee");
-               isAdmin = true;
-            } catch {
-               isAdmin = false;
-            }
-
-            const [moviesRes, cinemaRes] = await Promise.all([
-               axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
-               axios.get("/api/cinemas"),
-            ]);
-
-            setMovies(moviesRes.data);
-            setCinemas(cinemaRes.data);
+            const moviesResponse = await axios.get("/api/movies")
+            setMovies(moviesResponse.data);
          } catch (error) {
-         console.error("Error fetching initial data:", error);
+            console.error("Error fetching initial data:", error);
          }
       };
       fetchInitialData();
@@ -112,7 +72,7 @@ const Home = () => {
          <Typography variant="h5">Latest Releases </Typography>
 
          <Stack gap={2} justifyContent="flex-start" direction="row" flexWrap="wrap">
-         {moviesToDisplay.map((movie) => (
+         {movies.map((movie) => (
             <MovieCard
                to={`/movies/${movie.movie_id}`}
                key={movie.movie_id}
