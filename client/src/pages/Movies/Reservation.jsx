@@ -101,7 +101,7 @@ const Reservation = () => {
                   // console.log("selected cinema",selected)
                }}
                >
-               <MenuItem value="">None</MenuItem>
+               <MenuItem value="">All</MenuItem>
                {cinemas.map(cinema => (
                   <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
                      {cinema.cinema_name}
