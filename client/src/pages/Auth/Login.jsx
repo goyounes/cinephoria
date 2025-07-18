@@ -70,6 +70,7 @@ const Login = () => {
             label="Username"
             name="username"
             placeholder="Please enter your username"
+            autoComplete="current-password"
             onChange={handleChange}
             value={formData.username}
           />
@@ -81,6 +82,7 @@ const Login = () => {
             name="password"
             type="password"
             placeholder="Please enter your password"
+            autoComplete="current-password"
             onChange={handleChange}
             value={formData.password}
           />

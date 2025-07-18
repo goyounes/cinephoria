@@ -68,6 +68,7 @@ return (
             name="password"
             type="password"
             placeholder="8 characters minimum"
+            autoComplete="new-password"
             onChange={handleChange}
             value={formData.password}
           />
@@ -78,6 +79,7 @@ return (
             label="Username"
             name="username"
             placeholder="Unique Username"
+            autoComplete="username"
             onChange={handleChange}
             value={formData.username}
           />
