@@ -25,7 +25,12 @@ const NavButton = ({ label, Icon, to, onClick }) => {
       {...buttonProps}
     >
       <Icon fontSize="large" />
-      <Typography variant="caption">{label}</Typography>
+      <Typography
+        variant="caption"
+        sx={{ display: { xs: "none", md: "block" } }} 
+      >
+        {label}
+      </Typography>
     </Button>
   );
 };
@@ -34,13 +39,10 @@ const NavButton = ({ label, Icon, to, onClick }) => {
 const RealNavBar = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
-
   const open = Boolean(anchorEl);
-
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -74,14 +76,12 @@ const RealNavBar = () => {
               open={open}
               onClose={handleMenuClose}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'center'}}
-              slotProps={{
-                paper: {
+              transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+              slotProps={{paper: {
                   sx: {
-                    minWidth: 100, // adjust this to match your button size
+                    minWidth: anchorEl ? anchorEl.offsetWidth : undefined, // Match trigger button width
                   },
-                },
-              }}
+              },}}
             >
               <MenuItem component={Link} to="account">Profile</MenuItem>
               <MenuItem component={Link} to="/auth/login">Login</MenuItem>
