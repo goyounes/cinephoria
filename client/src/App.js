@@ -13,7 +13,7 @@ import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 
-import { Home as oldHome, Screenings } from './pages';
+import { Screenings } from './pages';
 import Movies from './pages/Movies/Movies';
 import Movie from './pages/Movies/Movie';
 import Reservation from './pages/Movies/Reservation';
@@ -30,7 +30,7 @@ function App() {
   return (
     <Stack minHeight="100vh">
       <RealNavBar />
-      <TopNavBar />
+      {/* <TopNavBar /> */}
 
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
