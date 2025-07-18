@@ -13,7 +13,6 @@ import ScreeningsDisplay from "./ScreeningsDisplay";
 const MovieScreenings = ({ movieId, nbrOfTickets = 0}) => {
   const [screenings, setScreenings] = useState([]);
   const [isEmployee, setIsEmployee] = useState(false);
-  let infiniteScroll = isEmployee;
   const navigate = useNavigate();
 
   // Check employee status once on mount
@@ -57,16 +56,18 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0}) => {
     fetchScreenings();
   }, [movieId]);
 
+
+  
   // Group screenings by day
   const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings]);
   const screeningDates = useMemo(() => Object.keys(screeningsByDay), [screeningsByDay]);
 
   const DAYS_PER_PAGE = 7;
   const LIMITED_TOTAL_DAYS = 14;
-  const totalDays = infiniteScroll ? Infinity : LIMITED_TOTAL_DAYS;
+  const totalDays = isEmployee ? Infinity : LIMITED_TOTAL_DAYS;
 
   const today = dayjs().startOf("day");
-  const maxPage = infiniteScroll ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
+  const maxPage = isEmployee ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
 
   const [page, setPage] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -123,7 +124,7 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0}) => {
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <IconButton onClick={handlePrev} disabled={!infiniteScroll && page <= 0}>
+          <IconButton onClick={handlePrev} disabled={!isEmployee && page <= 0}>
             <ArrowBackIosIcon fontSize="small" />
           </IconButton>
 
@@ -147,7 +148,7 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0}) => {
             );
           })}
 
-          <IconButton onClick={handleNext} disabled={!infiniteScroll && page >= maxPage}>
+          <IconButton onClick={handleNext} disabled={!isEmployee && page >= maxPage}>
             <ArrowForwardIosIcon fontSize="small" />
           </IconButton>
         </Stack>
