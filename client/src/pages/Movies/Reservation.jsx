@@ -97,7 +97,8 @@ const Reservation = () => {
                onChange={(e) => {
                   const selected = cinemas.find(c => c.cinema_id === e.target.value);
                   setSelectedCinema(selected || null);
-                  console.log("selected cinema",selected)
+                  setSelectedMovieId(-1)
+                  // console.log("selected cinema",selected)
                }}
                >
                <MenuItem value="">None</MenuItem>
