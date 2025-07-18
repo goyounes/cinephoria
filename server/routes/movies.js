@@ -132,7 +132,8 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
 router.get("/latest",async (req,res,next) => {
     try {
         const rawMovies = await getLatestMovies()
-        for (const movie of rawMovies){
+        const movies = CombineGenresIdNames(rawMovies)
+        for (const movie of movies){
             const getObjectParams = {
                 Bucket: bucketName,
                 Key: movie.poster_img_name
@@ -141,7 +142,7 @@ router.get("/latest",async (req,res,next) => {
             const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
             movie.imageUrl =  url; // Add the URL to the movie object
         };
-        res.status(200).json(rawMovies)
+        res.status(200).json(movies)
     } catch (error) {
         next(error)
     }
