@@ -13,10 +13,11 @@ import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 
-import { Home, Screenings } from './pages';
+import { Home as oldHome, Screenings } from './pages';
 import Movies from './pages/Movies/Movies';
 import Movie from './pages/Movies/Movie';
 import Reservation from './pages/Movies/Reservation';
+import Home from './pages/Movies/Home';
 
 
 import Register from './pages/Auth/Register';
@@ -29,7 +30,6 @@ function App() {
   return (
     <Stack minHeight="100vh">
       <RealNavBar />
-      {/* <RealNavBar/> */}
       <TopNavBar />
 
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
@@ -37,6 +37,7 @@ function App() {
           <Routes >
             {/* Home */}
             <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             {/* Movies */}
             <Route path="/reservation/:id" element={<Reservation />} />
             <Route path="/reservation/" element={<Reservation />} />
