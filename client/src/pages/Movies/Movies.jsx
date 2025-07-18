@@ -10,12 +10,13 @@ import {
 import {Search as SearchIcon, Tune as TuneIcon, Event as EventIcon, Clear as ClearIcon} from "@mui/icons-material";
 
 import ModalWrapper from "../../components/ModalWrapper";
-import SearchMovieModal from "./SearchMovieModal";
+import SearchMovieModal from "./components/SearchMovieModal";
 import BasicDatePicker from "../../components/BasicDatePicker";
 import ResponsiveIconButton from "../../components/ResponsiveIconButton";
 import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "./utils"
+import Home_page_image from '../../assets/Home_page_image.webp';
 
 
 const Movies = () => {
@@ -113,9 +114,19 @@ const Movies = () => {
 
   return (
     <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column", gap: 1}}>
-      <Typography variant="h3">Movies</Typography>
+      <Card>
+        <Stack direction="row" spacing={2} alignItems="stretch">
+            <Box
+            component="img"
+            src={Home_page_image}
+            alt="Home Image"
+            width="100%"
+            />
+        </Stack>
+      </Card>
 
       <Card sx={{ p: 2 }}>
+        <Typography variant="h4" gutterBottom>Movies</Typography>
         <Stack direction="row" spacing={2} alignItems="stretch">
           <FormControl sx={{ width: 360 }}>
             <InputLabel id="cinema-select-label">Cinema</InputLabel>

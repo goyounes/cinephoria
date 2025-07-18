@@ -1,22 +1,18 @@
 import axios from "axios";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import {
-Container, Stack, Card, Typography,
-FormControl, InputLabel, Select, MenuItem
-} from "@mui/material";
+import { Container, Stack, Card, Typography, FormControl, InputLabel, Select, MenuItem,Box} from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 
-import SearchMovieModal from "./SearchMovieModal";
+import SearchMovieModal from "./components/SearchMovieModal";
 import ResponsiveIconButton from "../../components/ResponsiveIconButton";
 import MovieCard from "./components/MovieCard";
 import MovieScreenings from "./components/MovieScreenings";
 import MovieDetails from "./components/MovieDetails";
 
-import {
-filterAndUniqueMovies,
-groupScreeningsByMovie
-} from "./utils";
+import {filterAndUniqueMovies,groupScreeningsByMovie} from "./utils";
+import Home_page_image from '../../assets/Home_page_image.webp';
+
 
 const Reservation = () => {
    const { id } = useParams();
@@ -84,9 +80,18 @@ const Reservation = () => {
 
    return (
       <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column", gap: 1 }}>
-         <Typography variant="h3">Reservation</Typography>
-
+         <Card>
+            <Stack direction="row" spacing={2} alignItems="stretch">
+               <Box
+               component="img"
+               src={Home_page_image}
+               alt="Home Image"
+               width="100%"
+               />
+            </Stack>
+         </Card>
          <Card sx={{ p: 2 }}>
+         <Typography variant="h4" gutterBottom>Reservation</Typography>
          <Stack direction="row" spacing={2} alignItems="stretch">
             <FormControl sx={{ width: 360 }}>
                <InputLabel id="cinema-select-label">Cinema</InputLabel>
