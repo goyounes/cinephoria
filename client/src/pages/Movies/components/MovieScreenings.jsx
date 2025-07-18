@@ -58,7 +58,11 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
          setScreenings([]);
          return;
       }
-
+      setPage(0);
+      setSelectedIndex(-1);
+      setHasAutoSelected(false);
+      setScreenings([]); 
+      
       const fetchScreenings = async () => {
          try {
          const employee = await checkIsEmployee();
