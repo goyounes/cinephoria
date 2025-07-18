@@ -1,7 +1,8 @@
-import {useState, useEffect} from 'react';
-import {  Modal,  Box,  Container, Stack,  Button,  TextField,  Autocomplete,  Divider} from '@mui/material';
-import {/* Search as SearchIcon,*/ Close as CloseIcon} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import {Modal,Box,Container,Stack,Button,TextField,Autocomplete,Divider} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import axios from 'axios';
+import MovieCard from './MovieCard';
 
 const fullScreenStyle = {
   position: 'fixed',
@@ -14,80 +15,88 @@ const fullScreenStyle = {
   overflowY: 'auto',
 };
 
-const SearchMovieModal = ({modalOpen, setModalOpen}) => {
-    // const [modalOpen, setModalOpen] = useState(false);
-    // eslint-disable-next-line
-    const [movies, setMovies] = useState([]);
-    const [selectedMovie, setSelectedMovie] = useState([]);
-    const [inputValue, setInputValue] = useState('');
-    useEffect(() => {
-        const fetchMovies = async () => {
-            try {
-                const moviesRes = await axios.get("/api/movies")
-                console.log(moviesRes.data)
-                setMovies(moviesRes.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
+const SearchMovieModal = ({ modalOpen, setModalOpen }) => {
+  const [movies, setMovies] = useState([]);
+  const [inputValue, setInputValue] = useState('');
 
-        fetchMovies();
-    }, [modalOpen]);
-    const MoviesSearched = movies.filter((movie) =>
-        movie.title.toLowerCase().includes(inputValue.toLowerCase())
-    );
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const moviesRes = await axios.get('/api/movies');
+        setMovies(moviesRes.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchMovies();
+  }, [modalOpen]);
+
+  const MoviesSearched = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
   return (
-    <Modal open={modalOpen} onClose={() => {setModalOpen(false)}} >
-        <Box sx={{ ...fullScreenStyle, position: 'relative', display:"flex"}}>
-            <Container sx={{flexGrow: 1, py:4, bgcolor: '#F7F7F7'}}>
-                <Stack spacing={2} direction="row" sx={{mb:4}}>
-   <Autocomplete
-      sx={{ flexGrow: 1 }}
-      freeSolo
-      openOnFocus
-      options={movies}
-      getOptionLabel={(option) => {
-        // option can be a string (freeSolo input) or movie object
-        if (typeof option === 'string') return option;
-        if (option && option.title) return option.title;
-        return '';
-      }}
-      value={selectedMovie}
-      onChange={(event, newValue) => {
-        if (typeof newValue === 'string') {
-          setSelectedMovie(null);
-        } else {
-          setSelectedMovie(newValue);
-        }
-      }}
-      inputValue={inputValue}
-      onInputChange={(event, newInputValue, reason) => {
-        setInputValue(newInputValue);
-        // If user is typing (not selecting), clear selectedMovie
-        if (reason === 'input') {
-          setSelectedMovie(null);
-        }
-      }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Search input"
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                type: 'search',
-              },
-            }}
-          />
-        )}
-    />
+    <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+      <Box sx={fullScreenStyle}>
+        <Container
+          maxWidth="xl"
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            py: 4,
+            minHeight: '100%',
+            overflow: 'auto',
+          }}
+        >
+          <Stack spacing={2} direction="row" sx={{ mb: 4 }}>
+            <Autocomplete
+              sx={{ flexGrow: 1 }}
+              freeSolo
+              openOnFocus
+              options={movies.map((m) => m.title)}
+              inputValue={inputValue}
+              onInputChange={(event, newInputValue) => {
+                setInputValue(newInputValue);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Movie title"
+                  placeholder="Search for a movie..."
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      type: 'search',
+                    },
+                  }}
+                />
+              )}
+            />
 
-                    <Button startIcon={<CloseIcon />} onClick={() => {setModalOpen(false)}} size="large" aria-label="close" ></Button>
-                </Stack>
+            <Button startIcon={<CloseIcon />} onClick={() => setModalOpen(false)} size="large" aria-label="close"/>
+          </Stack>
 
-                <Divider></Divider>
-            </Container>
-        </Box>
+          <Divider sx={{ mb: 4 }} />
+
+          <Stack
+            gap={4}
+            justifyContent="flex-start"
+            direction="row"
+            flexWrap="wrap"
+            sx={{ width: '100%' }}
+          >
+            {MoviesSearched.map((movie) => (
+              <MovieCard
+                key={movie.movie_id}
+                movie={movie}
+                to={`/movies/${movie.movie_id}`}
+              />
+            ))}
+          </Stack>
+        </Container>
+      </Box>
     </Modal>
   );
 };
