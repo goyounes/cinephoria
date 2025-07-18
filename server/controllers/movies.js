@@ -1,10 +1,11 @@
 import { pool } from "./connect.js";
 
 export async function  getMovies(){
-    const q = `SELECT * FROM movies;`
+    const q = `WHERE created_at > ? AND isDeleted = FALSE;`
     const [result_rows] = await pool.query(q);
     return result_rows
 }
+
 export async function  addMovie(movie){
 
     const connection = await pool.getConnection();
@@ -283,9 +284,24 @@ export async function getAllUpcomingMoviesWithGenres(cinema_id){    //How to han
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id])
     return result_rows
 }
-// export async function getMovieGenres(){
-//     const q = `SELECT * FROM movie_genres;`
-//     const [result_rows] = await pool.query(q);
-//     return result_rows
-// }
 
+export async function getLatestMovies(){
+    const today = new Date();
+    const lastWednesdayDate = new Date()
+
+    const WEDNSDAY_DAY_CODE = 3
+    const TodayDayCode = today.getDay() // which day of the week it is
+    
+    const Offset =  (TodayDayCode - WEDNSDAY_DAY_CODE + 7) % 7;
+    lastWednesdayDate.setDate(today.getDate() - Offset)
+    lastWednesdayDate.setHours(0, 0, 0, 0 );
+
+    const date_in_mysql_format = lastWednesdayDate
+
+    const [result_rows] = await pool.query(`
+        SELECT * FROM movies
+        WHERE created_at > ? AND isDeleted = FALSE;
+    `,[date_in_mysql_format]);
+
+    return result_rows
+}

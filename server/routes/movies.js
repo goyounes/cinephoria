@@ -6,7 +6,7 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie,  getGenres, deleteMovie, updateMovie, 
     getOneMovieWithGenres, getMoviesWithGenres,
-    getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres } 
+    getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres,  getLatestMovies} 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getAllUpcomingScreenings, getAllScreenings} from '../controllers/screenings.js';
 import {s3, bucketName} from "../awsS3Client.js"
@@ -129,11 +129,10 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
 })
 
 //Not used yet..
-router.get("/recent",async (req,res,next) => {
+router.get("/latest",async (req,res,next) => {
     try {
-        const rawMovies = await getMoviesAddedSince()
-        const movies = CombineGenresIdNames(rawMovies)
-        for (const movie of movies){
+        const rawMovies = await getLatestMovies()
+        for (const movie of rawMovies){
             const getObjectParams = {
                 Bucket: bucketName,
                 Key: movie.poster_img_name
@@ -142,8 +141,7 @@ router.get("/recent",async (req,res,next) => {
             const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // URL expires in 1 hour
             movie.imageUrl =  url; // Add the URL to the movie object
         };
-
-        res.status(200).json(movies)
+        res.status(200).json(rawMovies)
     } catch (error) {
         next(error)
     }
@@ -225,7 +223,7 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     }
 })
 
-// Movie resource own links
+// Movie resource managment links
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing DB for movie with movie_id =",id)

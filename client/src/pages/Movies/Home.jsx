@@ -34,7 +34,7 @@ const Home = () => {
    useEffect(() => {
       const fetchInitialData = async () => {
          try {
-            const moviesResponse = await axios.get("/api/movies")
+            const moviesResponse = await axios.get("/api/movies/latest")
             setMovies(moviesResponse.data);
          } catch (error) {
             console.error("Error fetching initial data:", error);
