@@ -1,16 +1,16 @@
 import axios from 'axios';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 // import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
-    // email: '',
+    // username: '',
   });
 
   const handleChange = (e) => {
@@ -31,7 +31,7 @@ const Login = () => {
       const response = await axios.post(`/api/auth/login`, formData);
       console.log("response of login: ");
       console.log(response)
-      alert('Login successful! \nWelcome ' + formData.username);
+      alert('Login successful! \nWelcome ' + formData.email);
       // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
 
       const response2 = await axios.post(`/api/auth/verify`,{ some: 'data' }, {withCredentials: true});
@@ -39,7 +39,7 @@ const Login = () => {
       console.log(response2);
       navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
     } catch (err) {
-      alert('Failed to add User: ' + err.message);
+      alert('Failed to register: ' + err.message);
     }
   };
   //TODO:Change redirection page
@@ -54,26 +54,27 @@ const Login = () => {
             Login Page
           </Typography>
 
-          {/* <TextField
+          <TextField
             fullWidth
             required
             label="Email"
             name="email"
             type="email"
             placeholder="example@mail.com"
+
             onChange={handleChange}
             value={formData.email}
-          /> */}
-          <TextField
+          />
+          {/* <TextField
             fullWidth
             required
             label="Username"
             name="username"
             placeholder="Please enter your username"
-            autoComplete="current-password"
+            autoComplete="username"
             onChange={handleChange}
             value={formData.username}
-          />
+          /> */}
 
           <TextField
             fullWidth
@@ -86,10 +87,22 @@ const Login = () => {
             onChange={handleChange}
             value={formData.password}
           />
+          <Typography>
+            <Link to={'/home'} underline="hover">
+              Forgot password?
+            </Link>
+          </Typography>
 
           <Button variant="contained" color="primary" onClick={handleSubmit} startIcon={<LoginIcon />}>
             Login
           </Button>
+
+          <Typography>
+            Don't have an account?{' '}
+            <Link to={'/home'} underline="hover" >
+              Signup now
+            </Link>
+          </Typography>
         </Stack>
       </CardContent>
       </Card>        
