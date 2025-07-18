@@ -63,9 +63,9 @@ export async function login (req, res, next) {
 
     try {
         // Check if user exists with the provided username
-        const q1 = "SELECT * FROM users WHERE user_name = ?";
-        const [data1] = await pool.query(q1 ,[req.body.username]);
-        if (data1.length === 0) return next(new Error("This username does not exist"));
+        const q1 = "SELECT * FROM users WHERE user_email = ?";
+        const [data1] = await pool.query(q1 ,[req.body.email]);
+        if (data1.length === 0) return next(new Error("This email does not exist"));
 
         // Get the user_id
         const user_id = data1[0].user_id;
@@ -173,9 +173,9 @@ export async function verifyEmployeeJWT(req, res, next) {
 
 export async function addUser (req, res, next) {
     // Validate request body
-    if (!req.body.username || !req.body.password) {
+    if (!req.body.username || !req.body.password || !req.body.username ) {
         console.log("provided information :", req.body);
-        return next(new Error("Username and password are required"));
+        return next(new Error("Username, Email and password are required"));
     }
     
     const connection = await pool.getConnection();
