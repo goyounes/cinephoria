@@ -23,7 +23,7 @@ const ScreeningsDisplay = ({ screeningsByLocation, nbrOfTickets }) => {
                 const visibleScreenings = roomData.screenings.filter(
                   (screening) => screening.seats_left >= nbrOfTickets
                 );
-
+                console.log("recived nbr of tickets is",nbrOfTickets)
                 if (visibleScreenings.length === 0) return null;
 
                 return (

@@ -58,11 +58,11 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
          setScreenings([]);
          return;
       }
+      setScreenings([]); 
       setPage(0);
       setSelectedIndex(-1);
       setHasAutoSelected(false);
-      setScreenings([]); 
-      
+
       const fetchScreenings = async () => {
          try {
          const employee = await checkIsEmployee();
@@ -208,6 +208,7 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
                 ) : (
                   <ScreeningsDisplay screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
                 )}
+                {console.log("sent number of tickets",nbrOfTickets)}
               </>
             );
           })()}

@@ -27,7 +27,7 @@ const Reservation = () => {
    const [selectedCinema, setSelectedCinema] = useState(null);
    const [selectedMovieId, setSelectedMovieId] = useState(-1);
 
-   const [nbrTickets, setNbrTickets] = useState(1);
+   const [nbrOfTickets, setNbrOfTickets] = useState(1);
    const [modalOpen, setModalOpen] = useState(false);
 
 
@@ -123,9 +123,9 @@ const Reservation = () => {
                <InputLabel id="number-of-tickets-select-label">Tickets</InputLabel>
                <Select
                labelId="number-of-tickets-select-label"
-               value={nbrTickets}
+               value={nbrOfTickets}
                label="Tickets"
-               onChange={(e) => setNbrTickets(e.target.value)}
+               onChange={(e) => setNbrOfTickets(e.target.value)}
                >
                {[...Array(10)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
@@ -152,7 +152,7 @@ const Reservation = () => {
          {selectedMovieId !== -1 && screeningsToDisplay[selectedMovieId] && (
          <>
             <MovieDetails movie={screeningsToDisplay[selectedMovieId][0]} loadingMovie={false} />
-            <MovieScreenings movieId={selectedMovieId} />
+            <MovieScreenings movieId={selectedMovieId} nbrOfTickets={nbrOfTickets} />
          </>
          )}
       </Container>
