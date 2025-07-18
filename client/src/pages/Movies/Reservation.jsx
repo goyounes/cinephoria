@@ -60,21 +60,21 @@ const Reservation = () => {
    useEffect(() => {
       const fetchInitialData = async () => {
          try {
-         let isAdmin = false;
-         try {
-            await axios.post("/api/auth/verify/employee");
-            isAdmin = true;
-         } catch {
-            isAdmin = false;
-         }
+            let isAdmin = false;
+            try {
+               await axios.post("/api/auth/verify/employee");
+               isAdmin = true;
+            } catch {
+               isAdmin = false;
+            }
 
-         const [moviesRes, cinemaRes] = await Promise.all([
-            axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
-            axios.get("/api/cinemas"),
-         ]);
+            const [moviesRes, cinemaRes] = await Promise.all([
+               axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
+               axios.get("/api/cinemas"),
+            ]);
 
-         setMovies(moviesRes.data);
-         setCinemas(cinemaRes.data);
+            setMovies(moviesRes.data);
+            setCinemas(cinemaRes.data);
          } catch (error) {
          console.error("Error fetching initial data:", error);
          }
@@ -97,6 +97,7 @@ const Reservation = () => {
                onChange={(e) => {
                   const selected = cinemas.find(c => c.cinema_id === e.target.value);
                   setSelectedCinema(selected || null);
+                  console.log("selected cinema",selected)
                }}
                >
                <MenuItem value="">None</MenuItem>
@@ -152,7 +153,7 @@ const Reservation = () => {
          {selectedMovieId !== -1 && screeningsToDisplay[selectedMovieId] && (
          <>
             <MovieDetails movie={screeningsToDisplay[selectedMovieId][0]} loadingMovie={false} />
-            <MovieScreenings movieId={selectedMovieId} nbrOfTickets={nbrOfTickets} />
+            <MovieScreenings movieId={selectedMovieId} cinema_id={selectedCinema?.cinema_id || null} nbrOfTickets={nbrOfTickets} />
          </>
          )}
       </Container>

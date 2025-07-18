@@ -28,7 +28,7 @@ const checkIsEmployee = async () => {
 const DAYS_PER_PAGE = 7;
 const LIMITED_TOTAL_DAYS = 14;
 
-const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
+const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
    const navigate = useNavigate();
 
    const [screenings, setScreenings] = useState([]);
@@ -54,33 +54,38 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
 
   // ✅ Fetch screenings on movieId change
    useEffect(() => {
-      if (!movieId) {
-         setScreenings([]);
-         return;
-      }
-      setScreenings([]); 
-      setPage(0);
-      setSelectedIndex(-1);
-      setHasAutoSelected(false);
+   if (!movieId) {
+      setScreenings([]);
+      return;
+   }
+   // Reset UI state
+   setScreenings([]);
+   setPage(0);
+   setSelectedIndex(-1);
+   setHasAutoSelected(false);
 
-      const fetchScreenings = async () => {
-         try {
-         const employee = await checkIsEmployee();
-         setIsEmployee(employee);
-         const { data } = await axios.get(
-            employee
-               ? `/api/movies/${movieId}/screenings/all`
-               : `/api/movies/${movieId}/screenings`
-         );
+   const fetchScreenings = async () => {
+      try {
+         const isEmp = await checkIsEmployee();
+         setIsEmployee(isEmp);
+
+         let url = `/api/movies/${movieId}/screenings`;
+         if (isEmp) url += `/all`;
+         if (cinema_id) {
+            const query = new URLSearchParams({ cinema_id});
+            url += `?${query.toString()}`;
+         }
+         console.log(url)
+         const { data } = await axios.get(url);
          setScreenings(data);
-         } catch (err) {
+      } catch (err) {
          console.error("Failed to fetch screenings:", err);
          setScreenings([]);
-         }
-      };
+      }
+   };
 
-    fetchScreenings();
-   }, [movieId]);
+   fetchScreenings();
+   }, [movieId, cinema_id]);
 
   // Auto-select the first available screening
    const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings]);
@@ -208,7 +213,6 @@ const MovieScreenings = ({ movieId, nbrOfTickets = 0 }) => {
                 ) : (
                   <ScreeningsDisplay screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
                 )}
-                {console.log("sent number of tickets",nbrOfTickets)}
               </>
             );
           })()}

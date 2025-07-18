@@ -201,8 +201,9 @@ router.get("/genres",async (req,res,next) => {
 
 router.get("/:id/screenings", async (req,res,next) => {
     const movie_id = req.params.id
+    const cinema_id = req.query.cinema_id || null; 
     try {
-        const rawScreenings = await getUpcomingScreenings(null,movie_id )
+        const rawScreenings = await getUpcomingScreenings(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
@@ -213,8 +214,9 @@ router.get("/:id/screenings", async (req,res,next) => {
 
 router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     const movie_id = req.params.id
+    const cinema_id = req.query.cinema_id || null; 
     try {
-        const rawScreenings = await getAllUpcomingScreenings(null,movie_id )
+        const rawScreenings = await getAllUpcomingScreenings(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
