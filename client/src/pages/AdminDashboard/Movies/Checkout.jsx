@@ -51,25 +51,28 @@ const Checkout = () => {
       checkStatus();
    }, []);
 
-   useEffect(() => {
-      const fetchData = async () => {
+    useEffect(() => {
+    const fetchData = async () => {
       try {
-         const movieRes = await axios.get(`/api/movies/${movie_id}`);
-         const screeningsRes = await axios.get(`/api/tickets/all/checkout/${screening_id}`);
+        const movieRes = await axios.get(`/api/movies/${movie_id}`);
+        const screeningUrl = isEmployee
+          ? `/api/tickets/all/checkout/${screening_id}`
+          : `/api/tickets/checkout/${screening_id}`;
+        const screeningsRes = await axios.get(screeningUrl);
 
-         setMovie(movieRes.data);
-         setScreening(screeningsRes.data);
+        setMovie(movieRes.data);
+        setScreening(screeningsRes.data);
       } catch (err) {
-         displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
+        displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
       } finally {
-         setLoading(false);
+        setLoading(false);
       }
-      };
+    };
 
-      if (movie_id && screening_id) {
+    if (movie_id && screening_id) {
       fetchData();
-      }
-   }, [movie_id, screening_id]);
+    }
+  }, [movie_id, screening_id, isEmployee]); 
 
    const handleTicketChange = (index, delta) => {
       setTicketCounts((prev) => {
@@ -79,33 +82,32 @@ const Checkout = () => {
       });
    };
 
-   const calculateTotal = () =>
-      ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].price, 0);
+   const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].price, 0);
 
-   const handleSubmit = async () => {
-      const ticketPayload = {
-         screening_id,
-         ticket_types: ticketTypes.map((type, index) => ({
-         type: type.label,
-         count: ticketCounts[index],
-         price: type.price,
-         })),
-      };
+   // const handleSubmit = async () => {
+   //    const ticketPayload = {
+   //       screening_id,
+   //       ticket_types: ticketTypes.map((type, index) => ({
+   //       type: type.label,
+   //       count: ticketCounts[index],
+   //       price: type.price,
+   //       })),
+   //    };
 
-      try {
-         await axios.post("/api/checkout/complete", ticketPayload);
-         displayCustomAlert(snackbars, setSnackbars, "Reservation successful!", "success");
-         navigate("/tickets");
-      } catch (err) {
-         const message = err.response?.data?.error?.message || err.message;
-         displayCustomAlert(snackbars, setSnackbars, "Checkout failed: " + message, "error");
-      }
-   };
+   //    try {
+   //       await axios.post("/api/checkout/complete", ticketPayload);
+   //       displayCustomAlert(snackbars, setSnackbars, "Reservation successful!", "success");
+   //       navigate("/tickets");
+   //    } catch (err) {
+   //       const message = err.response?.data?.error?.message || err.message;
+   //       displayCustomAlert(snackbars, setSnackbars, "Checkout failed: " + message, "error");
+   //    }
+   // };
 
    if (loading) {
       return (
          <Container sx={{ py: 6, display: "flex", justifyContent: "center" }}>
-         <CircularProgress />
+            <CircularProgress />
          </Container>
       );
    }
@@ -113,9 +115,9 @@ const Checkout = () => {
    if (!movie || !screening) {
       return (
          <Container sx={{ py: 6 }}>
-         <Typography variant="h5" color="error">
-            Movie or Screening not found.
-         </Typography>
+            <Typography variant="h5" color="error">
+               Movie or Screening not found.
+            </Typography>
          </Container>
       );
    }
@@ -190,24 +192,23 @@ const Checkout = () => {
                </CardContent>
             </Card>
 
-            {/* Screening Info */}
-{/* Screening Info Card */}
-         <Card elevation={2} sx={{ my: 3 }}>
-         <CardContent>
-            <Typography variant="h6" gutterBottom>
-               Screening Information
-            </Typography>
-            <Stack spacing={1}>
-               <Typography><strong>Cinema:</strong> {screening.cinema_name}</Typography>
-               <Typography><strong>Room:</strong> {screening.room_name}</Typography>
-               <Typography><strong>Address:</strong> {screening.cinema_adresse}</Typography>
-               <Typography>
-               <strong>Date & Time:</strong>{" "}
-               {new Date(screening.start_date).toLocaleDateString()} {screening.start_time}
+            {/* Screening Info Card */}
+            <Card elevation={2} sx={{ my: 3 }}>
+            <CardContent>
+               <Typography variant="h6" gutterBottom>
+                  Screening Information
                </Typography>
-            </Stack>
-         </CardContent>
-         </Card>
+               <Stack spacing={1}>
+                  <Typography><strong>Cinema:</strong> {screening.cinema_name}</Typography>
+                  <Typography><strong>Room:</strong> {screening.room_name}</Typography>
+                  <Typography><strong>Address:</strong> {screening.cinema_adresse}</Typography>
+                  <Typography>
+                  <strong>Date & Time:</strong>{" "}
+                  {new Date(screening.start_date).toLocaleDateString()} {screening.start_time}
+                  </Typography>
+               </Stack>
+            </CardContent>
+            </Card>
 
             {/* Ticket Types */}
             <Typography variant="h6" mt={4}>
@@ -216,21 +217,21 @@ const Checkout = () => {
 
             <Stack spacing={2} mt={2}>
                {ticketTypes.map((type, index) => (
-               <Stack key={type.label} spacing={2}>
-                  <Stack>
-                  </Stack>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                     <Typography>{type.label} : €{type.price}</Typography>
-                     <Stack direction="row" spacing={2} alignItems="center">
-                        <Button variant="outlined" onClick={() => handleTicketChange(index, -1)}>
-                           -
-                        </Button>
-                        <Typography>{ticketCounts[index]}</Typography>
-                        <Button variant="outlined" onClick={() => handleTicketChange(index, 1)}>
-                           +
-                        </Button>
+                  <Stack key={type.label} spacing={2}>
+
+                     <Stack direction="row" alignItems="center" spacing={1}>
+                           <Typography>{type.label} : €{type.price}</Typography>
+
+                           <Stack direction="row" spacing={2} alignItems="center">
+                              <Button variant="outlined" onClick={() => handleTicketChange(index, -1)}>
+                                 -
+                              </Button>
+                              <Typography>{ticketCounts[index]}</Typography>
+                              <Button variant="outlined" onClick={() => handleTicketChange(index, 1)}>
+                                 +
+                              </Button>
+                           </Stack>
                      </Stack>
-                  </Stack>
                </Stack>
                ))}
             </Stack>
@@ -244,7 +245,7 @@ const Checkout = () => {
                color="primary"
                fullWidth
                sx={{ mt: 3 }}
-               onClick={handleSubmit}
+               // onClick={handleSubmit}
                disabled={calculateTotal() === 0}
             >
                Confirm Reservation
