@@ -12,6 +12,7 @@ import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
 import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
+import Checkout from './pages/AdminDashboard/Movies/Checkout';
 
 import { Screenings } from './pages';
 import Movies from './pages/Movies/Movies';
@@ -37,6 +38,7 @@ function App() {
         {/* <Stack px={2} py={3}> */}
           <Routes >
             {/* Home */}
+            <Route path="/checkout" element={<Checkout/>} />
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             {/* Movies */}
