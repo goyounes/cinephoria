@@ -183,7 +183,7 @@ export async function getAllScreeningById(screening_id){
         ORDER BY screenings.start_date, screenings.start_time;
     `
     const [result_rows] = await pool.query(q, [screening_id])
-    return result_rows
+    return result_rows[0]
 }
 
 export async function  getQualities(){
