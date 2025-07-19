@@ -174,7 +174,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
                 variant={isSelected ? "contained" : "outlined"}
                 onClick={() => hasScreenings && setSelectedIndex(idx)}
                 disabled={!hasScreenings}
-                sx={{ minWidth: 80, flexDirection: "column", py: 1 }}
+                sx={{ minWidth: 80, flexDirection: "column", py: 1, flexGrow:1 }}
               >
                 <Typography variant="body2">{date}</Typography>
                 <Typography variant="caption">{dayName}</Typography>
