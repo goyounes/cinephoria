@@ -7,7 +7,7 @@ import {
   } from "@mui/material";
 import axios from "axios";
 import ImageUploader from "../../../components/ImageUploader";
-
+import EditNoteIcon from '@mui/icons-material/EditNote';
 
 const EditMovie = () => {
     const navigate = useNavigate()
@@ -157,7 +157,7 @@ const EditMovie = () => {
 
       <Stack
         component="form"
-        gap={2}
+        spacing={2}
         id="NewMovieForm"
         noValidate
         // sx={{ display: "flex", flexDirection: "column", gap: 3 }}
@@ -290,7 +290,7 @@ const EditMovie = () => {
           value={movieData.score}
         />
 
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit} startIcon={<EditNoteIcon/>}>
           Edit Movie
         </Button>
       </Stack>

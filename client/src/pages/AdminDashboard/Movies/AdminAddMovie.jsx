@@ -6,6 +6,7 @@ import {
   } from "@mui/material";
 import axios from "axios";
 import ImageUploader from "../../../components/ImageUploader";
+import AddIcon from '@mui/icons-material/Add';
 
 const AddMovie = () => {
   const [movieData, setMovieData] = useState({
@@ -248,7 +249,7 @@ useEffect(() => {
           value={movieData.score}
         />
 
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit} startIcon={<AddIcon/>}>
           Add Movie
         </Button>
       </Stack>

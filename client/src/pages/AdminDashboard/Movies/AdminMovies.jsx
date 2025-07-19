@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Container, Stack, Button } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import AddIcon from '@mui/icons-material/Add';
 // import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {
@@ -37,7 +38,9 @@ const Movies = () => {
   <Container sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"column"}}>
       <Stack direction="row" sx={{ justifyContent: 'space-between'}}>
         <h1>Movies table</h1>
-        <Link to={"/admin/movies/create"}><Button variant='contained'>Add movie</Button></Link> 
+        <Link to={"/admin/movies/create"}>
+          <Button variant='contained' startIcon={<AddIcon/>}>Add movie</Button>
+        </Link> 
       </Stack>
       
       <table>
