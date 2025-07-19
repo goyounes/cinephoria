@@ -8,8 +8,10 @@ import {
 import axios from "axios";
 import ImageUploader from "../../../components/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import {displayCustomAlert} from "../../../components/CustomSnackbar"
 
 const EditMovie = () => {
+    const [snackbars, setSnackbars] = useState([]);
     const navigate = useNavigate()
     //Load movie with id = 
     const { id } = useParams();
@@ -123,11 +125,11 @@ const EditMovie = () => {
           console.log("response of updating movie: ");
           console.log(response)
           console.log(response.data);
-          alert('Movie updated successfully!');
+          displayCustomAlert(snackbars, setSnackbars, "Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
         } catch (error) {
           const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
-          alert("Failed to update movie: " + customMessage);
+          displayCustomAlert(snackbars, setSnackbars, "Failed to update movie: " + customMessage, "error");
           console.log(error)
         }
     };
@@ -296,6 +298,7 @@ const EditMovie = () => {
       </Stack>
     </CardContent>
     </Card>
+      {snackbars}
   </Container>
   );
 };

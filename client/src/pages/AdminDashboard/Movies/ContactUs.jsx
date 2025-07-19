@@ -116,7 +116,6 @@ const ContactUs = () => {
         </CardContent>
       </Card>
 
-      {/* Render snackbars */}
       {snackbars}
     </Container>
   );

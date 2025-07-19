@@ -7,8 +7,10 @@ import {
 import axios from "axios";
 import ImageUploader from "../../../components/ImageUploader";
 import AddIcon from '@mui/icons-material/Add';
+import {displayCustomAlert} from "../../../components/CustomSnackbar"
 
 const AddMovie = () => {
+  const [snackbars, setSnackbars] = useState([]);
   const [movieData, setMovieData] = useState({
     title: "",
     description: "",
@@ -84,10 +86,10 @@ const handleFloatChange = (e) => {
       console.log("response of adding movie: ");
       console.log(response)
       console.log(result);
-      alert('Movie added successfully!');
+      displayCustomAlert(snackbars, setSnackbars, "Movie added successfully!", "success");
     } catch (error) {
       const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
-      alert("Failed to add movie: " + customMessage);
+      displayCustomAlert(snackbars, setSnackbars, "Failed to add movie: " + customMessage, "error");
       console.log(error)
     }
   };
@@ -255,6 +257,8 @@ useEffect(() => {
       </Stack>
     </CardContent>
     </Card>
+    
+      {snackbars}
   </Container>
   );
 };
