@@ -32,14 +32,12 @@ const Login = () => {
       await axios.post(`/api/auth/login`, formData);
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
 
-      // const response2 = await axios.post(`/api/auth/verify`, null, {withCredentials: true});
-
       setTimeout(() => {
         navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
       },2000)
 
     } catch (err) {
-      displayCustomAlert(snackbars, setSnackbars, "Failed to register: " + err.message, "error");
+      displayCustomAlert(snackbars, setSnackbars, "Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
     }
   };
   //TODO:Change redirection page

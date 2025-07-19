@@ -6,7 +6,8 @@ import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/mate
 
 import { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-// import {FormControl,  TextField, InputLabel, Select, MenuItem,} from '@mui/material';
+import {displayCustomAlert} from "../../components/CustomSnackbar"
+
 const roleMap = {
     1: 'user', 
     2: 'employee',
@@ -14,6 +15,7 @@ const roleMap = {
 };
 
 const Logout = () =>  {
+    const [snackbars, setSnackbars] = useState([]); 
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
 
@@ -48,20 +50,11 @@ const Logout = () =>  {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
-      const response = await axios.post(`/api/auth/logout`);
-
-      console.log("response of logout: ");
-      console.log(response.status)
-      alert('Logout successful! \nGoodbye \n\nServer response code : '+ String(response.status));
-      // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
-
-      const response2 = await axios.post(`/api/auth/verify`, {withCredentials: true});
-      
-      console.log(response2);
+      await axios.post(`/api/auth/logout`);
+      displayCustomAlert(snackbars, setSnackbars, "Logout successful! Goodbye ", "success");
       navigate('/home'); // Redirect to the users page
     } catch (err) {
-      alert('Verified JWT error: ' + err);
+      displayCustomAlert(snackbars, setSnackbars, "Verified JWT error:" + err.response?.data?.error?.message || "Server error", "error");
     }
   };
 
@@ -93,6 +86,7 @@ const Logout = () =>  {
           </Stack>
         </CardContent>
       </Card>
+      {snackbars}
     </Container>
   );
 };

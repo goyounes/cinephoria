@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import {displayCustomAlert} from "../../components/CustomSnackbar"
 
 const Register = () => {
+  const [snackbars, setSnackbars] = useState([]);
   const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -32,11 +34,11 @@ const Register = () => {
 
       const response = await axios.post(`/api/auth/register`, formData);
       console.log("response of adding user: ", response);
-      alert('User added successfully!');
-      // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
+      displayCustomAlert(snackbars, setSnackbars, "registered successfully!", "success");
       navigate('/home'); // Redirect to the users page
     } catch (err) {
-      alert('Failed to add User: ' + err.message);
+      displayCustomAlert(snackbars, setSnackbars, "Failed to register: " + err.response?.data?.error?.message || "Server error", "error");
+
     }
   };
 
@@ -110,6 +112,7 @@ return (
         </Stack>
       </CardContent>
       </Card>        
+      {snackbars}
     </Container>
   )
 };
