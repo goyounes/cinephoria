@@ -1,97 +1,88 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Card,
   CardContent,
   Typography,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Button,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Grid,
+  Box,
+  Chip,
+  Rating,
 } from "@mui/material";
+import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
 import { displayCustomAlert } from "../../../components/CustomSnackbar";
 
+const ticketTypes = [
+  { label: "Child", price: 5 },
+  { label: "Student", price: 10 },
+  { label: "Adult", price: 15 },
+  { label: "VIP", price: 20 },
+];
+
 const Checkout = () => {
-  const { screening_id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [checkoutInfo, setCheckoutInfo] = useState(null);
+
+  const screening_id = searchParams.get("screening_id");
+  const movie_id = searchParams.get("movie_id");
+
   const [loading, setLoading] = useState(true);
-  const [ticketCount, setTicketCount] = useState(1);
-  const ticketPrice = 12;
+  const [movie, setMovie] = useState(null);
+  const [screening, setScreening] = useState(null);
+  const [ticketCounts, setTicketCounts] = useState([0, 0, 0, 0]);
   const [snackbars, setSnackbars] = useState([]);
 
-  const [formValues, setFormValues] = useState({
-    user_email: "",
-    user_password: "",
-    card_number: "",
-    expiry: "",
-    cvv: "",
-  });
-
+  console.log(movie)
+  console.log(screening)
   useEffect(() => {
-    const fetchScreeningInfo = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`/api/screenings/${screening_id}`);
-        setCheckoutInfo(res.data);
+        const movieRes = await axios.get(`/api/movies/${movie_id}`);
+        const screeningsRes = await axios.get(`/api/screenings/${screening_id}`);
+
+        setMovie(movieRes.data);
+        setScreening(screeningsRes.data);
       } catch (err) {
-        displayCustomAlert(snackbars, setSnackbars, "Failed to load screening info", "error");
+        displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchScreeningInfo();
-  }, [screening_id]);
+    if (movie_id && screening_id) {
+      fetchData();
+    }
+  }, [movie_id, screening_id]);
 
-  const totalPrice = ticketCount * ticketPrice;
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleTicketChange = (index, delta) => {
+    setTicketCounts((prev) => {
+      const updated = [...prev];
+      updated[index] = Math.max(0, updated[index] + delta);
+      return updated;
+    });
   };
 
-  const handleTicketChange = (e) => {
-    setTicketCount(Number(e.target.value));
-  };
+  const calculateTotal = () =>
+    ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].price, 0);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const ticketData = {
+  const handleSubmit = async () => {
+    const ticketPayload = {
       screening_id,
-      user_email: formValues.user_email,
-      user_password: formValues.user_password,
-      ticketCount,
-      card_information: {
-        card_number: formValues.card_number,
-        expiry: formValues.expiry,
-        cvv: formValues.cvv,
-      },
+      ticket_types: ticketTypes.map((type, index) => ({
+        type: type.label,
+        count: ticketCounts[index],
+        price: type.price,
+      })),
     };
 
     try {
-      const response = await axios.post(`/api/checkout/complete`, ticketData);
-
-      if (response.status !== 200) throw new Error("Reservation failed");
-
+      await axios.post("/api/checkout/complete", ticketPayload);
       displayCustomAlert(snackbars, setSnackbars, "Reservation successful!", "success");
-      setFormValues({
-        user_email: "",
-        user_password: "",
-        card_number: "",
-        expiry: "",
-        cvv: "",
-      });
-      setTicketCount(1);
       navigate("/tickets");
     } catch (err) {
       const message = err.response?.data?.error?.message || err.message;
@@ -107,11 +98,11 @@ const Checkout = () => {
     );
   }
 
-  if (!checkoutInfo) {
+  if (!movie || !screening) {
     return (
       <Container sx={{ py: 6 }}>
         <Typography variant="h5" color="error">
-          Failed to load screening details.
+          Movie or Screening not found.
         </Typography>
       </Container>
     );
@@ -125,99 +116,121 @@ const Checkout = () => {
             Checkout
           </Typography>
 
-          <Stack spacing={3}>
-            <div>
-              <Typography variant="h6">Reservation Summary</Typography>
-              <Typography><strong>Movie:</strong> {checkoutInfo.title}</Typography>
-              <Typography><strong>Cinema:</strong> {checkoutInfo.cinema_name}</Typography>
-              <Typography><strong>Room:</strong> {checkoutInfo.room_name}</Typography>
-              <Typography><strong>Address:</strong> {checkoutInfo.cinema_adresse}</Typography>
-              <Typography>
-                <strong>Date & Time:</strong>{" "}
-                {new Date(checkoutInfo.start_date).toLocaleDateString()} {checkoutInfo.start_time}
-              </Typography>
-
-              <FormControl sx={{ mt: 2, width: "30%" }}>
-                <InputLabel id="ticketCount-label">Tickets</InputLabel>
-                <Select
-                  labelId="ticketCount-label"
-                  value={ticketCount}
-                  onChange={handleTicketChange}
-                  label="Tickets"
-                >
-                  {Array.from({ length: 20 }, (_, i) => (
-                    <MenuItem key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Typography sx={{ mt: 2 }}>
-                <strong>Total Price:</strong> €{totalPrice}
-              </Typography>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={2}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Email Address"
-                  name="user_email"
-                  placeholder="Please provide your account email"
-                  value={formValues.user_email}
-                  onChange={handleChange}
+          {/* Mini Movie Details Card */}
+          <Card elevation={2} sx={{ my: 3 }}>
+            <CardContent>
+              <Stack direction="row" spacing={2}>
+                {/* Poster */}
+                <Box
+                  component="img"
+                  src={movie.imageUrl}
+                  alt={movie.title}
+                  sx={{
+                    width: 100,
+                    height: 150,
+                    objectFit: "cover",
+                    borderRadius: 2,
+                  }}
                 />
 
-                <TextField
-                  required
-                  fullWidth
-                  label="Password"
-                  name="user_password"
-                  placeholder="Please provide your account password"
-                  value={formValues.user_password}
-                  onChange={handleChange}
-                />
+                {/* Movie Info */}
+                <Stack spacing={1} flex={1}>
+                  <Typography variant="h6" fontWeight="bold">
+                    {movie.title}
+                  </Typography>
 
-                <TextField
-                  required
-                  fullWidth
-                  label="Card Number"
-                  name="card_number"
-                  placeholder="Please enter your card details"
-                  inputProps={{ maxLength: 16 }}
-                  value={formValues.card_number}
-                  onChange={handleChange}
-                />
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    <Chip label={`Age ${movie.age_rating}+`} size="small" />
+                    <Chip label={`Duration: ${movie.length}`} size="small" />
+                    {movie.is_team_pick === 1 && (
+                      <Chip
+                        label="Team Pick"
+                        color="success"
+                        size="small"
+                        icon={<StarsIcon fontSize="small" />}
+                      />
+                    )}
+                  </Stack>
 
-                <TextField
-                  required
-                  fullWidth
-                  label="Expiry Date"
-                  name="expiry"
-                  placeholder="MM/YY"
-                  value={formValues.expiry}
-                  onChange={handleChange}
-                />
+                  {movie.genres?.length > 0 && (
+                    <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
+                      {movie.genres.map((genre) => (
+                        <Chip
+                          key={genre.genre_id}
+                          label={genre.genre_name}
+                          size="small"
+                        />
+                      ))}
+                    </Stack>
+                  )}
 
-                <TextField
-                  required
-                  fullWidth
-                  type="number"
-                  label="CVV"
-                  name="cvv"
-                  inputProps={{ maxLength: 3 }}
-                  value={formValues.cvv}
-                  onChange={handleChange}
-                />
-
-                <Button variant="contained" color="primary" type="submit">
-                  Confirm
-                </Button>
+                  <Stack direction="row" spacing={1} alignItems="center" mt={1}>
+                    <Rating
+                      value={parseFloat(movie.score)}
+                      precision={0.1}
+                      readOnly
+                      size="small"
+                    />
+                    <Typography variant="body2">({movie.score})</Typography>
+                  </Stack>
+                </Stack>
               </Stack>
-            </form>
+            </CardContent>
+          </Card>
+
+          {/* Screening Info */}
+          <Stack spacing={2} mt={2}>
+            <Typography><strong>Cinema:</strong> {screening.cinema_name}</Typography>
+            <Typography><strong>Room:</strong> {screening.room_name}</Typography>
+            <Typography><strong>Address:</strong> {screening.cinema_adresse}</Typography>
+            <Typography>
+              <strong>Date & Time:</strong>{" "}
+              {new Date(screening.start_date).toLocaleDateString()} {screening.start_time}
+            </Typography>
           </Stack>
+
+          {/* Ticket Types */}
+          <Typography variant="h6" mt={4}>
+            Select Ticket Types
+          </Typography>
+
+          <Stack spacing={2} mt={2}>
+            {ticketTypes.map((type, index) => (
+              <Grid container alignItems="center" key={type.label} spacing={2}>
+                <Grid item xs={4}>
+                  <Typography>{type.label} – €{type.price}</Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleTicketChange(index, -1)}
+                    >-</Button>
+                    <Typography>{ticketCounts[index]}</Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleTicketChange(index, 1)}
+                    >+</Button>
+                  </Stack>
+                </Grid>
+              </Grid>
+            ))}
+          </Stack>
+
+          <Typography variant="h6" mt={4}>
+            Total Price: €{calculateTotal()}
+          </Typography>
+
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3 }}
+            onClick={handleSubmit}
+            disabled={calculateTotal() === 0}
+          >
+            Confirm Reservation
+          </Button>
         </CardContent>
       </Card>
 
