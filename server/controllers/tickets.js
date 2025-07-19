@@ -16,7 +16,7 @@ export async function getCheckoutInfoAdmin(screening_id) {
         )
     `
     const [result_rows] = await pool.query(q,[screening_id]);
-    return result_rows
+    return result_rows[0]
 }
 
 export async function getCheckoutInfo(screening_id) {
@@ -39,7 +39,7 @@ export async function getCheckoutInfo(screening_id) {
         );
     `
     const [result_rows] = await pool.query(q,[screening_id]);
-    return result_rows
+    return result_rows[0]
 }
 
 
