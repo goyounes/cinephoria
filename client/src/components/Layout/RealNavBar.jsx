@@ -65,7 +65,7 @@ const RealNavBar = () => {
             <NavButton label="Home" Icon={HomeIcon} to="/" />
             <NavButton label="Reservation" Icon={EventSeatIcon} to="/reservation" />
             <NavButton label="Movies" Icon={MovieIcon} to="/movies" />
-            <NavButton label="Contact" Icon={ContactMailIcon} to="/contact" />
+            <NavButton label="Contact" Icon={ContactMailIcon} to="/contactus" />
 
             {/* This one opens the menu */}
             <NavButton label="My Account" Icon={AccountCircleIcon} onClick={handleMenuOpen} />

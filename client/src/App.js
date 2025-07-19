@@ -25,12 +25,13 @@ import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
 
 import { Container, Stack } from '@mui/material';
+import ContactUs from './pages/AdminDashboard/Movies/ContactUs';
 
 function App() {
   return (
     <Stack minHeight="100vh">
       <RealNavBar />
-      {/* <TopNavBar /> */}
+      <TopNavBar />
 
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
@@ -57,6 +58,7 @@ function App() {
             <Route path="/tickets/:id" element={<AdminTickets />} />
             {/* Messages */}
             <Route path="/messages" element={<AdminMessages />} />
+            <Route path="/contactus" element={<ContactUs />} />
             {/* Users */}
             <Route path="/users" element={<AdminUsers />} />
 
