@@ -34,7 +34,7 @@ const Login = () => {
 
       setTimeout(() => {
         navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
-      },2000)
+      },1000)
 
     } catch (err) {
       displayCustomAlert(snackbars, setSnackbars, "Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
