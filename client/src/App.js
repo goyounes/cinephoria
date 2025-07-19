@@ -25,7 +25,7 @@ import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
 
 import { Container, Stack } from '@mui/material';
-import ContactUs from './pages/AdminDashboard/Movies/ContactUs';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   return (

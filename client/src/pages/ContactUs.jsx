@@ -10,7 +10,7 @@ import {
   Stack,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import {displayCustomAlert} from "../../../components/CustomSnackbar"
+import {displayCustomAlert} from "../components/CustomSnackbar"
 // import CustomSnackbar, { displayCustomAlert } from "../../components/CustomSnackbar";
 
 

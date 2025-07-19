@@ -75,10 +75,7 @@ const Footer = () => {
                 alignItems: 'flex-start',
                 textAlign: 'left',
                 gap: 0.5,
-                ml:{  //neccesary hack to get the behaviour exactly like i wanted
-                  xs: '25%',   
-                  xl: 0      
-                }
+                ml:"25%"//neccesary hack to get the behaviour exactly like i wanted
               }}
             >
               <Typography fontWeight="bold">{cinema.name}</Typography>
