@@ -60,15 +60,13 @@ const Footer = () => {
         Our Cinemas
       </Typography>
 
-      <Grid container spacing={2} mt={2} justifyContent="center">
+      <Grid container spacing={2} mt={2} justifyContent="space-between">
         {cinemas.map((cinema) => (
           <Grid
             key={cinema.name}
-            item
-            xs={12}   // 1 per row on extra-small screens
-            sm={6}    // 2 per row on small screens
-            md={3}    // 4 per row on medium and up
-            sx={{ display: 'flex', justifyContent: 'center' }}
+            size={{ xs: 12, sm: 6,md:4, xl:1.5 }}
+
+            sx={{ display: 'flex', justifyContent: 'start' }}
           >
             <Box
               sx={{
@@ -77,6 +75,10 @@ const Footer = () => {
                 alignItems: 'flex-start',
                 textAlign: 'left',
                 gap: 0.5,
+                ml:{  //neccesary hack to get the behaviour exactly like i wanted
+                  xs: '25%',   
+                  xl: 0      
+                }
               }}
             >
               <Typography fontWeight="bold">{cinema.name}</Typography>
