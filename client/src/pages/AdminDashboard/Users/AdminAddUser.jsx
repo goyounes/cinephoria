@@ -2,8 +2,10 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+import {displayCustomAlert} from "../../../components/CustomSnackbar"
 
 const AddUser = () => {
+  const [snackbars, setSnackbars] = useState([]);
   // const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -26,24 +28,12 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // const payload = {
-      //   ...formData,
-      //   role_id: Number(formData.role_id),
-      // };
 
       const response = await axios.post(`/api/users`,formData);
       console.log(response)
-      // const result = response.data;
 
-    //   if (!response.ok) {
-    //     const err = new Error(result.error?.message || 'An error occurred');
-    //     err.status = result.error?.status;
-    //     err.code = result.error?.code;
-    //     err.details = result.error?.details;
-    //     throw err;
-    //   }
+	    displayCustomAlert(snackbars, setSnackbars, "User added successfully!", "success");
 
-      alert('User added successfully!');
       setFormData({
         email: '',
         password: '',
@@ -54,7 +44,7 @@ const AddUser = () => {
       });
       navigate('/users'); // Redirect to the users page
     } catch (err) {
-      alert('Failed to add User: ' + err.message);
+      displayCustomAlert(snackbars, setSnackbars, "Failed to add User: " + err.message, "error");
     }
   };
 
@@ -134,7 +124,8 @@ return (
           </Button>
         </Stack>
       </CardContent>
-      </Card>        
+      </Card>   
+      {snackbars}     
     </Container>
   )
 };

@@ -5,9 +5,11 @@ import { Container, Stack, Button } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddIcon from '@mui/icons-material/Add';
+import {displayCustomAlert} from "../../../components/CustomSnackbar"
 // import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {
+  const [snackbars, setSnackbars] = useState([]);
   const [movies, setMovies] = useState([])
   // let navigate = useNavigate();
 
@@ -30,7 +32,8 @@ const Movies = () => {
       await fetchMovies();
     } catch (error) {
       console.error("Error deleting movie with id: " + id , error);
-      alert("Error deleting movie with id: " + id +"\n" + error?.response?.data?.error?.message)
+      const errorMessage = "Error deleting movie with id: " + id +"\n" + error?.response?.data?.error?.message
+      displayCustomAlert(snackbars, setSnackbars, errorMessage, "error");
     }
   }
   
@@ -96,7 +99,7 @@ const Movies = () => {
           ))}
         </tbody>
       </table>
-
+      {snackbars}
     </Container>
   )
 

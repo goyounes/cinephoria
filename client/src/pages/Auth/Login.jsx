@@ -3,9 +3,10 @@ import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
-// import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {displayCustomAlert} from "../../components/CustomSnackbar"
 
 const Login = () => {
+  const [snackbars, setSnackbars] = useState([]);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -28,18 +29,17 @@ const Login = () => {
       console.log(`/auth/login`)
       console.log(formData)
 
-      const response = await axios.post(`/api/auth/login`, formData);
-      console.log("response of login: ");
-      console.log(response)
-      alert('Login successful! \nWelcome ' + formData.email);
-      // setFormData({email: '',password: '',username: '',firstName: '',lastName: '',});
+      await axios.post(`/api/auth/login`, formData);
+     	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
 
-      const response2 = await axios.post(`/api/auth/verify`,{ some: 'data' }, {withCredentials: true});
-      
-      console.log(response2);
-      navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
+      // const response2 = await axios.post(`/api/auth/verify`, null, {withCredentials: true});
+
+      setTimeout(() => {
+        navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
+      },2000)
+
     } catch (err) {
-      alert('Failed to register: ' + err.message);
+      displayCustomAlert(snackbars, setSnackbars, "Failed to register: " + err.message, "error");
     }
   };
   //TODO:Change redirection page
@@ -106,6 +106,8 @@ const Login = () => {
         </Stack>
       </CardContent>
       </Card>        
+      
+      {snackbars}
     </Container>
   )
 }
