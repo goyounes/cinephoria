@@ -2,6 +2,7 @@ import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
 import { getCheckoutInfo, getCheckoutInfoAdmin } from '../controllers/tickets.js';
+import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 
 
@@ -28,7 +29,7 @@ router.get("/checkout/:id", async (req,res,next) => {
         next(error)
     }
 })
-router.get("/all/checkout/:id", async (req,res,next) => {
+router.get("/all/checkout/:id", verifyEmployeeJWT ,async (req,res,next) => {
     const screening_id = req.params.id
     try {
         const checkoutInfo = await getCheckoutInfoAdmin(screening_id)
