@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material';
 import ScreeningButton from './ScreeningButton';
-
+import { Link } from 'react-router-dom'
 
 const ScreeningsDisplay = ({ screeningsByLocation, nbrOfTickets }) => {
   if (!screeningsByLocation) return null;
@@ -44,13 +44,18 @@ const ScreeningsDisplay = ({ screeningsByLocation, nbrOfTickets }) => {
                       direction="row"
                       sx={{ flexWrap: "wrap", gap: 1 }}
                     >
-                      {visibleScreenings.map((screening) => (
-                        <ScreeningButton
-                          key={screening.screening_id}
-                          screening={screening}
-                          room_name={roomData.room_name}
-                        />
-                      ))}
+                      {visibleScreenings.map((screening) => {
+                        const url = `/checkout?screening_id=${screening.screening_id}&movie_id=${screening.movie_id}`;
+                        return (
+                        <Link to={ url }>
+                          <ScreeningButton
+                            key={screening.screening_id}
+                            screening={screening}
+                            room_name={roomData.room_name}
+                          />           
+                        </Link>)}
+
+                      )}
                     </Stack>
                   );
                 })
