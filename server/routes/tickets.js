@@ -1,17 +1,40 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
+import { getCheckoutInfo, getCheckoutInfoAdmin } from '../controllers/tickets.js';
 
-const DB_API_URL = "http://localhost:5000/api/v1"
+
+
+
 
 router.get("/",async (req,res,next) => {
     try {
-        const response = await axios.get(DB_API_URL+"/tickets",{headers:{'X-Requested-By': 'backend-server'}})
+        const response = await axios.get("/tickets")
         const tickets = response.data
         // res.status(200).render("pages/tickets.ejs",{tickets})
         res.status(200).json(response.data)
     } catch (error) {
         // next(error)
+    }
+})
+
+router.get("/checkout/:id", async (req,res,next) => {
+    const screening_id = req.params.id
+    console.log("checkout : id was hit with id : ", screening_id)
+    try {
+        const checkoutInfo = await getCheckoutInfo(screening_id)
+        res.status(200).json(checkoutInfo)
+    } catch (error) {
+        next(error)
+    }
+})
+router.get("/all/checkout/:id", async (req,res,next) => {
+    const screening_id = req.params.id
+    try {
+        const checkoutInfo = await getCheckoutInfoAdmin(screening_id)
+        res.status(200).json(checkoutInfo)
+    } catch (error) {
+        next(error)
     }
 })
 
