@@ -5,7 +5,7 @@ import Footer from './components/Layout/Footer';
 import TopNavBar from './components/Layout/TopNavBar';
 import RealNavBar from './components/Layout/RealNavBar';
 
-import AdminMessages from './pages/AdminDashboard/AdminMessages';
+import AdminMessages from './pages/AdminDashboard/AdminInbox';
 import AdminMovies from './pages/AdminDashboard/Movies/AdminMovies';
 import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
 import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
