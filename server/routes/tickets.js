@@ -1,7 +1,6 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { getCheckoutInfo, getCheckoutInfoAdmin } from '../controllers/tickets.js';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 
