@@ -1,8 +1,16 @@
-// import { Router } from 'express';
-// const router = Router();
-// import axios from 'axios';
+import { Router } from 'express';
+const router = Router();
+import axios from 'axios';
 // const DB_API_URL = "http://localhost:5000/api/v1"
 
+router.post("/complete", async(req, res, next) => {
+    console.log(req.body)
+    const {screeningId, ticketTypes,paymentToken, userId } = req.body
+    console.log(order)
+    console.log(cardInfo)
+    res.status(200).json(req.body)
+
+})
 // router.get("/api/v1/checkout", async (req, res, next) => {
 //   const checkoutInfo = req.query.screening_id || null;
 //   console.log("Fetching Checkout information from the DB...");
@@ -81,3 +89,5 @@
 //     next(error); // Passes the error to the global error-handling middleware
 //   }
 // });
+
+export default router;
