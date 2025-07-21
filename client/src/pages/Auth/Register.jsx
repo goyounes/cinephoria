@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import {displayCustomAlert} from "../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 
 const Register = () => {
   const [snackbars, setSnackbars] = useState([]);

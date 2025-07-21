@@ -6,9 +6,9 @@ import {
    Autocomplete
   } from "@mui/material";
 import axios from "axios";
-import ImageUploader from "../../../components/ImageUploader";
+import ImageUploader from "../../../components/UI/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import {displayCustomAlert} from "../../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
 
 const EditMovie = () => {
     const [snackbars, setSnackbars] = useState([]);

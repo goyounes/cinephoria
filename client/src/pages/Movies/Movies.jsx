@@ -9,10 +9,11 @@ import {
 } from "@mui/material";
 import {Search as SearchIcon, Tune as TuneIcon, Event as EventIcon, Clear as ClearIcon} from "@mui/icons-material";
 
-import ModalWrapper from "../../components/ModalWrapper";
+import ModalWrapper from "../../components/UI/ModalWrapper";
 import SearchMovieModal from "./components/SearchMovieModal";
-import BasicDatePicker from "../../components/BasicDatePicker";
-import ResponsiveIconButton from "../../components/ResponsiveIconButton";
+import BasicDatePicker from "../../components/UI/BasicDatePicker";
+import ResponsiveIconButton from "../../components/UI/ResponsiveIconButton";
+
 import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "./utils"

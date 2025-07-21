@@ -1,6 +1,5 @@
 import axios from "axios";
-import { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
 Container, Stack, Card, Typography,
 Box
@@ -8,27 +7,14 @@ Box
 import { Search as SearchIcon } from "@mui/icons-material";
 
 import SearchMovieModal from "./components/SearchMovieModal";
-import ResponsiveIconButton from "../../components/ResponsiveIconButton";
+import ResponsiveIconButton from "../../components/UI/ResponsiveIconButton";
 import MovieCard from "./components/MovieCard";
 import Home_page_image from '../../assets/Home_page_image.webp';
 
 
-
-import {
-filterAndUniqueMovies,
-groupScreeningsByMovie
-} from "./utils";
-
 const Home = () => {
-   const { id } = useParams();
-
    const [movies, setMovies] = useState([]);
-  
-   const [selectedMovieId, setSelectedMovieId] = useState(-1);
-
    const [modalOpen, setModalOpen] = useState(false);
-
-   // Parse ID from route and set selectedMovieId
 
    // Initial fetch
    useEffect(() => {

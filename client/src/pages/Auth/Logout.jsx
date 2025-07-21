@@ -6,7 +6,7 @@ import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/mate
 
 import { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import {displayCustomAlert} from "../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 
 const roleMap = {
     1: 'user', 

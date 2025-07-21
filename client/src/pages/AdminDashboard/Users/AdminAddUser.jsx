@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
-import {displayCustomAlert} from "../../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
 
 const AddUser = () => {
   const [snackbars, setSnackbars] = useState([]);

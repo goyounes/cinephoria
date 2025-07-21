@@ -5,7 +5,7 @@ import { Container, Stack, Button } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddIcon from '@mui/icons-material/Add';
-import {displayCustomAlert} from "../../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
 // import { useNavigate } from 'react-router-dom';
 
 const Movies = () => {

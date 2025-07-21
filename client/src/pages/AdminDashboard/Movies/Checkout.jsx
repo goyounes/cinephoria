@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import {Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
-import { displayCustomAlert } from "../../../components/CustomSnackbar";
+import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
 
 const ticketTypes = [
    { label: "Child", price: 5 },

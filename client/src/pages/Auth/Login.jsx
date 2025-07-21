@@ -3,7 +3,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
-import {displayCustomAlert} from "../../components/CustomSnackbar"
+import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 
 const Login = () => {
   const [snackbars, setSnackbars] = useState([]);
