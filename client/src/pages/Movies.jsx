@@ -16,7 +16,7 @@ import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
 
 import MovieCard from "./components/MovieCard";
 
-import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "./utils"
+import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
 
 

@@ -10,7 +10,7 @@ import MovieCard from "./components/MovieCard";
 import MovieScreenings from "./components/MovieScreenings";
 import MovieDetails from "./components/MovieDetails";
 
-import {filterAndUniqueMovies,groupScreeningsByMovie} from "./utils";
+import {filterAndUniqueMovies,groupScreeningsByMovie} from "../utils";
 import Home_page_image from '../assets/Home_page_image.webp';
 
 

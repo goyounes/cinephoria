@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 function groupScreenings(screenings) {
   const groupedByDateByLocation = {};
 

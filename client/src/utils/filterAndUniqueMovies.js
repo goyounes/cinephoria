@@ -1,3 +1,5 @@
+import { hasAnyGenre } from "../utils";
+
 const filterAndUniqueMovies = (movies, { selectedCinema = null, selectedGenres = []}) => {
   const alreadyIncludedInFinalList = new Set();
 

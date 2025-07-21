@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
-import { groupScreenings } from "../utils";
+import { groupScreenings } from "../../utils";
 
 import {Stack,Button,Typography,IconButton,Card,CardContent,} from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
