@@ -14,10 +14,10 @@ import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 import Checkout from './pages/AdminDashboard/Movies/Checkout';
 
-import Movies from './pages/Movies/Movies';
-import Movie from './pages/Movies/Movie';
-import Reservation from './pages/Movies/Reservation';
-import Home from './pages/Movies/Home';
+import Movies from './pages/Movies';
+import Movie from './pages/Movie';
+import Reservation from './pages/Reservation';
+import Home from './pages/Home';
 
 
 import Register from './pages/Auth/Register';

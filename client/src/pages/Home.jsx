@@ -7,9 +7,9 @@ Box
 import { Search as SearchIcon } from "@mui/icons-material";
 
 import SearchMovieModal from "./components/SearchMovieModal";
-import ResponsiveIconButton from "../../components/UI/ResponsiveIconButton";
+import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
 import MovieCard from "./components/MovieCard";
-import Home_page_image from '../../assets/Home_page_image.webp';
+import Home_page_image from '../assets/Home_page_image.webp';
 
 
 const Home = () => {

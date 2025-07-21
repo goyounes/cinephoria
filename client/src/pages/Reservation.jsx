@@ -5,13 +5,13 @@ import { Container, Stack, Card, Typography, FormControl, InputLabel, Select, Me
 import { Search as SearchIcon } from "@mui/icons-material";
 
 import SearchMovieModal from "./components/SearchMovieModal";
-import ResponsiveIconButton from "../../components/UI/ResponsiveIconButton";
+import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
 import MovieCard from "./components/MovieCard";
 import MovieScreenings from "./components/MovieScreenings";
 import MovieDetails from "./components/MovieDetails";
 
 import {filterAndUniqueMovies,groupScreeningsByMovie} from "./utils";
-import Home_page_image from '../../assets/Home_page_image.webp';
+import Home_page_image from '../assets/Home_page_image.webp';
 
 
 const Reservation = () => {
