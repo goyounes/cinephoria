@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField
-} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
 import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
-import { validateCardExpiryDate } from "../../../utils";
+import PaymentDialog from "./PaymentDialog";
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 const checkIsEmployee = async () => {
@@ -23,7 +20,7 @@ const checkIsEmployee = async () => {
 const Checkout = () => {
 
    const [searchParams] = useSearchParams();
-   const navigate = useNavigate();
+   // const navigate = useNavigate();
 
    const screening_id = searchParams.get("screening_id");
    const movie_id = searchParams.get("movie_id");
@@ -86,26 +83,6 @@ const Checkout = () => {
       expiry: "",
       cvv: ""
    });
-   const handleCardInputChange = (field) => (event) => {
-      let value = event.target.value;
-      if (field === "number") {
-         value = value.replace(/\D/g, "").slice(0, 16);
-         value = value.replace(/(.{4})/g, "$1 ").trim();
-      }
-      if (field === "cvv") {
-         value = value.replace(/\D/g, "").slice(0, 3);
-      }
-      if (field === "expiry") {
-         value = value.replace(/\D/g, "").slice(0, 4);
-         if (value.length >= 3) {
-            value = value.replace(/(\d{2})(\d{1,2})/, "$1/$2");
-         }
-      }
-      setCardInfo((prev) => ({
-         ...prev,
-         [field]: value,
-      }));
-   };
 
    // const handleSubmit = async () => {
    //    const ticketPayload = {
@@ -277,53 +254,14 @@ const Checkout = () => {
          </Card>
 
 
-         <Dialog open={cardDialogOpen} onClose={() => setCardDialogOpen(false)} fullWidth>
-            <DialogTitle>Enter Card Information</DialogTitle>
-            <DialogContent>
-               <Stack spacing={2} mt={1}>
-                  <TextField
-                  label="Card Number"
-                  variant="outlined"
-                  fullWidth
-                  value={cardInfo.number}
-                  onChange={handleCardInputChange("number")}
-                  />
-                  <TextField
-                  label="Expiration Date (MM/YY)"
-                  variant="outlined"
-                  fullWidth
-                  value={cardInfo.expiry}
-                  onChange={handleCardInputChange("expiry")}
-                  />
-                  <TextField
-                  label="CVV"
-                  variant="outlined"
-                  fullWidth
-                  value={cardInfo.cvv}
-                  onChange={handleCardInputChange("cvv")}
-                  type="password"
-                  />
-               </Stack>
-            </DialogContent>
-            <DialogActions>
-               <Button onClick={() => setCardDialogOpen(false)}>Cancel</Button>
-               <Button
-               variant="contained"
-               onClick={() => {
-                  if (!validateCardExpiryDate(cardInfo.expiry)) {
-                     displayCustomAlert(snackbars, setSnackbars, "Expiration date is invalid.", "error");
-                     return;
-                  }
-
-                  setCardDialogOpen(false);
-                  // Trigger actual checkout logic here
-                  displayCustomAlert(snackbars, setSnackbars, "Card details submitted!", "success");
-               }}
-               >
-               Submit Payment
-               </Button>
-            </DialogActions>
-         </Dialog>
+         <PaymentDialog
+         open={cardDialogOpen}
+         onClose={() => setCardDialogOpen(false)}
+         cardInfo={cardInfo}
+         setCardInfo={setCardInfo}
+         snackbars={snackbars}
+         setSnackbars={setSnackbars}
+         />
 
          {snackbars}
       </Container>
