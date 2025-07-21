@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import {Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
+import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField
+} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
 import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
+import { validateCardExpiryDate } from "../../../utils";
 
+const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 const checkIsEmployee = async () => {
   try {
     await axios.post("/api/auth/verify/employee");
@@ -16,6 +21,7 @@ const checkIsEmployee = async () => {
 
 
 const Checkout = () => {
+
    const [searchParams] = useSearchParams();
    const navigate = useNavigate();
 
@@ -26,44 +32,80 @@ const Checkout = () => {
    const [movie, setMovie] = useState(null);
    const [screening, setScreening] = useState(null);
    const [ticketTypes, setTicketTypes] = useState([])
-   const [ticketCounts, setTicketCounts] = useState([0, 0, 0, 0]);
+   const [ticketCounts, setTicketCounts] = useState([]);
    const [snackbars, setSnackbars] = useState([]);
 
-    useEffect(() => {
-    const fetchData = async () => {
-      try {
-         const movieRes = await axios.get(`/api/movies/${movie_id}`);
-         const ticketTypesRes = await axios.get("/api/tickets/types");
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            const movieRes = await axios.get(`/api/movies/${movie_id}`);
+            const ticketTypesRes = await axios.get("/api/tickets/types");
 
-         const screeningUrl = await checkIsEmployee()
-          ? `/api/screenings/${screening_id}`
-          : `/api/screenings/upcoming/${screening_id}`;
-         const screeningsRes = await axios.get(screeningUrl);
+            const screeningUrl = await checkIsEmployee()
+            ? `/api/screenings/${screening_id}`
+            : `/api/screenings/upcoming/${screening_id}`;
+            const screeningsRes = await axios.get(screeningUrl);
 
-        setMovie(movieRes.data);
-        setScreening(screeningsRes.data);
-        setTicketTypes(ticketTypesRes.data)
-      } catch (err) {
-        displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
-      } finally {
-        setLoading(false);
+         setMovie(movieRes.data);
+         setScreening(screeningsRes.data);
+         setTicketTypes(ticketTypesRes.data)
+         setTicketCounts(new Array(ticketTypesRes.data.length).fill(0));
+         } catch (err) {
+         displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
+         } finally {
+         setLoading(false);
+         }
+      };
+
+      if (movie_id && screening_id) {
+         fetchData();
       }
-    };
-
-    if (movie_id && screening_id) {
-      fetchData();
-    }
-  }, [movie_id, screening_id]); 
+   }, [movie_id, screening_id]); 
 
    const handleTicketChange = (index, delta) => {
-      setTicketCounts((prev) => {
-         const updated = [...prev];
-         updated[index] = Math.max(0, updated[index] + delta);
-         return updated;
-      });
+      const currentTotal = ticketCounts.reduce((sum, count) => sum + count, 0);
+      const currentCount = ticketCounts[index];
+      const newCount = currentCount + delta;
+
+      if (newCount < 0) return
+      if (delta > 0 && currentTotal + delta > MAX_NUMBER_OF_TICKETS_PER_ORDER) {
+         displayCustomAlert(snackbars, setSnackbars, `You can only reserve up to ${MAX_NUMBER_OF_TICKETS_PER_ORDER} tickets.`, "error");
+         return;
+      }
+
+      const updatedCounts = [...ticketCounts];
+      updatedCounts[index] = newCount;
+      setTicketCounts(updatedCounts);
    };
 
-   const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].ticket_type_price, 0);
+   const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * (ticketTypes[i]?.ticket_type_price || 0), 0);
+
+   const [cardDialogOpen, setCardDialogOpen] = useState(false);
+   const [cardInfo, setCardInfo] = useState({
+      number: "",
+      expiry: "",
+      cvv: ""
+   });
+   const handleCardInputChange = (field) => (event) => {
+      let value = event.target.value;
+      if (field === "number") {
+         value = value.replace(/\D/g, "").slice(0, 16);
+         value = value.replace(/(.{4})/g, "$1 ").trim();
+      }
+      if (field === "cvv") {
+         value = value.replace(/\D/g, "").slice(0, 3);
+      }
+      if (field === "expiry") {
+         value = value.replace(/\D/g, "").slice(0, 4);
+         if (value.length >= 3) {
+            value = value.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+         }
+      }
+      setCardInfo((prev) => ({
+         ...prev,
+         [field]: value,
+      }));
+   };
 
    // const handleSubmit = async () => {
    //    const ticketPayload = {
@@ -139,7 +181,7 @@ const Checkout = () => {
                      <Chip label={`Duration: ${movie.length}`} size="small" />
                      {movie.is_team_pick === 1 && (
                         <Chip
-                           ticket_type_name="Team Pick"
+                           label="Team Pick"
                            color="success"
                            size="small"
                            icon={<StarsIcon fontSize="small" />}
@@ -200,7 +242,7 @@ const Checkout = () => {
                {ticketTypes.map((type, index) => (
                   <Stack key={type.ticket_type_name} spacing={2}>
 
-                     <Stack direction="row" alignItems="center" spacing={1}>
+                     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
                            <Typography>{type.ticket_type_name} : €{type.ticket_type_price}</Typography>
 
                            <Stack direction="row" spacing={2} alignItems="center">
@@ -222,17 +264,66 @@ const Checkout = () => {
             </Typography>
 
             <Button
-               variant="contained"
-               color="primary"
-               fullWidth
-               sx={{ mt: 3 }}
-               // onClick={handleSubmit}
-               disabled={calculateTotal() === 0}
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3 }}
+            onClick={() => setCardDialogOpen(true)}
+            disabled={calculateTotal() === 0}
             >
                Confirm Reservation
             </Button>
          </CardContent>
          </Card>
+
+
+         <Dialog open={cardDialogOpen} onClose={() => setCardDialogOpen(false)} fullWidth>
+            <DialogTitle>Enter Card Information</DialogTitle>
+            <DialogContent>
+               <Stack spacing={2} mt={1}>
+                  <TextField
+                  label="Card Number"
+                  variant="outlined"
+                  fullWidth
+                  value={cardInfo.number}
+                  onChange={handleCardInputChange("number")}
+                  />
+                  <TextField
+                  label="Expiration Date (MM/YY)"
+                  variant="outlined"
+                  fullWidth
+                  value={cardInfo.expiry}
+                  onChange={handleCardInputChange("expiry")}
+                  />
+                  <TextField
+                  label="CVV"
+                  variant="outlined"
+                  fullWidth
+                  value={cardInfo.cvv}
+                  onChange={handleCardInputChange("cvv")}
+                  type="password"
+                  />
+               </Stack>
+            </DialogContent>
+            <DialogActions>
+               <Button onClick={() => setCardDialogOpen(false)}>Cancel</Button>
+               <Button
+               variant="contained"
+               onClick={() => {
+                  if (!validateCardExpiryDate(cardInfo.expiry)) {
+                     displayCustomAlert(snackbars, setSnackbars, "Expiration date is invalid.", "error");
+                     return;
+                  }
+
+                  setCardDialogOpen(false);
+                  // Trigger actual checkout logic here
+                  displayCustomAlert(snackbars, setSnackbars, "Card details submitted!", "success");
+               }}
+               >
+               Submit Payment
+               </Button>
+            </DialogActions>
+         </Dialog>
 
          {snackbars}
       </Container>

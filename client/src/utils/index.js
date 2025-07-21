@@ -5,6 +5,7 @@ export { default as getAllowedScreeningDates } from './getAllowedScreeningDates.
 export { default as filterMoviesForSelectedDate } from './filterMoviesForSelectedDate.js';
 export { default as filterAndUniqueMovies } from './filterAndUniqueMovies.js';
 export { default as hasAnyGenre } from './hasAnyGenre.js';
+export { default as validateCardExpiryDate } from './validateCardExpiryDate.js';
 
 
 
