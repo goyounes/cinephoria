@@ -5,13 +5,6 @@ import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
 import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
 
-const ticketTypes = [
-   { label: "Child", price: 5 },
-   { label: "Student", price: 10 },
-   { label: "Adult", price: 15 },
-   { label: "VIP", price: 20 },
-];
-
 const checkIsEmployee = async () => {
   try {
     await axios.post("/api/auth/verify/employee");
@@ -32,21 +25,24 @@ const Checkout = () => {
    const [loading, setLoading] = useState(true);
    const [movie, setMovie] = useState(null);
    const [screening, setScreening] = useState(null);
+   const [ticketTypes, setTicketTypes] = useState([])
    const [ticketCounts, setTicketCounts] = useState([0, 0, 0, 0]);
    const [snackbars, setSnackbars] = useState([]);
 
     useEffect(() => {
     const fetchData = async () => {
       try {
-        const movieRes = await axios.get(`/api/movies/${movie_id}`);
+         const movieRes = await axios.get(`/api/movies/${movie_id}`);
+         const ticketTypesRes = await axios.get("/api/tickets/types");
 
-        const screeningUrl = await checkIsEmployee()
+         const screeningUrl = await checkIsEmployee()
           ? `/api/screenings/${screening_id}`
           : `/api/screenings/upcoming/${screening_id}`;
-        const screeningsRes = await axios.get(screeningUrl);
+         const screeningsRes = await axios.get(screeningUrl);
 
         setMovie(movieRes.data);
         setScreening(screeningsRes.data);
+        setTicketTypes(ticketTypesRes.data)
       } catch (err) {
         displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
       } finally {
@@ -67,15 +63,15 @@ const Checkout = () => {
       });
    };
 
-   const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].price, 0);
+   const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * ticketTypes[i].ticket_type_price, 0);
 
    // const handleSubmit = async () => {
    //    const ticketPayload = {
    //       screening_id,
    //       ticket_types: ticketTypes.map((type, index) => ({
-   //       type: type.label,
+   //       type: type.ticket_type_name,
    //       count: ticketCounts[index],
-   //       price: type.price,
+   //       ticket_type_price: type.ticket_type_price,
    //       })),
    //    };
 
@@ -143,14 +139,14 @@ const Checkout = () => {
                      <Chip label={`Duration: ${movie.length}`} size="small" />
                      {movie.is_team_pick === 1 && (
                         <Chip
-                           label="Team Pick"
+                           ticket_type_name="Team Pick"
                            color="success"
                            size="small"
                            icon={<StarsIcon fontSize="small" />}
                         />
                      )}
                      </Stack>
-
+                     {console.log(movie)}
                      {movie.genres?.length > 0 && (
                      <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
                         {movie.genres.map((genre) => (
@@ -202,10 +198,10 @@ const Checkout = () => {
 
             <Stack spacing={2} mt={2}>
                {ticketTypes.map((type, index) => (
-                  <Stack key={type.label} spacing={2}>
+                  <Stack key={type.ticket_type_name} spacing={2}>
 
                      <Stack direction="row" alignItems="center" spacing={1}>
-                           <Typography>{type.label} : €{type.price}</Typography>
+                           <Typography>{type.ticket_type_name} : €{type.ticket_type_price}</Typography>
 
                            <Stack direction="row" spacing={2} alignItems="center">
                               <Button variant="outlined" onClick={() => handleTicketChange(index, -1)}>
