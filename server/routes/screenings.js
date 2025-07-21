@@ -67,6 +67,7 @@ router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
         const rawwscreenings = await getScreeningDetailsByIdAdmin(id)
         const rawscreenings =  CombineGenresIdNames([rawwscreenings])[0] //cheated by submiting an array to the function and then taking the one elment out
         const screenings = CombineQualitiesIdNames([rawscreenings])[0] 
+        console.log("sending screening details",screenings)
         res.status(200).json(screenings)
     } catch (error) {
         next(error)

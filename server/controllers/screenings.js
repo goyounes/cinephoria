@@ -131,7 +131,7 @@ export async function getUpcomingScreeningsAdmin(cinema_id, movie_id) {
 
 export async function getUpcomingScreeningDetailsById(screening_id){    //How to handle filters query
     const q = `
-        SELECT screenings.*, cinemas.cinema_name, movies.title, 
+        SELECT screenings.*, cinemas.cinema_name, cinemas.cinema_adresse, movies.title, 
             rooms.*,
             seat_avail.*,
             quality_agg.qualities_ids, 
@@ -191,7 +191,7 @@ export async function getUpcomingScreeningDetailsById(screening_id){    //How to
 }
 export async function getScreeningDetailsByIdAdmin(screening_id){  
     const q =  `
-        SELECT screenings.*, cinemas.cinema_name, movies.title, 
+        SELECT screenings.*, cinemas.cinema_name,cinemas.cinema_adresse, movies.title, 
             rooms.*,
             seat_avail.*,
             quality_agg.qualities_ids, 

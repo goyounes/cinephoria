@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import {Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Grid,Box,Chip,Rating} from "@mui/material";
+import {Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
 import { displayCustomAlert } from "../../../components/CustomSnackbar";
@@ -34,30 +34,15 @@ const Checkout = () => {
    const [screening, setScreening] = useState(null);
    const [ticketCounts, setTicketCounts] = useState([0, 0, 0, 0]);
    const [snackbars, setSnackbars] = useState([]);
-   const [isEmployee, setIsEmployee] = useState(false); // ✅ NEW
-   console.log(movie)
-   console.log(screening)
-
-   //  Check if user is employee on mount
-   useEffect(() => {
-      const checkStatus = async () => {
-         try {
-         const result = await checkIsEmployee();
-         setIsEmployee(result);
-         } catch (e) {
-         console.error("Failed to check employee status");
-         }
-      };
-      checkStatus();
-   }, []);
 
     useEffect(() => {
     const fetchData = async () => {
       try {
         const movieRes = await axios.get(`/api/movies/${movie_id}`);
-        const screeningUrl = isEmployee
-          ? `/api/tickets/all/checkout/${screening_id}`
-          : `/api/tickets/checkout/${screening_id}`;
+
+        const screeningUrl = await checkIsEmployee()
+          ? `/api/screenings/${screening_id}`
+          : `/api/screenings/upcoming/${screening_id}`;
         const screeningsRes = await axios.get(screeningUrl);
 
         setMovie(movieRes.data);
@@ -72,7 +57,7 @@ const Checkout = () => {
     if (movie_id && screening_id) {
       fetchData();
     }
-  }, [movie_id, screening_id, isEmployee]); 
+  }, [movie_id, screening_id]); 
 
    const handleTicketChange = (index, delta) => {
       setTicketCounts((prev) => {
@@ -203,8 +188,8 @@ const Checkout = () => {
                   <Typography><strong>Room:</strong> {screening.room_name}</Typography>
                   <Typography><strong>Address:</strong> {screening.cinema_adresse}</Typography>
                   <Typography>
-                  <strong>Date & Time:</strong>{" "}
-                  {new Date(screening.start_date).toLocaleDateString()} {screening.start_time}
+                  <strong>Date & Time:</strong> 
+                  {` ${screening.start_date} ${screening.start_time.substring(0, 5)}`}
                   </Typography>
                </Stack>
             </CardContent>

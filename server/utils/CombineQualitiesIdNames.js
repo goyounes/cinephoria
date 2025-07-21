@@ -1,6 +1,6 @@
 function CombineQualitiesIdNames(screenings){ 
     return screenings.map((screening) => {
-        console.log(screening)
+        // console.log(screening)
         if (!screening.qualities_ids || !screening.qualities_names) {
             return { ...screening, qualities: null };
         }
