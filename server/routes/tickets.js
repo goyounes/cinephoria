@@ -19,26 +19,6 @@ router.get("/",async (req,res,next) => {
     }
 })
 
-router.get("/checkout/:id", async (req,res,next) => {
-    const screening_id = req.params.id
-    console.log("checkout : id was hit with id : ", screening_id)
-    try {
-        const checkoutInfo = await getCheckoutInfo(screening_id)
-        res.status(200).json(checkoutInfo)
-    } catch (error) {
-        next(error)
-    }
-})
-router.get("/all/checkout/:id", verifyEmployeeJWT ,async (req,res,next) => {
-    const screening_id = req.params.id
-    try {
-        const checkoutInfo = await getCheckoutInfoAdmin(screening_id)
-        res.status(200).json(checkoutInfo)
-    } catch (error) {
-        next(error)
-    }
-})
-
 router.get("/:id",async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for ticket with ticket_id =",id)
