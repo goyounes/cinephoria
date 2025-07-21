@@ -1,5 +1,10 @@
 import { pool } from "./connect.js";
 
+export async function getTicketTypes(){
+    const q = `SELECT * FROM ticket_types;`
+    const [result_rows] = await pool.query(q);
+    return result_rows;
+}
 
 export async function  getTickets(){
     const q = `SELECT * FROM tickets;`

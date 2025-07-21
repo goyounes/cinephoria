@@ -2,10 +2,18 @@ import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
+import { getTicketTypes } from '../controllers/tickets.js';
 
 
 
-
+router.get("/types",async (req,res,next) => {
+    try {
+        const ticketTypes = await getTicketTypes()
+        res.status(200).json(ticketTypes)
+    } catch (error) {
+        next(error)
+    }
+})
 
 router.get("/",async (req,res,next) => {
     try {
