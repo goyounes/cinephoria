@@ -2,8 +2,9 @@ import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import {useState } from 'react'
 import { displayCustomAlert } from '../../../components/UI/CustomSnackbar';
 import { validateCardExpiryDate } from '../../../utils';
+import axios from 'axios';
 
-const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars }) => {
+const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars, order }) => {
    const [isProcessing, setIsProcessing] = useState(false);
    const [operation, setOperation] = useState(""); 
 
@@ -29,6 +30,11 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
    };
 
    const handleSubmitPayment = async () => {
+      if (!order || order.ticket_types.every(t => t.count === 0)) {
+         displayCustomAlert(snackbars, setSnackbars, "No tickets selected", "error");
+         return;
+      }
+
       if (isProcessing) return;
       setIsProcessing(true);
       setOperation("");
@@ -47,10 +53,7 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
 
       try {
          setOperation("verifying seat availability");
-         // Simulate API call or logic to check seats availability
          await new Promise((res) => setTimeout(res, 1000));
-         // Imagine a seat check fails with:
-         // throw new Error("Seats are no longer available");
       } catch (error) {
          displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
          setIsProcessing(false);
@@ -60,7 +63,6 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
       try {
          setOperation("processing payment");
          await new Promise((res) => setTimeout(res, 3000)); // Simulate payment API call (e.g. Stripe)
-         // throw new Error("Payment declined");
       } catch (error) {
          displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
          setIsProcessing(false);
@@ -68,8 +70,12 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
       }
 
       try {
-         setOperation("fulfilling order");
+         setOperation("Backend handling the whole proceedure");
          await new Promise((res) => setTimeout(res, 5000));
+         await axios.post("/api/checkout/complete", {
+            ...order,
+            card: cardInfo, 
+         });
          // throw new Error("Could not assign seats");
       } catch (error) {
          displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");

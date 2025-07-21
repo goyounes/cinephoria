@@ -84,6 +84,15 @@ const Checkout = () => {
       cvv: ""
    });
 
+   const orderObject = {
+      screening_id,
+      ticket_types: ticketTypes.map((type, index) => ({
+         type: type.ticket_type_name,
+         count: ticketCounts[index],
+         ticket_type_price: type.ticket_type_price,
+      })),
+      total_price: calculateTotal(),
+   };
    // const handleSubmit = async () => {
    //    const ticketPayload = {
    //       screening_id,
@@ -255,12 +264,13 @@ const Checkout = () => {
 
 
          <PaymentDialog
-         open={cardDialogOpen}
-         onClose={() => setCardDialogOpen(false)}
-         cardInfo={cardInfo}
-         setCardInfo={setCardInfo}
-         snackbars={snackbars}
-         setSnackbars={setSnackbars}
+            open={cardDialogOpen}
+            onClose={() => setCardDialogOpen(false)}
+            cardInfo={cardInfo}
+            setCardInfo={setCardInfo}
+            snackbars={snackbars}
+            setSnackbars={setSnackbars}
+            order={orderObject}
          />
 
          {snackbars}
