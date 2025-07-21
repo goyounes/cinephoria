@@ -75,7 +75,7 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id, movie_id, movie_id])
     return result_rows
 }
-export async function getAllUpcomingScreenings(cinema_id, movie_id) {
+export async function getUpcomingScreeningsAdmin(cinema_id, movie_id) {
     const q = `
         SELECT 
             screenings.*, 
@@ -129,14 +129,54 @@ export async function getAllUpcomingScreenings(cinema_id, movie_id) {
 
 
 
-export async function getUpcomingScreeningById(screening_id){    //How to handle filters query
+export async function getUpcomingScreeningDetailsById(screening_id){    //How to handle filters query
     const q = `
-        SELECT screenings.*, cinemas.cinema_name, movies.title
+        SELECT screenings.*, cinemas.cinema_name, movies.title, 
+            rooms.*,
+            seat_avail.*,
+            quality_agg.qualities_ids, 
+            quality_agg.qualities_names,
+            genre_agg.genres_names,
+            genre_agg.genres_ids
         FROM screenings
-        JOIN cinemas 
-            ON screenings.cinema_id = cinemas.cinema_id
-        JOIN movies
-            ON screenings.movie_id = movies.movie_id
+        JOIN cinemas ON screenings.cinema_id = cinemas.cinema_id
+        JOIN rooms   ON screenings.room_id = rooms.room_id
+        JOIN movies  ON screenings.movie_id = movies.movie_id
+
+        LEFT JOIN (
+			SELECT 
+				movie_genres.movie_id,
+				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres_names,
+				GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
+			FROM movie_genres
+			JOIN genres ON movie_genres.genre_id = genres.genre_id
+			GROUP BY movie_genres.movie_id
+        ) AS genre_agg ON movies.movie_id = genre_agg.movie_id
+
+        LEFT JOIN (
+            SELECT 
+                screening_qualities.screening_id,
+                GROUP_CONCAT(qualities.quality_id SEPARATOR ';') AS qualities_ids,
+                GROUP_CONCAT(qualities.quality_name SEPARATOR ';') AS qualities_names
+            FROM screening_qualities
+            JOIN qualities ON screening_qualities.quality_id = qualities.quality_id
+            GROUP BY screening_qualities.screening_id
+        ) AS quality_agg ON screenings.screening_id = quality_agg.screening_id
+
+        LEFT JOIN (
+            SELECT 
+                s.screening_id,
+                r.room_capacity,
+                COUNT(seat.seat_id) AS total_seats,
+                COUNT(t.seat_id) AS booked_seats,
+                (COUNT(seat.seat_id) - COUNT(t.seat_id)) AS seats_left
+            FROM screenings s
+            JOIN rooms r ON s.room_id = r.room_id
+            JOIN seats seat ON seat.room_id = r.room_id AND seat.isDeleted = FALSE
+            LEFT JOIN tickets t ON t.screening_id = s.screening_id AND t.seat_id = seat.seat_id
+            GROUP BY s.screening_id, r.room_capacity
+        ) AS seat_avail ON screenings.screening_id = seat_avail.screening_id
+
         WHERE (
             screenings.start_date > CURDATE()   OR  (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         ) AND (
@@ -149,10 +189,66 @@ export async function getUpcomingScreeningById(screening_id){    //How to handle
     const [result_rows] = await pool.query(q, [screening_id])
     return result_rows
 }
+export async function getScreeningDetailsByIdAdmin(screening_id){  
+    const q =  `
+        SELECT screenings.*, cinemas.cinema_name, movies.title, 
+            rooms.*,
+            seat_avail.*,
+            quality_agg.qualities_ids, 
+            quality_agg.qualities_names,
+            genre_agg.genres_names,
+            genre_agg.genres_ids
+        FROM screenings
+        JOIN cinemas 
+            ON screenings.cinema_id = cinemas.cinema_id
+        JOIN rooms
+            ON screenings.room_id = rooms.room_id
+        JOIN movies
+            ON screenings.movie_id = movies.movie_id
+
+        LEFT JOIN (
+			SELECT 
+				movie_genres.movie_id,
+				GROUP_CONCAT(genres.genre_name SEPARATOR ';') AS genres_names,
+				GROUP_CONCAT(genres.genre_id SEPARATOR ';') AS genres_ids
+			FROM movie_genres
+			JOIN genres ON movie_genres.genre_id = genres.genre_id
+			GROUP BY movie_genres.movie_id
+        ) AS genre_agg ON movies.movie_id = genre_agg.movie_id
+
+        LEFT JOIN (
+            SELECT 
+                screening_qualities.screening_id,
+                GROUP_CONCAT(qualities.quality_id SEPARATOR ';') AS qualities_ids,
+                GROUP_CONCAT(qualities.quality_name SEPARATOR ';') AS qualities_names
+            FROM screening_qualities
+            JOIN qualities ON screening_qualities.quality_id = qualities.quality_id
+            GROUP BY screening_qualities.screening_id
+        ) AS quality_agg ON screenings.screening_id = quality_agg.screening_id
+
+        LEFT JOIN (
+            SELECT 
+                s.screening_id,
+                r.room_capacity,
+                COUNT(seat.seat_id) AS total_seats,
+                COUNT(t.seat_id) AS booked_seats,
+                (COUNT(seat.seat_id) - COUNT(t.seat_id)) AS seats_left
+            FROM screenings s
+            JOIN rooms r ON s.room_id = r.room_id
+            JOIN seats seat ON seat.room_id = r.room_id AND seat.isDeleted = FALSE
+            LEFT JOIN tickets t ON t.screening_id = s.screening_id AND t.seat_id = seat.seat_id
+            GROUP BY s.screening_id, r.room_capacity
+        ) AS seat_avail ON screenings.screening_id = seat_avail.screening_id
+
+        WHERE screenings.screening_id = ?
+        ORDER BY screenings.start_date, screenings.start_time;
+    `
+    const [result_rows] = await pool.query(q, [screening_id])
+    return result_rows[0]
+}
 
 
-
-export async function getAllScreenings(cinema_id,movie_id){  
+export async function getAllScreeningsAdmin(cinema_id,movie_id){  
     const q =  `
         SELECT screenings.*, cinemas.cinema_name, movies.title
         FROM screenings
@@ -171,20 +267,6 @@ export async function getAllScreenings(cinema_id,movie_id){
     return result_rows
 }
 
-export async function getAllScreeningById(screening_id){  
-    const q =  `
-        SELECT screenings.*, cinemas.cinema_name, movies.title
-        FROM screenings
-        JOIN cinemas 
-            ON screenings.cinema_id = cinemas.cinema_id
-        JOIN movies
-            ON screenings.movie_id = movies.movie_id
-        WHERE screenings.screening_id = ?
-        ORDER BY screenings.start_date, screenings.start_time;
-    `
-    const [result_rows] = await pool.query(q, [screening_id])
-    return result_rows[0]
-}
 
 export async function  getQualities(){
     // This function retrieves raw SCREENINGS TABLE data

@@ -194,13 +194,16 @@ export async function getUpcomingMovies(cinema_id){    //How to handle filters q
         FROM screenings
         JOIN cinemas ON screenings.cinema_id = cinemas.cinema_id
         JOIN movies ON screenings.movie_id = movies.movie_id
-        WHERE 
-            ( ? IS NULL OR screenings.cinema_id = ?)
-            AND (
+        WHERE ( 
+        ? IS NULL OR screenings.cinema_id = ?
+        ) AND (
                 screenings.start_date > CURDATE()
-                OR 
-                (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
+            OR (
+                screenings.start_date = CURDATE() 
+                AND 
+                screenings.start_time > CURTIME()
             )
+        )
         ORDER BY movies.movie_id, screenings.cinema_id, screenings.room_id, screenings.start_date, screenings.start_time;
     `
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id])
@@ -247,7 +250,7 @@ export async function getUpcomingMoviesWithGenres(cinema_id){    //How to handle
     return result_rows
 }
 
-export async function getAllUpcomingMoviesWithGenres(cinema_id){    //How to handle filters query
+export async function getUpcomingMoviesWithGenresAdmin(cinema_id){    //How to handle filters query
     const q = `
   		SELECT 
 			movies.*,

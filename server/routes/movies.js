@@ -6,9 +6,9 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie,  getGenres, deleteMovie, updateMovie, 
     getOneMovieWithGenres, getMoviesWithGenres,
-    getUpcomingMoviesWithGenres, getAllUpcomingMoviesWithGenres,  getLatestMovies} 
+    getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies} 
     from '../controllers/movies.js';
-import { getUpcomingScreenings , getAllUpcomingScreenings, getAllScreenings} from '../controllers/screenings.js';
+import { getUpcomingScreenings , getUpcomingScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
 import {s3, bucketName} from "../awsS3Client.js"
 
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
@@ -170,7 +170,7 @@ router.get("/upcoming",async (req,res,next) => {
 
 router.get("/upcoming/all",verifyEmployeeJWT ,async (req,res,next) => {
     try {
-        const rawMovies = await getAllUpcomingMoviesWithGenres()
+        const rawMovies = await getUpcomingMoviesWithGenresAdmin()
         const movies = CombineGenresIdNames(rawMovies)
         for (const movie of movies){
             const getObjectParams = {
@@ -215,7 +215,7 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     const movie_id = req.params.id
     const cinema_id = req.query.cinema_id || null; 
     try {
-        const rawScreenings = await getAllUpcomingScreenings(cinema_id,movie_id )
+        const rawScreenings = await getUpcomingScreeningsAdmin(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         console.log("screenigs =>",screenings)
         res.status(200).json(screenings)

@@ -1,8 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreenings, getUpcomingScreenings, getUpcomingScreeningById, getAllScreeningById} from '../controllers/screenings.js'; 
+import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
+import CombineGenresIdNames from '../utils/CombineGenresIdNames.js';
+import CombineQualitiesIdNames from '../utils/CombineQualitiesIdNames.js';
 
 // Code below will be needed when eventally i have a screening dashboard for admins that needs filter functions
 // router.get("/",async (req,res,next) => {
@@ -24,7 +26,7 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 router.get("/", verifyEmployeeJWT, async (req,res,next) => {
     try {
-        const screenings = await getAllScreenings()
+        const screenings = await getAllScreeningsAdmin()
         res.status(200).json(screenings)
     } catch (error) {
         next(error)
@@ -48,7 +50,9 @@ router.get("/upcoming/:id", async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for upcoming screening with screening_id =",id)
     try {
-        const screenings = await getUpcomingScreeningById(id)
+        const rawwscreenings = await getUpcomingScreeningDetailsById(id)
+        const rawscreenings =  CombineGenresIdNames([rawwscreenings])[0] //cheated by submiting an array to the function and then taking the one elment out
+        const screenings = CombineQualitiesIdNames([rawscreenings])[0]   //cheated by submiting an array to the function and then taking the one elment out
         res.status(200).json(screenings)
     } catch (error) {
         next(error)
@@ -60,7 +64,9 @@ router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for screening with screening_id =",id)
     try {
-        const screenings = await getAllScreeningById(id)
+        const rawwscreenings = await getScreeningDetailsByIdAdmin(id)
+        const rawscreenings =  CombineGenresIdNames([rawwscreenings])[0] //cheated by submiting an array to the function and then taking the one elment out
+        const screenings = CombineQualitiesIdNames([rawscreenings])[0] 
         res.status(200).json(screenings)
     } catch (error) {
         next(error)
