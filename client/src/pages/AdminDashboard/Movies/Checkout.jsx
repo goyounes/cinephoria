@@ -237,7 +237,7 @@ const Checkout = () => {
                               <Button variant="outlined" onClick={() => handleTicketChange(index, -1)}>
                                  -
                               </Button>
-                              <Typography>{ticketCounts[index]}</Typography>
+                              <Typography minWidth={20} textAlign="center">{ticketCounts[index]}</Typography>
                               <Button variant="outlined" onClick={() => handleTicketChange(index, 1)}>
                                  +
                               </Button>
@@ -252,12 +252,12 @@ const Checkout = () => {
             </Typography>
 
             <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 3 }}
-            onClick={() => setCardDialogOpen(true)}
-            disabled={calculateTotal() === 0}
+               variant="contained"
+               color="primary"
+               fullWidth
+               sx={{ mt: 3 }}
+               onClick={() => setCardDialogOpen(true)}
+               disabled={calculateTotal() === 0}
             >
                Confirm Reservation
             </Button>
