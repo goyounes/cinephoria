@@ -46,18 +46,26 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
          throw new Error(expiryValidation.reason === "expired" ? "Card expired" : "Expiration date is invalid");
          }
       } catch (error) {
-         displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
+         displayCustomAlert(
+            snackbars,
+            setSnackbars,
+            `Failed during ${operation}: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            "error");
          setIsProcessing(false);
          return;
       }
 
       try {
-         setOperation("Backend handling the whole proceedure");
+         setOperation("Backend Processing");
          await new Promise((res) => setTimeout(res, 1000));
          await axios.post("/api/checkout/complete", {...order,card: cardInfo}, {withCredentials: true } );
          // throw new Error("Could not assign seats");
       } catch (error) {
-         displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
+         displayCustomAlert(
+            snackbars,
+            setSnackbars,
+            `Failed during ${operation}: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            "error");
          setIsProcessing(false);
          return;
       }
