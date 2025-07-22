@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import axios from 'axios'
 import {
   Container,
@@ -8,17 +8,15 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-  Box
+  Box,
+  Button,
+  CircularProgress
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import QRCode from 'react-qr-code'
 
 const Account = () => {
-  const [tickets, setTickets] = useState(null)
+  const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -27,7 +25,7 @@ const Account = () => {
       try {
         const res = await axios.get('/api/tickets/owned')
         setTickets(res.data || [])
-      } catch (err) {
+      } catch {
         setError('Failed to fetch tickets')
       } finally {
         setLoading(false)
@@ -36,26 +34,69 @@ const Account = () => {
     fetchTickets()
   }, [])
 
-  // Group tickets by screening_id
-  const groupedTickets = React.useMemo(() => {
-    if (!tickets) return {}
+  const now = new Date("2025-10-30")
 
-    return tickets.reduce((acc, ticket) => {
-      if (!acc[ticket.screening_id]) {
-        acc[ticket.screening_id] = []
-      }
-      acc[ticket.screening_id].push(ticket)
-      return acc
-    }, {})
+  const getScreeningTime = (ticket) =>
+    new Date(`${ticket.start_date}T${ticket.start_time}`)
+
+  const upcomingTickets = useMemo(() => {
+    return tickets
+      .filter((t) => getScreeningTime(t) > now)
+      .sort((a, b) => getScreeningTime(a) - getScreeningTime(b))
   }, [tickets])
 
+  const passedTickets = useMemo(() => {
+    return tickets
+      .filter((t) => getScreeningTime(t) <= now)
+      .sort((a, b) => getScreeningTime(b) - getScreeningTime(a))
+  }, [tickets])
+
+  const groupByScreening = (list) =>
+    list.reduce((acc, ticket) => {
+      const key = `${ticket.title}|${ticket.cinema_name}|${ticket.start_date}|${ticket.start_time}`
+      if (!acc[key]) acc[key] = []
+      acc[key].push(ticket)
+      return acc
+    }, {})
+
+  const TicketCard = ({ ticket, showReviewButton }) => (
+    <Box
+      key={ticket.QR_code}
+      p={2}
+      border="1px solid black"
+      borderRadius={4}
+      width={200}
+    >
+      <Typography variant="subtitle2" fontWeight={600}>
+        {ticket.title}
+      </Typography>
+      <Typography variant="body2">{ticket.cinema_name}</Typography>
+      <Typography variant="body2" mt={0.5}>
+        Seat #{ticket.seat_number}
+      </Typography>
+      <Typography variant="body2">
+        {ticket.start_date} at {ticket.start_time.substring(0, 5)}
+      </Typography>
+      <Box mt={1}>
+        <QRCode value={ticket.QR_code} size={96} />
+      </Box>
+      {showReviewButton && (
+        <Box mt={1}>
+          <Button size="small" variant="outlined">
+            Leave a Review
+          </Button>
+        </Box>
+      )}
+    </Box>
+  )
+
   return (
-    <Container sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: 'column' }}>
+    <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" align="center" gutterBottom>
-        Welcome User {/* Add actual username if available */}
+        Welcome User
       </Typography>
 
-      <Card elevation={4} sx={{ flexGrow: 1 }}>
+      <Card elevation={4}>
         <CardContent>
           <Typography variant="h5" gutterBottom>
             Your Tickets
@@ -63,48 +104,64 @@ const Account = () => {
 
           {loading && <CircularProgress />}
           {error && <Typography color="error">{error}</Typography>}
+          {!loading && !error && tickets.length === 0 && <Typography>No tickets found.</Typography>}
 
-          {!loading && !error && (!tickets || tickets.length === 0) && (
-            <Typography>No tickets found.</Typography>
-          )}
-
-          {!loading && !error && tickets && tickets.length > 0 && (
-            Object.entries(groupedTickets).map(([screeningId, ticketsGroup]) => {
-              const firstTicket = ticketsGroup[0]
-              return (
-                <Accordion key={screeningId} sx={{ mb: 2 }}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                      {firstTicket.title} @ {firstTicket.cinema_name} — {ticketsGroup.length} ticket{ticketsGroup.length > 1 ? 's' : ''}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <List>
-                      {ticketsGroup.map(ticket => (
-                        <ListItem key={ticket.QR_code} divider sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                          <ListItemText
-                            secondary={
-                              <>
-                                <Typography component="span" variant="body2" color="text.primary">
-                                  {`Date: ${ticket.start_date} at ${ticket.start_time}`}
-                                </Typography>
-                                <br />
-                                <Typography component="span" variant="body2" color="text.secondary">
-                                  {`Seat Number: ${ticket.seat_number}`}
-                                </Typography>
-                              </>
-                            }
-                          />
-                          <Box mt={1}>
-                            <QRCode value={ticket.QR_code} size={128} />
+          {!loading && !error && (
+            <>
+              {upcomingTickets.length > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom>
+                    Upcoming Tickets
+                  </Typography>
+                  {Object.entries(groupByScreening(upcomingTickets)).map(([groupKey, group]) => {
+                    const [title, cinema, date, time] = groupKey.split('|')
+                    return (
+                      <Accordion key={groupKey}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography>
+                            {title} @ {cinema} — {group.length} ticket{group.length > 1 ? 's' : ''}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box display="flex" flexWrap="wrap" gap={1}>
+                            {group.map((ticket) => (
+                              <TicketCard key={ticket.QR_code} ticket={ticket} />
+                            ))}
                           </Box>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </AccordionDetails>
-                </Accordion>
-              )
-            })
+                        </AccordionDetails>
+                      </Accordion>
+                    )
+                  })}
+                </>
+              )}
+
+              {passedTickets.length > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+                    Past Tickets
+                  </Typography>
+                  {Object.entries(groupByScreening(passedTickets)).map(([groupKey, group]) => {
+                    const [title, cinema, date, time] = groupKey.split('|')
+                    return (
+                      <Accordion key={groupKey}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography>
+                            {title} @ {cinema} — {group.length} ticket{group.length > 1 ? 's' : ''}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box display="flex" flexWrap="wrap" gap={1}>
+                            {group.map((ticket) => (
+                              <TicketCard key={ticket.QR_code} ticket={ticket} showReviewButton />
+                            ))}
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
+                    )
+                  })}
+                </>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
