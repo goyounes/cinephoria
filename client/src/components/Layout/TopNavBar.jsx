@@ -4,16 +4,8 @@ import { Box, Typography } from '@mui/material';
 
 
 const navLinks = {
-  left: [
-    { to: '/auth/register', icon: '👤', label: 'Register' },
-    { to: '/auth/login', icon: '👤', label: 'Login' },
-    { to: '/auth/logout', icon: '👤', label: 'Logout' },
-  ],
   middle: [
-    { to: '/home', icon: '🏠', label: 'Admin' },
     { to: '/messages', icon: '✉️', label: 'Messages' },
-    { to: '/movies/recent', icon: '🆕', label: 'Recent' },
-    { to: '/admin/movies', icon: '📽️', label: 'Movies' },
     { to: '/screenings', icon: '🎞️', label: 'Screenings' },
     { to: '/cinemas', icon: '🏛️', label: 'Cinemas' },
     { to: '/reservation', icon: '📅', label: 'Reservation' },
@@ -90,17 +82,7 @@ const TopNavBar = () => {
         gap:5
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexGrow: 0,
-        }}
-      >
-        <NavGroup items={navLinks.left} />
-      </Box>
+
 
       <NavGroup items={navLinks.middle}  />
 
