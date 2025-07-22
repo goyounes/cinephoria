@@ -23,6 +23,7 @@ import Home from './pages/Home';
 import Register from './pages/Auth/Register';
 import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
+import Account from './pages/Auth/Account';
 
 import { Container, Stack } from '@mui/material';
 import ContactUs from './pages/ContactUs';
@@ -37,15 +38,15 @@ function App() {
         {/* <Stack px={2} py={3}> */}
           <Routes >
             {/* Home */}
-            <Route path="/checkout" element={<Checkout/>} />
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             {/* Movies */}
             <Route path="/reservation/:id" element={<Reservation />} />
             <Route path="/reservation/" element={<Reservation />} />
+            <Route path="/checkout" element={<Checkout/>} />
+
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id/*" element={<Movie />} />
-
             <Route path="/admin/movies" element={<AdminMovies />} />
             <Route path="/admin/movies/create" element={<AdminAddMovie />} />
             <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
@@ -61,6 +62,7 @@ function App() {
             {/* Users */}
             <Route path="/users" element={<AdminUsers />} />
 
+            <Route path="/auth/account" element={<Account />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />

@@ -83,8 +83,9 @@ const RealNavBar = () => {
                   },
               },}}
             >
-              <MenuItem component={Link} to="account">Profile</MenuItem>
+              <MenuItem component={Link} to="/auth/account">Profile</MenuItem>
               <MenuItem component={Link} to="/auth/login">Login</MenuItem>
+              <MenuItem component={Link} to="/auth/register">Register</MenuItem>
               <MenuItem component={Link} to="/auth/logout">Logout</MenuItem>
             </Menu>
           </Stack>
