@@ -2,6 +2,9 @@ import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const [rolesMap] = await pool.query("SELECT * FROM roles")
+const getRoleNameById = (id, roles) => rolesMap.find(r => r.role_id === id)?.role_name || null;
+
 export async function registerService (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password) {
@@ -61,7 +64,8 @@ export async function loginService (req, res, next) {
         if (data1.length === 0) return next(new Error("This email does not exist"));
 
         // Get the user_id
-        const user_id = data1[0].user_id;
+        const user = data1[0]
+        const user_id = user.user_id;
 
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
@@ -77,7 +81,7 @@ export async function loginService (req, res, next) {
 
         // If everything is fine, return the user_id signed using a JWT token
         const token = jwt.sign(
-          {user_id: data1[0].user_id , role_id: data1[0].role_id, role_name: data1[0].role_name} ,
+          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
           process.env.JWT_SECRET,
           { expiresIn: '24h' }
         );    
@@ -90,7 +94,7 @@ export async function loginService (req, res, next) {
             secure: false,          // Allow over HTTP (MITM risk)
             sameSite: 'Lax',        // Allows some cross-site requests
             maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-        }).status(200).json(data1[0]);
+        }).status(200).json(user);
     }catch (error) {
         next(error);
     }
