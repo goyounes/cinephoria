@@ -52,24 +52,6 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
       }
 
       try {
-         setOperation("verifying seat availability");
-         await new Promise((res) => setTimeout(res, 500));
-      } catch (error) {
-         displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
-         setIsProcessing(false);
-         return;
-      }
-
-      try {
-         setOperation("processing payment");
-         await new Promise((res) => setTimeout(res, 500)); // Simulate payment API call (e.g. Stripe)
-      } catch (error) {
-         displayCustomAlert(snackbars, setSnackbars, `Failed during ${operation}: ${error.message}`, "error");
-         setIsProcessing(false);
-         return;
-      }
-
-      try {
          setOperation("Backend handling the whole proceedure");
          await new Promise((res) => setTimeout(res, 1000));
          await axios.post("/api/checkout/complete", {...order,card: cardInfo}, {withCredentials: true } );

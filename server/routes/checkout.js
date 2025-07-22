@@ -6,8 +6,8 @@ import axios from 'axios';
 router.post("/complete", async(req, res, next) => {
     console.log(req.body)
     const {screeningId, ticketTypes,paymentToken, userId } = req.body
-    console.log(order)
-    console.log(cardInfo)
+    console.log(req.body)
+    // console.log(cardInfo)
     res.status(200).json(req.body)
 
 })

@@ -87,10 +87,12 @@ const Checkout = () => {
    const orderObject = {
       screening_id,
       ticket_types: ticketTypes.map((type, index) => ({
-         type: type.ticket_type_name,
+         type_id: type.ticket_type_id,
+         type_name: type.ticket_type_name,
          count: ticketCounts[index],
          ticket_type_price: type.ticket_type_price,
       })),
+
       total_price: calculateTotal(),
    };
    // const handleSubmit = async () => {
