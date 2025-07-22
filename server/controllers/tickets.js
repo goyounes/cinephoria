@@ -1,4 +1,10 @@
 import { pool } from "./connect.js";
+import crypto from "crypto"
+export async function getMyTickets(user_id){
+    const q = `SELECT * FROM tickets WHERE user_id = ?;`
+    const [result_rows] = await pool.query(q,[user_id]);
+    return result_rows;
+}
 
 export async function getTicketTypes(){
     const q = `SELECT * FROM ticket_types;`
@@ -6,38 +12,39 @@ export async function getTicketTypes(){
     return result_rows;
 }
 
-export async function  getTickets(){
-    const q = `SELECT * FROM tickets;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
-export async function  addTicket(t){
-    const q = `INSERT INTO tickets(screening_id, user_id, seat_id)
-               VALUES (?,?,?);
-              `
-    const VALUES = [
-        1,
-        5,
-        10
-    ]
-    const [insertResult] = await pool.query(q,VALUES);
-    return insertResult
-}
+// export async function  getTickets(){
+//     const q = `SELECT * FROM tickets;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
+// export async function  addTicket(t){
+//     const q = `INSERT INTO tickets(screening_id, user_id, seat_id)
+//                VALUES (?,?,?);
+//               `
+//     const VALUES = [
+//         1,
+//         5,
+//         10
+//     ]
+//     const [insertResult] = await pool.query(q,VALUES);
+//     return insertResult
+// }
 
-export async function getRemainingSeats(screening_id){
-    const q = `
-        SELECT 
-            (COUNT(seats.seat_id) - COUNT(tickets.seat_id)) AS seats_left
-        FROM screenings
-        JOIN rooms ON screenings.room_id = rooms.room_id
-        JOIN seats ON seats.room_id = rooms.room_id AND seats.isDeleted = FALSE
-        LEFT JOIN tickets ON tickets.screening_id = screenings.screening_id AND tickets.seat_id = seats.seat_id
-        WHERE screenings.screening_id = ?
-        GROUP BY screenings.screening_id, rooms.room_capacity
-    ` 
-    const [result_rows] = await pool.query(q,[screening_id]);
-    return result_rows
-}
+
+// export async function getRemainingSeats(screening_id){
+//     const q = `
+//         SELECT 
+//             (COUNT(seats.seat_id) - COUNT(tickets.seat_id)) AS seats_left
+//         FROM screenings
+//         JOIN rooms ON screenings.room_id = rooms.room_id
+//         JOIN seats ON seats.room_id = rooms.room_id AND seats.isDeleted = FALSE
+//         LEFT JOIN tickets ON tickets.screening_id = screenings.screening_id AND tickets.seat_id = seats.seat_id
+//         WHERE screenings.screening_id = ?
+//         GROUP BY screenings.screening_id, rooms.room_capacity
+//     ` 
+//     const [result_rows] = await pool.query(q,[screening_id]);
+//     return result_rows
+// }
 
 export async function bookingService(req, res, next) {
     const { screening_id, ticket_types, total_price, card } = req.body;
@@ -82,19 +89,21 @@ export async function bookingService(req, res, next) {
         console.log("Payment processed");
         // Prepare ticket insert statement
         const insertTicketQuery = `
-            INSERT INTO tickets (screening_id, user_id, seat_id, ticket_type_id)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO tickets (screening_id, user_id, seat_id, ticket_type_id, QR_code)
+            VALUES (?, ?, ?, ?, ?)
         `;
 
         // Build and execute insert queries
         let seatIndex = 0;
         for (const ticket_type of ticket_types) {
             for (let i = 0; i < ticket_type.count; i++) {
+                const qrToken = crypto.randomBytes(16).toString("hex");
                 const VALUES = [
                     screening_id,
                     user_id,
                     seats[seatIndex].seat_id,
-                    ticket_type.type_id
+                    ticket_type.type_id,
+                    qrToken,
                 ];
                 await connection.query(insertTicketQuery, VALUES);
                 seatIndex++;

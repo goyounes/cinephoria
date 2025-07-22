@@ -1,8 +1,8 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
-import { getTicketTypes } from '../controllers/tickets.js';
+import { verifyAdminJWT, verifyEmployeeJWT, verifyUserJWT } from '../controllers/auth.js';
+import { getTicketTypes, getMyTickets } from '../controllers/tickets.js';
 
 
 
@@ -15,7 +15,21 @@ router.get("/types",async (req,res,next) => {
     }
 })
 
-router.get("/",async (req,res,next) => {
+router.get("/owned", verifyUserJWT,async (req,res,next) => {
+    const user = req.user
+    try {
+        const myTickets = await getMyTickets(user.user_id)
+        res.status(200).json(myTickets)
+    } catch (error) {
+        next(error)
+    }
+})
+
+
+
+
+
+router.get("/",verifyEmployeeJWT,async (req,res,next) => {
     try {
         const response = await axios.get("/tickets")
         const tickets = response.data
