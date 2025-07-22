@@ -1,7 +1,21 @@
 import { pool } from "./connect.js";
 import crypto from "crypto"
 export async function getMyTickets(user_id){
-    const q = `SELECT * FROM tickets WHERE user_id = ?;`
+    const q = `
+    SELECT 
+        tickets.QR_code , 
+        movies.title, 
+        cinemas.cinema_name, 
+        screenings.start_date, 
+        screenings.start_time,
+        seats.seat_number
+    FROM tickets 
+    JOIN screenings ON tickets.screening_id = screenings.screening_id
+    JOIN movies on screenings.movie_id = movies.movie_id
+    JOIN cinemas ON screenings.cinema_id = cinemas.cinema_id
+    JOIN seats ON seats.seat_id = tickets.seat_id
+    WHERE user_id = ?;
+    `
     const [result_rows] = await pool.query(q,[user_id]);
     return result_rows;
 }
