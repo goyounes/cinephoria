@@ -2,16 +2,9 @@ import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const roleMap = {
-    1: 'user', 
-    2: 'employee',
-    3: 'admin'
-};
-
-export async function register (req, res, next) {
+export async function registerService (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password) {
-        console.log("provided information :", req.body);
         return next(new Error("Username and password are required"));
     }
     
@@ -59,7 +52,7 @@ export async function register (req, res, next) {
     }
 }
 
-export async function login (req, res, next) {
+export async function loginService (req, res, next) {
 
     try {
         // Check if user exists with the provided username
@@ -83,7 +76,11 @@ export async function login (req, res, next) {
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // If everything is fine, return the user_id signed using a JWT token
-        const token = jwt.sign( {user_id: data1[0].user_id , role_id: data1[0].role_id} , process.env.JWT_SECRET, { expiresIn: '24h' });    
+        const token = jwt.sign(
+          {user_id: data1[0].user_id , role_id: data1[0].role_id, role_name: data1[0].role_name} ,
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );    
         res.cookie('accessToken', token, {
             // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             // secure: true, // <-- REQUIRED for SameSite=None
@@ -99,7 +96,7 @@ export async function login (req, res, next) {
     }
 
 }
-export async function logout (req, res, next) {
+export async function logoutService (req, res, next) {
     //clear the cookie representing the JWT token
     res.clearCookie('accessToken',{
         secure: true,
@@ -121,7 +118,7 @@ export async function verifyUserJWT (req, res, next) {
     req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
-        role_name: roleMap[decoded.role_id],
+        role_name: decoded.role_name,
     }; 
     next();
   } catch (error) {
@@ -142,7 +139,7 @@ export async function verifyAdminJWT(req, res, next) {
     req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
-        role_name: roleMap[decoded.role_id],
+        role_name: decoded.role_name,
     }; 
     next();
   } catch (error) {
@@ -163,7 +160,7 @@ export async function verifyEmployeeJWT(req, res, next) {
     req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
-        role_name: roleMap[decoded.role_id],
+        role_name: decoded.role_name,
     }; 
     next();
   } catch (error) {
