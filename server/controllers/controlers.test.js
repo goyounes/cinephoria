@@ -3,8 +3,8 @@ import '../config/env.js';
 import { getCinemas, getRooms, getSeats } from "./cinemas.js";
 import { getMessages } from "./messages.js";
 import { addMovie, getGenres, getMovies, getMoviesWithGenres } from "./movies.js";
-import { getAllScreenings, getScreeningQualities, getScreenings, getUpcomingScreenings } from "./screenings.js";
-import { getCheckoutInfo, getTickets } from "./tickets.js";
+import { getScreeningQualities, getScreenings, getUpcomingScreenings } from "./screenings.js";
+import { getRemainingSeats, getTickets } from "./tickets.js";
 import { getUser, getUsers } from "./users.js";
 
 
@@ -29,5 +29,5 @@ console.table(await getUsers());
 console.table(await getUser(1));
 
 // console.log(await addMovie());
-
+console.log(await getRemainingSeats(2))
 process.exit(0);
