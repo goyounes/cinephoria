@@ -1,16 +1,85 @@
 import { Router } from 'express';
 const router = Router();
-import axios from 'axios';
-// const DB_API_URL = "http://localhost:5000/api/v1"
+import { verifyUserJWT } from '../controllers/auth.js'
+import { pool } from '../controllers/connect.js';
 
-router.post("/complete", async(req, res, next) => {
-    console.log(req.body)
-    const {screeningId, ticketTypes,paymentToken, userId } = req.body
-    console.log(req.body)
-    // console.log(cardInfo)
-    res.status(200).json(req.body)
+router.post("/complete", verifyUserJWT, async (req, res, next) => {
+    const { screening_id, ticket_types, total_price, card } = req.body;
+    const user_id = req.user.user_id;
 
-})
+    const nbrOfTickets = ticket_types.reduce((sum, t) => sum + t.count, 0);
+    const computedTotalPrice = ticket_types.reduce((sum, t) => sum + (t.count * parseFloat(t.ticket_type_price)), 0);
+
+    // Validate total price
+    if (total_price !== computedTotalPrice) {
+        const err = new Error("Total price mismatch")
+        err.status = 400
+        next(err)
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Lock available seats for this screening
+        const getAvailableSeatsQuery = `
+            SELECT seats.seat_id
+            FROM seats
+            JOIN rooms ON seats.room_id = rooms.room_id
+            JOIN screenings ON rooms.room_id = screenings.room_id
+            WHERE screenings.screening_id = ?
+              AND seats.isDeleted = FALSE
+              AND seats.seat_id NOT IN (
+                  SELECT seat_id FROM tickets WHERE screening_id = ?
+              )
+            LIMIT ? FOR UPDATE
+        `;
+        const [seats] = await connection.query(getAvailableSeatsQuery, [screening_id,screening_id,nbrOfTickets]);
+
+        if (seats.length < nbrOfTickets) {
+            const err = new Error("Not enough seats available")
+            err.status = 400
+            next(err)
+        }
+        // Simulate payment processing delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("Payment processed");
+        // Prepare ticket insert statement
+        const insertTicketQuery = `
+            INSERT INTO tickets (screening_id, user_id, seat_id, ticket_type_id)
+            VALUES (?, ?, ?, ?)
+        `;
+
+        // Build and execute insert queries
+        let seatIndex = 0;
+        for (const ticket_type of ticket_types) {
+            for (let i = 0; i < ticket_type.count; i++) {
+                const VALUES = [
+                    screening_id,
+                    user_id,
+                    seats[seatIndex].seat_id,
+                    ticket_type.type_id
+                ];
+                await connection.query(insertTicketQuery, VALUES);
+                seatIndex++;
+            }
+        }
+
+        await connection.commit();
+        res.status(200).json({
+            message: "Booking successful",
+            tickets_booked: nbrOfTickets,
+            seat_ids: seats.map(s => s.seat_id)
+        });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("Booking error:", error);
+        next(error);
+    } finally {
+        connection.release();
+    }
+});
 // router.get("/api/v1/checkout", async (req, res, next) => {
 //   const checkoutInfo = req.query.screening_id || null;
 //   console.log("Fetching Checkout information from the DB...");
@@ -23,20 +92,15 @@ router.post("/complete", async(req, res, next) => {
 //   }
 // });
 
-// router.post("/api/v1/checkout/complete", async (req, res, next) => {
-//   const purchaseInformation = req.body;
-//   if (
-//     !purchaseInformation.user_email ||
-//     !purchaseInformation.user_password ||
-//     !purchaseInformation.card_information
-//   )
-//     throwError("Missing purchase data, creation operation failed", 400);
+// router.post("/api/v1/checkout/complete",verifyUserJWT , async (req, res, next) => {
+//   const {screening_id,ticket_types, total_price, card } = req.body;
+//   if (!card ) next ( new Error("Missing purchase data, creation operation failed"))
+
 //   console.log("Processing purchase request...");
+
 //   try {
 //     //Extract User id from the email
-//     const user_id = await dbFunc.getUserIdByEmail(
-//       purchaseInformation.user_email
-//     );
+//     const user_id = await 
 //     if (!user_id) throwError("User not found, purchase operation failed", 400);
 
 //     //Check password to validate user
