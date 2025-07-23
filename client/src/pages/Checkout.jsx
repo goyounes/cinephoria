@@ -3,8 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from "axios";
-import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
-import PaymentDialog from "./PaymentDialog";
+import { displayCustomAlert } from "../components/UI/CustomSnackbar";
+import PaymentDialog from "./components/PaymentDialog";
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 const checkIsEmployee = async () => {

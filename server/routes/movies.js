@@ -204,7 +204,6 @@ router.get("/:id/screenings", async (req,res,next) => {
     try {
         const rawScreenings = await getUpcomingScreenings(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
-        console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
     } catch (error) {
         next(error)
@@ -217,7 +216,6 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     try {
         const rawScreenings = await getUpcomingScreeningsAdmin(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
-        console.log("screenigs =>",screenings)
         res.status(200).json(screenings)
     } catch (error) {
         next(error)

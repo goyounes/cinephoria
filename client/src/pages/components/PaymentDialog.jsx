@@ -1,7 +1,7 @@
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Stack, TextField, CircularProgress } from '@mui/material';
 import {useState } from 'react'
-import { displayCustomAlert } from '../../../components/UI/CustomSnackbar';
-import { validateCardExpiryDate } from '../../../utils';
+import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
+import { validateCardExpiryDate } from '../../utils';
 import axios from 'axios';
 
 const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars, order }) => {

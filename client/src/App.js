@@ -12,7 +12,7 @@ import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
 import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
-import Checkout from './pages/AdminDashboard/Movies/Checkout';
+import Checkout from './pages/Checkout';
 
 import Movies from './pages/Movies';
 import Movie from './pages/Movie';
