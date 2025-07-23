@@ -33,7 +33,7 @@ const Login = () => {
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
 
       setTimeout(() => {
-        navigate('/auth/logout'); // Redirect to the logout page --> change to redirect to home/my account after
+        navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
       },1000)
 
     } catch (err) {
