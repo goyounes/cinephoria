@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import axios from 'axios'
 import {
   Container,
@@ -15,49 +15,6 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import QRCode from 'react-qr-code'
 
-const Account = () => {
-  const [tickets, setTickets] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    async function fetchTickets() {
-      try {
-        const res = await axios.get('/api/tickets/owned')
-        setTickets(res.data || [])
-      } catch {
-        setError('Failed to fetch tickets')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchTickets()
-  }, [])
-
-  const now = new Date("2025-10-30")
-
-  const getScreeningTime = (ticket) =>
-    new Date(`${ticket.start_date}T${ticket.start_time}`)
-
-  const upcomingTickets = useMemo(() => {
-    return tickets
-      .filter((t) => getScreeningTime(t) > now)
-      .sort((a, b) => getScreeningTime(a) - getScreeningTime(b))
-  }, [tickets])
-
-  const passedTickets = useMemo(() => {
-    return tickets
-      .filter((t) => getScreeningTime(t) <= now)
-      .sort((a, b) => getScreeningTime(b) - getScreeningTime(a))
-  }, [tickets])
-
-  const groupByScreening = (list) =>
-    list.reduce((acc, ticket) => {
-      const key = `${ticket.title}|${ticket.cinema_name}|${ticket.start_date}|${ticket.start_time}`
-      if (!acc[key]) acc[key] = []
-      acc[key].push(ticket)
-      return acc
-    }, {})
 
   const TicketCard = ({ ticket, showReviewButton }) => (
     <Box
@@ -65,7 +22,7 @@ const Account = () => {
       p={2}
       border="1px solid black"
       borderRadius={4}
-      width={200}
+      width={300}
     >
       <Typography variant="subtitle2" fontWeight={600}>
         {ticket.title}
@@ -90,8 +47,86 @@ const Account = () => {
     </Box>
   )
 
+const Account = () => {
+  const [tickets, setTickets] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    async function fetchTickets() {
+      try {
+        const res = await axios.get('/api/tickets/owned')
+        setTickets(res.data || [])
+      } catch {
+        setError('Failed to fetch tickets')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchTickets()
+  }, [])
+
+  // const now = new Date()
+  const now = new Date("2025-10-26")
+
+  const getScreeningTime = (ticket) => new Date(`${ticket.start_date}T${ticket.start_time}`)
+
+  const upcomingTickets = useMemo(() => {
+    return tickets
+      .filter((t) => getScreeningTime(t) > now)
+      .sort((a, b) => getScreeningTime(a) - getScreeningTime(b))
+      // eslint-disable-next-line
+  }, [tickets])
+
+  const passedTickets = useMemo(() => {
+    return tickets
+      .filter((t) => getScreeningTime(t) <= now)
+      .sort((a, b) => getScreeningTime(b) - getScreeningTime(a))
+      // eslint-disable-next-line
+  }, [tickets])
+
+  const groupedUpcoming = useMemo(() => {
+    const grouped = {}
+    for (const ticket of upcomingTickets) {
+      const id = ticket.screening_id
+      if (!grouped[id]) {
+        grouped[id] = {
+          screening: {
+            title: ticket.title,
+            cinema: ticket.cinema_name,
+            date: ticket.start_date,
+            time: ticket.start_time,
+          },
+          tickets: [],
+        }
+      }
+      grouped[id].tickets.push(ticket)
+    }
+    return Object.entries(grouped).map(([id, data]) => ({id,...data}))
+  }, [upcomingTickets])
+
+  const groupedPast = useMemo(() => {
+    const grouped = {}
+    for (const ticket of passedTickets) {
+      const id = ticket.screening_id
+      if (!grouped[id]) {
+        grouped[id] = {
+          screening: {
+            title: ticket.title,
+            cinema: ticket.cinema_name,
+            date: ticket.start_date,
+            time: ticket.start_time,
+          },
+          tickets: [],
+        }
+      }
+      grouped[id].tickets.push(ticket)
+    }
+    return Object.entries(grouped).map(([id, data]) => ({id,...data}))
+  }, [passedTickets])
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container  sx={{ py: 4 }}>
       <Typography variant="h4" align="center" gutterBottom>
         Welcome User
       </Typography>
@@ -104,28 +139,34 @@ const Account = () => {
 
           {loading && <CircularProgress />}
           {error && <Typography color="error">{error}</Typography>}
-          {!loading && !error && tickets.length === 0 && <Typography>No tickets found.</Typography>}
+          {!loading && !error && tickets.length === 0 && (
+            <Typography>No tickets found.</Typography>
+          )}
 
           {!loading && !error && (
             <>
-              {upcomingTickets.length > 0 && (
+              {groupedUpcoming.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom>
                     Upcoming Tickets
                   </Typography>
-                  {Object.entries(groupByScreening(upcomingTickets)).map(([groupKey, group]) => {
-                    const [title, cinema, date, time] = groupKey.split('|')
+                  {groupedUpcoming.map(({ id, screening, tickets }) => {
+                    const { title, cinema } = screening
                     return (
-                      <Accordion key={groupKey}>
+                      <Accordion key={id}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                           <Typography>
-                            {title} @ {cinema} — {group.length} ticket{group.length > 1 ? 's' : ''}
+                            {title} @ {cinema} — {tickets.length} ticket
+                            {tickets.length > 1 ? 's' : ''}
                           </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                           <Box display="flex" flexWrap="wrap" gap={1}>
-                            {group.map((ticket) => (
-                              <TicketCard key={ticket.QR_code} ticket={ticket} />
+                            {tickets.map((ticket) => (
+                              <TicketCard
+                                key={ticket.QR_code}
+                                ticket={ticket}
+                              />
                             ))}
                           </Box>
                         </AccordionDetails>
@@ -135,24 +176,29 @@ const Account = () => {
                 </>
               )}
 
-              {passedTickets.length > 0 && (
+              {groupedPast.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
                     Past Tickets
                   </Typography>
-                  {Object.entries(groupByScreening(passedTickets)).map(([groupKey, group]) => {
-                    const [title, cinema, date, time] = groupKey.split('|')
+                  {groupedPast.map(({ id, screening, tickets }) => {
+                    const { title, cinema } = screening
                     return (
-                      <Accordion key={groupKey}>
+                      <Accordion key={id}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                           <Typography>
-                            {title} @ {cinema} — {group.length} ticket{group.length > 1 ? 's' : ''}
+                            {title} @ {cinema} — {tickets.length} ticket
+                            {tickets.length > 1 ? 's' : ''}
                           </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                           <Box display="flex" flexWrap="wrap" gap={1}>
-                            {group.map((ticket) => (
-                              <TicketCard key={ticket.QR_code} ticket={ticket} showReviewButton />
+                            {tickets.map((ticket) => (
+                              <TicketCard
+                                key={ticket.QR_code}
+                                ticket={ticket}
+                                showReviewButton
+                              />
                             ))}
                           </Box>
                         </AccordionDetails>
