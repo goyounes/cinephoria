@@ -43,20 +43,21 @@ const Checkout = () => {
             : `/api/screenings/upcoming/${screening_id}`;
             const screeningsRes = await axios.get(screeningUrl);
 
-         setMovie(movieRes.data);
-         setScreening(screeningsRes.data);
-         setTicketTypes(ticketTypesRes.data)
-         setTicketCounts(new Array(ticketTypesRes.data.length).fill(0));
+            setMovie(movieRes.data);
+            setScreening(screeningsRes.data);
+            setTicketTypes(ticketTypesRes.data);
+            setTicketCounts(new Array(ticketTypesRes.data.length).fill(0));
          } catch (err) {
-         displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
+            displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
          } finally {
-         setLoading(false);
+            setLoading(false);
          }
       };
 
       if (movie_id && screening_id) {
          fetchData();
       }
+      // eslint-disable-next-line
    }, [movie_id, screening_id]); 
 
    const handleTicketChange = (index, delta) => {

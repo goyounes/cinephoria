@@ -138,13 +138,16 @@ const Account = () => {
           </Typography>
 
           {loading && <CircularProgress />}
+
           {error && <Typography color="error">{error}</Typography>}
+
           {!loading && !error && tickets.length === 0 && (
             <Typography>No tickets found.</Typography>
           )}
 
           {!loading && !error && (
             <>
+            
               {groupedUpcoming.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom>
@@ -207,6 +210,7 @@ const Account = () => {
                   })}
                 </>
               )}
+              
             </>
           )}
         </CardContent>
