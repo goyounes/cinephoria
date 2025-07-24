@@ -27,6 +27,25 @@ import Account from './pages/Auth/Account';
 
 import { Container, Stack } from '@mui/material';
 import ContactUs from './pages/ContactUs';
+import ProtectedRoutes from './utils/ProtectedRoutes';
+
+// const AuthenticatedRoute = () => {
+//     const isAuthorized = 1//use your logic to check this
+//     const location = useLocation();
+
+//     if (!isAuthorized) {
+//         //redirect to this route after login
+//         return <Navigate to={RoutesEnum.LOGIN} replace state={{     
+//      redirectTo: location }} />;
+//         }
+
+//     return (
+//         <div>
+//             <AppicationBar /> // shared content or whatever
+//             <Outlet /> //page content
+//         </div>
+//     );
+// };
 
 function App() {
   return (
@@ -37,13 +56,17 @@ function App() {
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
           <Routes >
+            <Route element={<ProtectedRoutes requiredRoleId={1}/>}>
+              <Route path="/checkout" element={<Checkout/>} />
+              <Route path="/auth/account" element={<Account />} />
+            </Route>
+
             {/* Home */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             {/* Movies */}
             <Route path="/reservation/:id" element={<Reservation />} />
             <Route path="/reservation/" element={<Reservation />} />
-            <Route path="/checkout" element={<Checkout/>} />
 
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id/*" element={<Movie />} />
@@ -62,12 +85,10 @@ function App() {
             {/* Users */}
             <Route path="/users" element={<AdminUsers />} />
 
-            <Route path="/auth/account" element={<Account />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/admin/users/create" element={<AdminAddUser />} />
-
           </Routes>
         {/* </Stack> */}
       </Container>

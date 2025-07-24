@@ -1,13 +1,15 @@
 import axios from '../../api/axiosInstance.js';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 
 const Login = () => {
-  const [snackbars, setSnackbars] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/'
+  const [snackbars, setSnackbars] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,7 +25,7 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       console.log(`/auth/login`)
@@ -33,7 +35,8 @@ const Login = () => {
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
 
       setTimeout(() => {
-        navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
+        // navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
+        navigate(from, { replace: true })
       },1000)
 
     } catch (err) {
@@ -91,7 +94,7 @@ const Login = () => {
             </Link>
           </Typography>
 
-          <Button variant="contained" color="primary" onClick={handleSubmit} startIcon={<LoginIcon />}>
+          <Button variant="contained" color="primary" onClick={handleLogin} startIcon={<LoginIcon />}>
             Login
           </Button>
 
