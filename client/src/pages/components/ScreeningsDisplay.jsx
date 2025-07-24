@@ -47,7 +47,7 @@ const ScreeningsDisplay = ({ screeningsByLocation, nbrOfTickets }) => {
                       {visibleScreenings.map((screening) => {
                         const url = `/checkout?screening_id=${screening.screening_id}&movie_id=${screening.movie_id}`;
                         return (
-                        <Link to={ url }>
+                        <Link key={screening.screening_id} to={ url }>
                           <ScreeningButton
                             key={screening.screening_id}
                             screening={screening}
