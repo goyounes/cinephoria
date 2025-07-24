@@ -5,7 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 const app = experess();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 app.use(experess.json());
 // app.use(cors());
