@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
+import { useContext } from 'react';
+import { AuthContext } from "../Auth/AuthProvider.jsx";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,13 +28,15 @@ const Login = () => {
     }));
   };
 
+
+  const {login} = useContext(AuthContext)
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      console.log(`/auth/login`)
-      console.log(formData)
 
-      await axios.post(`/api/auth/login`, formData);
+      // await axios.post(`/api/auth/login`, formData);
+
+        login(formData)
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
 
       setTimeout(() => {
