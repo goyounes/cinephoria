@@ -14,6 +14,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import ScreeningsDisplay from "./ScreeningsDisplay";
+import { useAuth } from "../Auth/AuthProvider.jsx";
 
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter);
@@ -31,6 +32,8 @@ const DAYS_PER_PAGE = 7;
 const LIMITED_TOTAL_DAYS = 14;
 
 const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
+    const test = useAuth()
+    console.log("context value ->",test)
    const navigate = useNavigate();
 
    const [screenings, setScreenings] = useState([]);
@@ -38,7 +41,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
    const [page, setPage] = useState(0);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const [hasAutoSelected, setHasAutoSelected] = useState(false);
-
+      console.log(screenings,isEmployee,page,selectedIndex,hasAutoSelected)
    const today = dayjs().startOf("day");
    const totalDays = isEmployee ? Infinity : LIMITED_TOTAL_DAYS;
    const maxPage = isEmployee ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
@@ -77,7 +80,6 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
             const query = new URLSearchParams({ cinema_id});
             url += `?${query.toString()}`;
          }
-         console.log(url)
          const { data } = await axios.get(url);
          setScreenings(data);
       } catch (err) {
