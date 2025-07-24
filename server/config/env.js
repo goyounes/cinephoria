@@ -1,7 +1,14 @@
-import dotenv from "dotenv";
-// process.env.DOTENV_CONFIG_DEBUG = 'true';
+import dotenv from 'dotenv';
 
-dotenv.config({ path: './.env' });
+if (process.env.NODE_ENV !== 'production') {
+  const result = dotenv.config({ path: './.env' });
 
-// console.log("Younes : Server: Environment variables loaded successfully!");
-// console.log(process.env)
+  if (result.error) {
+    console.warn('Warning: .env file not found or failed to load.');
+  } else {
+    console.log('Environment variables loaded successfully.');
+  }
+} else {
+  console.log('Production mode detected — skipping .env loading');
+  console.log("loaded PORT is", process.env.PORT)
+}
