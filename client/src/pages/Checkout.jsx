@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
-import axios from "axios";
+import axios from '../api/axiosInstance.js';
+
 import { displayCustomAlert } from "../components/UI/CustomSnackbar";
 import PaymentDialog from "./components/PaymentDialog";
 

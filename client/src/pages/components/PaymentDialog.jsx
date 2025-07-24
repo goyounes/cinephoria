@@ -2,7 +2,8 @@ import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import {useState } from 'react'
 import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
 import { validateCardExpiryDate } from '../../utils';
-import axios from 'axios';
+import axios from '../../api/axiosInstance.js';
+
 
 const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars, order }) => {
    const [isProcessing, setIsProcessing] = useState(false);

@@ -1,17 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
-import axios from 'axios'
-import {
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-  Button,
-  CircularProgress
-} from '@mui/material'
+import axios from '../../api/axiosInstance.js';
+import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,AccordionDetails,Box,Button,CircularProgress} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import QRCode from 'react-qr-code'
 

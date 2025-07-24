@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../api/axiosInstance.js';
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Stack, Card, Typography, FormControl, InputLabel, Select, MenuItem,Box} from "@mui/material";

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../api/axiosInstance.js';
 import dayjs from "dayjs";
 import { useEffect, useState, useMemo } from "react";
 

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../api/axiosInstance.js';
 import { useEffect, useState } from "react";
 import {
 Container, Stack, Card, Typography,

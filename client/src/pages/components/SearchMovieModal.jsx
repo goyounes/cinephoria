@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {Modal,Box,Container,Stack,Button,TextField,Autocomplete,Divider} from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from 'axios';
+import axios from '../../api/axiosInstance.js';
 import MovieCard from './MovieCard';
 
 const fullScreenStyle = {

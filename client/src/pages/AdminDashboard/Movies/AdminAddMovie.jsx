@@ -4,7 +4,7 @@ import {
    FormControl,  Stack,  FormHelperText,  CardContent,
    Autocomplete
   } from "@mui/material";
-import axios from "axios";
+import axios from '../../../api/axiosInstance.js';
 import ImageUploader from "../../../components/UI/ImageUploader";
 import AddIcon from '@mui/icons-material/Add';
 import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"

@@ -8,7 +8,8 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import axios from "axios";
+import axios from '../../api/axiosInstance.js';
+
 
 const AdminInbox = () => {
   const [messages, setMessages] = useState([]);

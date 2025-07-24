@@ -5,7 +5,8 @@ import {
    FormControl,  Stack,  FormHelperText,  CardContent,
    Autocomplete
   } from "@mui/material";
-import axios from "axios";
+import axios from '../../../api/axiosInstance.js';
+
 import ImageUploader from "../../../components/UI/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"

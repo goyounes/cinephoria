@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams, useLocation } from "react-router-dom";
-import axios from "axios";
+import axios from '../api/axiosInstance.js';
 
 import {  Container, Typography, Button} from "@mui/material";
 import {  KeyboardDoubleArrowDown as DownArrow,  KeyboardDoubleArrowUp as UpArrow,} from "@mui/icons-material";

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../../api/axiosInstance.js';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
