@@ -80,12 +80,19 @@ export async function loginService (req, res, next) {
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // If everything is fine, return the user_id signed using a JWT token
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
           {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
-          process.env.JWT_SECRET,
+          process.env.ACCESS_JWT_SECRET,
           { expiresIn: '24h' }
         );    
-        res.cookie('accessToken', token, {
+        const refreshToken = jwt.sign(
+          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
+          process.env.REFRESH_JWT_SECRET,
+          { expiresIn: '90d' }
+        );  
+        refreshTokens.push(refreshToken)
+
+        res.cookie('accessToken', accessToken, {
             // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
             // secure: true, // <-- REQUIRED for SameSite=None
             // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
@@ -94,7 +101,11 @@ export async function loginService (req, res, next) {
             secure: false,          // Allow over HTTP (MITM risk)
             sameSite: 'Lax',        // Allows some cross-site requests
             maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-        }).status(200).json(user);
+        }).status(200).json({
+          ...user,
+          accessToken,
+          refreshToken
+        });
     }catch (error) {
         next(error);
     }
@@ -109,13 +120,74 @@ export async function logoutService (req, res, next) {
     .status(200).json({ message: "Logged out successfully" });
 }
 
+let refreshTokens = []
+export async function refreshService (req, res, next) {
+    // take refresh token
+    const refreshToken = req.body.token
+    //send error if there is no token
+    if(!refreshToken) return res.status(401).json("You are not authenticated")
+    if(!refreshTokens.includes(refreshToken)) return res.status(403).json("Refresh token not valid")
+    // Good --> send new acces token
+
+    const accessToken = jwt.sign(
+      {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
+      process.env.ACCESS_JWT_SECRET,
+      { expiresIn: '24h' }
+    );    
+
+
+    try {
+
+        // Get the user_id
+        const user = data1[0]
+        const user_id = user.user_id;
+
+        // Get the user's password hash
+        const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
+        const [data2] = await pool.query(q2 ,[user_id]);
+        if (data2.length === 0) return next(new Error("No credentials found for this user... desync in the database?"));
+
+        // Get the password hash
+        const passwordHash = data2[0].user_password_hash;
+
+        //Check the hash
+        const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
+        if (!isPasswordValid) return next(new Error("Invalid password"));
+
+        // If everything is fine, return the user_id signed using a JWT token
+        const accessToken = jwt.sign(
+          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
+          process.env.ACCESS_JWT_SECRET,
+          { expiresIn: '24h' }
+        );    
+
+
+        res.cookie('accessToken', accessToken, {
+            // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            // secure: true, // <-- REQUIRED for SameSite=None
+            // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
+            
+            httpOnly: false,        // Allow access from JavaScript (XSS risk)
+            secure: false,          // Allow over HTTP (MITM risk)
+            sameSite: 'Lax',        // Allows some cross-site requests
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+        }).status(200).json({
+          ...user,
+          accessToken
+        });
+    }catch (error) {
+        next(error);
+    }
+
+}
+
 export async function verifyUserJWT (req, res, next) {
   try {
     const token = req.cookies.accessToken;
     if (!token) {
       throw new Error("No token provided");
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
     if (decoded.role_id < 1) {
       throw new Error("Access denied: you have to be loged in");
     }
@@ -136,7 +208,7 @@ export async function verifyAdminJWT(req, res, next) {
     if (!token) {
       throw new Error("No token provided");
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
     if (decoded.role_id !== 3) {
       throw new Error("Access denied: admin only");
     }
@@ -157,7 +229,7 @@ export async function verifyEmployeeJWT(req, res, next) {
     if (!token) {
       throw new Error("No token provided");
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
     if (decoded.role_id < 2) {
       throw new Error("Access denied: employee or admin only");
     }
