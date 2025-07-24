@@ -61,6 +61,18 @@ function App() {
               <Route path="/auth/account" element={<Account />} />
             </Route>
 
+            <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
+              <Route path="/admin/movies" element={<AdminMovies />} />
+              <Route path="/admin/movies/create" element={<AdminAddMovie />} />
+              <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
+              <Route path="/messages" element={<AdminMessages />} />
+            </Route>
+
+            <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
+              <Route path="/users" element={<AdminUsers />} />
+              <Route path="/admin/users/create" element={<AdminAddUser />} />
+            </Route>
+
             {/* Home */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
@@ -70,9 +82,7 @@ function App() {
 
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id/*" element={<Movie />} />
-            <Route path="/admin/movies" element={<AdminMovies />} />
-            <Route path="/admin/movies/create" element={<AdminAddMovie />} />
-            <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
+
             {/* Screenings */}
             
             {/* Tickets */}
@@ -80,15 +90,12 @@ function App() {
             <Route path="/tickets/create" element={<AdminTickets />} />
             <Route path="/tickets/:id" element={<AdminTickets />} />
             {/* Messages */}
-            <Route path="/messages" element={<AdminMessages />} />
             <Route path="/contactus" element={<ContactUs />} />
             {/* Users */}
-            <Route path="/users" element={<AdminUsers />} />
 
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
-            <Route path="/admin/users/create" element={<AdminAddUser />} />
           </Routes>
         {/* </Stack> */}
       </Container>

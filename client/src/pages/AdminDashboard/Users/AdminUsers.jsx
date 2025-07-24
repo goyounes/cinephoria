@@ -31,7 +31,7 @@ const Users = () => {
       <div className="container-3of4-center">
         <div className="users-header">
           <h1>Users List</h1>
-          <Link to="/admin/users/create"><Button variant='contained'>Add movie</Button></Link>
+          <Link to="/admin/users/create"><Button variant='contained'>Add user</Button></Link>
         </div>
         <table>
           <thead>
