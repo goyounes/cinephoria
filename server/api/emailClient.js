@@ -6,41 +6,6 @@ const NO_REPLY_EMAIL = "no-reply@cinephoria.net"
 const CONTACT_EMAIL = "contact@cinephoria.net"
 const CONTACT_FORM_SENDER_EMAIL = "contact-form@cinephoria.net"
 
-// async function sendEmail({to,subject,text,html,replyTo}){
-//    const FROM = NO_REPLY_EMAIL
-
-//    const msg = {
-//       to: to,
-//       from: FROM, 
-//       subject: subject,
-//       text: text || 'no text provided',
-//       html: html ||'<strong>no html provided</strong>',
-//    }
-//    // if (replyTo) msg.replyTo = replyTo //sets an email to be replied to if the reciver tries to reply
-
-//    try {
-//       const response = await sgMail.send(msg);
-//       console.log('Email sent successfully to:', to);
-//       return response;
-//    } catch (error) {
-//       console.error('Error sending email:', error.response?.body || error.message);
-//       throw error;
-//    }
-// }
-
-// export async function sendWelcomeEmail(email,username) {
-//    const subject = 'Welcome to Cinephoria!';
-//    const text = `Hi ${username || 'there'},\n\nWelcome to Cinephoria! We're glad to have you with us.`;
-//    const html = `<p>Hi ${username || 'there'},</p><p>Welcome to <strong>Cinephoria</strong>! We're glad to have you with us.</p>`;
-//    const msg = {
-//       to:email,
-//       subject,
-//       text,
-//       html
-//    }
-//    return await sendNoReplyEmail(msg);
-// }
-
 export async function sendVerificationEmail(userEmail, verificationLink) {
 
    const msg = {
@@ -87,11 +52,55 @@ export async function sendContactMessage({ name, email, subject, message }){
 
    try {
       const response = await sgMail.send(msg);
-      console.log('Contact-form Email sent successfully to:', to, "on behalf of: ",replyTo);
+      console.log('Contact-form Email sent successfully to:', CONTACT_EMAIL, "on behalf of: ",email);
       return response;
    } catch (error) {
-      console.error('Error sending email to:', to, "on behalf of: ",replyTo,"Error :", error.response?.body || error.message);
+      console.error('Error sending email to:', CONTACT_EMAIL, "on behalf of: ",email,"Error :", error.response?.body || error.message);
       throw error;
    }
 
+}
+
+export async function sendContactAcknowledgment({ name, email, subject, message }) {
+  const msg = {
+    to: email,
+    from: NO_REPLY_EMAIL,
+    subject: `We've received your message - Cinephoria`,
+    text: `Hi ${name},
+
+      Thanks for contacting Cinephoria. We've received your message regarding "${subject}" and our team will get back to you shortly.
+
+      ---
+      Copy of your message:
+      ${message}
+
+      - The Cinephoria Team`,
+     html: `
+      <div style="font-family: sans-serif; line-height: 1.6;">
+         <p>Hi ${name},</p>
+         <p>Thanks for contacting <strong>Cinephoria</strong>. We've received your message regarding <strong>${subject}</strong>, and our team will respond as soon as possible.</p>
+         <p>If you have more to share, feel free to reach out at <a href="mailto:support@cinephoria.net">support@cinephoria.net</a>.</p>
+         <p>- The Cinephoria Team</p>
+
+         <hr>
+         <div style="font-size: 0.85em; color: #666; margin-top: 20px;">
+           <p><strong>Copy of your message:</strong></p>
+           <p style="white-space: pre-line;">${message.replace(/\n/g, "<br>")}</p>
+         </div>
+
+         <hr>
+         <p style="font-size: 0.75em; color: #999;">
+           This is an automated message from an unmonitored inbox. Please do not reply to this email.
+         </p>
+      </div>
+    `,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log(`Acknowledgment email sent to user: ${email}`);
+  } catch (error) {
+    console.error(`Failed to send acknowledgment email to ${email}:`, error.response?.body || error.message);
+    // Don't rethrow – main contact message was already sent
+  }
 }
