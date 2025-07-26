@@ -28,6 +28,7 @@ import Account from './pages/Auth/Account';
 import { Container, Stack } from '@mui/material';
 import ContactUs from './pages/ContactUs';
 import ProtectedRoutes from './utils/ProtectedRoutes';
+import ResetPassword from './pages/Auth/ResetPassword';
 
 // const AuthenticatedRoute = () => {
 //     const isAuthorized = 1//use your logic to check this
@@ -94,6 +95,7 @@ function App() {
             {/* Users */}
 
             <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
           </Routes>

@@ -35,6 +35,15 @@ export const AuthContextProvider = ({ children }) => {
     localStorage.removeItem("user");
   }
 
+  const resetPassword = async (email) => {
+    try {
+      const res = await axios.post("/api/auth/reset-password", { email });
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const syncAuth = (e) => {
       if (e.key === 'user') {

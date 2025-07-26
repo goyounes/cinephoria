@@ -85,7 +85,7 @@ const Login = () => {
             value={formData.password}
           />
           <Typography>
-            <Link to={'/home'} underline="hover">
+            <Link to={'/auth/reset-password'} underline="hover">
               Forgot password?
             </Link>
           </Typography>
@@ -96,7 +96,7 @@ const Login = () => {
 
           <Typography>
             Don't have an account?{' '}
-            <Link to={'/home'} underline="hover" >
+            <Link to={'/auth/register'} underline="hover" >
               Signup now
             </Link>
           </Typography>
