@@ -11,13 +11,16 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import {displayCustomAlert} from "../components/UI/CustomSnackbar"
+import { useAuth } from './Auth/AuthProvider.jsx';
 // import CustomSnackbar, { displayCustomAlert } from "../../components/CustomSnackbar";
 
 
 const ContactUs = () => {
+  const {currentUser} = useAuth()
+
   const [formData, setFormData] = useState({
     message_sender_name: "",
-    message_sender_email: "",
+    message_sender_email: currentUser.user_email|| "",
     message_subject: "",
     message_text: "",
   });
