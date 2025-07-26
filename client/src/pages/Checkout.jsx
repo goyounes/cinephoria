@@ -10,7 +10,7 @@ import PaymentDialog from "./components/PaymentDialog";
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 const checkIsEmployee = async () => {
   try {
-    await axios.post("/api/auth/verify/employee");
+    await axios.post("/api/auth/verify-employee");
     return true;
   } catch {
     return false;

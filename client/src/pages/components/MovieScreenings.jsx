@@ -20,7 +20,7 @@ dayjs.extend(isSameOrAfter);
 
 const checkIsEmployee = async () => {
   try {
-    await axios.post("/api/auth/verify/employee");
+    await axios.post("/api/auth/verify-employee");
     return true;
   } catch {
     return false;

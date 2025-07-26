@@ -58,7 +58,7 @@ const Reservation = () => {
          try {
             let isAdmin = false;
             try {
-               await axios.post("/api/auth/verify/employee");
+               await axios.post("/api/auth/verify-employee");
                isAdmin = true;
             } catch {
                isAdmin = false;
