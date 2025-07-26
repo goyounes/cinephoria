@@ -2,7 +2,7 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function sendEmail(to,replyTo,email,subject,text,html){
+async function sendEmail({to,subject,text,html,replyTo}){
     const msg = {
         to: to,
         from: 'no-reply@cinephoria.net', 
@@ -22,12 +22,10 @@ async function sendEmail(to,replyTo,email,subject,text,html){
     }
 }
 
-export async function sendWelcomeEmail(username,email) {
+export async function sendWelcomeEmail(email,username) {
   const subject = 'Welcome to Cinephoria!';
   const text = `Hi ${username || 'there'},\n\nWelcome to Cinephoria! We're glad to have you with us.`;
   const html = `<p>Hi ${username || 'there'},</p><p>Welcome to <strong>Cinephoria</strong>! We're glad to have you with us.</p>`;
 
-  return await sendEmail(email, subject, text, html);
+  return await sendEmail({to:email, subject, text, html});
 }
-
-await sendWelcomeEmail("younes50","ysahar30@gmail.com")

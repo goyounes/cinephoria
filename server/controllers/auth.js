@@ -1,6 +1,7 @@
 import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { sendWelcomeEmail } from "../api/emailClient.js";
 
 const [rolesMap] = await pool.query("SELECT * FROM roles")
 const getRoleNameById = (id, roles) => rolesMap.find(r => r.role_id === id)?.role_name || null;
@@ -42,8 +43,9 @@ export async function registerService (req, res, next) {
             hashedPassword
         ];
         await connection.query(q3, values3);
-
         await connection.commit();
+
+        sendWelcomeEmail(req.body.email, req.body.username)
 
         res.status(201).json({ message: "User registered successfully", user_id });
     } catch (error) {

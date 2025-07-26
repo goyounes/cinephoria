@@ -610,6 +610,7 @@ CREATE TABLE users (
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     role_id INT DEFAULT 1,
+    isVerified BOOL DEFAULT FALSE,
     UNIQUE (user_name),
 	UNIQUE (user_email),
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
