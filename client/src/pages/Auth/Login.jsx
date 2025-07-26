@@ -1,11 +1,9 @@
-import axios from '../../api/axiosInstance.js';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
-import { Link, redirect, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
-import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
-import { useContext } from 'react';
-import { AuthContext } from "../Auth/AuthProvider.jsx";
+import { displayCustomAlert} from "../../components/UI/CustomSnackbar"
+import { useAuth } from "../Auth/AuthProvider.jsx";
 
 
 const Login = () => {
@@ -29,22 +27,16 @@ const Login = () => {
   };
 
 
-  const {login} = useContext(AuthContext)
+  const {login} = useAuth()
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-
-      // await axios.post(`/api/auth/login`, formData);
-
-        login(formData)
+      await login(formData)
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
-
       setTimeout(() => {
         // navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
-        console.log("redirecting to ",from)
         navigate(from, { replace: true })
       },1000)
-
     } catch (err) {
       displayCustomAlert(snackbars, setSnackbars, "Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
     }

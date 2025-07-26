@@ -1,12 +1,11 @@
-import axios from '../../api/axiosInstance.js';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/material';
 
-import { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
+import { useAuth } from './AuthProvider.jsx';
 
 const roleMap = {
     1: 'user', 
@@ -47,10 +46,12 @@ const Logout = () =>  {
         return () => clearInterval(interval); // Clean up on unmount
     }, []);
 
-  const handleSubmit = async (e) => {
+  const {logout} = useAuth() 
+  const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`/api/auth/logout`);
+      // await axios.post(`/api/auth/logout`);
+      await logout()
       displayCustomAlert(snackbars, setSnackbars, "Logout successful! Goodbye ", "success");
       navigate('/home'); // Redirect to the users page
     } catch (err) {
@@ -78,7 +79,7 @@ const Logout = () =>  {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleSubmit}
+              onClick={handleLogout}
               startIcon={<LogoutIcon />}
             >
               Logout
