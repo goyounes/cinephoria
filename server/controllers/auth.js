@@ -1,10 +1,10 @@
 import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail, sendVerificationEmail } from "../api/emailClient.js";
+import {sendVerificationEmail } from "../api/emailClient.js";
 
 const [rolesMap] = await pool.query("SELECT * FROM roles")
-const getRoleNameById = (id, roles) => rolesMap.find(r => r.role_id === id)?.role_name || null;
+const getRoleNameById = (id) => rolesMap.find(r => r.role_id === id)?.role_name || null;
 
 export async function registerService (req, res, next) {
     // Validate request body
