@@ -3,11 +3,12 @@ import {useState } from 'react'
 import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
 import { validateCardExpiryDate } from '../../utils';
 import axios from '../../api/axiosInstance.js';
+import { useNavigate } from 'react-router-dom';
 
 
 const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars, order }) => {
+   const navigate = useNavigate()
    const [isProcessing, setIsProcessing] = useState(false);
-   const [operation, setOperation] = useState(""); 
 
    const handleInputChange = (field) => (event) => {
       let value = event.target.value;
@@ -38,10 +39,9 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
 
       if (isProcessing) return;
       setIsProcessing(true);
-      setOperation("");
 
+      // Validate Expiry date
       try {
-         setOperation("validating payment information");
          const expiryValidation = validateCardExpiryDate(cardInfo.expiry);
          if (!expiryValidation.valid) {
          throw new Error(expiryValidation.reason === "expired" ? "Card expired" : "Expiration date is invalid");
@@ -50,22 +50,20 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
          displayCustomAlert(
             snackbars,
             setSnackbars,
-            `Failed during ${operation}: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            `Failed during validating payment information: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
          return;
       }
-
+      // call backend to process the chekout
       try {
-         setOperation("Backend Processing");
          await new Promise((res) => setTimeout(res, 1000));
          await axios.post("/api/checkout/complete", {...order,card: cardInfo}, {withCredentials: true } );
-         // throw new Error("Could not assign seats");
       } catch (error) {
          displayCustomAlert(
             snackbars,
             setSnackbars,
-            `Failed during ${operation}: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            `Failed during Backend Processing: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
          return;
@@ -74,6 +72,10 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
       displayCustomAlert(snackbars, setSnackbars, "Payment successful!", "success");
       setIsProcessing(false);
       onClose();
+      setTimeout(() => {
+        navigate("/auth/account")
+      },1000)
+
    };
 
 
@@ -115,7 +117,7 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
             disabled={isProcessing}
             startIcon={isProcessing ? <CircularProgress color="inherit" size={20} /> : null}
             >
-            {isProcessing ? `${operation}...` : "Submit Payment"}
+            {isProcessing ? `Processing...` : "Submit Payment"}
             </Button>
          </DialogActions>
       </Dialog>

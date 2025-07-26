@@ -34,7 +34,6 @@ const Login = () => {
       await login(formData)
      	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
       setTimeout(() => {
-        // navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
         navigate(from, { replace: true })
       },1000)
     } catch (err) {
