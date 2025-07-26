@@ -15,9 +15,7 @@ import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectComm
 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import sharp from 'sharp'
-import randomImageName from '../utils/randomImageName.js';
-import { CombineGenresIdNames } from '../utils/index.js';
-import { CombineQualitiesIdNames } from '../utils/index.js';
+import { randomImageName, CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 
 
 

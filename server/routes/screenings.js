@@ -3,8 +3,7 @@ const router = Router();
 import axios from 'axios';
 import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
-import CombineGenresIdNames from '../utils/CombineGenresIdNames.js';
-import CombineQualitiesIdNames from '../utils/CombineQualitiesIdNames.js';
+import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 
 // Code below will be needed when eventally i have a screening dashboard for admins that needs filter functions
 // router.get("/",async (req,res,next) => {
