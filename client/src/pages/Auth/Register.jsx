@@ -7,7 +7,6 @@ import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 
 const Register = () => {
   const [snackbars, setSnackbars] = useState([]);
-  const API_URL = "http://localhost:8080";
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -26,12 +25,9 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      console.log(`${API_URL}/auth/register`)
-      console.log(formData)
-
       const response = await axios.post(`/api/auth/register`, formData);
       console.log("response of adding user: ", response);
       displayCustomAlert(snackbars, setSnackbars, "registered successfully!", "success");
@@ -106,7 +102,7 @@ return (
             value={formData.lastName}
           />
           
-          <Button variant="contained" color="primary" startIcon={<HowToRegIcon />} onClick={handleSubmit}>
+          <Button variant="contained" color="primary" startIcon={<HowToRegIcon />} onClick={handleRegister}>
             Register
           </Button>
         </Stack>

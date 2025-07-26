@@ -76,16 +76,9 @@ const handleFloatChange = (e) => {
         formData.append('selectedGenres[]', genre);
       });
     }
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
 
     try {
-      const response = await axios.post('/api/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
-      const result = response.data
-      console.log("response of adding movie: ");
-      console.log(response)
-      console.log(result);
+      await axios.post('/api/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       displayCustomAlert(snackbars, setSnackbars, "Movie added successfully!", "success");
     } catch (error) {
       const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";

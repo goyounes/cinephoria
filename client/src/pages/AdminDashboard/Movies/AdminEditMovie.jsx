@@ -53,7 +53,6 @@ const EditMovie = () => {
             })
             if (data.genres?.length>0){
               setSelectedGenres(data.genres)
-              console.log(data.genres)
             }
 
         } catch (err) {
@@ -117,15 +116,9 @@ const EditMovie = () => {
             formData.append('selectedGenres[]', genre);
           });
         }
-        for (const [key, value] of formData.entries()) {
-          console.log(key, value);
-        }
 
         try {
-          const response = await axios.put(`/api/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
-          console.log("response of updating movie: ");
-          console.log(response)
-          console.log(response.data);
+          await axios.put(`/api/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
           displayCustomAlert(snackbars, setSnackbars, "Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
         } catch (error) {

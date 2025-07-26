@@ -29,9 +29,7 @@ const AddUser = () => {
     e.preventDefault();
     try {
 
-      const response = await axios.post(`/api/users`,formData);
-      console.log(response)
-
+      await axios.post(`/api/users`,formData);
 	    displayCustomAlert(snackbars, setSnackbars, "User added successfully!", "success");
 
       setFormData({
