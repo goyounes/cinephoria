@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createContext, useContext } from 'react'
+import {useEffect, createContext, useContext } from 'react'
 import axios from '../../api/axiosInstance.js';
 
 // 1. Create the context
@@ -34,6 +34,17 @@ export const AuthContextProvider = ({ children }) => {
     setCurrentUser(null);
     localStorage.removeItem("user");
   }
+
+  useEffect(() => {
+    const syncAuth = (e) => {
+      if (e.key === 'user') {
+        setCurrentUser(JSON.parse(e.newValue  || null)); // null on logout
+      }
+    };
+
+    window.addEventListener('storage', syncAuth);
+    return () => window.removeEventListener('storage', syncAuth);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ currentUser, login, logout}}>
