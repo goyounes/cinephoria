@@ -1,7 +1,7 @@
 import axios from '../../api/axiosInstance.js';
 import LoginIcon from '@mui/icons-material/Login';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, redirect, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 import { useContext } from 'react';
@@ -11,7 +11,7 @@ import { AuthContext } from "../Auth/AuthProvider.jsx";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/'
+  const from = location.state?.from || '/'
   const [snackbars, setSnackbars] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
@@ -41,6 +41,7 @@ const Login = () => {
 
       setTimeout(() => {
         // navigate('/auth/account'); // Redirect to the logout page --> change to redirect to home/my account after
+        console.log("redirecting to ",from)
         navigate(from, { replace: true })
       },1000)
 
@@ -48,7 +49,6 @@ const Login = () => {
       displayCustomAlert(snackbars, setSnackbars, "Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
     }
   };
-  //TODO:Change redirection page
 
    return (
     <Container maxWidth="sm" sx={{ flexGrow: 1 , py:4, display:'flex', flexDirection:"row", alignItems: 'center'}}>
