@@ -31,24 +31,6 @@ import ProtectedRoutes from './utils/ProtectedRoutes';
 import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
 import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
 
-// const AuthenticatedRoute = () => {
-//     const isAuthorized = 1//use your logic to check this
-//     const location = useLocation();
-
-//     if (!isAuthorized) {
-//         //redirect to this route after login
-//         return <Navigate to={RoutesEnum.LOGIN} replace state={{     
-//      redirectTo: location }} />;
-//         }
-
-//     return (
-//         <div>
-//             <AppicationBar /> // shared content or whatever
-//             <Outlet /> //page content
-//         </div>
-//     );
-// };
-
 function App() {
   return (
     <Stack minHeight="100vh">
