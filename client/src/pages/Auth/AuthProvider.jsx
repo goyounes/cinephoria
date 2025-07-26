@@ -35,9 +35,9 @@ export const AuthContextProvider = ({ children }) => {
     localStorage.removeItem("user");
   }
 
-  const resetPassword = async (email) => {
+  const resetPasswordReq = async (email) => {
     try {
-      const res = await axios.post("/api/auth/reset-password", { email });
+      const res = await axios.post("/api/auth/reset-password-req", { email });
       return res.data;
     } catch (error) {
       throw error;
@@ -56,7 +56,7 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, resetPassword}}>
+    <AuthContext.Provider value={{ currentUser, login, logout, resetPasswordReq}}>
       {children}
     </AuthContext.Provider>
   )

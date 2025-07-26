@@ -8,7 +8,7 @@ import { useAuth } from '../Auth/AuthProvider.jsx';
 const ResetPasswordReq = () => {
   const [snackbars, setSnackbars] = useState([]);
   const [email, setEmail] = useState('');
-  const { resetPassword } = useAuth(); // Assuming you add this method
+  const { resetPasswordReq } = useAuth(); // Assuming you add this method
 
   const handleChange = (e) => {
     setEmail(e.target.value);
@@ -22,7 +22,7 @@ const ResetPasswordReq = () => {
     }
     try {
       // Call resetPassword API - add this method in your AuthProvider or call your backend directly
-      await resetPassword(email);
+      await resetPasswordReq(email);
       displayCustomAlert(snackbars, setSnackbars, `Password reset link sent to ${email}`, 'success');
     } catch (err) {
       const errorMessage = 'Failed to send reset email: ' +( err.response?.data?.error?.message || err?.response?.data?.message  || err.response?.data?.message || err.message  ||  'Server error')
