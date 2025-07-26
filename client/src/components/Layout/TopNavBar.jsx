@@ -5,15 +5,12 @@ import { Box, Typography } from '@mui/material';
 
 const navLinks = {
   middle: [
-    { to: '/messages', icon: '✉️', label: 'Messages' },
-    { to: '/screenings', icon: '🎞️', label: 'Screenings' },
+    { to: '/admin/movies', icon: '🎞️', label: 'Movies' },
     { to: '/cinemas', icon: '🏛️', label: 'Cinemas' },
-    { to: '/reservation', icon: '📅', label: 'Reservation' },
     { to: '/tickets', icon: '🎟️', label: 'Tickets' },
   ],
   right: [
     { to: '/users', icon: '👤', label: 'Users' },
-    { to: '/contact', icon: '📞', label: 'Contact' },
   ],
 };
 
@@ -35,7 +32,7 @@ function NavItem({ to, icon, label }) {
         },
       }}
     >
-      <Typography variant="h4" component="span" sx={{ lineHeight: 1 }}>
+      <Typography variant="h5" component="span">
         {icon}
       </Typography>
       
@@ -68,7 +65,6 @@ const TopNavBar = () => {
     <Box
       component="header"
       sx={{
-        p: 1,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
