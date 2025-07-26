@@ -10,9 +10,7 @@ export const useAuth = () => useContext(AuthContext)
 
 // 3. Provider with hardcoded user
 export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  )
+  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem("user")) || null)
 
   const login = async (inputs) => {
     try {
@@ -20,7 +18,7 @@ export const AuthContextProvider = ({ children }) => {
         withCredentials:true
       }) 
       setCurrentUser(res.data)
-      res?.data && localStorage.setItem('user', JSON.stringify(res));
+      res?.data && localStorage.setItem('user', JSON.stringify(res.data));
       return res.data
     } catch (error) {
       console.log("login failed")
