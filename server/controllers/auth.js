@@ -109,7 +109,7 @@ export async function loginService (req, res, next) {
         // Get the user_id
         const user = data1[0]
         const user_id = user.user_id;
-
+        user.role_name = getRoleNameById(user.role_id)
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
         const [data2] = await pool.query(q2 ,[user_id]);
@@ -122,14 +122,15 @@ export async function loginService (req, res, next) {
         const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
+        console.log("calculation for role", user.role_id, getRoleNameById(user.role_id))
         // If everything is fine, return the user_id signed using a JWT token
         const accessToken = jwt.sign(
-          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
+          {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name } ,
           process.env.ACCESS_JWT_SECRET,
           { expiresIn: '24h' }
         );    
         const refreshToken = jwt.sign(
-          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
+          {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name} ,
           process.env.REFRESH_JWT_SECRET,
           { expiresIn: '90d' }
         );  
