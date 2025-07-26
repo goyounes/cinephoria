@@ -2,13 +2,15 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function sendEmail({to,subject,text,html,replyTo}){
+async function sendNoReplyEmail({to,subject,text,html,replyTo}){
+    const FROM = 'no-reply@cinephoria.net'
+
     const msg = {
         to: to,
-        from: 'no-reply@cinephoria.net', 
+        from: FROM, 
         subject: subject,
-        text: text || 'This is a text version',
-        html: html ||'<strong>This is a html version</strong>',
+        text: text || 'no text provided',
+        html: html ||'<strong>no html provided</strong>',
     }
     // if (replyTo) msg.replyTo = replyTo //sets an email to be replied to if the reciver tries to reply
 
@@ -23,9 +25,40 @@ async function sendEmail({to,subject,text,html,replyTo}){
 }
 
 export async function sendWelcomeEmail(email,username) {
-  const subject = 'Welcome to Cinephoria!';
-  const text = `Hi ${username || 'there'},\n\nWelcome to Cinephoria! We're glad to have you with us.`;
-  const html = `<p>Hi ${username || 'there'},</p><p>Welcome to <strong>Cinephoria</strong>! We're glad to have you with us.</p>`;
+    const subject = 'Welcome to Cinephoria!';
+    const text = `Hi ${username || 'there'},\n\nWelcome to Cinephoria! We're glad to have you with us.`;
+    const html = `<p>Hi ${username || 'there'},</p><p>Welcome to <strong>Cinephoria</strong>! We're glad to have you with us.</p>`;
+    const msg = {
+        to:email,
+        subject,
+        text,
+        html
+    }
+    return await sendNoReplyEmail(msg);
+}
 
-  return await sendEmail({to:email, subject, text, html});
+export async function sendVerificationEmail(userEmail, verificationLink) {
+    const subject = 'Verify Your Cinephoria Account'
+    const html= `
+        <h2>Welcome to Cinephoria!</h2>
+        <p>Please verify your email address by clicking the button below:</p>
+        <a href="${verificationLink}" style="background:#007bff;color:#fff;padding:10px 20px;text-decoration:none;">Verify Email</a>
+        <p>If the button doesn’t work, copy and paste this URL into your browser:</p>
+        <p>${verificationLink}</p>
+    `
+    const text = html
+
+    const msg = {
+        to: userEmail,
+        subject,
+        text,
+        html,
+    }
+
+  try {
+    await sendNoReplyEmail(msg);
+    console.log('Verification email sent');
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+  }
 }
