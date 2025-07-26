@@ -15,14 +15,30 @@ export const AuthContextProvider = ({ children }) => {
   )
 
   const login = async (inputs) => {
-    const res = await axios.post("/api/auth/login", inputs, {
-      withCredentials:true
-    }) 
-    setCurrentUser(res.data)
+    try {
+      const res = await axios.post("/api/auth/login", inputs, {
+        withCredentials:true
+      }) 
+      setCurrentUser(res.data)
+      res?.data && localStorage.setItem('user', JSON.stringify(res));
+      return res.data
+    } catch (error) {
+      console.log("login failed")
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await axios.post("/api/auth/logout");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    setCurrentUser(null);
+    localStorage.removeItem("user");
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, login  }}>
+    <AuthContext.Provider value={{ currentUser, login, logout}}>
       {children}
     </AuthContext.Provider>
   )
