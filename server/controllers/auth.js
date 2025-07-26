@@ -1,7 +1,7 @@
 import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {sendVerificationEmail } from "../api/emailClient.js";
+import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
 
 const [rolesMap] = await pool.query("SELECT * FROM roles")
 const getRoleNameById = (id) => rolesMap.find(r => r.role_id === id)?.role_name || null;
@@ -95,6 +95,39 @@ export async function verifyEmailService(req, res, next) {
       return res.status(410).json({ message: "Verification link expired" });
     }
     return next(err);
+  }
+}
+
+export async function resetPasswordService(req, res, next) {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email is required" });
+
+  try {
+    // 1. Check if the user exists
+    const q = "SELECT user_id FROM users WHERE user_email = ?";
+    const [rows] = await pool.query(q, [email]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "No user with that email" });
+    }
+
+    const user_id = rows[0].user_id;
+
+    // 2. Generate a secure token
+    const resetToken = jwt.sign(
+      { user_id, type: "password_reset" },
+      process.env.PASSWORD_RESET_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // 3. Build the reset link
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    // 4. Send the email
+    await sendPasswordResetEmail(email, resetLink);
+
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (err) {
+    next(err);
   }
 }
 

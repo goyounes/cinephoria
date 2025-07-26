@@ -1,11 +1,15 @@
 import { Router } from 'express';
 const router = Router();
 
-import {  registerService, loginService, logoutService, verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT, verifyEmailService} from '../controllers/auth.js';
-router.post('/register', registerService);
+import { verifyEmailService, resetPasswordService, registerService, loginService, logoutService,
+  verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT } from '../controllers/auth.js';
 router.get('/verify-email', verifyEmailService);
+router.post('/reset-password', resetPasswordService);
+
+router.post('/register', registerService);
 router.post('/login', loginService);
 router.post('/logout', logoutService);
+
 router.post('/verify', verifyUserJWT, (req, res) => {
   res.status(200).json({ message: 'Token valid', user: req.user });
 });

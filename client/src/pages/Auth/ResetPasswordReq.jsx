@@ -5,7 +5,7 @@ import { Container, Typography, Stack, TextField, Button, Card, CardContent } fr
 import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
 import { useAuth } from '../Auth/AuthProvider.jsx';
 
-const ResetPassword = () => {
+const ResetPasswordReq = () => {
   const [snackbars, setSnackbars] = useState([]);
   const [email, setEmail] = useState('');
   const { resetPassword } = useAuth(); // Assuming you add this method
@@ -73,4 +73,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default ResetPasswordReq;
