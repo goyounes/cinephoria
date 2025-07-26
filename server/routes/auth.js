@@ -3,6 +3,7 @@ const router = Router();
 
 import {  registerService, loginService, logoutService, verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT, verifyEmailService} from '../controllers/auth.js';
 router.post('/register', registerService);
+router.get('/verify-email', verifyEmailService);
 router.post('/login', loginService);
 router.post('/logout', logoutService);
 router.post('/verify', verifyUserJWT, (req, res) => {

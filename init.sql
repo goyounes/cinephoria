@@ -616,26 +616,26 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 
-INSERT INTO users(user_name,user_email,first_name,last_name,role_id)
+INSERT INTO users(user_name, user_email, first_name, last_name, role_id, isVerified)
 VALUES 
-("bbraney0","bbraney0@tinyurl.com","Bernard","Braney",1),
-("ffolonin1","ffolonin1@ucla.edu","Fletch","Folonin",1),
-("rkinnier2","rkinnier2@thetimes.co.uk","Raynor","Kinnier",2),
-("bmongin3","bmongin3@seesaa.net","Butch","Mongin",3),
-("phaglinton4","phaglinton4@acquirethisname.com","Pamelina","Haglinton",1),
-("mshambroke5","mshambroke5@lulu.com","Miner","Shambroke",1),
-("dmundford6","dmundford6@java.com","Denis","Mundford",1),
-("gkelinge7","gkelinge7@cmu.edu","Guthrie","Kelinge",1),
-("hyanyushkin8","hyanyushkin8@sciencedaily.com","Hamlin","Yanyushkin",1),
-("smessiter9","smessiter9@marketwatch.com","Sydney","Messiter",1),
-("cburrena","cburrena@yahoo.com","Clement","Burren",2),
-("hvaneschib","hvaneschib@google.co.jp","Heywood","Vaneschi",3),
-("fdavallc","fdavallc@networksolutions.com","Faye","Davall",1),
-("lleadstond","lleadstond@ning.com","Lenore","Leadston",3),
-("jfleischmanne","jfleischmanne@globo.com","June","Fleischmann",1),
-("admin_admin","admin@admin.com","Rock","Paper",3),
-("employee_employee","emp@emp.com","Emp","Loye",2),
-("user_user","user@user.com","UUSS","EERR",1);
+("bbraney0","bbraney0@tinyurl.com","Bernard","Braney",1,1),
+("ffolonin1","ffolonin1@ucla.edu","Fletch","Folonin",1,1),
+("rkinnier2","rkinnier2@thetimes.co.uk","Raynor","Kinnier",2,1),
+("bmongin3","bmongin3@seesaa.net","Butch","Mongin",3,1),
+("phaglinton4","phaglinton4@acquirethisname.com","Pamelina","Haglinton",1,1),
+("mshambroke5","mshambroke5@lulu.com","Miner","Shambroke",1,1),
+("dmundford6","dmundford6@java.com","Denis","Mundford",1,1),
+("gkelinge7","gkelinge7@cmu.edu","Guthrie","Kelinge",1,1),
+("hyanyushkin8","hyanyushkin8@sciencedaily.com","Hamlin","Yanyushkin",1,1),
+("smessiter9","smessiter9@marketwatch.com","Sydney","Messiter",1,1),
+("cburrena","cburrena@yahoo.com","Clement","Burren",2,1),
+("hvaneschib","hvaneschib@google.co.jp","Heywood","Vaneschi",3,1),
+("fdavallc","fdavallc@networksolutions.com","Faye","Davall",1,1),
+("lleadstond","lleadstond@ning.com","Lenore","Leadston",3,1),
+("jfleischmanne","jfleischmanne@globo.com","June","Fleischmann",1,0), -- randomly set this user as unverified
+("admin_admin","admin@admin.com","Rock","Paper",3,1),
+("employee_employee","emp@emp.com","Emp","Loye",2,1),
+("user_user","user@user.com","UUSS","EERR",1,1);
 
 
 

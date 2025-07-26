@@ -1,7 +1,7 @@
 import { pool } from "./connect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail } from "../api/emailClient.js";
+import { sendWelcomeEmail, sendVerificationEmail } from "../api/emailClient.js";
 
 const [rolesMap] = await pool.query("SELECT * FROM roles")
 const getRoleNameById = (id, roles) => rolesMap.find(r => r.role_id === id)?.role_name || null;
@@ -44,10 +44,18 @@ export async function registerService (req, res, next) {
         ];
         await connection.query(q3, values3);
         await connection.commit();
+        // sendWelcomeEmail(req.body.email, req.body.username)
+        // sendVerificationEmail(req.body.email, req.body.username)
+        const emailVerificationToken = jwt.sign(
+          { user_id, type: "email_verification" },
+          process.env.EMAIL_VERIFICATION_SECRET,
+          { expiresIn: "24h" }
+        );
+        // Build verification link
+        const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+        await sendVerificationEmail(req.body.email, verificationLink);
 
-        sendWelcomeEmail(req.body.email, req.body.username)
-
-        res.status(201).json({ message: "User registered successfully", user_id });
+        res.status(201).json({ message: "User registered successfully. Please verify your email.", user_id });
     } catch (error) {
         await connection.rollback();
         next(error);
@@ -55,6 +63,39 @@ export async function registerService (req, res, next) {
         // Release the connection back to the pool
         if (connection)   connection.release();
     }
+}
+
+export async function verifyEmailService(req, res, next) {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ message: "Token is required" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET);
+
+    if (decoded.type !== "email_verification") {
+      return res.status(400).json({ message: "Invalid token type" });
+    }
+
+    const user_id = decoded.user_id;
+
+    // Verify User does exists + is NOT already verified 
+    const q1 = "SELECT isVerified FROM users WHERE user_id = ?"
+    const [rows] =  await pool.query(q1, [user_id]);
+    if (rows?.length === 0 ) return res.status(404).json({ message: "Account not found" });
+    const isVerified = rows[0].isVerified
+    if (isVerified) return res.status(409).json({ message: "Account already verified" });
+
+    // Update user as verified
+    const q2 = "UPDATE users SET isVerified = TRUE WHERE user_id = ?";
+    await pool.query(q2, [user_id]);
+
+    res.status(200).json({ message: "Email successfully verified" });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(410).json({ message: "Verification link expired" });
+    }
+    return next(err);
+  }
 }
 
 export async function loginService (req, res, next) {
