@@ -33,7 +33,7 @@ const ContactUs = () => {
     event.preventDefault();
 
     try {
-      await axios.post("/api/admin/messages", formData);
+      await axios.post("/api/messages", formData);
 
       setFormData({
         message_sender_name: "",
