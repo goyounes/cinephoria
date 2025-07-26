@@ -12,10 +12,13 @@ import MovieDetails from "./components/MovieDetails";
 
 import {filterAndUniqueMovies,groupScreeningsByMovie} from "../utils";
 import Home_page_image from '../assets/Home_page_image.webp';
+import { useAuth } from './Auth/AuthProvider.jsx';
 
 
 const Reservation = () => {
    const { id } = useParams();
+   const { currentUser } = useAuth()
+   const isAdmin = currentUser?.role_id >= 2;
 
    const [movies, setMovies] = useState([]);
    const [cinemas, setCinemas] = useState([]);
@@ -56,14 +59,6 @@ const Reservation = () => {
    useEffect(() => {
       const fetchInitialData = async () => {
          try {
-            let isAdmin = false;
-            try {
-               await axios.post("/api/auth/verify-employee");
-               isAdmin = true;
-            } catch {
-               isAdmin = false;
-            }
-
             const [moviesRes, cinemaRes] = await Promise.all([
                axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
                axios.get("/api/cinemas"),
@@ -76,7 +71,7 @@ const Reservation = () => {
          }
       };
       fetchInitialData();
-   }, []);
+   }, [isAdmin]);
 
    return (
       <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column", gap: 1 }}>

@@ -18,12 +18,15 @@ import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
+import { useAuth } from './Auth/AuthProvider.jsx';
 
 
 const Movies = () => {
    //TODO: Change the code so that it's understood that we are getting Screenings. and tht they have full movie data in them for each one.
    //eventually, this will become the recived movies list should group Movies and an array for each that has all screening data inside, 
    //This can be done in the server endopint level , but the code from this point onwards has to evolve accordingly
+   const { currentUser } = useAuth();
+   const isAdmin = currentUser?.role_id >= 2;
    const [movies, setMovies] = useState([]);
    const [cinemas, setCinemas] = useState([]);
    const [genresList, setGenresList] = useState([]);
@@ -62,15 +65,6 @@ const Movies = () => {
    useEffect(() => {
    const fetchInitialData = async () => {
       try {
-         // First, check if user is admin
-         let isAdmin = false;
-         try {
-         await axios.post("/api/auth/verify-employee");
-         isAdmin = true;
-         } catch {
-         isAdmin = false;
-         }
-
          // Fetch data depending on user role
          const [moviesRes, cinemaRes, genreRes] = await Promise.all([
          axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
@@ -86,7 +80,7 @@ const Movies = () => {
       }
    };
    fetchInitialData();
-   }, []);
+   }, [isAdmin]);
 
    useEffect(() => {
       const fetchAllMovies = async () => {

@@ -1,61 +1,35 @@
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/material';
 
-import { jwtDecode } from 'jwt-decode';
+
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 import { useAuth } from './AuthProvider.jsx';
 
-const roleMap = {
-    1: 'user', 
-    2: 'employee',
-    3: 'admin'
-};
+const Logout = () => {
+  const [snackbars, setSnackbars] = useState([]);
+  const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+  console.log("Current user is", currentUser);
 
-const Logout = () =>  {
-    const [snackbars, setSnackbars] = useState([]); 
-    const navigate = useNavigate();
-    const [username, setUsername] = useState("");
+  const display = currentUser
+    ? `${currentUser.role_name} → User ID: ${currentUser.user_id} (Role: ${currentUser.role_id})`
+    : "Guest";
 
-    useEffect(() => {
-        const getCookie = (name) => {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        };
-
-        const checkToken = () => {
-            try {
-            const token = getCookie('accessToken');
-            if (token) {
-                const decoded = jwtDecode(token);
-                setUsername(`${roleMap[decoded.role_id]} --> User ID: ${decoded.user_id} (Role: ${decoded.role_id}) `);
-            } else {
-                setUsername("Guest");
-            }
-            } catch (err) {
-            console.error("JWT decode error", err);
-            setUsername("Guest");
-            }
-        };
-
-        checkToken(); // Initial check
-        const interval = setInterval(checkToken, 3000); // Recheck every 3 seconds
-
-        return () => clearInterval(interval); // Clean up on unmount
-    }, []);
-
-  const {logout} = useAuth() 
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      // await axios.post(`/api/auth/logout`);
-      await logout()
-      displayCustomAlert(snackbars, setSnackbars, "Logout successful! Goodbye ", "success");
-      navigate('/home'); // Redirect to the users page
+      await logout();
+      displayCustomAlert(snackbars, setSnackbars, "Logout successful! Goodbye", "success");
+      navigate('/home');
     } catch (err) {
-      displayCustomAlert(snackbars, setSnackbars, "Verified JWT error:" + err.response?.data?.error?.message || "Server error", "error");
+      displayCustomAlert(
+        snackbars,
+        setSnackbars,
+        "Logout error: " + (err.response?.data?.error?.message || "Server error"),
+        "error"
+      );
     }
   };
 
@@ -73,7 +47,7 @@ const Logout = () =>  {
             </Typography>
 
             <Typography variant="subtitle1" align="center">
-              Logged in as: <strong>{username}</strong>
+              Logged in as: <strong>{display}</strong>
             </Typography>
 
             <Button

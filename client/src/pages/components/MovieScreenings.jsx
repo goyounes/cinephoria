@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axios from '../../api/axiosInstance.js';
 
 
@@ -14,78 +14,59 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import ScreeningsDisplay from "./ScreeningsDisplay";
+import { useAuth } from "../Auth/AuthProvider.jsx";
 
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter);
-
-const checkIsEmployee = async () => {
-  try {
-    await axios.post("/api/auth/verify-employee");
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 const DAYS_PER_PAGE = 7;
 const LIMITED_TOTAL_DAYS = 14;
 
 const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
-   const navigate = useNavigate();
+   // const navigate = useNavigate();
+   const {currentUser} = useAuth();
+   const isAdmin = currentUser?.role_id >= 2;
 
    const [screenings, setScreenings] = useState([]);
-   const [isEmployee, setIsEmployee] = useState(false);
    const [page, setPage] = useState(0);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const [hasAutoSelected, setHasAutoSelected] = useState(false);
    const today = dayjs().startOf("day");
-   const totalDays = isEmployee ? Infinity : LIMITED_TOTAL_DAYS;
-   const maxPage = isEmployee ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
+   const totalDays = isAdmin ? Infinity : LIMITED_TOTAL_DAYS;
+   const maxPage = isAdmin ? Infinity : Math.floor(totalDays / DAYS_PER_PAGE) - 1;
 
    // ------------------ Effects ------------------
 
-   // Check employee status once on mount
+  // Fetch screenings on movieId change
    useEffect(() => {
-      const checkStatus = async () => {
-         const result = await checkIsEmployee();
-         setIsEmployee(result);
-      };
-      checkStatus();
-   }, []);
-
-  // ✅ Fetch screenings on movieId change
-   useEffect(() => {
-   if (!movieId) {
-      setScreenings([]);
-      return;
-   }
-   // Reset UI state
-   setScreenings([]);
-   setPage(0);
-   setSelectedIndex(-1);
-   setHasAutoSelected(false);
-
-   const fetchScreenings = async () => {
-      try {
-         const isEmp = await checkIsEmployee();
-         setIsEmployee(isEmp);
-
-         let url = `/api/movies/${movieId}/screenings`;
-         if (isEmp) url += `/all`;
-         if (cinema_id) {
-            const query = new URLSearchParams({ cinema_id});
-            url += `?${query.toString()}`;
-         }
-         const { data } = await axios.get(url);
-         setScreenings(data);
-      } catch (err) {
-         console.error("Failed to fetch screenings:", err);
+      if (!movieId) {
          setScreenings([]);
+         return;
       }
-   };
+      // Reset UI state
+      setScreenings([]);
+      setPage(0);
+      setSelectedIndex(-1);
+      setHasAutoSelected(false);
 
-   fetchScreenings();
-   }, [movieId, cinema_id]);
+      const fetchScreenings = async () => {
+         try {
+            let url = `/api/movies/${movieId}/screenings`;
+            if (isAdmin) url += `/all`;
+            if (cinema_id) {
+               const query = new URLSearchParams({ cinema_id});
+               url += `?${query.toString()}`;
+            }
+            const { data } = await axios.get(url);
+            setScreenings(data);
+         } catch (err) {
+            console.error("Failed to fetch screenings:", err);
+            setScreenings([]);
+         }
+      };
+
+      fetchScreenings();
+   }, [movieId, cinema_id, isAdmin]);
 
   // Auto-select the first available screening
    const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings]);
@@ -111,22 +92,17 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
    const screeningsMap = screeningsByDay;
 
    const handleNext = async () => {
-      if (!isEmployee && page >= maxPage) return;
+      if (!isAdmin && page >= maxPage) return;
       const newPage = page + 1;
       setPage(newPage);
       setSelectedIndex(-1);
-
-      if (isEmployee && !(await checkIsEmployee())) return  navigate("/reservation");
-
    };
 
    const handlePrev = async () => {
-      if (!isEmployee && page <= 0) return;
+      if (!isAdmin && page <= 0) return;
       const newPage = page - 1;
       setPage(newPage);
       setSelectedIndex(-1);
-
-      if (isEmployee && !(await checkIsEmployee())) return  navigate("/reservation");
    };
 
    useEffect(() => {
@@ -158,7 +134,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <IconButton onClick={handlePrev} disabled={!isEmployee && page <= 0}>
+          <IconButton onClick={handlePrev} disabled={!isAdmin && page <= 0}>
             <ArrowBackIosIcon fontSize="small" />
           </IconButton>
 
@@ -182,7 +158,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
             );
           })}
 
-          <IconButton onClick={handleNext} disabled={!isEmployee && page >= maxPage}>
+          <IconButton onClick={handleNext} disabled={!isAdmin && page >= maxPage}>
             <ArrowForwardIosIcon fontSize="small" />
           </IconButton>
         </Stack>
