@@ -25,10 +25,11 @@ const ResetPassword = () => {
       await resetPassword(email);
       displayCustomAlert(snackbars, setSnackbars, `Password reset link sent to ${email}`, 'success');
     } catch (err) {
+      const errorMessage = 'Failed to send reset email: ' +( err.response?.data?.error?.message || err?.response?.data?.message  || err.response?.data?.message || err.message  ||  'Server error')
       displayCustomAlert(
         snackbars,
         setSnackbars,
-        'Failed to send reset email: ' + (err.response?.data?.error?.message || 'Server error'),
+        errorMessage,
         'error'
       );
     }
