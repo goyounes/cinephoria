@@ -1,9 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 
-import { verifyEmailService, resetPasswordService, registerService, loginService, logoutService,
+import { verifyEmailService, resetPasswordReqService, resetPasswordService, registerService, loginService, logoutService,
   verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT } from '../controllers/auth.js';
 router.get('/verify-email', verifyEmailService);
+router.post('/reset-password-req', resetPasswordReqService);
 router.post('/reset-password', resetPasswordService);
 
 router.post('/register', registerService);

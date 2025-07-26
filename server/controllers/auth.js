@@ -98,7 +98,7 @@ export async function verifyEmailService(req, res, next) {
   }
 }
 
-export async function resetPasswordService(req, res, next) {
+export async function resetPasswordReqService(req, res, next) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
 
@@ -120,7 +120,7 @@ export async function resetPasswordService(req, res, next) {
     );
 
     // 3. Build the reset link
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
     // 4. Send the email
     await sendPasswordResetEmail(email, resetLink);
@@ -128,6 +128,47 @@ export async function resetPasswordService(req, res, next) {
     res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
     next(err);
+  }
+}
+
+export async function resetPasswordService(req, res, next) {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: "Token and new password are required" });
+  }
+
+  try {
+    // 1. Verify the token
+    const decoded = jwt.verify(token, process.env.PASSWORD_RESET_SECRET);
+
+    if (decoded.type !== "password_reset") {
+      return res.status(400).json({ message: "Invalid token type" });
+    }
+
+    const user_id = decoded.user_id;
+
+    // 2. Make sure user still exists
+    const [rows] = await pool.query("SELECT user_id FROM users WHERE user_id = ?", [user_id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 3. Hash the new password
+    const salt = bycrpt.genSaltSync(10);
+    const hashedPassword = bycrpt.hashSync(newPassword, salt);
+
+    // 4. Update the password
+    const updateQuery = "UPDATE users_credentials SET user_password_hash = ? WHERE user_id = ?";
+    await pool.query(updateQuery, [hashedPassword, user_id]);
+
+    return res.status(200).json({ message: "Password reset successfully" });
+
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(410).json({ message: "Password reset link expired" });
+    }
+    return next(err);
   }
 }
 

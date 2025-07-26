@@ -28,7 +28,8 @@ import Account from './pages/Auth/Account';
 import { Container, Stack } from '@mui/material';
 import ContactUs from './pages/ContactUs';
 import ProtectedRoutes from './utils/ProtectedRoutes';
-import ResetPassword from './pages/Auth/ResetPassword';
+import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
+import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
 
 // const AuthenticatedRoute = () => {
 //     const isAuthorized = 1//use your logic to check this
@@ -94,8 +95,9 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
             {/* Users */}
 
+            <Route path="/auth/reset-password-req" element={<ResetPasswordReq />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordForm />} />
             <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
           </Routes>
