@@ -9,7 +9,7 @@ import { addMovie,  getGenres, deleteMovie, updateMovie,
     getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies} 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getUpcomingScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
-import {s3, bucketName} from "../awsS3Client.js"
+import {s3, bucketName} from "../api/awsS3Client.js"
 
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 
