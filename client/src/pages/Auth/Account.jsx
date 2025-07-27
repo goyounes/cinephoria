@@ -1,42 +1,14 @@
 import { useEffect, useState, useMemo } from 'react'
 import axios from '../../api/axiosInstance.js';
-import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,AccordionDetails,Box,Button,CircularProgress} from '@mui/material'
+import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,AccordionDetails,Box,CircularProgress} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import QRCode from 'react-qr-code'
+import TicketCard from '../components/TicketCard.jsx';
+import { useAuth } from './AuthProvider.jsx';
 
-
-  const TicketCard = ({ ticket, showReviewButton }) => (
-    <Box
-      key={ticket.QR_code}
-      p={2}
-      border="1px solid black"
-      borderRadius={4}
-      width={300}
-    >
-      <Typography variant="subtitle2" fontWeight={600}>
-        {ticket.title}
-      </Typography>
-      <Typography variant="body2">{ticket.cinema_name}</Typography>
-      <Typography variant="body2" mt={0.5}>
-        Seat #{ticket.seat_number}
-      </Typography>
-      <Typography variant="body2">
-        {ticket.start_date} at {ticket.start_time.substring(0, 5)}
-      </Typography>
-      <Box mt={1}>
-        <QRCode value={ticket.QR_code} size={96} />
-      </Box>
-      {showReviewButton && (
-        <Box mt={1}>
-          <Button size="small" variant="outlined">
-            Leave a Review
-          </Button>
-        </Box>
-      )}
-    </Box>
-  )
 
 const Account = () => {
+  const { currentUser} = useAuth();
+
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -55,8 +27,8 @@ const Account = () => {
     fetchTickets()
   }, [])
 
-  // const now = new Date()
-  const now = new Date("2025-10-26")
+  const now = new Date()
+  // const now = new Date("2025-10-26")
 
   const getScreeningTime = (ticket) => new Date(`${ticket.start_date}T${ticket.start_time}`)
 
@@ -117,7 +89,7 @@ const Account = () => {
   return (
     <Container  sx={{ py: 4 }}>
       <Typography variant="h4" align="center" gutterBottom>
-        Welcome User
+        Hello {currentUser.user_email}
       </Typography>
 
       <Card elevation={4}>
