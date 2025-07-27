@@ -18,8 +18,10 @@ const Login = () => {
   });
 
   const { currentUser } = useAuth();
+  console.log(currentUser)
+  const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   useEffect(() => {
-    if (currentUser) {
+    if (isLoggedIn) {
       navigate('/auth/account', { replace: true });
     }
   }, [currentUser, navigate]);

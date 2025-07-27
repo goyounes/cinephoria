@@ -10,11 +10,6 @@ import { useAuth } from './AuthProvider.jsx';
 const Logout = () => {
   const { currentUser} = useAuth();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (currentUser) {
-      navigate('/auth/account', { replace: true });
-    }
-  }, [currentUser, navigate]);
   
   const [snackbars, setSnackbars] = useState([]);
 

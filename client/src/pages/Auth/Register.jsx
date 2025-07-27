@@ -23,8 +23,9 @@ const isValidEmail = (email) => {
 const Register = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   useEffect(() => {
-    if (currentUser) {
+    if (isLoggedIn) {
       navigate('/auth/account', { replace: true });
     }
   }, [currentUser, navigate]);

@@ -46,6 +46,7 @@ function App() {
             <Route element={<ProtectedRoutes requiredRoleId={1}/>}>
               <Route path="/checkout" element={<Checkout/>} />
               <Route path="/auth/account" element={<Account />} />
+              <Route path="/auth/logout" element={<Logout />} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
@@ -82,7 +83,6 @@ function App() {
             <Route path="/auth/reset-password-req" element={<ResetPasswordReq />} />
             <Route path="/auth/reset-password" element={<ResetPasswordForm />} />
             <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/logout" element={<Logout />} />
             <Route path="/auth/register" element={<Register />} />
           </Routes>
         {/* </Stack> */}
