@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 
-const MovieCard = ({ movie, to, onClick }) => {
+const MovieCard = ({ movie, to, state, onClick }) => {
   const Component = to ? Link : "div";
 
   return (
     <Box sx={{ width: 225 }} onClick={onClick} role="button">
       <Card
         component={Component}
-        {...(to ? { to } : {})}
+        {...(to ? { to, state } : {})}  // <-- pass state along with to
         sx={{
           textDecoration: "none",
           color: "inherit",
