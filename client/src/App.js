@@ -1,11 +1,11 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './assets/global.css';
 
 import Footer from './components/Layout/Footer';
 import TopNavBar from './components/Layout/TopNavBar';
 import RealNavBar from './components/Layout/RealNavBar';
 
-import AdminMessages from './pages/AdminDashboard/AdminInbox';
+import AdminMessages from './pages/AdminDashboard/AdminDashboard';
 import AdminMovies from './pages/AdminDashboard/Movies/AdminMovies';
 import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
 import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
@@ -31,15 +31,24 @@ import ProtectedRoutes from './pages/ProtectedRoutes';
 import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
 import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
 import NotAuthorized from './pages/NotAuthorized';
+import { useAuth } from './pages/Auth/AuthProvider';
+import AdminSideBar from './components/Layout/AdminSideBar';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 
 function App() {
+  const location = useLocation();
+  const {currentUser} = useAuth()
+  const isAdminUser = currentUser?.role_id >= 2;
+  const showSidebar = isAdminUser && location.pathname.startsWith('/admin');
   return (
     <Stack minHeight="100vh">
       <RealNavBar />
-      <TopNavBar />
+      {/* <TopNavBar /> */}
 
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
+        {showSidebar && <AdminSideBar />}
+
           <Routes >
             <Route path="/not-authorized" element={<NotAuthorized/>} />
 
@@ -50,11 +59,11 @@ function App() {
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
-              <Route path="/admin/dashboard" element={<AdminMovies />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/movies" element={<AdminMovies />} />
               <Route path="/admin/movies/create" element={<AdminAddMovie />} />
               <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
-              <Route path="/messages" element={<AdminMessages />} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>

@@ -24,7 +24,7 @@ const NavButton = ({ label, Icon, to, onClick }) => {
     <Button
       color="inherit"
       aria-label={label}
-      sx={{ flexDirection: "column" }}
+      sx={{ flexDirection: "column" ,p:0}}
       {...buttonProps}
     >
       <Icon fontSize="large" />
@@ -53,11 +53,11 @@ const RealNavBar = () => {
   };
 
   return (
-    <AppBar position="sticky" color="primary" elevation={0}>
-      <Container>
+    <AppBar position="sticky" color="primary" elevation={0} sx={{ height: 100, display:"flex", justifyContent:'center' }}>
+      <Container >
       <Toolbar sx={{flexGrow:1 , display:"flex", alignItems:"stretch", justifyContent:"space-between"}}>
           
-          <Button component={Link} to="/" color="inherit">
+          <Button component={Link} to="/" color="inherit" sx={{p:0}}>
             <Box
               component="img"
               src={black_logo_3}

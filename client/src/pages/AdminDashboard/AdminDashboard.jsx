@@ -11,32 +11,32 @@ import {
 import axios from '../../api/axiosInstance.js';
 
 
-const AdminInbox = () => {
+const AdminDashboard = () => {
   const [messages, setMessages] = useState([]);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get("/api/admin/messages"); // Replace with your actual API
-        setMessages(res.data);
-      } catch (err) {
-        console.error("Error fetching messages:", err);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchMessages = async () => {
+  //     try {
+  //       const res = await axios.get("/api/admin/messages"); // Replace with your actual API
+  //       setMessages(res.data);
+  //     } catch (err) {
+  //       console.error("Error fetching messages:", err);
+  //     }
+  //   };
 
-    fetchMessages();
-  }, []);
+  //   fetchMessages();
+  // }, []);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h3" align="center" gutterBottom>
-        Inbox
+        Admin Dashboard
       </Typography>
 
       <Stack spacing={3}>
         {messages.length === 0 ? (
           <Typography variant="body1" align="center">
-            No messages found.
+            No data to be displayed
           </Typography>
         ) : (
           messages.map((msg, idx) => (
@@ -88,4 +88,4 @@ const AdminInbox = () => {
   );
 };
 
-export default AdminInbox;
+export default AdminDashboard;

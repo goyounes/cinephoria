@@ -47,7 +47,8 @@ const cinemas = [
 
 const Footer = () => {
   return (
-    <Stack
+    <Stack 
+      zIndex={999}
       component="footer"
       sx={{
         backgroundColor: '#2c3e50',
