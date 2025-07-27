@@ -63,7 +63,7 @@ export async function getTicketTypes(){
 //     return result_rows
 // }
 
-export async function bookingService(req, res, next) {
+export async function bookingService(req, res, next,options = {}) {
     const { screening_id, ticket_types, total_price, card } = req.body;
     const user_id = req.user.user_id;
 
@@ -80,6 +80,10 @@ export async function bookingService(req, res, next) {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
+
+        if (!options.skipDateCheck) {
+            await validateScreeningDate(screening_id, connection);
+        }
 
         // Lock available seats for this screening
         const getAvailableSeatsQuery = `
@@ -141,4 +145,28 @@ export async function bookingService(req, res, next) {
     } finally {
         connection.release();
     }
+}
+
+async function validateScreeningDate(screening_id, connection) {
+  const query = `
+    SELECT screening_id FROM screenings
+    WHERE screening_id = ?
+      AND (
+        start_date > CURDATE()
+        OR (start_date = CURDATE() AND start_time > CURTIME())
+      )
+      AND start_date < CURDATE() + INTERVAL 14 DAY
+    LIMIT 1
+  `;
+  const [rows] = await connection.query(query, [screening_id]);
+  if (rows.length === 0) {
+    const err = new Error("Booking allowed only within 14 days for regular users");
+    err.status = 403;
+    throw err;
+  }
+}
+
+export async function bookingServiceAdmin(req, res, next) {
+  // Just call bookingService with the admin bypass flag
+  return bookingService(req, res, next, { skipDateCheck: true });
 }
