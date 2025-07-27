@@ -19,7 +19,7 @@ const Movies = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5; // You can adjust this
+  const ROWS_PER_PAGE = 20; // You can adjust this
 
   const fetchMovies = async () => {
     try {
@@ -80,11 +80,11 @@ const Movies = () => {
 
   // Pagination logic - slice the sorted array for the current page
   const paginatedMovies = useMemo(() => {
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    return sortedMovies.slice(startIndex, startIndex + rowsPerPage);
-  }, [sortedMovies, currentPage, rowsPerPage]);
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+    return sortedMovies.slice(startIndex, startIndex + ROWS_PER_PAGE);
+  }, [sortedMovies, currentPage, ROWS_PER_PAGE]);
 
-  const totalPages = Math.ceil(sortedMovies.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedMovies.length / ROWS_PER_PAGE);
 
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key) return null;
@@ -158,6 +158,7 @@ return (
               key={movie.movie_id}
               hover
               sx={{
+                minHeight: 170,
                 backgroundColor: movie.is_team_pick ? 'rgba(25, 118, 210, 0.08)' : 'inherit',
                 transition: 'background-color 0.3s',
               }}
