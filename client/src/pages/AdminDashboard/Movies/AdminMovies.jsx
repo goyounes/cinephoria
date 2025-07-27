@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from '../../../api/axiosInstance.js';
 import { Link } from 'react-router-dom';
 import {
@@ -9,10 +9,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddIcon from '@mui/icons-material/Add';
 import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const Movies = () => {
   const [snackbars, setSnackbars] = useState([]);
   const [movies, setMovies] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const fetchMovies = async () => {
     try {
@@ -38,9 +41,47 @@ const Movies = () => {
     }
   };
 
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        if (prev.direction === 'asc') {
+          return { key, direction: 'desc' };
+        } else if (prev.direction === 'desc') {
+          return { key: null, direction: 'asc' }; // Clear sort
+        }
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const sortedMovies = useMemo(() => {
+    if (!sortConfig.key) return movies;
+
+    const sorted = [...movies].sort((a, b) => {
+      const a_value = a[sortConfig.key];
+      const b_value = b[sortConfig.key];
+
+      if (typeof a_value === 'string') {
+        return sortConfig.direction === 'asc'
+          ? a_value.localeCompare(b_value)
+          : b_value.localeCompare(a_value);
+      }
+
+      return sortConfig.direction === 'asc' ? a_value - b_value : b_value - a_value;
+    });
+
+    return sorted;
+  }, [movies, sortConfig]);
+
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    if (sortConfig.direction === 'asc') return <ArrowDropUpIcon fontSize="small" />;
+    if (sortConfig.direction === 'desc') return <ArrowDropDownIcon fontSize="small" />;
+    return null;
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" fontWeight="bold">
           🎬 Movies
@@ -52,24 +93,33 @@ const Movies = () => {
         </Link>
       </Stack>
 
-      {/* Table */}
       <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'white' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>Poster</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('title')}>
+                Title {renderSortIcon('title')}
+              </TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Age Rating</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Team Pick</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Score</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Length</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('age_rating')}>
+                Age Rating {renderSortIcon('age_rating')}
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('is_team_pick')}>
+                Team Pick {renderSortIcon('is_team_pick')}
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('score')}>
+                Score {renderSortIcon('score')}
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('length')}>
+                Length {renderSortIcon('length')}
+              </TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {movies.map((movie) => (
+            {sortedMovies.map((movie) => (
               <TableRow
                 key={movie.movie_id}
                 hover
@@ -115,7 +165,6 @@ const Movies = () => {
 
                 <TableCell>
                   <Stack direction="column" spacing={1}>
-
                     <Link to={`/admin/movies/${movie.movie_id}/edit`} style={{ textDecoration: 'none' }}>
                       <Button size="large" color="primary">
                         <EditNoteIcon fontSize="large" />
@@ -129,7 +178,6 @@ const Movies = () => {
                     >
                       <DeleteIcon />
                     </Button>
-
                   </Stack>
                 </TableCell>
               </TableRow>
