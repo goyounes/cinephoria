@@ -6,22 +6,15 @@ import axios from '../api/axiosInstance.js';
 
 import { displayCustomAlert } from "../components/UI/CustomSnackbar";
 import PaymentDialog from "./components/PaymentDialog";
+import { useAuth } from "./Auth/AuthProvider.jsx";
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
-const checkIsEmployee = async () => {
-  try {
-    await axios.post("/api/auth/verify-employee");
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 
 const Checkout = () => {
+   const { currentUser } = useAuth();
+   const isAdmin = currentUser?.role_id >= 2;
 
    const [searchParams] = useSearchParams();
-   // const navigate = useNavigate();
 
    const screening_id = searchParams.get("screening_id");
    const movie_id = searchParams.get("movie_id");
@@ -39,7 +32,7 @@ const Checkout = () => {
             const movieRes = await axios.get(`/api/movies/${movie_id}`);
             const ticketTypesRes = await axios.get("/api/tickets/types");
 
-            const screeningUrl = await checkIsEmployee()
+            const screeningUrl = isAdmin
             ? `/api/screenings/${screening_id}`
             : `/api/screenings/upcoming/${screening_id}`;
             const screeningsRes = await axios.get(screeningUrl);
