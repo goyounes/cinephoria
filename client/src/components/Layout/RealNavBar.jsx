@@ -11,6 +11,7 @@ import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
 // import cinephoriaSm from '../assets/cinephoria-sm.png';
 import { useState } from "react";
+import { useAuth } from "../../pages/Auth/AuthProvider";
 
 const NavButton = ({ label, Icon, to, onClick }) => {
   const buttonProps = to
@@ -37,7 +38,8 @@ const NavButton = ({ label, Icon, to, onClick }) => {
 
 
 const RealNavBar = () => {
-
+  const {currentUser} = useAuth()
+  const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
@@ -83,10 +85,10 @@ const RealNavBar = () => {
                   },
               },}}
             >
-              <MenuItem component={Link} to="/auth/account">Profile</MenuItem>
-              <MenuItem component={Link} to="/auth/login">Login</MenuItem>
-              <MenuItem component={Link} to="/auth/register">Register</MenuItem>
-              <MenuItem component={Link} to="/auth/logout">Logout</MenuItem>
+              { !isLoggedIn && (<MenuItem component={Link} to="/auth/login">Login</MenuItem>)}
+              { !isLoggedIn && (<MenuItem component={Link} to="/auth/register">Register</MenuItem>)}
+              { isLoggedIn  && (<MenuItem component={Link} to="/auth/account">Profile</MenuItem>)}
+              { isLoggedIn  && (<MenuItem component={Link} to="/auth/logout">Logout</MenuItem>)}
             </Menu>
           </Stack>
         </Toolbar>
