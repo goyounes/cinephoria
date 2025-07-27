@@ -29,32 +29,6 @@ const Reservation = () => {
    const [nbrOfTickets, setNbrOfTickets] = useState(1);
    const [modalOpen, setModalOpen] = useState(false);
 
-
-   const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(movies), [movies]);
-
-   const moviesToDisplay = useMemo(
-      () => filterAndUniqueMovies(movies, { selectedCinema }),
-      [movies, selectedCinema]
-   );
-
-   // Parse ID from route and set selectedMovieId
-   useEffect(() => {
-      const parsedId = parseInt(id);
-      if (!isNaN(parsedId)) {
-         setSelectedMovieId(parsedId);
-      }
-   }, [id]);
-
-      useEffect(() => {
-      if (selectedMovieId !== -1 && screeningsToDisplay[selectedMovieId] ) {
-         setTimeout(() => {
-            window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-            });
-         }, 100);
-      }
-      }, [selectedMovieId, screeningsToDisplay]);
    // Initial fetch
    useEffect(() => {
       const fetchInitialData = async () => {
@@ -72,6 +46,27 @@ const Reservation = () => {
       };
       fetchInitialData();
    }, [isAdmin]);
+
+   const moviesToDisplay = useMemo(
+      () => filterAndUniqueMovies(movies, { selectedCinema }),
+      [movies, selectedCinema]
+   );
+
+   const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(movies), [movies]);
+
+
+   useEffect(() => {
+      if (selectedMovieId === -1 ) return;
+      const scrollToBottom = () => {
+         window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+         });
+      };
+      const frame = requestAnimationFrame(scrollToBottom);
+      return () => cancelAnimationFrame(frame);
+   }, [selectedMovieId, screeningsToDisplay]);
+
 
    return (
       <Container sx={{ flexGrow: 1, py: 4, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -143,11 +138,9 @@ const Reservation = () => {
 
          <Stack gap={2} justifyContent="flex-start" direction="row" flexWrap="wrap">
          {moviesToDisplay.map((movie) => (
-            <MovieCard
-               to={`/reservation/${movie.movie_id}`}
-               key={movie.movie_id}
-               movie={movie}
-            />
+            <Box onClick={ () => {setSelectedMovieId(movie.movie_id)} }  key={movie.movie_id}>
+               <MovieCard movie={movie}/>
+            </Box>
          ))}
          </Stack>
 

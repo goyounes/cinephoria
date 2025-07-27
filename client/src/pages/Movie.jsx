@@ -13,31 +13,19 @@ const Movie = () => {
   // const setting =
   const { id } = useParams();
   const location = useLocation();
-  const screeningsRef = useRef(null);
 
   const [movie, setMovie] = useState(null);
-
-  // const [loadingScreenings, setLoadingScreenings] = useState(true);
   const [loadingMovie, setLoadingMovie] = useState(true);
   const [showScreenings, setShowScreenings] = useState(false);
-
-  // Show screenings and scroll down
-  useEffect(() => {
-    setShowScreenings(location.pathname.endsWith("/screenings"));
-  }, [location.pathname]);
-  useEffect(() => {
-    if (!loadingMovie && showScreenings && screeningsRef.current) {
-      requestAnimationFrame(() => {
-        screeningsRef.current.scrollIntoView({ behavior: "smooth" });
-      });
-    }
-  }, [loadingMovie, showScreenings]);
 
    useEffect(() => {
       const fetchMovie = async () => {
          try {
-            const { data } = await axios.get(`/api/movies/${id}`);
-            setMovie(data);
+            const res = await axios.get(`/api/movies/${id}`);
+            setMovie(res.data);
+            if (location.state?.showScreenings) {
+               setShowScreenings(true);
+            }
          } catch (err) {
             console.error("Failed to fetch movie:", err);
          } finally {
@@ -46,6 +34,19 @@ const Movie = () => {
       };
       fetchMovie();
    }, [id]);
+
+   useEffect(() => {
+      if (loadingMovie || !showScreenings ) return;
+      console.log("effect ran")
+      const scrollToBottom = () => {
+         window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+         });
+      };
+      const frame = requestAnimationFrame(scrollToBottom);
+      return () => cancelAnimationFrame(frame);
+   }, [loadingMovie, showScreenings]);
 
 
   return (
@@ -61,15 +62,15 @@ const Movie = () => {
                <MovieDetails movie={movie} loadingMovie={false} />
 
                <Button
-               disableRipple
-               startIcon={showScreenings ? <UpArrow /> : <DownArrow />}
-               onClick={() => setShowScreenings((prev) => !prev)}
+                  disableRipple
+                  startIcon={showScreenings ? <UpArrow /> : <DownArrow />}
+                  onClick={() => setShowScreenings((prev) => !prev)}
                >
                {showScreenings ? "Hide Screenings" : "Show Screenings"}
                </Button>
 
                {showScreenings && (
-               <MovieScreenings movieId={id} ref={screeningsRef}  />
+               <MovieScreenings movieId={id}/>
                )}
             </>
          )}
