@@ -60,7 +60,6 @@ export async function registerService (req, res, next) {
         await connection.rollback();
         next(error);
     }finally {
-        // Release the connection back to the pool
         if (connection)   connection.release();
     }
 }
@@ -103,7 +102,7 @@ export async function resetPasswordReqService(req, res, next) {
   if (!email) return res.status(400).json({ message: "Email is required" });
 
   try {
-    // 1. Check if the user exists
+    // Check user exists
     const q = "SELECT user_id FROM users WHERE user_email = ?";
     const [rows] = await pool.query(q, [email]);
     if (rows.length === 0) {
@@ -116,13 +115,10 @@ export async function resetPasswordReqService(req, res, next) {
     const resetToken = jwt.sign(
       { user_id, type: "password_reset" },
       process.env.PASSWORD_RESET_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "15m" }
     );
 
-    // 3. Build the reset link
     const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
-
-    // 4. Send the email
     await sendPasswordResetEmail(email, resetLink);
 
     res.status(200).json({ message: "Password reset email sent" });
@@ -139,7 +135,6 @@ export async function resetPasswordService(req, res, next) {
   }
 
   try {
-    // 1. Verify the token
     const decoded = jwt.verify(token, process.env.PASSWORD_RESET_SECRET);
 
     if (decoded.type !== "password_reset") {
@@ -148,17 +143,16 @@ export async function resetPasswordService(req, res, next) {
 
     const user_id = decoded.user_id;
 
-    // 2. Make sure user still exists
+    // check user exists
     const [rows] = await pool.query("SELECT user_id FROM users WHERE user_id = ?", [user_id]);
     if (rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 3. Hash the new password
     const salt = bycrpt.genSaltSync(10);
     const hashedPassword = bycrpt.hashSync(newPassword, salt);
 
-    // 4. Update the password
+    // Update the password
     const updateQuery = "UPDATE users_credentials SET user_password_hash = ? WHERE user_id = ?";
     await pool.query(updateQuery, [hashedPassword, user_id]);
 
@@ -184,6 +178,7 @@ export async function loginService (req, res, next) {
         const user = data1[0]
         const user_id = user.user_id;
         user.role_name = getRoleNameById(user.role_id)
+
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
         const [data2] = await pool.query(q2 ,[user_id]);
@@ -238,6 +233,7 @@ export async function logoutService (req, res, next) {
     .status(200).json({ message: "Logged out successfully" });
 }
 
+// refresh functionality still under build
 let refreshTokens = []
 export async function refreshService (req, res, next) {
     // take refresh token
@@ -253,9 +249,7 @@ export async function refreshService (req, res, next) {
       { expiresIn: '24h' }
     );    
 
-
     try {
-
         // Get the user_id
         const user = data1[0]
         const user_id = user.user_id;
@@ -299,70 +293,37 @@ export async function refreshService (req, res, next) {
 
 }
 
-export async function verifyUserJWT (req, res, next) {
-  try {
-    const token = req.cookies.accessToken;
-    if (!token) {
-      throw new Error("No token provided");
-    }
-    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
-    if (decoded.role_id < 1) {
-      throw new Error("Access denied: you have to be loged in");
-    }
-    req.user = {
+function createRoleMiddleware(roleCheckFunc) {
+  return async function (req, res, next) {
+    try {
+      const token = req.cookies.accessToken;
+      if (!token) {
+        throw new Error("No token provided");
+      }
+
+      const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
+
+      if (!roleCheckFunc(decoded.role_id)) {
+        throw new Error("Access denied");
+      }
+
+      req.user = {
         user_id: decoded.user_id,
         role_id: decoded.role_id,
         role_name: decoded.role_name,
-    }; 
-    next();
-  } catch (error) {
-    next(error); 
-  }
-}
+      };
 
-export async function verifyAdminJWT(req, res, next) {
-  try {
-    const token = req.cookies.accessToken;
-    if (!token) {
-      throw new Error("No token provided");
+      next();
+    } catch (error) {
+      next(error);
     }
-    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
-    if (decoded.role_id !== 3) {
-      throw new Error("Access denied: admin only");
-    }
-    req.user = {
-        user_id: decoded.user_id,
-        role_id: decoded.role_id,
-        role_name: decoded.role_name,
-    }; 
-    next();
-  } catch (error) {
-    next(error); 
-  }
+  };
 }
+export const verifyUserJWT = createRoleMiddleware((role_id) => role_id >= 1);   
+export const verifyEmployeeJWT = createRoleMiddleware((role_id) => role_id >= 2);
+export const verifyAdminJWT = createRoleMiddleware((role_id) => role_id === 3);
 
-export async function verifyEmployeeJWT(req, res, next) {
-  try {
-    const token = req.cookies.accessToken;
-    if (!token) {
-      throw new Error("No token provided");
-    }
-    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
-    if (decoded.role_id < 2) {
-      throw new Error("Access denied: employee or admin only");
-    }
-    req.user = {
-        user_id: decoded.user_id,
-        role_id: decoded.role_id,
-        role_name: decoded.role_name,
-    }; 
-    next();
-  } catch (error) {
-    next(error); 
-  }
-}
-
-export async function addUser (req, res, next) {
+export async function addUserService (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password || !req.body.username ) {
         console.log("provided information :", req.body);
@@ -408,7 +369,6 @@ export async function addUser (req, res, next) {
         await connection.rollback();
         next(error);
     }finally {
-        // Release the connection back to the pool
-        if (connection)   connection.release();
+        if (connection) connection.release();
     }
 }

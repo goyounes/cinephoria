@@ -3,7 +3,7 @@ const router = Router();
 import axios from 'axios';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import { getUser, getUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
-import { addUser } from '../controllers/auth.js'; // assuming you have a controller to add users
+import { addUserService } from '../controllers/auth.js'; // assuming you have a controller to add users
 
 router.get("/",verifyEmployeeJWT,async (req,res,next) => {
     try {
@@ -24,7 +24,7 @@ router.get("/",verifyEmployeeJWT,async (req,res,next) => {
 //     }
 // });
 
-router.post('/', verifyAdminJWT, addUser)
+router.post('/', verifyAdminJWT, addUserService)
 
 
 router.get("/:id",async (req,res,next) => {
