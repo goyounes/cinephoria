@@ -7,8 +7,17 @@ import {
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { displayCustomAlert } from "../../components/UI/CustomSnackbar";
 
-import isStrongPassword from "validator/lib/isStrongPassword";
-import isEmail from "validator/lib/isEmail"
+const validatePassword = (value) => ({
+  length: value.length >= 8,
+  uppercase: /[A-Z]/.test(value),
+  lowercase: /[a-z]/.test(value),
+  number: /[0-9]/.test(value),
+  specialChar: /[^A-Za-z0-9]/.test(value),
+});
+
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+};
 
 const Register = () => {
   const [snackbars, setSnackbars] = useState([]);
@@ -21,37 +30,48 @@ const Register = () => {
     firstName: '',
     lastName: '',
   });
-
-  // ✅ NEW: Track field errors
   const [formErrors, setFormErrors] = useState({
-    password: '',
+    password:'',
+    email: '',
+    username:'',
   });
 
- const handleChange = (e) => {
+  const [displayPasswordErrors, setDisplayPasswordErrors] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'password') {
-      const isValid = isStrongPassword(value, {
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1
-      });
-      setFormErrors((prev) => ({
+      const validationResults = validatePassword(value);
+      const isValid = Object.values(validationResults).every(Boolean);
+      setFormErrors(prev => ({
         ...prev,
-        password: isValid ? '' : 'Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character.',
+        password: isValid ? '' : 'Password must meet all criteria below',
       }));
+      // Update the passwordValidation state so the checklist updates
+      setPasswordValidation(validationResults);
     }
 
     if (name === 'email') {
-      console.log("test for emial", isEmail(value))
+      console.log("test for emial", isValidEmail(value))
       setFormErrors((prev) => ({
         ...prev,
-        email: isEmail(value) ? '' : 'Please enter a valid email address.',
+        email: isValidEmail(value) ? '' : 'Please enter a valid email address.',
       }));
     }
-
+    if (name === 'username') {
+      setFormErrors(prev => ({
+        ...prev,
+        username: value.trim().length >= 4 ? '' : 'Username must be at least 4 characters long.',
+      }));
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -80,6 +100,16 @@ const Register = () => {
       );
     }
   };
+
+  const isFormValid = 
+    !formErrors.password &&
+    !formErrors.email &&
+    !formErrors.username &&
+    formData.email.trim() !== '' &&
+    formData.password.trim() !== '' &&
+    formData.username.trim() !== '' &&
+    formData.firstName.trim() !== '' &&
+    formData.lastName.trim() !== '';
 
   return (
     <Container maxWidth="sm" sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: "row", alignItems: 'center' }}>
@@ -111,12 +141,33 @@ const Register = () => {
               type="password"
               placeholder="8 characters minimum"
               autoComplete="new-password"
+              onFocus={() => setDisplayPasswordErrors(true)}
+              onBlur={() => setDisplayPasswordErrors(!!formErrors.password)}
               onChange={handleChange}
               value={formData.password}
               // ✅ Show validation error
               error={!!formErrors.password}
               helperText={formErrors.password || "Use a strong password."}
             />
+            {(displayPasswordErrors) && (
+              <Stack spacing={0.5} sx={{ ml: 1, mt: 1 }}>
+                <Typography variant="body2" color={passwordValidation.length ? 'success.main' : 'error.main'}>
+                  {passwordValidation.length ? '✓' : '✗'} At least 8 characters
+                </Typography>
+                <Typography variant="body2" color={passwordValidation.uppercase ? 'success.main' : 'error.main'}>
+                  {passwordValidation.uppercase ? '✓' : '✗'} An uppercase letter
+                </Typography>
+                <Typography variant="body2" color={passwordValidation.lowercase ? 'success.main' : 'error.main'}>
+                  {passwordValidation.lowercase ? '✓' : '✗'} A lowercase letter
+                </Typography>
+                <Typography variant="body2" color={passwordValidation.number ? 'success.main' : 'error.main'}>
+                  {passwordValidation.number ? '✓' : '✗'} A number
+                </Typography>
+                <Typography variant="body2" color={passwordValidation.specialChar ? 'success.main' : 'error.main'}>
+                  {passwordValidation.specialChar ? '✓' : '✗'} A special character
+                </Typography>
+              </Stack>
+            )}
 
             <TextField
               fullWidth
@@ -127,6 +178,8 @@ const Register = () => {
               autoComplete="username"
               onChange={handleChange}
               value={formData.username}
+              error={!!formErrors.username}
+              helperText={formErrors.username}
             />
 
             <TextField
@@ -154,6 +207,7 @@ const Register = () => {
               color="primary"
               startIcon={<HowToRegIcon />}
               onClick={handleRegister}
+              disabled={!isFormValid}
             >
               Register
             </Button>
