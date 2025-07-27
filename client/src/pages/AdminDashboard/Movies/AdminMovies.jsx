@@ -12,7 +12,7 @@ import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
-const Movies = () => {
+const AdminMovies = () => {
   const [snackbars, setSnackbars] = useState([]);
   const [movies, setMovies] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -247,4 +247,4 @@ return (
 );
 };
 
-export default Movies;
+export default AdminMovies;
