@@ -17,6 +17,10 @@ const Movies = () => {
   const [movies, setMovies] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5; // You can adjust this
+
   const fetchMovies = async () => {
     try {
       const response = await axios.get('/api/movies');
@@ -52,6 +56,7 @@ const Movies = () => {
       }
       return { key, direction: 'asc' };
     });
+    setCurrentPage(1); // Reset to first page on sort change
   };
 
   const sortedMovies = useMemo(() => {
@@ -73,6 +78,14 @@ const Movies = () => {
     return sorted;
   }, [movies, sortConfig]);
 
+  // Pagination logic - slice the sorted array for the current page
+  const paginatedMovies = useMemo(() => {
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    return sortedMovies.slice(startIndex, startIndex + rowsPerPage);
+  }, [sortedMovies, currentPage, rowsPerPage]);
+
+  const totalPages = Math.ceil(sortedMovies.length / rowsPerPage);
+
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key) return null;
     if (sortConfig.direction === 'asc') return <ArrowDropUpIcon fontSize="small" />;
@@ -80,115 +93,157 @@ const Movies = () => {
     return null;
   };
 
-  return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" fontWeight="bold">
-          🎬 Movies
-        </Typography>
-        <Link to="/admin/movies/create" style={{ textDecoration: 'none' }}>
-          <Button variant="contained" startIcon={<AddIcon />} size="medium">
-            Add Movie
-          </Button>
-        </Link>
-      </Stack>
+return (
+  <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Stack direction="row" justifyContent="space-between" alignItems="center" >
+      <Typography variant="h4" fontWeight="bold">
+        🎬 Movies
+      </Typography>
+      <Link to="/admin/movies/create" style={{ textDecoration: 'none' }}>
+        <Button variant="contained" startIcon={<AddIcon />} size="medium">
+          Add Movie
+        </Button>
+      </Link>
+    </Stack>
 
-      <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'white' }}>
-              <TableCell sx={{ fontWeight: 'bold' }}>Poster</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('title')}>
-                Title {renderSortIcon('title')}
+    {/* Pagination Controls - TOP */}
+    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} mb={2}>
+      <Button
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+      >
+        Previous
+      </Button>
+
+      <Typography>
+        Page {currentPage} of {totalPages}
+      </Typography>
+
+      <Button
+        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+      >
+        Next
+      </Button>
+    </Stack>
+
+    <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: 'white' }}>
+            <TableCell sx={{ fontWeight: 'bold' }}>Poster</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('title')}>
+              Title {renderSortIcon('title')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('age_rating')}>
+              Age Rating {renderSortIcon('age_rating')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('is_team_pick')}>
+              Team Pick {renderSortIcon('is_team_pick')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('score')}>
+              Score {renderSortIcon('score')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('length')}>
+              Length {renderSortIcon('length')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {paginatedMovies.map((movie) => (
+            <TableRow
+              key={movie.movie_id}
+              hover
+              sx={{
+                backgroundColor: movie.is_team_pick ? 'rgba(25, 118, 210, 0.08)' : 'inherit',
+                transition: 'background-color 0.3s',
+              }}
+            >
+              <TableCell>
+                {movie.imageUrl ? (
+                  <Box
+                    component="img"
+                    src={movie.imageUrl}
+                    alt={`Poster for ${movie.title}`}
+                    sx={{
+                      width: 100,
+                      height: 'auto',
+                      borderRadius: 1,
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <Typography variant="body2" color="text.secondary">N/A</Typography>
+                )}
               </TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('age_rating')}>
-                Age Rating {renderSortIcon('age_rating')}
+
+              <TableCell>
+                <Link to={`/movies/${movie.movie_id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                  <Typography variant="subtitle1">{movie.title}</Typography>
+                </Link>
               </TableCell>
-              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('is_team_pick')}>
-                Team Pick {renderSortIcon('is_team_pick')}
+
+              <TableCell>
+                <Typography variant="body2" color="text.secondary">
+                  {movie.description}
+                </Typography>
               </TableCell>
-              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('score')}>
-                Score {renderSortIcon('score')}
-              </TableCell>
-              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('length')}>
-                Length {renderSortIcon('length')}
-              </TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
 
-          <TableBody>
-            {sortedMovies.map((movie) => (
-              <TableRow
-                key={movie.movie_id}
-                hover
-                sx={{
-                  backgroundColor: movie.is_team_pick ? 'rgba(25, 118, 210, 0.08)' : 'inherit',
-                  transition: 'background-color 0.3s',
-                }}
-              >
-                <TableCell>
-                  {movie.imageUrl ? (
-                    <Box
-                      component="img"
-                      src={movie.imageUrl}
-                      alt={`Poster for ${movie.title}`}
-                      sx={{
-                        width: 100,
-                        height: 'auto',
-                        borderRadius: 1,
-                        objectFit: 'cover',
-                      }}
-                    />
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">N/A</Typography>
-                  )}
-                </TableCell>
+              <TableCell>{movie.age_rating}</TableCell>
+              <TableCell>{movie.is_team_pick ? "Yes" : "No"}</TableCell>
+              <TableCell>{movie.score}</TableCell>
+              <TableCell>{movie.length}</TableCell>
 
-                <TableCell>
-                  <Link to={`/movies/${movie.movie_id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
-                    <Typography variant="subtitle1">{movie.title}</Typography>
-                  </Link>
-                </TableCell>
-
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {movie.description}
-                  </Typography>
-                </TableCell>
-
-                <TableCell>{movie.age_rating}</TableCell>
-                <TableCell>{movie.is_team_pick ? "Yes" : "No"}</TableCell>
-                <TableCell>{movie.score}</TableCell>
-                <TableCell>{movie.length}</TableCell>
-
-                <TableCell>
-                  <Stack direction="column" spacing={1}>
-                    <Link to={`/admin/movies/${movie.movie_id}/edit`} style={{ textDecoration: 'none' }}>
-                      <Button size="large" color="primary">
-                        <EditNoteIcon fontSize="large" />
-                      </Button>
-                    </Link>
-
-                    <Button
-                      size="large"
-                      color="error"
-                      onClick={() => HandleDeleteButton(movie.movie_id)}
-                    >
-                      <DeleteIcon />
+              <TableCell>
+                <Stack direction="column" spacing={1}>
+                  <Link to={`/admin/movies/${movie.movie_id}/edit`} style={{ textDecoration: 'none' }}>
+                    <Button size="large" color="primary">
+                      <EditNoteIcon fontSize="large" />
                     </Button>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                  </Link>
 
-      {snackbars}
-    </Container>
-  );
+                  <Button
+                    size="large"
+                    color="error"
+                    onClick={() => HandleDeleteButton(movie.movie_id)}
+                  >
+                    <DeleteIcon />
+                  </Button>
+                </Stack>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Pagination Controls - BOTTOM */}
+    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} mt={2}>
+      <Button
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+      >
+        Previous
+      </Button>
+
+      <Typography>
+        Page {currentPage} of {totalPages}
+      </Typography>
+
+      <Button
+        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+      >
+        Next
+      </Button>
+    </Stack>
+
+    {snackbars}
+  </Container>
+);
 };
 
 export default Movies;
