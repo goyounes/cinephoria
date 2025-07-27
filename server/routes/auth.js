@@ -24,13 +24,16 @@ router.post('/logout', logoutService);
 router.post(
   '/login',
   [
-    // Validate username or email (assuming login accepts either)
-    body('username')
-      .notEmpty().withMessage('Username is required')
-      .bail()
-      .isLength({ min: 4 }).withMessage('Username must be at least 4 characters')
-      .bail()
-      .custom(value => !value.includes(' ')).withMessage('Username must not contain spaces'),
+    // Email validations
+    body('email').notEmpty().withMessage('Email is required'),
+    body('email').isEmail().withMessage('Please enter a valid email'),
+    body('email').custom(value => {
+      const domain = value.split('@')[1];
+      if (!domain || domain.length < 2) {
+        throw new Error('Email domain must be at least 2 characters');
+      }
+      return true;
+    }),
 
     // Password validations separated
     body('password')
