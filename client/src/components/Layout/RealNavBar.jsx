@@ -4,8 +4,10 @@ import {
   AccountCircle as AccountCircleIcon,
   EventSeat as EventSeatIcon,
   Movie as MovieIcon,
-  ContactMail as ContactMailIcon
+  ContactMail as ContactMailIcon,
+  Dashboard  as DashboardIcon
 } from "@mui/icons-material";
+
 import { Link } from 'react-router-dom';
 import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
@@ -40,6 +42,7 @@ const NavButton = ({ label, Icon, to, onClick }) => {
 const RealNavBar = () => {
   const {currentUser} = useAuth()
   const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
+  const isAdmin = isLoggedIn && currentUser.role_id >= 2
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
@@ -64,6 +67,7 @@ const RealNavBar = () => {
           </Button>
 
           <Stack direction="row" spacing={2} alignItems="center">
+            {isAdmin && (<NavButton label="Dashboard" Icon={DashboardIcon} to="/admin/dashboard" />)}
             <NavButton label="Home" Icon={HomeIcon} to="/" />
             <NavButton label="Reservation" Icon={EventSeatIcon} to="/reservation" />
             <NavButton label="Movies" Icon={MovieIcon} to="/movies" />

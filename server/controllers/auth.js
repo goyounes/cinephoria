@@ -191,7 +191,6 @@ export async function loginService (req, res, next) {
         const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
-        console.log("calculation for role", user.role_id, getRoleNameById(user.role_id))
         // If everything is fine, return the user_id signed using a JWT token
         const accessToken = jwt.sign(
           {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name } ,

@@ -50,6 +50,7 @@ function App() {
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
+              <Route path="/admin/dashboard" element={<AdminMovies />} />
               <Route path="/admin/movies" element={<AdminMovies />} />
               <Route path="/admin/movies/create" element={<AdminAddMovie />} />
               <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
