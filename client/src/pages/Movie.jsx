@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams, useLocation } from "react-router-dom";
 import axios from '../api/axiosInstance.js';
@@ -11,21 +11,19 @@ import MovieScreenings from "./components/MovieScreenings";
 
 const Movie = () => {
   // const setting =
-  const { id } = useParams();
-  const location = useLocation();
+   const { id } = useParams();
+   const location = useLocation();
 
-  const [movie, setMovie] = useState(null);
-  const [loadingMovie, setLoadingMovie] = useState(true);
-  const [showScreenings, setShowScreenings] = useState(false);
+   const [movie, setMovie] = useState(null);
+   const [loadingMovie, setLoadingMovie] = useState(true);
+   const [showScreenings, setShowScreenings] = useState(false);
 
    useEffect(() => {
       const fetchMovie = async () => {
          try {
             const res = await axios.get(`/api/movies/${id}`);
             setMovie(res.data);
-            if (location.state?.showScreenings) {
-               setShowScreenings(true);
-            }
+            if (location.state?.showScreenings) setShowScreenings(true);
          } catch (err) {
             console.error("Failed to fetch movie:", err);
          } finally {
@@ -33,16 +31,14 @@ const Movie = () => {
          }
       };
       fetchMovie();
+      // eslint-disable-next-line
    }, [id]);
 
    useEffect(() => {
       if (loadingMovie || !showScreenings ) return;
       console.log("effect ran")
       const scrollToBottom = () => {
-         window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-         });
+         window.scrollTo({top: document.body.scrollHeight,behavior: "smooth"});
       };
       const frame = requestAnimationFrame(scrollToBottom);
       return () => cancelAnimationFrame(frame);

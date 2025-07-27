@@ -27,9 +27,10 @@ import Account from './pages/Auth/Account';
 
 import { Container, Stack } from '@mui/material';
 import ContactUs from './pages/ContactUs';
-import ProtectedRoutes from './utils/ProtectedRoutes';
+import ProtectedRoutes from './pages/ProtectedRoutes';
 import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
 import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
+import NotAuthorized from './pages/NotAuthorized';
 
 function App() {
   return (
@@ -40,6 +41,8 @@ function App() {
       <Container maxWidth="lg" sx={{flexGrow: 1, bgcolor: '#F7F7F7', display:'flex', direction:'column'}} >
         {/* <Stack px={2} py={3}> */}
           <Routes >
+            <Route path="/not-authorized" element={<NotAuthorized/>} />
+
             <Route element={<ProtectedRoutes requiredRoleId={1}/>}>
               <Route path="/checkout" element={<Checkout/>} />
               <Route path="/auth/account" element={<Account />} />

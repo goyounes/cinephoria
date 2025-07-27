@@ -1,22 +1,20 @@
 import axios from '../api/axiosInstance.js';
 import { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
 import { Container, Stack, Card, Typography, FormControl, InputLabel, Select, MenuItem,Box} from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
 
-import SearchMovieModal from "./components/SearchMovieModal";
+import { Search as SearchIcon } from "@mui/icons-material";
 import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
+import SearchMovieModal from "./components/SearchMovieModal";
 import MovieCard from "./components/MovieCard";
 import MovieScreenings from "./components/MovieScreenings";
 import MovieDetails from "./components/MovieDetails";
 
-import {filterAndUniqueMovies,groupScreeningsByMovie} from "../utils";
+import {filterAndUniqueMovies, groupScreeningsByMovie} from "../utils";
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from './Auth/AuthProvider.jsx';
 
 
 const Reservation = () => {
-   const { id } = useParams();
    const { currentUser } = useAuth()
    const isAdmin = currentUser?.role_id >= 2;
 
@@ -58,10 +56,7 @@ const Reservation = () => {
    useEffect(() => {
       if (selectedMovieId === -1 ) return;
       const scrollToBottom = () => {
-         window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-         });
+         window.scrollTo({top: document.body.scrollHeight,behavior: "smooth",});
       };
       const frame = requestAnimationFrame(scrollToBottom);
       return () => cancelAnimationFrame(frame);
