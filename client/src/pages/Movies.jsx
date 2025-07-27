@@ -225,7 +225,12 @@ const Movies = () => {
 
       <Stack gap={2} justifyContent="flex-start" direction="row" flexWrap="wrap">
         {allMovies.map((movie) => (
-          <MovieCard key={movie.movie_id} movie={movie} to={`/movies/${movie.movie_id}/screenings`}></MovieCard>
+          <MovieCard 
+            key={movie.movie_id} 
+            movie={movie} 
+            to={`/movies/${movie.movie_id}`}
+            state={{ showScreenings: true }}
+          />
         ))}
       </Stack>
     </Container>
