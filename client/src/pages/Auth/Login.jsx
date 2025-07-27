@@ -1,5 +1,5 @@
 import LoginIcon from '@mui/icons-material/Login';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import { displayCustomAlert} from "../../components/UI/CustomSnackbar"
@@ -16,6 +16,13 @@ const Login = () => {
     password: '',
     // username: '',
   });
+
+  const { currentUser } = useAuth();
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/auth/account', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const handleChange = (e) => {
     // console.log("e.target: ", e.target);
@@ -58,7 +65,7 @@ const Login = () => {
             name="email"
             type="email"
             placeholder="example@mail.com"
-
+            autoComplete='email'
             onChange={handleChange}
             value={formData.email}
           />
