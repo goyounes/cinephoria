@@ -28,7 +28,7 @@ const Register = () => {
     if (isLoggedIn) {
       navigate('/auth/account', { replace: true });
     }
-  }, [currentUser, navigate]);
+  }, [isLoggedIn, navigate]);
 
   const [snackbars, setSnackbars] = useState([]);
 
@@ -97,7 +97,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post(`/api/auth/register`, formData);
+      await axios.post(`/api/auth/register`, formData);
       displayCustomAlert(snackbars, setSnackbars, "Registered successfully!", "success");
       navigate('/home');
     } catch (err) {

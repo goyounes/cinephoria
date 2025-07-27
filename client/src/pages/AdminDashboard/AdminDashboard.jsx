@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -14,18 +14,18 @@ import axios from '../../api/axiosInstance.js';
 const AdminDashboard = () => {
   const [messages, setMessages] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchMessages = async () => {
-  //     try {
-  //       const res = await axios.get("/api/admin/messages"); // Replace with your actual API
-  //       setMessages(res.data);
-  //     } catch (err) {
-  //       console.error("Error fetching messages:", err);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get("/api/admin/messages"); // Replace with your actual API
+        setMessages(res.data);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      }
+    };
 
-  //   fetchMessages();
-  // }, []);
+    fetchMessages();
+  }, []);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

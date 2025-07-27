@@ -2,10 +2,11 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import './assets/global.css';
 
 import Footer from './components/Layout/Footer';
+// eslint-disable-next-line
 import TopNavBar from './components/Layout/TopNavBar';
 import RealNavBar from './components/Layout/RealNavBar';
 
-import AdminMessages from './pages/AdminDashboard/AdminDashboard';
+
 import AdminMovies from './pages/AdminDashboard/Movies/AdminMovies';
 import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
 import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';

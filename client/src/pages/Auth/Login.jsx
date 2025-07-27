@@ -18,13 +18,12 @@ const Login = () => {
   });
 
   const { currentUser } = useAuth();
-  console.log(currentUser)
   const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   useEffect(() => {
     if (isLoggedIn) {
       navigate('/auth/account', { replace: true });
     }
-  }, [currentUser, navigate]);
+  }, [isLoggedIn, navigate]);
 
   const handleChange = (e) => {
     // console.log("e.target: ", e.target);

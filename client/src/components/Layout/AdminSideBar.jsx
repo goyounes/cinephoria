@@ -1,5 +1,4 @@
-import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemText, Toolbar } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
