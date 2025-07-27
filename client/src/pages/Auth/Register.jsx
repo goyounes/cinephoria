@@ -1,11 +1,12 @@
 import axios from '../../api/axiosInstance.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container, Typography, Stack, TextField, Button, Card, CardContent
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { displayCustomAlert } from "../../components/UI/CustomSnackbar";
+import { useAuth } from './AuthProvider.jsx';
 
 const validatePassword = (value) => ({
   length: value.length >= 8,
@@ -20,8 +21,15 @@ const isValidEmail = (email) => {
 };
 
 const Register = () => {
-  const [snackbars, setSnackbars] = useState([]);
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/auth/account', { replace: true });
+    }
+  }, [currentUser, navigate]);
+
+  const [snackbars, setSnackbars] = useState([]);
 
   const [formData, setFormData] = useState({
     email: '',

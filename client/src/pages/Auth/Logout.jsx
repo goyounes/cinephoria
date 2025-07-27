@@ -1,5 +1,5 @@
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/material';
 
@@ -8,15 +8,22 @@ import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
 import { useAuth } from './AuthProvider.jsx';
 
 const Logout = () => {
-  const [snackbars, setSnackbars] = useState([]);
+  const { currentUser} = useAuth();
   const navigate = useNavigate();
-  const { currentUser, logout } = useAuth();
-  console.log("Current user is", currentUser);
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/auth/account', { replace: true });
+    }
+  }, [currentUser, navigate]);
+  
+  const [snackbars, setSnackbars] = useState([]);
+
 
   const display = currentUser
     ? `${currentUser.role_name} → User ID: ${currentUser.user_id} (Role: ${currentUser.role_id})`
     : "Guest";
 
+  const { logout} = useAuth();
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
