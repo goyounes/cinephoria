@@ -3,13 +3,12 @@ import {useEffect, createContext, useContext } from 'react'
 import axios from '../api/axiosInstance.js';
 import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
 
-// 1. Create the context
+
 export const AuthContext = createContext()
 
-// 2. Export a hook to access the context
 export const useAuth = () => useContext(AuthContext)
 
-// 3. Provider with hardcoded user
+
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(getItemWithExpiry("user") || null)
   const login = async (inputs) => {
