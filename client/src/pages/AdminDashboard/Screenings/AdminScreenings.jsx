@@ -6,11 +6,14 @@ import {
   TableContainer, TableHead, TableRow, Paper, Typography} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import EditNoteIcon from '@mui/icons-material/EditNote';
-// import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
 
 const AdminScreenings = () => {
+  const showSnackbar = useSnackbar();
+
   const [screenings, setScreenings] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,16 +33,16 @@ const AdminScreenings = () => {
     fetchScreenings();
   }, []);
 
-  // const handleDelete = async (id) => {
-  //   try {
-  //     await axios.delete(`/api/screenings/${id}`);
-  //     await fetchScreenings();
-  //   } catch (error) {
-  //     console.error("Error deleting screening with id: " + id, error);
-  //     const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
-  //     showSnackbar( errorMessage, "error");
-  //   }
-  // };
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`/api/screenings/${id}`);
+      await fetchScreenings();
+    } catch (error) {
+      console.error("Error deleting screening with id: " + id, error);
+      const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
+      showSnackbar( errorMessage, "error");
+    }
+  };
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -159,6 +162,9 @@ const AdminScreenings = () => {
                         <EditNoteIcon />
                       </Button>
                     </Link>
+                    <Button size="large" color="error" onClick={() => handleDelete(screening.screening_id)}>
+                      <DeleteIcon />
+                    </Button>
                   </Stack>
                 </TableCell>
               </TableRow>
