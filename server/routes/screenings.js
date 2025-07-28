@@ -50,6 +50,11 @@ router.get("/upcoming/:id", async (req,res,next) => {
     console.log("accesing API for upcoming screening with screening_id =",id)
     try {
         const rawwscreenings = await getUpcomingScreeningDetailsById(id)
+        if (!rawwscreenings) {
+            const err = new Error("Screening not found");
+            err.status = 404;
+            return next(err); 
+        }
         const rawscreenings =  CombineGenresIdNames([rawwscreenings])[0] //cheated by submiting an array to the function and then taking the one elment out
         const screenings = CombineQualitiesIdNames([rawscreenings])[0]   //cheated by submiting an array to the function and then taking the one elment out
         res.status(200).json(screenings)
@@ -64,6 +69,11 @@ router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
     console.log("accesing API for screening with screening_id =",id)
     try {
         const rawwscreenings = await getScreeningDetailsByIdAdmin(id)
+        if (!rawwscreenings) {
+            const err = new Error("Screening not found");
+            err.status = 404;
+            return next(err); 
+        }
         const rawscreenings =  CombineGenresIdNames([rawwscreenings])[0] //cheated by submiting an array to the function and then taking the one elment out
         const screenings = CombineQualitiesIdNames([rawscreenings])[0] 
         console.log("sending screening details",screenings)
