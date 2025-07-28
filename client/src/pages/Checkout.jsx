@@ -152,7 +152,6 @@ const Checkout = () => {
                         />
                      )}
                      </Stack>
-                     {console.log(movie)}
                      {movie.genres?.length > 0 && (
                      <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
                         {movie.genres.map((genre) => (

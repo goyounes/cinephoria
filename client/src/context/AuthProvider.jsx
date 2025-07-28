@@ -32,7 +32,6 @@ export const AuthContextProvider = ({ children }) => {
           formattedMessage = error.message || "Unknown error occurred";
         }
         // Throwing a new Error with formatted message for caller to display
-        console.log("erros display ",formattedMessage)
         throw new Error(formattedMessage);
     }
   }

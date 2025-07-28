@@ -154,7 +154,6 @@ useEffect(() => {
           getOptionLabel={(option) => option.genre_name}
           value={selectedGenres}
           onChange={(event, newValue) => {
-            console.log("Selected Genres: ", newValue);
             return setSelectedGenres(newValue)
           }}
           renderInput={(params) => (

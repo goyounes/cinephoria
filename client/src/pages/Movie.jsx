@@ -36,7 +36,6 @@ const Movie = () => {
 
    useEffect(() => {
       if (loadingMovie || !showScreenings ) return;
-      console.log("effect ran")
       const scrollToBottom = () => {
          window.scrollTo({top: document.body.scrollHeight,behavior: "smooth"});
       };

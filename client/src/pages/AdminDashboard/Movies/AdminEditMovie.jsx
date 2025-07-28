@@ -196,7 +196,6 @@ const EditMovie = () => {
           isOptionEqualToValue={(option, value) => option.genre_id === value.genre_id}//MUI compares obj in genresList to obj in my FetchedMovies data, this being a === comparision the diffrent obj refrence makes it fail.
           value={selectedGenres}
           onChange={(event, newValue) => {
-            console.log("Selected Genres: ", newValue);
             return setSelectedGenres(newValue)
           }}
           renderInput={(params) => (

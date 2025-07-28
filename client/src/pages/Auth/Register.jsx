@@ -70,7 +70,6 @@ const Register = () => {
     }
 
     if (name === 'email') {
-      console.log("test for emial", isValidEmail(value))
       setFormErrors((prev) => ({
         ...prev,
         email: isValidEmail(value) ? '' : 'Please enter a valid email address.',

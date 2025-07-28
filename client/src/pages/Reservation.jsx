@@ -88,7 +88,6 @@ const Reservation = () => {
                   const selected = cinemas.find(c => c.cinema_id === e.target.value);
                   setSelectedCinema(selected || null);
                   setSelectedMovieId(-1)
-                  // console.log("selected cinema",selected)
                }}
                >
                <MenuItem value="">All</MenuItem>
