@@ -24,7 +24,7 @@ const AdminMovies = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 20;
+  const ROWS_PER_PAGE = 5;
 
   const fetchMovies = async () => {
     try {
@@ -206,25 +206,31 @@ return (
     <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: 'white' }}>
-            <TableCell sx={{ fontWeight: 'bold' }}>Poster</TableCell>
-            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('title')}>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'bold', width: 150 }}>
+              Poster
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 200 }} onClick={() => handleSort('title')}>
               Title {renderSortIcon('title')}
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
-            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('age_rating')}>
+            <TableCell sx={{ fontWeight: 'bold', width: 300 }}>
+              Description
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 60 }} onClick={() => handleSort('age_rating')}>
               Age Rating {renderSortIcon('age_rating')}
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('is_team_pick')}>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 60 }} onClick={() => handleSort('is_team_pick')}>
               Team Pick {renderSortIcon('is_team_pick')}
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('score')}>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('score')}>
               Score {renderSortIcon('score')}
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('length')}>
+            <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('length')}>
               Length {renderSortIcon('length')}
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', width: 150 }}>
+              Actions
+            </TableCell>
           </TableRow>
         </TableHead>
 
@@ -239,23 +245,24 @@ return (
                 transition: 'background-color 0.3s',
               }}
             >
-              <TableCell>
-                {movie.imageUrl ? (
-                  <Box
-                    component="img"
-                    src={movie.imageUrl}
-                    alt={`Poster for ${movie.title}`}
-                    sx={{
-                      width: 100,
-                      height: 'auto',
-                      borderRadius: 1,
-                      objectFit: 'cover',
-                    }}
-                  />
-                ) : (
-                  <Typography variant="body2" color="text.secondary">N/A</Typography>
-                )}
-              </TableCell>
+<TableCell sx={{ width: 120 }}>
+  {movie.imageUrl ? (
+    <Box
+      component="img"
+      src={movie.imageUrl}
+      alt={`Poster for ${movie.title}`}
+      sx={{
+        width: 100,
+        height: 150, // or whatever matches your desired aspect ratio
+        borderRadius: 1,
+        objectFit: 'cover',
+        display: 'block',
+      }}
+    />
+  ) : (
+    <Typography variant="body2" color="text.secondary">N/A</Typography>
+  )}
+</TableCell>
 
               <TableCell>
                 <Link to={`/movies/${movie.movie_id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
