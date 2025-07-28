@@ -1,5 +1,5 @@
 function CombineQualitiesIdNames(screenings){ 
-    if (!screenings || screenings?.length === 0) return null
+    if (!screenings || screenings?.length === 0) return []
 
     return screenings.map((screening) => {
         // console.log(screening)

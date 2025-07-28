@@ -1,5 +1,5 @@
 function CombineGenresIdNames(movies){ 
-    if (!movies || movies?.length === 0) return null
+    if (!movies || movies?.length === 0) return []
 
     return movies.map((movie) => {
         if (!movie?.genres_ids || !movie?.genres_names) {
