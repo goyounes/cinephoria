@@ -13,7 +13,7 @@ import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
 // import cinephoriaSm from '../assets/cinephoria-sm.png';
 import { useState } from "react";
-import { useAuth } from "../../pages/Auth/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 
 const NavButton = ({ label, Icon, to, onClick }) => {
   const buttonProps = to

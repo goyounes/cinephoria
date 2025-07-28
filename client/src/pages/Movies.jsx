@@ -18,7 +18,7 @@ import MovieCard from "./components/MovieCard";
 
 import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
-import { useAuth } from './Auth/AuthProvider.jsx';
+import { useAuth } from '../context/AuthProvider';
 
 
 const Movies = () => {

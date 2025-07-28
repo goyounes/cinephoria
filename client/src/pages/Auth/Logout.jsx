@@ -5,7 +5,7 @@ import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/mate
 
 
 import {displayCustomAlert} from "../../components/UI/CustomSnackbar"
-import { useAuth } from './AuthProvider.jsx';
+import { useAuth } from '../../context/AuthProvider';
 
 const Logout = () => {
   const { currentUser} = useAuth();

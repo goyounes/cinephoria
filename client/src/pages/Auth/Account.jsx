@@ -3,7 +3,7 @@ import axios from '../../api/axiosInstance.js';
 import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,AccordionDetails,Box,CircularProgress} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TicketCard from '../components/TicketCard.jsx';
-import { useAuth } from './AuthProvider.jsx';
+import { useAuth } from '../../context/AuthProvider';
 
 
 const Account = () => {

@@ -32,7 +32,7 @@ import ProtectedRoutes from './pages/ProtectedRoutes';
 import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
 import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
 import NotAuthorized from './pages/NotAuthorized';
-import { useAuth } from './pages/Auth/AuthProvider';
+import { useAuth } from './context/AuthProvider';
 import AdminSideBar from './components/Layout/AdminSideBar';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminScreenings from './pages/AdminDashboard/Screenings/AdminScreenings';

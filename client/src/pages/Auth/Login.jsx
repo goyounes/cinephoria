@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import { displayCustomAlert} from "../../components/UI/CustomSnackbar"
-import { useAuth } from "../Auth/AuthProvider.jsx";
+import { useAuth } from "../../context/AuthProvider";
 
 
 const Login = () => {

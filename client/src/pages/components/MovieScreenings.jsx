@@ -14,7 +14,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import ScreeningsDisplay from "./ScreeningsDisplay";
-import { useAuth } from "../Auth/AuthProvider.jsx";
+import { useAuth } from "../../context/AuthProvider";
 
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter);

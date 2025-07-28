@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import {displayCustomAlert} from "../components/UI/CustomSnackbar"
-import { useAuth } from './Auth/AuthProvider.jsx';
+import { useAuth } from '../context/AuthProvider';
 // import CustomSnackbar, { displayCustomAlert } from "../../components/CustomSnackbar";
 
 

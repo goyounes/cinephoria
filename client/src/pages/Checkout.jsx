@@ -6,7 +6,7 @@ import axios from '../api/axiosInstance.js';
 
 import { displayCustomAlert } from "../components/UI/CustomSnackbar";
 import PaymentDialog from "./components/PaymentDialog";
-import { useAuth } from "./Auth/AuthProvider.jsx";
+import { useAuth } from "../context/AuthProvider";
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { displayCustomAlert } from "../../components/UI/CustomSnackbar";
-import { useAuth } from './AuthProvider.jsx';
+import { useAuth } from '../../context/AuthProvider';
 
 const validatePassword = (value) => ({
   length: value.length >= 8,

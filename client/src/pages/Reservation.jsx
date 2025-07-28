@@ -11,7 +11,7 @@ import MovieDetails from "./components/MovieDetails";
 
 import {filterAndUniqueMovies, groupScreeningsByMovie} from "../utils";
 import Home_page_image from '../assets/Home_page_image.webp';
-import { useAuth } from './Auth/AuthProvider.jsx';
+import { useAuth } from '../context/AuthProvider';
 
 
 const Reservation = () => {

@@ -1,5 +1,5 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../pages/Auth/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 
 const ProtectedRoutes = ({ requiredRoleId }) => {
   const location = useLocation();
