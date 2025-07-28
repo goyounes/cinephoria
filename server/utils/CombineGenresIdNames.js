@@ -1,6 +1,8 @@
 function CombineGenresIdNames(movies){ 
+    if (!movies || movies?.length === 0) return null
+
     return movies.map((movie) => {
-        if (!movie.genres_ids || !movie.genres_names) {
+        if (!movie?.genres_ids || !movie?.genres_names) {
             return { ...movie, genres: null };
         }
         const ids = movie.genres_ids.split(';');

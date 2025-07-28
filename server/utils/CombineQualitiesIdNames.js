@@ -1,7 +1,9 @@
 function CombineQualitiesIdNames(screenings){ 
+    if (!screenings || screenings?.length === 0) return null
+
     return screenings.map((screening) => {
         // console.log(screening)
-        if (!screening.qualities_ids || !screening.qualities_names) {
+        if (!screening?.qualities_ids || !screening?.qualities_names) {
             return { ...screening, qualities: null };
         }
         const ids = screening.qualities_ids.split(';');
