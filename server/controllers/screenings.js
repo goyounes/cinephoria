@@ -1,11 +1,11 @@
 import { pool } from "./connect.js";
 
-export async function  getScreenings(){
-    // This function retrieves raw SCREENINGS TABLE data
-    const q = `SELECT * FROM screenings;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
+// export async function  getScreenings(){
+//     // This function retrieves raw SCREENINGS TABLE data
+//     const q = `SELECT * FROM screenings;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
 export async function  addScreening(s){
     const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
                VALUES (?,?,?,?,?,?);  
@@ -68,6 +68,8 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
             screenings.start_date > CURDATE() OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         ) AND (
 			screenings.start_date < CURDATE() + INTERVAL 14 DAY
+        ) AND (
+            screenings.isDeleted = FALSE
         )
         ORDER BY screenings.start_date, screenings.start_time;
     `;
@@ -183,6 +185,8 @@ export async function getUpcomingScreeningDetailsById(screening_id){    //How to
 			screenings.start_date < CURDATE() + INTERVAL 14 DAY
         ) AND (
             screenings.screening_id = ?
+        ) AND (
+            screenings.isDeleted = FALSE
         )
         ORDER BY screenings.start_date, screenings.start_time;
     `
@@ -250,12 +254,14 @@ export async function getScreeningDetailsByIdAdmin(screening_id){
 
 export async function getAllScreeningsAdmin(cinema_id,movie_id){  
     const q =  `
-        SELECT screenings.*, cinemas.cinema_name, movies.title
+        SELECT screenings.*, cinemas.cinema_name, movies.title,rooms.room_name
         FROM screenings
         JOIN cinemas 
             ON screenings.cinema_id = cinemas.cinema_id
         JOIN movies
             ON screenings.movie_id = movies.movie_id
+        JOIN rooms 
+            ON screenings.room_id = rooms.room_id  
         WHERE (
             ? IS NULL OR screenings.cinema_id = ?
         ) AND (
