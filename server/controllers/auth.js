@@ -49,7 +49,7 @@ export async function registerService (req, res, next) {
         const emailVerificationToken = jwt.sign(
           { user_id, type: "email_verification" },
           process.env.EMAIL_VERIFICATION_SECRET,
-          { expiresIn: "24h" }
+          { expiresIn: "1h" }
         );
         // Build verification link
         const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
@@ -195,7 +195,7 @@ export async function loginService (req, res, next) {
         const accessToken = jwt.sign(
           {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name } ,
           process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '24h' }
+          { expiresIn: '1h' }
         );    
         const refreshToken = jwt.sign(
           {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name} ,
@@ -212,7 +212,7 @@ export async function loginService (req, res, next) {
             httpOnly: false,        // Allow access from JavaScript (XSS risk)
             secure: false,          // Allow over HTTP (MITM risk)
             sameSite: 'Lax',        // Allows some cross-site requests
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+            maxAge: 1 * 60 * 60 * 1000, // 1 hours in milliseconds
         }).status(200).json({
           ...user,
           accessToken,
@@ -245,7 +245,7 @@ export async function refreshService (req, res, next) {
     const accessToken = jwt.sign(
       {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
       process.env.ACCESS_JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '1h' }
     );    
 
     try {
@@ -269,7 +269,7 @@ export async function refreshService (req, res, next) {
         const accessToken = jwt.sign(
           {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
           process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '24h' }
+          { expiresIn: '1h' }
         );    
 
 
@@ -281,7 +281,7 @@ export async function refreshService (req, res, next) {
             httpOnly: false,        // Allow access from JavaScript (XSS risk)
             secure: false,          // Allow over HTTP (MITM risk)
             sameSite: 'Lax',        // Allows some cross-site requests
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+            maxAge: 1 * 60 * 60 * 1000, // 1 hours in milliseconds
         }).status(200).json({
           ...user,
           accessToken

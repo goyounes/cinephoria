@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {useEffect, createContext, useContext } from 'react'
 import axios from '../../api/axiosInstance.js';
+import { getItemWithExpiry, setItemWithExpiry } from '../../utils/index.js';
 
 // 1. Create the context
 export const AuthContext = createContext()
@@ -10,15 +11,14 @@ export const useAuth = () => useContext(AuthContext)
 
 // 3. Provider with hardcoded user
 export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem("user")) || null)
-
+  const [currentUser, setCurrentUser] = useState(getItemWithExpiry("user") || null)
   const login = async (inputs) => {
     try {
       const res = await axios.post("/api/auth/login", inputs, {
         withCredentials:true
-      }) 
+      })
       setCurrentUser(res.data)
-      res?.data && localStorage.setItem('user', JSON.stringify(res.data));
+      res?.data && setItemWithExpiry('user', res.data, 1 * 60 * 60 * 1000 );
       return res.data
     } catch (error) {
       // console.log("login failed")
