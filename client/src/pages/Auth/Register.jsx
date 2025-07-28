@@ -76,12 +76,22 @@ const Register = () => {
         email: isValidEmail(value) ? '' : 'Please enter a valid email address.',
       }));
     }
+
     if (name === 'username') {
+      const errors = [];
+      if (value.length < 4) {
+        errors.push('Username must be at least 4 characters long.');
+      }
+      if (/\s/.test(value)) {
+        errors.push('Username must not contain spaces.');
+      }
       setFormErrors(prev => ({
         ...prev,
-        username: value.trim().length >= 4 ? '' : 'Username must be at least 4 characters long.',
+        username: errors.join(' '),
       }));
     }
+
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -90,12 +100,6 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    // ✅ Prevent submission if password is invalid
-    if (formErrors.password) {
-      showSnackbar("Please fix validation errors before submitting.", "error");
-      return;
-    }
 
     try {
       await axios.post(`/api/auth/register`, formData);
