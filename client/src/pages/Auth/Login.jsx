@@ -46,7 +46,8 @@ const Login = () => {
       navigate(from, { replace: true })
 
     } catch (err) {
-      showSnackbar("Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
+      // showSnackbar("Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
+      showSnackbar("Failed to login: " + err.message || "Server error", "error");
     }
   };
 

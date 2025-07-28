@@ -20,7 +20,20 @@ export const AuthContextProvider = ({ children }) => {
       res?.data && setItemWithExpiry('user', res.data, 1 * 60 * 60 * 1000 );
       return res.data
     } catch (error) {
-      // console.log("login failed")
+        const backendErrors = error.response?.data?.errors;
+        let formattedMessage;
+        if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+          // Join all messages into one string, separated by comma
+          formattedMessage = backendErrors.map(e => e.msg).join(", ");
+        } else if (error.response?.data?.message) {
+          // Some APIs return { message: '...' } for errors
+          formattedMessage = error.response.data.message;
+        } else {
+          formattedMessage = error.message || "Unknown error occurred";
+        }
+        // Throwing a new Error with formatted message for caller to display
+        console.log("erros display ",formattedMessage)
+        throw new Error(formattedMessage);
     }
   }
 
