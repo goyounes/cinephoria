@@ -1,12 +1,13 @@
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Stack, TextField, CircularProgress } from '@mui/material';
 import {useState } from 'react'
-import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
 import { validateCardExpiryDate } from '../../utils';
 import axios from '../../api/axiosInstance.js';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from '../../context/SnackbarProvider.jsx';
 
-
-const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSnackbars, order }) => {
+const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }) => {
+   const showSnackbar = useSnackbar();
+   
    const navigate = useNavigate()
    const [isProcessing, setIsProcessing] = useState(false);
 
@@ -33,7 +34,7 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
 
    const handleSubmitPayment = async () => {
       if (!order || order.ticket_types.every(t => t.count === 0)) {
-         displayCustomAlert(snackbars, setSnackbars, "No tickets selected", "error");
+         showSnackbar( "No tickets selected", "error");
          return;
       }
 
@@ -47,9 +48,7 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
          throw new Error(expiryValidation.reason === "expired" ? "Card expired" : "Expiration date is invalid");
          }
       } catch (error) {
-         displayCustomAlert(
-            snackbars,
-            setSnackbars,
+         showSnackbar(
             `Failed during validating payment information: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
@@ -57,24 +56,20 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, snackbars, setSna
       }
       // call backend to process the chekout
       try {
-         await new Promise((res) => setTimeout(res, 1000));
          await axios.post("/api/checkout/complete", {...order,card: cardInfo}, {withCredentials: true } );
       } catch (error) {
-         displayCustomAlert(
-            snackbars,
-            setSnackbars,
+         showSnackbar(
             `Failed during Backend Processing: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
          return;
       }
       // If we reach here, all steps succeeded
-      displayCustomAlert(snackbars, setSnackbars, "Payment successful!", "success");
+      showSnackbar("Payment successful!", "success");
       setIsProcessing(false);
       onClose();
-      setTimeout(() => {
-        navigate("/auth/account")
-      },1000)
+      navigate("/auth/account")
+
 
    };
 

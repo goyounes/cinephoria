@@ -2,11 +2,11 @@ import axios from '../../../api/axiosInstance.js';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
-import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
+
+import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
 
 const AddUser = () => {
-  const [snackbars, setSnackbars] = useState([]);
-  // const API_URL = "http://localhost:8080";
+  const showSnackbar = useSnackbar();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -30,7 +30,7 @@ const AddUser = () => {
     try {
 
       await axios.post(`/api/users`,formData);
-	    displayCustomAlert(snackbars, setSnackbars, "User added successfully!", "success");
+	    showSnackbar( "User added successfully!", "success");
 
       setFormData({
         email: '',
@@ -42,7 +42,7 @@ const AddUser = () => {
       });
       navigate('/users'); // Redirect to the users page
     } catch (err) {
-      displayCustomAlert(snackbars, setSnackbars, "Failed to add User: " + err.message, "error");
+      showSnackbar("Failed to add User: " + err.message, "error");
     }
   };
 
@@ -123,7 +123,6 @@ return (
         </Stack>
       </CardContent>
       </Card>   
-      {snackbars}     
     </Container>
   )
 };

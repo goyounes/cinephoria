@@ -9,10 +9,11 @@ import axios from '../../../api/axiosInstance.js';
 
 import ImageUploader from "../../../components/UI/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
+
+import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
 
 const EditMovie = () => {
-    const [snackbars, setSnackbars] = useState([]);
+    const showSnackbar = useSnackbar();
     const navigate = useNavigate()
     //Load movie with id = 
     const { id } = useParams();
@@ -119,11 +120,11 @@ const EditMovie = () => {
 
         try {
           await axios.put(`/api/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
-          displayCustomAlert(snackbars, setSnackbars, "Movie updated successfully!", "success");
+          showSnackbar("Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
         } catch (error) {
           const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
-          displayCustomAlert(snackbars, setSnackbars, "Failed to update movie: " + customMessage, "error");
+          showSnackbar("Failed to update movie: " + customMessage, "error");
           console.log(error)
         }
     };
@@ -292,7 +293,6 @@ const EditMovie = () => {
       </Stack>
     </CardContent>
     </Card>
-      {snackbars}
   </Container>
   );
 };

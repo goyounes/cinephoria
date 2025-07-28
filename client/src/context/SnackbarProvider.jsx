@@ -1,15 +1,10 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import {createContext,useContext,useState,useCallback,useEffect} from "react";
 import { Snackbar, Alert } from "@mui/material";
 
 
 const SnackbarContext = createContext();
 
+const SNACKBARS_TIMEOUT = 4000
 
 export const SnackbarProvider = ({ children }) => {
   const [snackbars, setSnackbars] = useState([]);
@@ -34,7 +29,7 @@ export const SnackbarProvider = ({ children }) => {
   return (
     <SnackbarContext.Provider value={{ showSnackbar }}>
       {children}
-      
+
       {snackbars.map(({ key, message, severity, onClose }) => (
         <CustomSnackbar
           key={key}
@@ -64,7 +59,7 @@ const CustomSnackbar = ({ message, severity = "info", onClose }) => {
     const timer = setTimeout(() => {
       setOpen(false);
       onClose?.();
-    }, 4000);
+    }, SNACKBARS_TIMEOUT);
     return () => clearTimeout(timer);
   }, [onClose]);
 

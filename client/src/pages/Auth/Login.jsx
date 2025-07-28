@@ -2,15 +2,16 @@ import LoginIcon from '@mui/icons-material/Login';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
-import { displayCustomAlert} from "../../components/UI/CustomSnackbar"
 import { useAuth } from "../../context/AuthProvider";
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/'
-  const [snackbars, setSnackbars] = useState([]);
+  const showSnackbar = useSnackbar();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,14 +20,15 @@ const Login = () => {
 
   const { currentUser } = useAuth();
   const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
+
   useEffect(() => {
     if (isLoggedIn) {
       navigate('/auth/account', { replace: true });
     }
-  }, [isLoggedIn, navigate]);
+  // eslint-disable-next-line
+  }, []);
 
   const handleChange = (e) => {
-    // console.log("e.target: ", e.target);
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -40,12 +42,11 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(formData)
-     	displayCustomAlert(snackbars, setSnackbars, "Login successful! \nWelcome " + formData.email, "success");
-      setTimeout(() => {
-        navigate(from, { replace: true })
-      },1000)
+     	showSnackbar( "Login successful! \nWelcome " + formData.email, "success");
+      navigate(from, { replace: true })
+
     } catch (err) {
-      displayCustomAlert(snackbars, setSnackbars, "Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
+      showSnackbar("Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
     }
   };
 
@@ -111,8 +112,6 @@ const Login = () => {
         </Stack>
       </CardContent>
       </Card>        
-      
-      {snackbars}
     </Container>
   )
 }

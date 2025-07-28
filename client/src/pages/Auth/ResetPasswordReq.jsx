@@ -2,11 +2,12 @@ import LockResetIcon from '@mui/icons-material/LockReset';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent } from '@mui/material';
-import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
+
 import { useAuth } from '../../context/AuthProvider';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 const ResetPasswordReq = () => {
-  const [snackbars, setSnackbars] = useState([]);
+  const showSnackbar = useSnackbar();
   const [email, setEmail] = useState('');
   const { resetPasswordReq } = useAuth(); // Assuming you add this method
 
@@ -17,18 +18,16 @@ const ResetPasswordReq = () => {
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     if (!email) {
-      displayCustomAlert(snackbars, setSnackbars, 'Please enter your email', 'warning');
+      showSnackbar('Please enter your email', 'warning');
       return;
     }
     try {
       // Call resetPassword API - add this method in your AuthProvider or call your backend directly
       await resetPasswordReq(email);
-      displayCustomAlert(snackbars, setSnackbars, `Password reset link sent to ${email}`, 'success');
+      showSnackbar(`Password reset link sent to ${email}`, 'success');
     } catch (err) {
       const errorMessage = 'Failed to send reset email: ' +( err.response?.data?.error?.message || err?.response?.data?.message  || err.response?.data?.message || err.message  ||  'Server error')
-      displayCustomAlert(
-        snackbars,
-        setSnackbars,
+      showSnackbar(
         errorMessage,
         'error'
       );
@@ -68,7 +67,6 @@ const ResetPasswordReq = () => {
           </Stack>
         </CardContent>
       </Card>
-      {snackbars}
     </Container>
   );
 };

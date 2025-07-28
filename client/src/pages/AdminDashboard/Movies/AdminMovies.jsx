@@ -8,12 +8,13 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddIcon from '@mui/icons-material/Add';
-import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
+
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
 
 const AdminMovies = () => {
-  const [snackbars, setSnackbars] = useState([]);
+  const showSnackbar = useSnackbar();
   const [movies, setMovies] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
@@ -41,7 +42,7 @@ const AdminMovies = () => {
     } catch (error) {
       console.error("Error deleting movie with id: " + id, error);
       const errorMessage = "Error deleting movie with id: " + id + "\n" + error?.response?.data?.error?.message;
-      displayCustomAlert(snackbars, setSnackbars, errorMessage, "error");
+      showSnackbar(errorMessage, "error");
     }
   };
 
@@ -242,8 +243,6 @@ return (
         Next
       </Button>
     </Stack>
-
-    {snackbars}
   </Container>
 );
 };

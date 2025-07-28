@@ -10,14 +10,15 @@ import {
   CardContent,
 } from '@mui/material';
 import LockResetIcon from '@mui/icons-material/LockReset';
-import { displayCustomAlert } from '../../components/UI/CustomSnackbar';
 import axios from '../../api/axiosInstance';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 const ResetPasswordForm = () => {
+  const showSnackbar = useSnackbar();
+
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token'); // ?token=xyz123
   const navigate = useNavigate();
-  const [snackbars, setSnackbars] = useState([]);
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -32,7 +33,7 @@ const ResetPasswordForm = () => {
     e.preventDefault();
 
     if (formData.newPassword !== formData.confirmPassword) {
-      return displayCustomAlert(snackbars, setSnackbars, "Passwords do not match.", "error");
+      return showSnackbar("Passwords do not match.", "error");
     }
 
     try {
@@ -41,15 +42,15 @@ const ResetPasswordForm = () => {
         newPassword: formData.newPassword,
       });
 
-      displayCustomAlert(snackbars, setSnackbars, "Password reset successful.", "success");
-      setTimeout(() => navigate('/auth/login'), 1000);
+      showSnackbar("Password reset successful. Please check your email", "success");
+      navigate('/auth/login')
     } catch (err) {
       const message =
         err.response?.data?.error?.message ||
         err.response?.data?.message ||
         err.message ||
         'Reset failed';
-      displayCustomAlert(snackbars, setSnackbars, message, 'error');
+      showSnackbar(message, 'error');
     }
   };
 
@@ -93,7 +94,6 @@ const ResetPasswordForm = () => {
           </Stack>
         </CardContent>
       </Card>
-      {snackbars}
     </Container>
   );
 };

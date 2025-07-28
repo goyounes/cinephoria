@@ -5,8 +5,9 @@ import {
   Container, Typography, Stack, TextField, Button, Card, CardContent
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import { displayCustomAlert } from "../../components/UI/CustomSnackbar";
+
 import { useAuth } from '../../context/AuthProvider';
+import { useSnackbar } from '../../context/SnackbarProvider.jsx';
 
 const validatePassword = (value) => ({
   length: value.length >= 8,
@@ -22,6 +23,7 @@ const isValidEmail = (email) => {
 
 const Register = () => {
   const { currentUser } = useAuth();
+  const showSnackbar = useSnackbar();
   const navigate = useNavigate();
   const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   useEffect(() => {
@@ -30,7 +32,6 @@ const Register = () => {
     }
   }, [isLoggedIn, navigate]);
 
-  const [snackbars, setSnackbars] = useState([]);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -92,18 +93,16 @@ const Register = () => {
 
     // ✅ Prevent submission if password is invalid
     if (formErrors.password) {
-      displayCustomAlert(snackbars, setSnackbars, "Please fix validation errors before submitting.", "error");
+      showSnackbar("Please fix validation errors before submitting.", "error");
       return;
     }
 
     try {
       await axios.post(`/api/auth/register`, formData);
-      displayCustomAlert(snackbars, setSnackbars, "Registered successfully!", "success");
+      showSnackbar("Registered successfully!", "success");
       navigate('/home');
     } catch (err) {
-      displayCustomAlert(
-        snackbars,
-        setSnackbars,
+      showSnackbar(
         "Failed to register: " + (err.response?.data?.error?.message || "Server error"),
         "error"
       );
@@ -223,7 +222,6 @@ const Register = () => {
           </Stack>
         </CardContent>
       </Card>
-      {snackbars}
     </Container>
   );
 };

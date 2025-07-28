@@ -37,7 +37,7 @@ const AdminScreenings = () => {
   //   } catch (error) {
   //     console.error("Error deleting screening with id: " + id, error);
   //     const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
-  //     displayCustomAlert(snackbars, setSnackbars, errorMessage, "error");
+  //     showSnackbar( errorMessage, "error");
   //   }
   // };
 

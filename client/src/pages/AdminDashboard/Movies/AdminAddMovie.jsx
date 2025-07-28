@@ -7,10 +7,11 @@ import {
 import axios from '../../../api/axiosInstance.js';
 import ImageUploader from "../../../components/UI/ImageUploader";
 import AddIcon from '@mui/icons-material/Add';
-import {displayCustomAlert} from "../../../components/UI/CustomSnackbar"
+import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+
 
 const AddMovie = () => {
-  const [snackbars, setSnackbars] = useState([]);
+  const showSnackbar = useSnackbar();
   const [movieData, setMovieData] = useState({
     title: "",
     description: "",
@@ -79,10 +80,10 @@ const handleFloatChange = (e) => {
 
     try {
       await axios.post('/api/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
-      displayCustomAlert(snackbars, setSnackbars, "Movie added successfully!", "success");
+      showSnackbar("Movie added successfully!", "success");
     } catch (error) {
       const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
-      displayCustomAlert(snackbars, setSnackbars, "Failed to add movie: " + customMessage, "error");
+      showSnackbar("Failed to add movie: " + customMessage, "error");
       console.log(error)
     }
   };
@@ -250,8 +251,6 @@ useEffect(() => {
       </Stack>
     </CardContent>
     </Card>
-    
-      {snackbars}
   </Container>
   );
 };

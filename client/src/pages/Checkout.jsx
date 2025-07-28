@@ -4,15 +4,16 @@ import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box
 import { Stars as StarsIcon } from "@mui/icons-material";
 import axios from '../api/axiosInstance.js';
 
-import { displayCustomAlert } from "../components/UI/CustomSnackbar";
 import PaymentDialog from "./components/PaymentDialog";
 import { useAuth } from "../context/AuthProvider";
+import { useSnackbar } from '../context/SnackbarProvider.jsx';
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 
 const Checkout = () => {
    const { currentUser } = useAuth();
    const isAdmin = currentUser?.role_id >= 2;
+   const showSnackbar = useSnackbar();
 
    const [searchParams] = useSearchParams();
 
@@ -24,7 +25,6 @@ const Checkout = () => {
    const [screening, setScreening] = useState(null);
    const [ticketTypes, setTicketTypes] = useState([])
    const [ticketCounts, setTicketCounts] = useState([]);
-   const [snackbars, setSnackbars] = useState([]);
 
    useEffect(() => {
       const fetchData = async () => {
@@ -42,7 +42,7 @@ const Checkout = () => {
             setTicketTypes(ticketTypesRes.data);
             setTicketCounts(new Array(ticketTypesRes.data.length).fill(0));
          } catch (err) {
-            displayCustomAlert(snackbars, setSnackbars, "Failed to load screening or movie info", "error");
+            showSnackbar("Failed to load screening or movie info", "error");
          } finally {
             setLoading(false);
          }
@@ -61,7 +61,7 @@ const Checkout = () => {
 
       if (newCount < 0) return
       if (delta > 0 && currentTotal + delta > MAX_NUMBER_OF_TICKETS_PER_ORDER) {
-         displayCustomAlert(snackbars, setSnackbars, `You can only reserve up to ${MAX_NUMBER_OF_TICKETS_PER_ORDER} tickets.`, "error");
+         showSnackbar(`You can only reserve up to ${MAX_NUMBER_OF_TICKETS_PER_ORDER} tickets.`, "error");
          return;
       }
 
@@ -90,25 +90,6 @@ const Checkout = () => {
 
       total_price: calculateTotal(),
    };
-   // const handleSubmit = async () => {
-   //    const ticketPayload = {
-   //       screening_id,
-   //       ticket_types: ticketTypes.map((type, index) => ({
-   //       type: type.ticket_type_name,
-   //       count: ticketCounts[index],
-   //       ticket_type_price: type.ticket_type_price,
-   //       })),
-   //    };
-
-   //    try {
-   //       await axios.post("/api/checkout/complete", ticketPayload);
-   //       displayCustomAlert(snackbars, setSnackbars, "Reservation successful!", "success");
-   //       navigate("/tickets");
-   //    } catch (err) {
-   //       const message = err.response?.data?.error?.message || err.message;
-   //       displayCustomAlert(snackbars, setSnackbars, "Checkout failed: " + message, "error");
-   //    }
-   // };
 
    if (loading) {
       return (
@@ -265,12 +246,9 @@ const Checkout = () => {
             onClose={() => setCardDialogOpen(false)}
             cardInfo={cardInfo}
             setCardInfo={setCardInfo}
-            snackbars={snackbars}
-            setSnackbars={setSnackbars}
             order={orderObject}
          />
 
-         {snackbars}
       </Container>
    );
    };

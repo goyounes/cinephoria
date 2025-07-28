@@ -10,13 +10,12 @@ import {
   Stack,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import {displayCustomAlert} from "../components/UI/CustomSnackbar"
 import { useAuth } from '../context/AuthProvider';
-// import CustomSnackbar, { displayCustomAlert } from "../../components/CustomSnackbar";
-
+import { useSnackbar } from '../context/SnackbarProvider.jsx';
 
 const ContactUs = () => {
   const {currentUser} = useAuth()
+  const showSnackbar = useSnackbar();
 
   const [formData, setFormData] = useState({
     message_sender_name: "",
@@ -24,8 +23,6 @@ const ContactUs = () => {
     message_subject: "",
     message_text: "",
   });
-
-  const [snackbars, setSnackbars] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,10 +42,10 @@ const ContactUs = () => {
         message_text: "",
       });
 
-      displayCustomAlert(snackbars, setSnackbars, "Message sent!", "success");
+      showSnackbar("Message sent!", "success");
     } catch (error) {
       const serverMessage = error.response?.data?.error?.message || error.message || "Something went wrong";
-      displayCustomAlert(snackbars, setSnackbars, `Failed to send message: ${serverMessage}`, "error");
+      showSnackbar(`Failed to send message: ${serverMessage}`, "error");
     }
   };
 
@@ -118,8 +115,6 @@ const ContactUs = () => {
           </Stack>
         </CardContent>
       </Card>
-
-      {snackbars}
     </Container>
   );
 };
