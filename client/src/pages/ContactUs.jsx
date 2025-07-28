@@ -1,14 +1,6 @@
 import axios from '../api/axiosInstance.js';
 import { useState } from "react";
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-} from "@mui/material";
+import {Container,Typography,TextField,Button,Card,CardContent,Stack} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from '../context/AuthProvider';
 import { useSnackbar } from '../context/SnackbarProvider.jsx';
@@ -19,7 +11,7 @@ const ContactUs = () => {
 
   const [formData, setFormData] = useState({
     message_sender_name: "",
-    message_sender_email: currentUser.user_email|| "",
+    message_sender_email: currentUser?.user_email || "",
     message_subject: "",
     message_text: "",
   });
