@@ -85,7 +85,7 @@ const AdminMovies = () => {
     return sortedMovies.slice(startIndex, startIndex + ROWS_PER_PAGE);
   }, [sortedMovies, currentPage, ROWS_PER_PAGE]);
 
-  const totalPages = Math.ceil(sortedMovies.length / ROWS_PER_PAGE);
+  const totalPages = Math.max ( Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1 )
 
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key) return null;
