@@ -161,9 +161,6 @@ const AdminScreenings = () => {
                         <EditNoteIcon />
                       </Button>
                     </Link>
-                    <Button size="large" color="error" onClick={() => handleDelete(screening.screening_id)}>
-                      <DeleteIcon />
-                    </Button>
                   </Stack>
                 </TableCell>
               </TableRow>

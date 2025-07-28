@@ -95,6 +95,7 @@ const AdminMovies = () => {
 
 return (
   <Container maxWidth="xl" sx={{ py: 4 }}>
+    {/* Headings and "Add" button */}
     <Stack direction="row" justifyContent="space-between" alignItems="center" >
       <Typography variant="h4" fontWeight="bold">
         🎬 Movies
