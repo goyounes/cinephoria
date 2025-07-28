@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom';
 import {
   Container, Stack, Button, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Typography, Box,
-  Select, MenuItem
-} from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import AddIcon from '@mui/icons-material/Add';
-
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+  Select, MenuItem, TextField, Autocomplete } from "@mui/material";
+import { Delete as DeleteIcon, 
+  EditNote as EditNoteIcon, 
+  Add as AddIcon, 
+  ArrowDropUp as ArrowDropUpIcon, 
+  ArrowDropDown as ArrowDropDownIcon } 
+  from '@mui/icons-material';
 import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
 
 const AdminMovies = () => {
@@ -19,7 +18,8 @@ const AdminMovies = () => {
   const [movies, setMovies] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filters, setFilters] = useState({
-    is_team_pick: '' // empty means no filter; 'yes' or 'no' for filtering
+    is_team_pick: '',
+    movie_id: ''  
   });
 
   // Pagination states
@@ -38,6 +38,15 @@ const AdminMovies = () => {
   useEffect(() => {
     fetchMovies();
   }, []);
+
+  const movieOptions = useMemo(() => {
+    // Map each movie to { movie_id, label: title }
+    return movies.map(movie => ({
+      movie_id: movie.movie_id,
+      label: movie.title
+    }));
+  }, [movies]);
+
 
   const HandleDeleteButton = async (id) => {
     try {
@@ -74,11 +83,19 @@ const AdminMovies = () => {
   // Filter movies by is_team_pick filter
   const filteredMovies = useMemo(() => {
     return movies.filter(movie => {
-      if (filters.is_team_pick === 'yes') return movie.is_team_pick === true || movie.is_team_pick === 1;
-      if (filters.is_team_pick === 'no') return movie.is_team_pick === false || movie.is_team_pick === 0;
-      return true; // no filter
+      // Filter by team pick
+      if (filters.is_team_pick === 'yes' && !(movie.is_team_pick === true || movie.is_team_pick === 1)) {
+        return false;
+      }
+      if (filters.is_team_pick === 'no' && !(movie.is_team_pick === false || movie.is_team_pick === 0)) {
+        return false;
+      }
+      if (filters.movie_id && movie.movie_id !== filters.movie_id) {
+        return false;
+      }
+      return true;
     });
-  }, [movies, filters.is_team_pick]);
+  }, [movies, filters.is_team_pick, filters.movie_id]);
 
   // Sort filtered movies
   const sortedMovies = useMemo(() => {
@@ -143,6 +160,26 @@ return (
         <MenuItem value="yes">Yes</MenuItem>
         <MenuItem value="no">No</MenuItem>
       </Select>
+
+      <Autocomplete
+        size="small"
+        sx={{ width: 300 }}
+        options={movieOptions}
+        value={filters.movie_id
+          ? movieOptions.find(option => option.movie_id === filters.movie_id) || null
+          : null
+        }
+        onChange={(event, newValue) => {
+          setFilters({ ...filters, movie_id: newValue ? newValue.movie_id : '' });
+          setCurrentPage(1); // reset page on filter change
+        }}
+        renderInput={(params) => (
+          <TextField {...params} label="Movie" placeholder="Select a movie" />
+        )}
+        clearOnEscape
+        isOptionEqualToValue={(option, value) => option.movie_id === value.movie_id}
+      />
+
     </Stack>
 
     {/* Pagination Controls - TOP */}
