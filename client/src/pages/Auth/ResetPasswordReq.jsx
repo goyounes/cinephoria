@@ -6,31 +6,48 @@ import { Container, Typography, Stack, TextField, Button, Card, CardContent } fr
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
 
+// Email validation helper
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+};
+
 const ResetPasswordReq = () => {
   const showSnackbar = useSnackbar();
   const [email, setEmail] = useState('');
-  const { resetPasswordReq } = useAuth(); // Assuming you add this method
+  const [emailError, setEmailError] = useState('');
+  const { resetPasswordReq } = useAuth(); // Assuming this exists
 
   const handleChange = (e) => {
-    setEmail(e.target.value);
+    const value = e.target.value;
+    setEmail(value);
+    setEmailError(isValidEmail(value) ? '' : 'Please enter a valid email address.');
   };
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
+
     if (!email) {
       showSnackbar('Please enter your email', 'warning');
       return;
     }
+
+    if (!isValidEmail(email)) {
+      setEmailError('Please enter a valid email address.');
+      showSnackbar('Invalid email address.', 'error');
+      return;
+    }
+
     try {
-      // Call resetPassword API - add this method in your AuthProvider or call your backend directly
       await resetPasswordReq(email);
       showSnackbar(`Password reset link sent to ${email}`, 'success');
     } catch (err) {
-      const errorMessage = 'Failed to send reset email: ' +( err.response?.data?.error?.message || err?.response?.data?.message  || err.response?.data?.message || err.message  ||  'Server error')
-      showSnackbar(
-        errorMessage,
-        'error'
-      );
+      const errorMessage =
+        'Failed to send reset email: ' +
+        (err.response?.data?.error?.message ||
+          err?.response?.data?.message ||
+          err.message ||
+          'Server error');
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -52,9 +69,17 @@ const ResetPasswordReq = () => {
               value={email}
               onChange={handleChange}
               autoComplete="email"
+              error={!!emailError}
+              helperText={emailError}
             />
 
-            <Button type="submit" variant="contained" color="primary" startIcon={<LockResetIcon />}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              startIcon={<LockResetIcon />}
+              disabled={!email || !!emailError}
+            >
               Send Reset Link
             </Button>
 
