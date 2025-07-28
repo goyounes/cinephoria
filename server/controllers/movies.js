@@ -308,3 +308,15 @@ export async function getLatestMovies(){
 
     return result_rows
 }
+
+export async function checkMovieIdAdmin (id){
+    const q = `
+        SELECT movies.movie_id
+        FROM movies
+        WHERE movies.movie_id = ?
+    `
+
+    const [result_rows] = await pool.query(q,[id]);
+    const found = !(result_rows.length === 0)
+    return found
+}

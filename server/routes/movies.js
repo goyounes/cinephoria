@@ -6,7 +6,8 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 import { addMovie,  getGenres, deleteMovie, updateMovie, 
     getOneMovieWithGenres, getMoviesWithGenres,
-    getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies} 
+    getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies,
+    checkMovieIdAdmin} 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getUpcomingScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
 import {s3, bucketName} from "../api/awsS3Client.js"
@@ -200,6 +201,12 @@ router.get("/:id/screenings", async (req,res,next) => {
     const movie_id = req.params.id
     const cinema_id = req.query.cinema_id || null; 
     try {
+        const found = await checkMovieIdAdmin(movie_id) // check movie exists in the db 
+        if (!found){
+            const err = new Error("No movie with this id was found");
+            err.status = 404;
+            return next(err);
+        }
         const rawScreenings = await getUpcomingScreenings(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         res.status(200).json(screenings)
@@ -212,6 +219,12 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
     const movie_id = req.params.id
     const cinema_id = req.query.cinema_id || null; 
     try {
+        const found = await checkMovieIdAdmin(movie_id) // check movie exists in the db 
+        if (!found){
+            const err = new Error("No movie with this id was found");
+            err.status = 404;
+            return next(err);
+        }
         const rawScreenings = await getUpcomingScreeningsAdmin(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         res.status(200).json(screenings)
@@ -226,13 +239,13 @@ router.get("/:id",async (req,res,next) => {
     console.log("accesing DB for movie with movie_id =",id)
     try {
         const rawMovie = await getOneMovieWithGenres(id) // either a reosurce obj or err obj
-        const movie =  CombineGenresIdNames([rawMovie])[0] //cheated by submiting an array to the function and then taking the one elment out
         // console.log(movie)
-        if (!movie) {
+        if (!rawMovie) {
             const err = new Error("Movie not found");
             err.status = 404;
             return next(err); 
         }
+        const movie =  CombineGenresIdNames([rawMovie])[0] //cheated by submiting an array to the function and then taking the one elment out
 
         const getObjectParams = {
             Bucket: bucketName,
@@ -254,6 +267,13 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
     if (!req.body.title) {
         const err = new Error("Missing movie title");
         err.status = 400;
+        return next(err);
+    }
+
+    const found = await checkMovieIdAdmin(id) // check movie exists in the db 
+    if (!found){
+        const err = new Error("No movie with this id was found");
+        err.status = 404;
         return next(err);
     }
 
@@ -338,13 +358,14 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     console.log("Deleting movie with movie_id =",id)
     try {
         const movie = await getOneMovieWithGenres(id)
-        const deleteResult = await deleteMovie(id) // either a reosurce obj or err obj
 
         if (!movie) {
             const err = new Error("Movie not found");
             err.status = 404;
             return next(err); 
         }
+
+        const deleteResult = await deleteMovie(id) 
         
         //Delete the image
         console.log(movie)
