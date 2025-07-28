@@ -3,7 +3,8 @@ import axios from '../../../api/axiosInstance.js';
 import { Link } from 'react-router-dom';
 import {
   Container, Stack, Button, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Typography, Box
+  TableContainer, TableHead, TableRow, Paper, Typography, Box,
+  Select, MenuItem
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -17,10 +18,13 @@ const AdminMovies = () => {
   const showSnackbar = useSnackbar();
   const [movies, setMovies] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [filters, setFilters] = useState({
+    is_team_pick: '' // empty means no filter; 'yes' or 'no' for filtering
+  });
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 20; // You can adjust this
+  const ROWS_PER_PAGE = 20;
 
   const fetchMovies = async () => {
     try {
@@ -60,10 +64,27 @@ const AdminMovies = () => {
     setCurrentPage(1); // Reset to first page on sort change
   };
 
-  const sortedMovies = useMemo(() => {
-    if (!sortConfig.key) return movies;
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    if (sortConfig.direction === 'asc') return <ArrowDropUpIcon fontSize="small" />;
+    if (sortConfig.direction === 'desc') return <ArrowDropDownIcon fontSize="small" />;
+    return null;
+  };
 
-    const sorted = [...movies].sort((a, b) => {
+  // Filter movies by is_team_pick filter
+  const filteredMovies = useMemo(() => {
+    return movies.filter(movie => {
+      if (filters.is_team_pick === 'yes') return movie.is_team_pick === true || movie.is_team_pick === 1;
+      if (filters.is_team_pick === 'no') return movie.is_team_pick === false || movie.is_team_pick === 0;
+      return true; // no filter
+    });
+  }, [movies, filters.is_team_pick]);
+
+  // Sort filtered movies
+  const sortedMovies = useMemo(() => {
+    if (!sortConfig.key) return filteredMovies;
+
+    const sorted = [...filteredMovies].sort((a, b) => {
       const a_value = a[sortConfig.key];
       const b_value = b[sortConfig.key];
 
@@ -77,22 +98,15 @@ const AdminMovies = () => {
     });
 
     return sorted;
-  }, [movies, sortConfig]);
+  }, [filteredMovies, sortConfig]);
 
-  // Pagination logic - slice the sorted array for the current page
+  // Pagination
   const paginatedMovies = useMemo(() => {
     const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
     return sortedMovies.slice(startIndex, startIndex + ROWS_PER_PAGE);
   }, [sortedMovies, currentPage, ROWS_PER_PAGE]);
 
-  const totalPages = Math.max ( Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1 )
-
-  const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return null;
-    if (sortConfig.direction === 'asc') return <ArrowDropUpIcon fontSize="small" />;
-    if (sortConfig.direction === 'desc') return <ArrowDropDownIcon fontSize="small" />;
-    return null;
-  };
+  const totalPages = Math.max(Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1);
 
 return (
   <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -108,8 +122,31 @@ return (
       </Link>
     </Stack>
 
+    {/* Filters */}
+    <Stack direction="row" spacing={2} alignItems="center" mt={3}>
+      {/* Team Pick filter select */}
+      <Select
+        value={filters.is_team_pick}
+        onChange={(e) => {
+          setFilters({ ...filters, is_team_pick: e.target.value });
+          setCurrentPage(1); // reset page on filter change
+        }}
+        size="small"
+        displayEmpty
+        sx={{ width: 150 }}
+        MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
+      >
+        <MenuItem disabled value="">
+          Team Pick
+        </MenuItem>
+        <MenuItem value="">All</MenuItem>
+        <MenuItem value="yes">Yes</MenuItem>
+        <MenuItem value="no">No</MenuItem>
+      </Select>
+    </Stack>
+
     {/* Pagination Controls - TOP */}
-    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} mb={2}>
+    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} mb={2} mt={3}>
       <Button
         disabled={currentPage === 1}
         onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -191,7 +228,7 @@ return (
 
               <TableCell>
                 <Typography variant="body2" color="text.secondary">
-                  {movie.description}
+                  {movie.description?.slice(0, 200) || '-'}
                 </Typography>
               </TableCell>
 
@@ -202,23 +239,37 @@ return (
 
               <TableCell>
                 <Stack direction="column" spacing={1}>
-                  <Link to={`/admin/movies/${movie.movie_id}/edit`} style={{ textDecoration: 'none' }}>
-                    <Button size="large" color="primary">
-                      <EditNoteIcon fontSize="large" />
-                    </Button>
-                  </Link>
+                  <Button
+                    component={Link}
+                    to={`/admin/movies/${movie.movie_id}/edit`}
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EditNoteIcon />}
+                  >
+                    Edit
+                  </Button>
 
                   <Button
-                    size="large"
+                    size="small"
+                    variant="outlined"
                     color="error"
+                    startIcon={<DeleteIcon />}
                     onClick={() => HandleDeleteButton(movie.movie_id)}
                   >
-                    <DeleteIcon />
+                    Delete
                   </Button>
                 </Stack>
               </TableCell>
             </TableRow>
           ))}
+
+          {paginatedMovies.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={8} align="center" sx={{ py: 5 }}>
+                No movies found.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </TableContainer>
