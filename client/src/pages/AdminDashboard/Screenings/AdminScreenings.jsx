@@ -3,20 +3,18 @@ import axios from '../../../api/axiosInstance.js';
 import { Link } from 'react-router-dom';
 import {
   Container, Stack, Button, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Typography, Box
-} from "@mui/material";
+  TableContainer, TableHead, TableRow, Paper, Typography} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import DeleteIcon from '@mui/icons-material/Delete';
+// import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { displayCustomAlert } from "../../../components/UI/CustomSnackbar";
 
 const AdminScreenings = () => {
   const [screenings, setScreenings] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
-  const [snackbars, setSnackbars] = useState([]);
+
   const ROWS_PER_PAGE = 20;
 
   const fetchScreenings = async () => {
@@ -32,16 +30,16 @@ const AdminScreenings = () => {
     fetchScreenings();
   }, []);
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/screenings/${id}`);
-      await fetchScreenings();
-    } catch (error) {
-      console.error("Error deleting screening with id: " + id, error);
-      const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
-      displayCustomAlert(snackbars, setSnackbars, errorMessage, "error");
-    }
-  };
+  // const handleDelete = async (id) => {
+  //   try {
+  //     await axios.delete(`/api/screenings/${id}`);
+  //     await fetchScreenings();
+  //   } catch (error) {
+  //     console.error("Error deleting screening with id: " + id, error);
+  //     const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
+  //     displayCustomAlert(snackbars, setSnackbars, errorMessage, "error");
+  //   }
+  // };
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -179,8 +177,6 @@ const AdminScreenings = () => {
           Next
         </Button>
       </Stack>
-
-      {snackbars}
     </Container>
   );
 };
