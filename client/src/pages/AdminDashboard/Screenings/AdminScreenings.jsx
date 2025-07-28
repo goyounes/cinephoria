@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom';
 import {
   Container, Stack, Button, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Typography} from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import {
+  Add as AddIcon,
+  EditNote as EditNoteIcon,
+  Delete as DeleteIcon,
+  ArrowDropUp as ArrowDropUpIcon,
+  ArrowDropDown as ArrowDropDownIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
 
 const AdminScreenings = () => {
@@ -134,6 +136,9 @@ const AdminScreenings = () => {
               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('end_time')}>
                 End Time {renderSortIcon('end_time')}
               </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('isDeleted')}>
+                Deleted {renderSortIcon('isDeleted')}
+              </TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>
                 Actions
               </TableCell>
@@ -151,9 +156,10 @@ const AdminScreenings = () => {
                 <TableCell>{screening.title}</TableCell>
                 <TableCell>{screening.cinema_name}</TableCell>
                 <TableCell>{screening.room_id}</TableCell>
-                <TableCell>{new Date(screening.start_date).toLocaleDateString()}</TableCell>
-                <TableCell>{screening.start_time}</TableCell>
-                <TableCell>{screening.end_time}</TableCell>
+                <TableCell>{screening.start_date}</TableCell>
+                <TableCell>{screening.start_time?.substring(0,5)}</TableCell>
+                <TableCell>{screening.end_time?.substring(0,5)}</TableCell>
+                <TableCell>{(screening.isDeleted === 0) ? "No" : "Yes"}</TableCell>
 
                 <TableCell>
                   <Stack direction="row" spacing={1}>

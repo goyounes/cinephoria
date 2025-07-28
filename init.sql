@@ -467,6 +467,7 @@ CREATE TABLE screenings (
     start_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    isDeleted BOOL DEFAULT FALSE,
     FOREIGN KEY (cinema_id) REFERENCES cinemas(cinema_id),
     FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
     FOREIGN KEY (room_id) REFERENCES rooms(room_id)
