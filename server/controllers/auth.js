@@ -303,13 +303,21 @@ export async function refreshService(req, res, next) {
 function createRoleMiddleware(roleCheckFunc) {
   return async function (req, res, next) {
     try {
-      const token = req.body.accessToken; 
+      const token = req.body.accessToken;
 
       if (!token) {
-        return res.status(401).json({ message: "No access token provided" });
+        return res.status(400).json({ message: "No access token provided" });
       }
 
-      const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
+      let decoded;
+      try {
+        decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
+      } catch (error) {
+        if (error.name === "TokenExpiredError") {
+          return res.status(401).json({ message: "Access token expired" });
+        }
+        return res.status(400).json({ message: "Invalid access token" });
+      }
 
       if (!roleCheckFunc(decoded.role_id)) {
         return res.status(403).json({ message: "Access denied" });
@@ -323,7 +331,7 @@ function createRoleMiddleware(roleCheckFunc) {
 
       next();
     } catch (error) {
-      return res.status(401).json({ message: "Invalid or expired token" });
+      next(error)
     }
   };
 }
