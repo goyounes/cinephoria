@@ -166,144 +166,154 @@ export async function resetPasswordService(req, res, next) {
   }
 }
 
-export async function loginService (req, res, next) {
 
+const revokedRefreshTokens = {};
+export async function logoutService(req, res, next) {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(400).json({ message: "Refresh token required" });
+
+    // Add refreshToken to revoked list (blacklist)
+    revokedRefreshTokens[refreshToken] = true;
+
+    console.log("revoked tokens hashMap", revokedRefreshTokens)
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+// Login functionality implemented using JWTs
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_JWT_SECRET;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_JWT_SECRET;
+const ACCESS_TOKEN_EXPIRY = '15m';
+const REFRESH_TOKEN_EXPIRY = '1d';
+
+const generateTokens = (user_id, role_id, role_name, token_version) => {
+  const accessToken = jwt.sign({ user_id, role_id, role_name}, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  const refreshToken = jwt.sign({ user_id, token_version }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  return { accessToken, refreshToken };
+};
+
+export async function loginService (req, res, next) {
+    const { email, password } = req.body; 
     try {
         // Check if user exists with the provided username
         const q1 = "SELECT * FROM users WHERE user_email = ?";
-        const [data1] = await pool.query(q1 ,[req.body.email]);
+        const [data1] = await pool.query(q1 ,[email]);
         if (data1.length === 0) return next(new Error("This email does not exist"));
-
-        // Get the user_id
         const user = data1[0]
-        const user_id = user.user_id;
         user.role_name = getRoleNameById(user.role_id)
 
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
-        const [data2] = await pool.query(q2 ,[user_id]);
+        const [data2] = await pool.query(q2 ,[user.user_id]);
         if (data2.length === 0) return next(new Error("No credentials found for this user... desync in the database?"));
-
-        // Get the password hash
         const passwordHash = data2[0].user_password_hash;
 
         //Check the hash
-        const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
+        const isPasswordValid = bycrpt.compareSync(password, passwordHash);
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
-        // If everything is fine, return the user_id signed using a JWT token
-        const accessToken = jwt.sign(
-          {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name } ,
-          process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '1h' }
-        );    
-        const refreshToken = jwt.sign(
-          {user_id: user.user_id , role_id: user.role_id, role_name: user.role_name} ,
-          process.env.REFRESH_JWT_SECRET,
-          { expiresIn: '90d' }
-        );  
-        refreshTokens.push(refreshToken)
+        // check token version from user DB 
+        let token_version = user?.token_version ?? 0;
+        const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, token_version);
 
-        res.cookie('accessToken', accessToken, {
-            // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-            // secure: true, // <-- REQUIRED for SameSite=None
-            // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
-            
-            httpOnly: false,        // Allow access from JavaScript (XSS risk)
-            secure: false,          // Allow over HTTP (MITM risk)
-            sameSite: 'Lax',        // Allows some cross-site requests
-            maxAge: 1 * 60 * 60 * 1000, // 1 hours in milliseconds
-        }).status(200).json({
-          ...user,
+        res.status(200).json({
+          user_id: user.user_id,
+          user_name: user.user_name,
+          user_email: user.user_email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          role_id: user.role_id,
+          role_name: user.role_name,
+          isVerified: user.isVerified,
           accessToken,
-          refreshToken
+          refreshToken,
         });
     }catch (error) {
         next(error);
     }
 
 }
-export async function logoutService (req, res, next) {
-    //clear the cookie representing the JWT token
-    res.clearCookie('accessToken',{
-        secure: true,
-        sameSite:"none"
-    })
-    .status(200).json({ message: "Logged out successfully" });
-}
+
+
 
 // refresh functionality still under build
-let refreshTokens = []
-export async function refreshService (req, res, next) {
-    // take refresh token
-    const refreshToken = req.body.token
-    //send error if there is no token
-    if(!refreshToken) return res.status(401).json("You are not authenticated")
-    if(!refreshTokens.includes(refreshToken)) return res.status(403).json("Refresh token not valid")
-    // Good --> send new acces token
 
-    const accessToken = jwt.sign(
-      {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
-      process.env.ACCESS_JWT_SECRET,
-      { expiresIn: '1h' }
-    );    
+export async function refreshService(req, res, next) {
+  try {
+    const { accessToken, refreshToken } = req.body;
 
-    try {
-        // Get the user_id
-        const user = data1[0]
-        const user_id = user.user_id;
+    if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
 
-        // Get the user's password hash
-        const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
-        const [data2] = await pool.query(q2 ,[user_id]);
-        if (data2.length === 0) return next(new Error("No credentials found for this user... desync in the database?"));
-
-        // Get the password hash
-        const passwordHash = data2[0].user_password_hash;
-
-        //Check the hash
-        const isPasswordValid = bycrpt.compareSync(req.body.password, passwordHash);
-        if (!isPasswordValid) return next(new Error("Invalid password"));
-
-        // If everything is fine, return the user_id signed using a JWT token
-        const accessToken = jwt.sign(
-          {user_id: user.user_id , role_id: user.role_id, role_name: getRoleNameById(user.role_id)} ,
-          process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '1h' }
-        );    
-
-
-        res.cookie('accessToken', accessToken, {
-            // httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-            // secure: true, // <-- REQUIRED for SameSite=None
-            // sameSite: 'None', // <-- REQUIRED for cross-site cookie sharing
-            
-            httpOnly: false,        // Allow access from JavaScript (XSS risk)
-            secure: false,          // Allow over HTTP (MITM risk)
-            sameSite: 'Lax',        // Allows some cross-site requests
-            maxAge: 1 * 60 * 60 * 1000, // 1 hours in milliseconds
-        }).status(200).json({
-          ...user,
-          accessToken
-        });
-    }catch (error) {
-        next(error);
+    // Check if refresh token is revoked (blacklisted)
+    if (revokedRefreshTokens[refreshToken]) {
+      return res.status(403).json({ message: "Refresh token revoked (logged out)" });
     }
 
+    // Verify access token first (MUST be valid signed token, just expired is okay)
+    let decodedAccess;
+    try {
+      decodedAccess = jwt.verify(accessToken, ACCESS_TOKEN_SECRET, { ignoreExpiration: true });
+    } catch (err) {
+      return res.status(401).json({ message: "Access token is not valid" });
+    }
+
+    let decodedRefresh;
+    try {
+      decodedRefresh = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+    } catch (err) {
+      return res.status(401).json({message: "Invalid refresh token"});
+    }
+
+    // Check refresh token version matches
+    const q = "SELECT refresh_token_version FROM users WHERE user_id = ?";
+    const [rows] = await pool.query(q, [decodedAccess.user_id]);
+    if (rows.length === 0) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    const refresh_token_version = rows[0].refresh_token_version;
+    console.log(refresh_token_version)
+
+    if (refresh_token_version !== decodedRefresh.token_version) {
+
+      return res.status(401).json({message: "Token version mismatch"});
+    }
+
+    // Generate new tokens
+    const new_token_version = refresh_token_version
+    const { accessToken: newAccessToken } = generateTokens(
+      decodedAccess.user_id,
+      decodedAccess.role_id,
+      decodedAccess.role_name,
+      new_token_version
+    );
+
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
+
 
 function createRoleMiddleware(roleCheckFunc) {
   return async function (req, res, next) {
     try {
-      const token = req.cookies.accessToken;
+      const token = req.body.accessToken; 
+
       if (!token) {
-        throw new Error("No token provided");
+        return res.status(401).json({ message: "No access token provided" });
       }
 
       const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
 
       if (!roleCheckFunc(decoded.role_id)) {
-        throw new Error("Access denied");
+        return res.status(403).json({ message: "Access denied" });
       }
 
       req.user = {
@@ -314,10 +324,11 @@ function createRoleMiddleware(roleCheckFunc) {
 
       next();
     } catch (error) {
-      next(error);
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
   };
 }
+
 export const verifyUserJWT = createRoleMiddleware((role_id) => role_id >= 1);   
 export const verifyEmployeeJWT = createRoleMiddleware((role_id) => role_id >= 2);
 export const verifyAdminJWT = createRoleMiddleware((role_id) => role_id === 3);

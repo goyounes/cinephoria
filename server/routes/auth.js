@@ -3,8 +3,11 @@ const router = Router();
 
 import { verifyEmailService, resetPasswordReqService, resetPasswordService, 
   registerService, loginService, logoutService,
-  verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT } from '../controllers/auth.js';
+  verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT, 
+  refreshService} from '../controllers/auth.js';
 import { body, validationResult } from 'express-validator';
+
+router.post('/refresh', verifyUserJWT,refreshService);
 
 router.post('/verify-user', verifyUserJWT, (req, res) => {
   res.status(200).json({ message: 'Token valid', user: req.user });

@@ -612,6 +612,7 @@ CREATE TABLE users (
     last_name VARCHAR(255) NOT NULL,
     role_id INT DEFAULT 1,
     isVerified BOOL DEFAULT FALSE,
+    refresh_token_version INT DEFAULT 0,
     UNIQUE (user_name),
 	UNIQUE (user_email),
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
