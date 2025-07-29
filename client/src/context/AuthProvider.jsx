@@ -1,46 +1,64 @@
-import { useState } from 'react'
-import {useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react';
 import axios from '../api/axiosInstance.js';
+import jwtDecode from 'jwt-decode';
 import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
 
-
-export const AuthContext = createContext()
+export const AuthContext = createContext();
 
 export const useAuth = () => {
-  const authContext = useContext(AuthContext)
-
-  if(!AuthContext){
-    throw new Error("useAuth must be used within a AuthProvider")
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-
-  return authContext
-}
+  return authContext;
+};
 
 export const AuthContextProvider = ({ children }) => {
-  const [token, setToken] =  useState()
-  const [currentUser, setCurrentUser] = useState(getItemWithExpiry("user") || null)
-  
+  const [currentUser, setCurrentUser] = useState(() => {
+    const token = getItemWithExpiry("accessToken");
+    return token ? decodeUserFromToken(token) : null;
+  });
+
+  // Decode JWT payload (user info)
+  const decodeUserFromToken = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded; // You can extract only needed fields if you want
+    } catch (err) {
+      console.error("Invalid token:", err);
+      return null;
+    }
+  };
+
   const login = async (inputs) => {
     try {
       const res = await axios.post("/api/auth/login", inputs, {
-        withCredentials:true
-      })
-      setCurrentUser(res.data)
-      res?.data && setItemWithExpiry('user', res.data, 1 * 60 * 60 * 1000 );
-      return res.data
+        withCredentials: true,
+      });
+
+      const { accessToken, refreshToken } = res.data;
+
+      // Save tokens with expiry (example: 1h for access, 7d for refresh)
+      setItemWithExpiry("accessToken", accessToken, 60 * 60 * 1000);        // 1 hour
+      setItemWithExpiry("refreshToken", refreshToken, 7 * 24 * 60 * 60 * 1000); // 7 days
+
+      const decodedUser = decodeUserFromToken(accessToken);
+      setCurrentUser(decodedUser);
+
+      return decodedUser;
     } catch (error) {
-        const backendErrors = error.response?.data?.errors;
-        let formattedMessage;
-        if (Array.isArray(backendErrors) && backendErrors.length > 0) {
-          formattedMessage = backendErrors.map(e => e.msg).join(", ");
-        } else if (error.response?.data?.message) {
-          formattedMessage = error.response.data.message;
-        } else {
-          formattedMessage = error.message || "Unknown error occurred";
-        }
-        throw new Error(formattedMessage);
+      const backendErrors = error.response?.data?.errors;
+      let formattedMessage;
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        formattedMessage = backendErrors.map(e => e.msg).join(", ");
+      } else if (error.response?.data?.message) {
+        formattedMessage = error.response.data.message;
+      } else {
+        formattedMessage = error.message || "Unknown error occurred";
+      }
+      throw new Error(formattedMessage);
     }
-  }
+  };
 
   const logout = async () => {
     try {
@@ -48,9 +66,11 @@ export const AuthContextProvider = ({ children }) => {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+
     setCurrentUser(null);
-    localStorage.removeItem("user");
-  }
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  };
 
   const resetPasswordReq = async (email) => {
     try {
@@ -63,8 +83,10 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     const syncAuth = (e) => {
-      if (e.key === 'user') {
-        setCurrentUser(JSON.parse(e.newValue  || null)); // null on logout
+      if (e.key === 'accessToken') {
+        const token = e.newValue ? JSON.parse(e.newValue).value : null;
+        const decodedUser = token ? decodeUserFromToken(token) : null;
+        setCurrentUser(decodedUser);
       }
     };
 
