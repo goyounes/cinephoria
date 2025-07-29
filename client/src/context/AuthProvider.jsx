@@ -53,7 +53,8 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post("/api/auth/logout");
+      const refreshToken = localStorage.getItem('refreshToken')
+      refreshToken &&  await axios.post("/api/auth/logout",null, {headers:{Authorization: `Bearer ${refreshToken}`}});
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -68,6 +69,8 @@ export const AuthContextProvider = ({ children }) => {
     // Request interceptor - attach token from current state (or localStorage)
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
+        if (config.headers.Authorization) return config; //do not override already set Authorization header
+
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) {
           config.headers.Authorization = `Bearer ${accessToken}`;
@@ -100,6 +103,7 @@ export const AuthContextProvider = ({ children }) => {
           } catch (refreshError) {
             // Refresh failed - clear user and tokens
             setCurrentUser(null);
+            localStorage.removeItem('currentUser');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             return Promise.reject(refreshError);

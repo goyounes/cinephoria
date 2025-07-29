@@ -169,14 +169,25 @@ export async function resetPasswordService(req, res, next) {
 
 const revokedRefreshTokens = {};
 export async function logoutService(req, res, next) {
-  try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ message: "Refresh token required" });
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(400).json({ message: "Refresh token required" });
+  }
+  
+  const refreshToken = authHeader.split(' ')[1];
 
+  let decoded
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired refresh token" });
+  }
+  
+  try {
     // Add refreshToken to revoked list (blacklist)
     revokedRefreshTokens[refreshToken] = true;
-
-    console.log("revoked tokens hashMap", revokedRefreshTokens)
+    // console.log("revoked tokens hashMap", revokedRefreshTokens)
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     next(error);
@@ -185,14 +196,12 @@ export async function logoutService(req, res, next) {
 
 
 // Login functionality implemented using JWTs
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_JWT_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_JWT_SECRET;
-const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY = '7d';
+const ACCESS_JWT_EXPIRY = '15m';
+const REFRESH_JWT_EXPIRY = '7d';
 
 const generateTokens = (user_id, role_id, role_name, token_version) => {
-  const accessToken = jwt.sign({ user_id, role_id, role_name}, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-  const refreshToken = jwt.sign({ user_id, token_version }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  const accessToken = jwt.sign({ user_id, role_id, role_name}, process.env.ACCESS_JWT_SECRET, { expiresIn: ACCESS_JWT_EXPIRY });
+  const refreshToken = jwt.sign({ user_id, token_version }, process.env.REFRESH_JWT_SECRET, { expiresIn: REFRESH_JWT_EXPIRY });
   return { accessToken, refreshToken };
 };
 
@@ -255,14 +264,14 @@ export async function refreshService(req, res, next) {
     // Verify access token first (MUST be valid signed token, just expired is okay)
     let decodedAccess;
     try {
-      decodedAccess = jwt.verify(accessToken, ACCESS_TOKEN_SECRET, { ignoreExpiration: true });
+      decodedAccess = jwt.verify(accessToken, process.env.ACCESS_JWT_SECRET, { ignoreExpiration: true });
     } catch (err) {
       return res.status(401).json({ message: "Access token is not valid" });
     }
 
     let decodedRefresh;
     try {
-      decodedRefresh = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+      decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
     } catch (err) {
       return res.status(401).json({message: "Invalid refresh token"});
     }
@@ -303,11 +312,13 @@ export async function refreshService(req, res, next) {
 function createRoleMiddleware(roleCheckFunc) {
   return async function (req, res, next) {
     try {
-      const token = req.body.accessToken;
+      const authHeader = req.headers.authorization || req.headers.Authorization;
 
-      if (!token) {
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(400).json({ message: "No access token provided" });
       }
+      const token = authHeader.split(' ')[1];
+      console.log("extracted token :" , token)
 
       let decoded;
       try {
