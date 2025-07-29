@@ -1,7 +1,7 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useLayoutEffect } from 'react';
 import axios from '../api/axiosInstance.js';
-import jwtDecode from 'jwt-decode';
-import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
+// import {jwtDecode} from 'jwt-decode';
+// import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
 
 export const AuthContext = createContext();
 
@@ -14,38 +14,29 @@ export const useAuth = () => {
 };
 
 export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(() => {
-    const token = getItemWithExpiry("accessToken");
-    return token ? decodeUserFromToken(token) : null;
-  });
-
-  // Decode JWT payload (user info)
-  const decodeUserFromToken = (token) => {
-    try {
-      const decoded = jwtDecode(token);
-      return decoded; // You can extract only needed fields if you want
-    } catch (err) {
-      console.error("Invalid token:", err);
-      return null;
-    }
-  };
+  const [currentUser, setCurrentUser] = useState(() => JSON.stringify(localStorage.getItem("currentUser"))  || null);
 
   const login = async (inputs) => {
     try {
-      const res = await axios.post("/api/auth/login", inputs, {
-        withCredentials: true,
-      });
+      const res = await axios.post('/api/auth/login', inputs, { withCredentials: false });
+      const {user_id,user_name,user_email,role_id,role_name,accessToken,refreshToken} = res.data;
+      // first_name,// last_name,// isVerified,
 
-      const { accessToken, refreshToken } = res.data;
+      // Save tokens with expiry (adjust timeToLive as needed)
+      localStorage.setItem('accessToken', accessToken); 
+      localStorage.setItem('refreshToken', refreshToken);
 
-      // Save tokens with expiry (example: 1h for access, 7d for refresh)
-      setItemWithExpiry("accessToken", accessToken, 60 * 60 * 1000);        // 1 hour
-      setItemWithExpiry("refreshToken", refreshToken, 7 * 24 * 60 * 60 * 1000); // 7 days
+      const user = {
+        user_id,
+        user_name,
+        user_email,
+        role_id,
+        role_name,
+      };
+      setCurrentUser(user);
+      localStorage.setItem('currentUser', JSON.stringify(user)); // store user info for 1 days
 
-      const decodedUser = decodeUserFromToken(accessToken);
-      setCurrentUser(decodedUser);
-
-      return decodedUser;
+      return user;
     } catch (error) {
       const backendErrors = error.response?.data?.errors;
       let formattedMessage;
@@ -68,9 +59,64 @@ export const AuthContextProvider = ({ children }) => {
     }
 
     setCurrentUser(null);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('currentUser');
   };
+
+   useLayoutEffect(() => {
+    // Request interceptor - attach token from current state (or localStorage)
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor - handle 401, refresh token and logout on failure
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+
+          try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) throw new Error('No refresh token');
+
+            const response = await axios.post('/api/auth/refresh', { refreshToken });
+            const newAccessToken = response.data.accessToken;
+
+            localStorage.setItem('accessToken', newAccessToken);
+
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return axios(originalRequest);
+          } catch (refreshError) {
+            // Refresh failed - clear user and tokens
+            setCurrentUser(null);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            return Promise.reject(refreshError);
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, [currentUser]); // rerun when token changes or setCurrentUser fn changes
+
 
   const resetPasswordReq = async (email) => {
     try {
@@ -81,17 +127,20 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    const syncAuth = (e) => {
+  useEffect(() => { //sync across many browser windows
+    const syncAuthAcrossTabs = (e) => {
       if (e.key === 'accessToken') {
-        const token = e.newValue ? JSON.parse(e.newValue).value : null;
-        const decodedUser = token ? decodeUserFromToken(token) : null;
-        setCurrentUser(decodedUser);
+        if (!e.newValue) {
+          setCurrentUser(null);
+        }
+      }
+      if (e.key === 'currentUser') {
+        setCurrentUser(e.newValue ? JSON.parse(e.newValue) : null);
       }
     };
 
-    window.addEventListener('storage', syncAuth);
-    return () => window.removeEventListener('storage', syncAuth);
+    window.addEventListener('storage', syncAuthAcrossTabs);
+    return () => window.removeEventListener('storage', syncAuthAcrossTabs);
   }, []);
 
   return (
