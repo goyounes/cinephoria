@@ -3,7 +3,9 @@ import axios from '../../../api/axiosInstance.js';
 import { Link } from 'react-router-dom';
 import {
 Container, Stack, Button,  Paper, Typography,  Select,  MenuItem, Autocomplete, TextField,
-Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+Checkbox,
+FormControlLabel} from "@mui/material";
 import {
 Add as AddIcon,
 EditNote as EditNoteIcon,
@@ -35,6 +37,7 @@ const AdminScreenings = () => {
       fetchScreenings();
    }, []);
 
+   const [showPastScreenings, setShowPastScreenings] = useState(false);
    const [filters, setFilters] = useState({
       screening_id: '',
       movie_id: '',
@@ -119,15 +122,19 @@ const AdminScreenings = () => {
    }, [screenings, sortConfig]);
 
    const filteredScreenings = useMemo(() => {
+      const today = new Date().toISOString().split('T')[0]; // format: YYYY-MM-DD
+
       return sortedScreenings.filter(s => {
+         const isFutureOrToday = s.start_date >= today;
          return (
-         (!filters.screening_id || s.screening_id === filters.screening_id) &&
-         (!filters.movie_id || s.movie_id === filters.movie_id) &&
-         (!filters.cinema_id || s.cinema_id === filters.cinema_id) &&
-         (!filters.room_id || s.room_id === filters.room_id)
+            (!filters.screening_id || s.screening_id === filters.screening_id) &&
+            (!filters.movie_id || s.movie_id === filters.movie_id) &&
+            (!filters.cinema_id || s.cinema_id === filters.cinema_id) &&
+            (!filters.room_id || s.room_id === filters.room_id) &&
+            (showPastScreenings || isFutureOrToday)
          );
       });
-   }, [sortedScreenings, filters]);
+   }, [sortedScreenings, filters, showPastScreenings]);
 
    const paginatedScreenings = useMemo(() => {
       const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
@@ -179,7 +186,7 @@ const AdminScreenings = () => {
 
             <Autocomplete
                size="small"
-               sx={{ width: 400 }}
+               sx={{ width: 300 }}
                options={movie_ids.map((id, idx) => ({
                   movie_id: id,
                   label: movies[idx].split(' : ').slice(1).join(' : ') || '' // extract just the title part after "id : "
@@ -219,7 +226,7 @@ const AdminScreenings = () => {
                value={filters.room_id}
                onChange={(e) => setFilters({ ...filters, room_id: e.target.value })}
                size="small"
-               sx={{ width: 300 }}
+               sx={{ width: 200 }}
                MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
             >
                <MenuItem value="">All Rooms</MenuItem>
@@ -227,6 +234,17 @@ const AdminScreenings = () => {
                   <MenuItem key={id} value={id}>{rooms[idx]}</MenuItem> // rooms[idx] is "id : room name"
                ))}
             </Select>
+
+            <FormControlLabel
+               control={
+                  <Checkbox
+                     checked={showPastScreenings}
+                     onChange={(e) => setShowPastScreenings(e.target.checked)}
+                     size="large"
+                  />
+               }
+               label="Show Past Screenings"
+               />
          </Stack>
 
 
