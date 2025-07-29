@@ -243,36 +243,36 @@ const AdminScreenings = () => {
 
          {/* Table */}
          <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
-         <Table>
+         <Table sx={{ tableLayout: 'fixed' }}>
             <TableHead>
-               <TableRow sx={{ backgroundColor: 'white' }}>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('screening_id')}>
-                  Screening ID {renderSortIcon('screening_id')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('title')}>
-                  Movie Title {renderSortIcon('title')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('cinema_name')}>
-                  Cinema {renderSortIcon('cinema_name')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('room_id')}>
-                  Room ID {renderSortIcon('room_id')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('start_date')}>
-                  Start Date {renderSortIcon('start_date')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('start_time')}>
-                  Start Time {renderSortIcon('start_time')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('end_time')}>
-                  End Time {renderSortIcon('end_time')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer' }} onClick={() => handleSort('isDeleted')}>
-                  Deleted {renderSortIcon('isDeleted')}
-               </TableCell>
-               <TableCell sx={{ fontWeight: 'bold' }}>
-                  Actions
-               </TableCell>
+               <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 50 }} onClick={() => handleSort('screening_id')}>
+                     ID {renderSortIcon('screening_id')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 250 }} onClick={() => handleSort('title')}>
+                     Movie Title {renderSortIcon('title')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 170 }} onClick={() => handleSort('cinema_name')}>
+                     Cinema {renderSortIcon('cinema_name')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('room_id')}>
+                     Room {renderSortIcon('room_id')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 110 }} onClick={() => handleSort('start_date')}>
+                     Start Date {renderSortIcon('start_date')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('start_time')}>
+                     Start Time {renderSortIcon('start_time')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('end_time')}>
+                     End Time {renderSortIcon('end_time')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('isDeleted')}>
+                     Deleted {renderSortIcon('isDeleted')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', width: 124 }}>
+                     Actions
+                  </TableCell>
                </TableRow>
             </TableHead>
 
@@ -290,22 +290,35 @@ const AdminScreenings = () => {
                      </Link>
                   </TableCell>
                   <TableCell>{screening.cinema_name}</TableCell>
-                  <TableCell>{screening.room_id}</TableCell>
+                  <TableCell>{screening.room_name}</TableCell>
                   <TableCell>{screening.start_date}</TableCell>
                   <TableCell>{screening.start_time?.substring(0,5)}</TableCell>
                   <TableCell>{screening.end_time?.substring(0,5)}</TableCell>
                   <TableCell>{(screening.isDeleted === 0) ? "No" : "Yes"}</TableCell>
 
                   <TableCell>
-                     <Stack direction="row" spacing={1}>
-                     <Link to={`/screenings/${screening.screening_id}/edit`} style={{ textDecoration: 'none' }}>
-                        <Button size="large" color="primary">
-                           <EditNoteIcon />
-                        </Button>
-                     </Link>
-                     <Button size="large" color="error" onClick={() => handleDelete(screening.screening_id)}>
-                        <DeleteIcon />
+                     <Stack direction="column" spacing={1}>
+
+                     <Button
+                     component={Link}
+                     to={`/screenings/${screening.screening_id}/edit`}
+                     size="small"
+                     variant="outlined"
+                     startIcon={<EditNoteIcon />}
+                     >
+                        Edit
                      </Button>
+
+                     <Button
+                     size="small"
+                     variant="outlined"
+                     color="error"
+                     startIcon={<DeleteIcon />}
+                     onClick={() => handleDelete(screening.screening_id)}
+                     >
+                        Delete
+                     </Button>
+
                      </Stack>
                   </TableCell>
                </TableRow>
