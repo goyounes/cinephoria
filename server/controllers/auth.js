@@ -188,7 +188,7 @@ export async function logoutService(req, res, next) {
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_JWT_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_JWT_SECRET;
 const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY = '1d';
+const REFRESH_TOKEN_EXPIRY = '7d';
 
 const generateTokens = (user_id, role_id, role_name, token_version) => {
   const accessToken = jwt.sign({ user_id, role_id, role_name}, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
@@ -216,9 +216,8 @@ export async function loginService (req, res, next) {
         const isPasswordValid = bycrpt.compareSync(password, passwordHash);
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
-        // check token version from user DB 
-        let token_version = user?.token_version ?? 0;
-        const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, token_version);
+        // create new token with same token version from user DB query
+        const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, user.refresh_token_version);
 
         res.status(200).json({
           user_id: user.user_id,
