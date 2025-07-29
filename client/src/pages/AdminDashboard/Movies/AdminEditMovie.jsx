@@ -149,7 +149,7 @@ const EditMovie = () => {
     <CardContent>
 
       <Typography variant="h4" align="center" gutterBottom>
-        Add New Movie
+        Edit Movie
       </Typography>
 
       <Stack

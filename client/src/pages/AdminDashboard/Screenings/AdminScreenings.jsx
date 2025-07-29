@@ -284,7 +284,11 @@ const AdminScreenings = () => {
                      {screening.screening_id}
                      </Link>
                   </TableCell>
-                  <TableCell>{screening.title}</TableCell>
+                  <TableCell>
+                     <Link to={`/admin/movies/${screening.movie_id}/edit`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                        {screening.title}
+                     </Link>
+                  </TableCell>
                   <TableCell>{screening.cinema_name}</TableCell>
                   <TableCell>{screening.room_id}</TableCell>
                   <TableCell>{screening.start_date}</TableCell>
