@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from '../../../api/axiosInstance.js';
 import { Link } from 'react-router-dom';
 import {
-Container, Stack, Button, Table, TableBody, TableCell, Skeleton,
-TableContainer, TableHead, TableRow, Paper, Typography, Box,
+Container, Stack, Button, Table, TableBody, TableCell,
+TableContainer, TableHead, TableRow, Paper, Typography, 
 Select, MenuItem, TextField, Autocomplete } from "@mui/material";
 import { Delete as DeleteIcon, 
 EditNote as EditNoteIcon, 
@@ -16,7 +16,7 @@ import ImageWithSkeleton from '../../../components/UI/ImageWithSkeleton.jsx';
 
 
 
-const ROWS_PER_PAGE = 2;
+const ROWS_PER_PAGE = 10;
 
 const AdminMovies = () => {
    
@@ -187,48 +187,46 @@ const AdminMovies = () => {
          disabled={currentPage === 1}
          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
          >
-         Previous
+            Previous
          </Button>
 
-         <Typography>
-         Page {currentPage} of {totalPages}
-         </Typography>
+         <Typography>Page {currentPage} of {totalPages}</Typography>
 
          <Button
          disabled={currentPage === totalPages}
          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
          >
-         Next
+            Next
          </Button>
       </Stack>
 
       <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 0 }}>
-         <Table>
+         <Table sx={{ tableLayout: 'fixed' }}>
          <TableHead>
             <TableRow>
-               <TableCell sx={{ fontWeight: 'bold', width: 150 }}>
-               Poster
+               <TableCell sx={{ fontWeight: 'bold', width: 132 }}>
+                  Poster
                </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 200 }} onClick={() => handleSort('title')}>
-               Title {renderSortIcon('title')}
+               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 250 }} onClick={() => handleSort('title')}>
+                  Title {renderSortIcon('title')}
                </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', width: 300 }}>
-               Description
+               <TableCell sx={{ fontWeight: 'bold', width: 350 }}>
+                  Description
                </TableCell>
                <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 60 }} onClick={() => handleSort('age_rating')}>
-               Age Rating {renderSortIcon('age_rating')}
+                  Age Rating {renderSortIcon('age_rating')}
                </TableCell>
                <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 60 }} onClick={() => handleSort('is_team_pick')}>
-               Team Pick {renderSortIcon('is_team_pick')}
+                  Team Pick {renderSortIcon('is_team_pick')}
                </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('score')}>
-               Score {renderSortIcon('score')}
+               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 60 }} onClick={() => handleSort('score')}>
+                  Score {renderSortIcon('score')}
                </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 100 }} onClick={() => handleSort('length')}>
-               Length {renderSortIcon('length')}
+               <TableCell sx={{ fontWeight: 'bold', cursor: 'pointer', width: 90 }} onClick={() => handleSort('length')}>
+                  Length {renderSortIcon('length')}
                </TableCell>
-               <TableCell sx={{ fontWeight: 'bold', width: 150 }}>
-               Actions
+               <TableCell sx={{ fontWeight: 'bold', width: 102 }}>
+                  Actions
                </TableCell>
             </TableRow>
          </TableHead>
