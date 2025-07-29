@@ -6,11 +6,20 @@ import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
 
 export const AuthContext = createContext()
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+  const authContext = useContext(AuthContext)
 
+  if(!AuthContext){
+    throw new Error("useAuth must be used within a AuthProvider")
+  }
+
+  return authContext
+}
 
 export const AuthContextProvider = ({ children }) => {
+  const [token, setToken] =  useState()
   const [currentUser, setCurrentUser] = useState(getItemWithExpiry("user") || null)
+  
   const login = async (inputs) => {
     try {
       const res = await axios.post("/api/auth/login", inputs, {
@@ -23,15 +32,12 @@ export const AuthContextProvider = ({ children }) => {
         const backendErrors = error.response?.data?.errors;
         let formattedMessage;
         if (Array.isArray(backendErrors) && backendErrors.length > 0) {
-          // Join all messages into one string, separated by comma
           formattedMessage = backendErrors.map(e => e.msg).join(", ");
         } else if (error.response?.data?.message) {
-          // Some APIs return { message: '...' } for errors
           formattedMessage = error.response.data.message;
         } else {
           formattedMessage = error.message || "Unknown error occurred";
         }
-        // Throwing a new Error with formatted message for caller to display
         throw new Error(formattedMessage);
     }
   }
