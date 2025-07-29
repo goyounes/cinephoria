@@ -48,16 +48,6 @@ const AdminMovies = () => {
   }, [movies]);
 
 
-  const HandleDeleteButton = async (id) => {
-    try {
-      await axios.delete(`/api/movies/${id}`);
-      await fetchMovies();
-    } catch (error) {
-      console.error("Error deleting movie with id: " + id, error);
-      const errorMessage = "Error deleting movie with id: " + id + "\n" + error?.response?.data?.error?.message;
-      showSnackbar(errorMessage, "error");
-    }
-  };
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -80,19 +70,11 @@ const AdminMovies = () => {
     return null;
   };
 
-  // Filter movies by is_team_pick filter
   const filteredMovies = useMemo(() => {
     return movies.filter(movie => {
-      // Filter by team pick
-      if (filters.is_team_pick === 'yes' && !(movie.is_team_pick === true || movie.is_team_pick === 1)) {
-        return false;
-      }
-      if (filters.is_team_pick === 'no' && !(movie.is_team_pick === false || movie.is_team_pick === 0)) {
-        return false;
-      }
-      if (filters.movie_id && movie.movie_id !== filters.movie_id) {
-        return false;
-      }
+      if (filters.is_team_pick === 'yes' && !(movie.is_team_pick === 1)) return false;
+      if (filters.is_team_pick === 'no' && !(movie.is_team_pick === 0)) return false;
+      if (filters.movie_id && movie.movie_id !== filters.movie_id) return false;
       return true;
     });
   }, [movies, filters.is_team_pick, filters.movie_id]);
@@ -124,6 +106,18 @@ const AdminMovies = () => {
   }, [sortedMovies, currentPage, ROWS_PER_PAGE]);
 
   const totalPages = Math.max(Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1);
+
+  
+  const HandleDeleteButton = async (id) => {
+    try {
+      await axios.delete(`/api/movies/${id}`);
+      await fetchMovies();
+    } catch (error) {
+      console.error("Error deleting movie with id: " + id, error);
+      const errorMessage = "Error deleting movie with id: " + id + "\n" + error?.response?.data?.error?.message;
+      showSnackbar(errorMessage, "error");
+    }
+  };
 
 return (
   <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -253,7 +247,7 @@ return (
       alt={`Poster for ${movie.title}`}
       sx={{
         width: 100,
-        height: 150, // or whatever matches your desired aspect ratio
+        height: 150,
         borderRadius: 1,
         objectFit: 'cover',
         display: 'block',
