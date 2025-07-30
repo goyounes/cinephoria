@@ -7,7 +7,9 @@ import { verifyEmailService, resetPasswordReqService, resetPasswordService,
   refreshService} from '../controllers/auth.js';
 import { body, validationResult } from 'express-validator';
 
+// uses refresh token for the route
 router.post('/refresh', refreshService);
+router.post('/logout', logoutService);
 
 router.post('/verify-user', verifyUserJWT, (req, res) => {
   res.status(200).json({ message: 'Token valid', user: req.user });
@@ -21,7 +23,7 @@ router.post('/verify-admin', verifyAdminJWT, (req, res) => {
 
 router.get('/verify-email', verifyEmailService);
 
-router.post('/logout', logoutService);
+
 
 router.post(
   '/reset-password-req',

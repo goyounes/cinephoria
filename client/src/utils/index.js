@@ -6,8 +6,6 @@ export { default as filterMoviesForSelectedDate } from './filterMoviesForSelecte
 export { default as filterAndUniqueMovies } from './filterAndUniqueMovies.js';
 export { default as hasAnyGenre } from './hasAnyGenre.js';
 export { default as validateCardExpiryDate } from './validateCardExpiryDate.js';
-export { setItemWithExpiry, getItemWithExpiry } from './localStorage.js';
-
 
 
 

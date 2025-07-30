@@ -1,7 +1,5 @@
 import { useState, useEffect, createContext, useContext, useLayoutEffect } from 'react';
 import axios from '../api/axiosInstance.js';
-// import {jwtDecode} from 'jwt-decode';
-// import { getItemWithExpiry, setItemWithExpiry } from '../utils/index.js';
 
 export const AuthContext = createContext();
 
@@ -14,7 +12,10 @@ export const useAuth = () => {
 };
 
 export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(() => JSON.stringify(localStorage.getItem("currentUser"))  || null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
   const login = async (inputs) => {
     try {
