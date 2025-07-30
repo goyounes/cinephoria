@@ -1,9 +1,10 @@
 import { Router } from 'express';
 const router = Router();
-import axios from 'axios';
+
 import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
+import dayjs from 'dayjs';
 
 
 router.get("/", verifyEmployeeJWT, async (req,res,next) => {
@@ -16,22 +17,26 @@ router.get("/", verifyEmployeeJWT, async (req,res,next) => {
 })
 
 router.post('/', verifyEmployeeJWT, async (req, res,next) => {
-
-    if (!req.body.movie_id) { // we can add more validation using express-validator
-        const err = new Error("Missing movie id");
+    const { movie_id, cinema_id, room_ids, start_date, start_time, end_time } = req.body;
+    if (!movie_id  || !cinema_id || !room_ids || !start_date || !start_time || !end_time ) { // we can add more validation using express-validator
+        const err = new Error("Missing screening data");
         err.status = 400;
         return next(err); 
     }
-   
+    if (dayjs(start_date).isBefore(dayjs())) {
+        const err = new Error("Date cannot be in the past");
+        err.status = 400;
+        return next(err); 
+    }
     try {
 
         const result = await addManyScreenings({
-            cinema_id : req.body.cinema_id  , 
-            movie_id : req.body.movie_id , 
-            room_ids : req.body.room_ids , 
-            start_date : req.body.start_date , 
-            start_time : req.body.start_time , 
-            end_time : req.body.end_time , 
+            cinema_id , 
+            movie_id, 
+            room_ids, 
+            start_date, 
+            start_time, 
+            end_time, 
         })
         
         res.status(201).json({
