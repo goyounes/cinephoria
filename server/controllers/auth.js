@@ -169,17 +169,15 @@ export async function resetPasswordService(req, res, next) {
 
 const revokedRefreshTokens = {};
 export async function logoutService(req, res, next) {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(400).json({ message: "Refresh token required" });
-  }
-  
-  const refreshToken = authHeader.split(' ')[1];
 
-  let decoded
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token required in body" });
+  }
+
   try {
-    decoded = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
+    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired refresh token" });
   }
@@ -196,7 +194,7 @@ export async function logoutService(req, res, next) {
 
 
 // Login functionality implemented using JWTs
-const ACCESS_JWT_EXPIRY = '15m';
+const ACCESS_JWT_EXPIRY = '15s';
 const REFRESH_JWT_EXPIRY = '7d';
 
 const generateTokens = (user_id, role_id, role_name, token_version) => {
@@ -252,7 +250,14 @@ export async function loginService (req, res, next) {
 
 export async function refreshService(req, res, next) {
   try {
-    const { accessToken, refreshToken } = req.body;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(400).json({ message: "No access token provided" });
+    }
+
+    const accessToken = authHeader.split(' ')[1];
+    const { refreshToken } = req.body;
 
     if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
 
@@ -273,7 +278,7 @@ export async function refreshService(req, res, next) {
     try {
       decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
     } catch (err) {
-      return res.status(401).json({message: "Invalid refresh token"});
+      return res.status(400).json({message: "Invalid refresh token"});
     }
 
     // Check refresh token version matches
@@ -283,7 +288,6 @@ export async function refreshService(req, res, next) {
       return res.status(401).json({ message: "User not found" });
     }
     const refresh_token_version = rows[0].refresh_token_version;
-    console.log(refresh_token_version)
 
     if (refresh_token_version !== decodedRefresh.token_version) {
 
@@ -318,7 +322,6 @@ function createRoleMiddleware(roleCheckFunc) {
         return res.status(400).json({ message: "No access token provided" });
       }
       const token = authHeader.split(' ')[1];
-      console.log("extracted token :" , token)
 
       let decoded;
       try {
@@ -354,7 +357,6 @@ export const verifyAdminJWT = createRoleMiddleware((role_id) => role_id === 3);
 export async function addUserService (req, res, next) {
     // Validate request body
     if (!req.body.username || !req.body.password || !req.body.username ) {
-        console.log("provided information :", req.body);
         return next(new Error("Username, Email and password are required"));
     }
     
