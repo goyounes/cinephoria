@@ -16,17 +16,14 @@ import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
 
 import MovieCard from "./components/MovieCard";
 
-import {filterMoviesForSelectedDate, getAllowedScreeningDates, groupScreeningsByMovie} from "../utils"
+import {filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from '../context/AuthProvider';
 import { filterMovies, uniqueMovies } from '../utils/newUtil.js';
 
 
 const Movies = () => {
-   //TODO: Change the code so that it's understood that we are getting Screenings. and tht they have full movie data in them for each one.
-   //eventually, this will become the recived movies list should group Movies and an array for each that has all screening data inside, 
-   //This can be done in the server endopint level , but the code from this point onwards has to evolve accordingly
-   const { currentUser } = useAuth();
+  const { currentUser } = useAuth();
    const isAdmin = currentUser?.role_id >= 2;
 
    const [moviesScreenings, setMoviesScreenings] = useState([]);

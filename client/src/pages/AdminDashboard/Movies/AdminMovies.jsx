@@ -107,7 +107,7 @@ const AdminMovies = () => {
    const paginatedMovies = useMemo(() => {
       const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
       return sortedMovies.slice(startIndex, startIndex + ROWS_PER_PAGE);
-   }, [sortedMovies, currentPage, ROWS_PER_PAGE]);
+   }, [sortedMovies, currentPage]);
 
    const totalPages = Math.max(Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1);
 
