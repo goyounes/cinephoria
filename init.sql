@@ -461,9 +461,9 @@ SELECT * FROM seats;
 
 CREATE TABLE screenings (
     screening_id INT PRIMARY KEY AUTO_INCREMENT,
-	movie_id INT,
-	cinema_id INT,
-    room_id INT,
+	movie_id INT NOT NULL,
+	cinema_id INT NOT NULL,
+    room_id INT NOT NULL,
     start_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
