@@ -3,23 +3,20 @@ import dayjs from "dayjs";
 import { useEffect, useState, useMemo } from "react";
 
 import {
-  Container,  Stack,  Box, Card,  
-  Typography,  Button,  IconButton, Divider,
-  FormControl, Autocomplete,  TextField,    InputLabel,  Select,  MenuItem, 
+  Container,  Stack,  Box, Card, Typography,  Button,  IconButton, Divider,
+  FormControl, Autocomplete,  TextField,  InputLabel,  Select,  MenuItem, 
 } from "@mui/material";
 import {Search as SearchIcon, Tune as TuneIcon, Event as EventIcon, Clear as ClearIcon} from "@mui/icons-material";
 
-import ModalWrapper from "../components/UI/ModalWrapper";
-import SearchMovieModal from "./components/SearchMovieModal";
 import BasicDatePicker from "../components/UI/BasicDatePicker";
 import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
-
+import ModalWrapper from "../components/UI/ModalWrapper";
+import SearchMovieModal from "./components/SearchMovieModal";
 import MovieCard from "./components/MovieCard";
 
-import {filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
+import {filterMoviesForSelectedDate, getAllowedScreeningDates, filterMovies, uniqueMovies} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from '../context/AuthProvider';
-import { filterMovies, uniqueMovies } from '../utils/newUtil.js';
 
 
 const Movies = () => {
