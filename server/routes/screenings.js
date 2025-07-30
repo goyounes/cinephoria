@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 
-import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings} from '../controllers/screenings.js'; 
+import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings, updateScreening} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 import dayjs from 'dayjs';
@@ -98,6 +98,43 @@ router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
         next(error)
     }
 })
+
+router.put("/:id", verifyEmployeeJWT, async (req, res,next) => {
+    const id = req.params.id
+    const { movie_id, cinema_id, room_id, start_date, start_time, end_time } = req.body;
+    if (!movie_id  || !cinema_id || !room_id || !start_date || !start_time || !end_time ) { // we can add more validation using express-validator
+        const err = new Error("Missing screening data");
+        err.status = 400;
+        return next(err); 
+    }
+    if (dayjs(start_date).isBefore(dayjs())) {
+        const err = new Error("Date cannot be in the past");
+        err.status = 400;
+        return next(err); 
+    }
+    try {
+
+        const result = await updateScreening(id,{
+            cinema_id, 
+            movie_id, 
+            room_id, 
+            start_date, 
+            start_time, 
+            end_time, 
+        })
+        
+        res.status(201).json({
+            message: "Screening added successfully to the database",
+            screening: req.body,
+            screeningInsertResult: result,
+        });
+
+    } catch (error) {
+        console.error("Error during movie upload process:", error);
+        next(error); 
+    }
+
+});
 
 router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     const id = req.params.id

@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 
 import BasicDatePicker from './../../../components/UI/BasicDatePicker.jsx';
 import RoomMultiSelect from "../../components/RoomMultiSelect.jsx";
+import RoomSingleSelect from "../../components/RoomSingleSelect.jsx";
 
 const AdminEditScreening = () => {
   const { id } = useParams();
@@ -32,7 +33,7 @@ const AdminEditScreening = () => {
   const [cinemas, setCinemas] = useState([]);
   const [movies, setMovies] = useState([]);
   const [roomOptions, setRoomOptions] = useState([]);
-  const [selectedRooms, setSelectedRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState([]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -56,7 +57,7 @@ const AdminEditScreening = () => {
 
         const matchedCinema = cinemaRoomMap.find(c => c.cinema_id === screening.cinema_id);
         setRoomOptions(matchedCinema?.rooms || []);
-        setSelectedRooms([screening.room_id] || []);
+        setSelectedRoom([screening.room_id] || []);
 
         setFormData({
           cinema_id: screening.cinema_id.toString(),
@@ -83,7 +84,7 @@ const AdminEditScreening = () => {
       const selectedId = parseInt(value);
       const cinemaObj = cinemas.find(c => c.cinema_id === selectedId);
       setRoomOptions(cinemaObj?.rooms || []);
-      setSelectedRooms([]); // Reset room selection
+      setSelectedRoom([]); // Reset room selection
     }
   };
 
@@ -97,7 +98,7 @@ const AdminEditScreening = () => {
       start_date: dateToString(formData.start_date),
       start_time: timeToString(formData.start_time),
       end_time: timeToString(formData.end_time),
-      room_ids: selectedRooms,
+      room_id: selectedRoom,
     };
 
     try {
@@ -161,10 +162,10 @@ const AdminEditScreening = () => {
                 </Select>
               </FormControl>
 
-              <RoomMultiSelect
+              <RoomSingleSelect
                 rooms={roomOptions}
-                selectedRooms={selectedRooms}
-                setSelectedRooms={setSelectedRooms}
+                selectedRoom={selectedRoom}
+                setSelectedRoom={setSelectedRoom}
               />
 
               <BasicDatePicker

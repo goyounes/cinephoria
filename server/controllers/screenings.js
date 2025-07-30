@@ -7,16 +7,13 @@ import { pool } from "./connect.js";
 //     return result_rows
 // }
 export async function  addScreening(screening){
-    if (!Array.isArray(room_ids) || room_ids.length === 0) {
-        throw new Error("room_ids must be a non-empty array");
-    }
     const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
                VALUES (?,?,?,?,?,?);  
               `
     const VALUES = [
         screening.cinema_id  , 
         screening.movie_id , 
-        screening.room_ids[0], 
+        screening.room_ids[0], // Assuming room_ids is an array and we take the only room for now
         screening.start_date , 
         screening.start_time , 
         screening.end_time , 
@@ -24,6 +21,32 @@ export async function  addScreening(screening){
     const [insertResult] = await pool.query(q,VALUES);
     return insertResult
 }
+export async function  updateScreening(id,screening){
+    const updateQuery = `
+        UPDATE screenings
+        SET 
+            movie_id = ?, 
+            cinema_id = ?,
+            room_id = ?, 
+            start_date = ?, 
+            start_time = ?, 
+            end_time = ?
+        WHERE screening_id = ? ;
+    `
+    const VALUES = [
+        screening.cinema_id,
+        screening.movie_id,
+        screening.room_id,
+        screening.start_date,
+        screening.start_time,
+        screening.end_time,
+        id
+    ]
+    const result = await pool.query(updateQuery, VALUES);
+    return result
+
+}
+
 export async function  addManyScreenings(screening){
     if (!Array.isArray(screening?.room_ids) || screening?.room_ids?.length === 0) {
         throw new Error("room_ids must be a non-empty array");
