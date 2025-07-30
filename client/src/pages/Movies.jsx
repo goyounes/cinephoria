@@ -16,9 +16,10 @@ import ResponsiveIconButton from "../components/UI/ResponsiveIconButton";
 
 import MovieCard from "./components/MovieCard";
 
-import {filterAndUniqueMovies, filterMoviesForSelectedDate, getAllowedScreeningDates} from "../utils"
+import {filterMoviesForSelectedDate, getAllowedScreeningDates, groupScreeningsByMovie} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from '../context/AuthProvider';
+import { filterMovies, uniqueMovies } from '../utils/newUtil.js';
 
 
 const Movies = () => {
@@ -27,7 +28,8 @@ const Movies = () => {
    //This can be done in the server endopint level , but the code from this point onwards has to evolve accordingly
    const { currentUser } = useAuth();
    const isAdmin = currentUser?.role_id >= 2;
-   const [movies, setMovies] = useState([]);
+
+   const [moviesScreenings, setMoviesScreenings] = useState([]);
    const [cinemas, setCinemas] = useState([]);
    const [genresList, setGenresList] = useState([]);
    const [allMovies, setAllMovies] = useState([]);
@@ -46,40 +48,42 @@ const Movies = () => {
    setShowPicker(false);
    };
 
-   const filteredMovies = useMemo(
-      () => filterAndUniqueMovies(movies, {selectedCinema,selectedGenres}),
-      [movies, selectedCinema, selectedGenres]
+   const filteredMoviesScreenings = useMemo(
+      () => filterMovies(moviesScreenings, {selectedCinema,selectedGenres}),
+      [moviesScreenings, selectedCinema, selectedGenres]
    );
-
    const allowedScreeningDates = useMemo(
-      () => getAllowedScreeningDates(filteredMovies),
-      [filteredMovies]
+      () => getAllowedScreeningDates(moviesScreenings),
+      [moviesScreenings]
    );
 
    const FormatedDate = dayjs(selectedDate).format("YYYY-MM-DD");
-   const moviesToDisplay = !selectedDate
-   ? filteredMovies
-   : filterMoviesForSelectedDate(FormatedDate, filteredMovies);
+
+   const movieScreeningsToDisplay = !selectedDate
+   ? filteredMoviesScreenings
+   : filterMoviesForSelectedDate(FormatedDate, filteredMoviesScreenings);
+
+   const moviesToDisplay = uniqueMovies(movieScreeningsToDisplay);
 
    //Initial Movies Screenings Data Fetch
    useEffect(() => {
-   const fetchInitialData = async () => {
-      try {
-         // Fetch data depending on user role
-         const [moviesRes, cinemaRes, genreRes] = await Promise.all([
-         axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
-         axios.get("/api/cinemas"),
-         axios.get("/api/movies/genres"),
-         ]);
-
-         setMovies(moviesRes.data);
-         setCinemas(cinemaRes.data);
-         setGenresList(genreRes.data);
-      } catch (error) {
-         console.error("Error fetching initial data:", error);
-      }
-   };
-   fetchInitialData();
+    const fetchInitialData = async () => {
+        try {
+          // Fetch data depending on user role
+          const [moviesRes, cinemaRes, genreRes] = await Promise.all([
+          axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
+          axios.get("/api/cinemas"),
+          axios.get("/api/movies/genres"),
+          ]);
+          setMoviesScreenings( moviesRes.data );
+          setCinemas(cinemaRes.data);
+          setGenresList(genreRes.data);
+        } catch (error) {
+          console.error("Error fetching initial data:", error);
+        }
+    };
+    
+    fetchInitialData();
    }, [isAdmin]);
 
    useEffect(() => {
