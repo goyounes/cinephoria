@@ -1,27 +1,10 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, addScreening} from '../controllers/screenings.js'; 
+import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, addScreening, addManyScreenings} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 
-// Code below will be needed when eventally i have a screening dashboard for admins that needs filter functions
-// router.get("/",async (req,res,next) => {
-//     const cinema_id = req.query.cinema_id || null;
-//     const movie_id = req.query.movie_id || null;
-//     try {
-//         const url = new URL(DB_API_URL+"/screenings");
-//         if (cinema_id) url.searchParams.routerend("cinema_id", cinema_id);
-//         if (movie_id) url.searchParams.routerend("movie_id", movie_id);
-
-//         const response = await axios.get(url,{headers:{'X-Requested-By': 'backend-server'}})
-//         const screenings = response.data
-//         // res.status(200).render("pages/screenings.ejs",{screenings})
-//         res.status(200).json(response.data)
-//     } catch (error) {
-//         next(error)
-//     }
-// })
 
 router.get("/", verifyEmployeeJWT, async (req,res,next) => {
     try {
@@ -42,15 +25,13 @@ router.post('/', verifyEmployeeJWT, async (req, res,next) => {
    
     try {
 
-        console.log("hello")
-
-        const result = await addScreening({
+        const result = await addManyScreenings({
             cinema_id : req.body.cinema_id  , 
             movie_id : req.body.movie_id , 
-            room_ids : req.body.room_id , //
-            start_date : req.body.start_date , //
-            start_time : req.body.start_time , //
-            end_time : req.body.end_time , //
+            room_ids : req.body.room_ids , 
+            start_date : req.body.start_date , 
+            start_time : req.body.start_time , 
+            end_time : req.body.end_time , 
         })
         
 
@@ -61,7 +42,6 @@ router.post('/', verifyEmployeeJWT, async (req, res,next) => {
         });
 
     } catch (error) {
-        //delete the image if the add movie operation fails
         console.error("Error during movie upload process:", error);
         next(error); 
     }

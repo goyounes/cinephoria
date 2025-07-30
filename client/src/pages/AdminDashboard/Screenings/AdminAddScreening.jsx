@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Container, Card, Typography, Stack, TextField,
+  Container, Card, Typography, Stack, 
   MenuItem, Select, InputLabel, FormControl, Button, CardContent
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
@@ -13,34 +13,66 @@ import dayjs from 'dayjs';
 
 // Import your custom BasicDatePicker
 import BasicDatePicker from './../../../components/UI/BasicDatePicker.jsx';
+import RoomMultiSelect from "../../components/RoomMultiSelect.jsx";
 
 const AdminAddScreening = () => {
-  const showSnackbar = useSnackbar();
-  const [formData, setFormData] = useState({
-    cinema_id: "",
-    movie_id: "",
-    room_id: "",
-    start_date: null,  // will be a Dayjs object now
-    start_time: null,  // Date object for MUI TimePicker (can be dayjs if you want)
-    end_time: null,
-  });
+    const showSnackbar = useSnackbar();
+    const [formData, setFormData] = useState({
+        cinema_id: "",
+        movie_id: "",
+        start_date: null,
+        start_time: null,
+        end_time: null,
+    });
+    
+    const [cinemas, setCinemas] = useState([]); // list of all cinemas with their rooms as an array
+    const [movies, setMovies] = useState([]);
+    // eslint-disable-next-line
+    const [allRooms, setAllRooms] = useState([]); 
+    
+    // For multi-select rooms
+    const [roomOptions, setRoomOptions] = useState([]);
+    const [selectedRooms, setSelectedRooms] = useState([]);
 
-  const [cinemas, setCinemas] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [movies, setMovies] = useState([]);
-  const [cinemaRoomData, setCinemaRoomData] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+        try {
+            const [cinemasRes,roomsRes, moviesRes] = await Promise.all([
+            axios.get("/api/cinemas"),
+            axios.get("/api/cinemas/rooms"),
+            axios.get("/api/movies")
+            ]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+            const CinemasWithRoomsArr = cinemasRes?.data?.map(cinema => {
+                const result = []
+                roomsRes?.data?.forEach(room => {
+                if (room.cinema_id === cinema.cinema_id) result.push(room)
+                })
+                return {...cinema, rooms: result}
+            }); 
 
-    if (name === "cinema_id") {
-      const selectedId = parseInt(value);
-      const filteredRooms = cinemaRoomData.filter(room => room.cinema_id === selectedId);
-      setRooms(filteredRooms);
-      setFormData(prev => ({ ...prev, room_id: "" }));
-    }
-  };
+            setAllRooms(roomsRes.data);
+            setCinemas(CinemasWithRoomsArr);
+            setMovies(moviesRes.data);
+        } catch (err) {
+            console.error("Error loading data: ", err);
+        }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === "cinema_id") {
+            const selectedId = parseInt(value);
+            const cinemaObj = cinemas.find(cinema => cinema.cinema_id === selectedId);
+            setRoomOptions(cinemaObj.rooms);
+            setSelectedRooms([]); // reset room selection on cinema change
+        }
+    };
 
   // Helpers to convert Dayjs or Date to "HH:mm"
   const timeToString = (time) => {
@@ -62,59 +94,23 @@ const AdminAddScreening = () => {
 
   const handleSubmit = async () => {
     const payload = {
-      ...formData,
-      cinema_id: parseInt(formData.cinema_id),
-      movie_id: parseInt(formData.movie_id),
-      room_id: parseInt(formData.room_id),
-      start_date: dateToString(formData.start_date),
-      start_time: timeToString(formData.start_time),
-      end_time: timeToString(formData.end_time),
+        cinema_id: parseInt(formData.cinema_id),
+        movie_id: parseInt(formData.movie_id),
+        start_date: dateToString(formData.start_date),
+        start_time: timeToString(formData.start_time),
+        end_time: timeToString(formData.end_time),
+        room_ids: selectedRooms,
     };
 
     try {
       await axios.post("/api/screenings", payload);
-      showSnackbar("Screening added successfully!", "success");
-      setFormData({
-        cinema_id: "",
-        movie_id: "",
-        room_id: "",
-        start_date: null,
-        start_time: null,
-        end_time: null,
-      });
+      showSnackbar("Screening added successfully! You can continue to add other screenings", "success");
     } catch (error) {
       const customMessage = "\nAxios: " + error.message + "\nServer: " + (error.response?.data?.error?.message || "Server error");
       showSnackbar("Failed to add screening: " + customMessage, "error");
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [roomsRes, moviesRes] = await Promise.all([
-          axios.get("/api/cinemas/rooms"),
-          axios.get("/api/movies")
-        ]);
-
-        const roomData = roomsRes.data;
-        const movieData = moviesRes.data;
-
-        const uniqueCinemas = Array.from(
-          new Map(roomData.map(item => [item.cinema_id, item])).values()
-        );
-
-        setCinemaRoomData(roomData);
-        setCinemas(uniqueCinemas);
-        setMovies(movieData);
-      } catch (err) {
-        console.error("Error loading cinema/movie data:", err);
-        showSnackbar("Failed to load data: " + err.message, "error");
-      }
-    };
-
-    fetchData();
-  }, []);
 
   // For allowedDates, you can pass from cinemaRoomData or an array of strings
   const allowedDates = []; // put allowed dates as strings "YYYY-MM-DD" if needed
@@ -149,40 +145,28 @@ const AdminAddScreening = () => {
             </FormControl>
 
             <FormControl fullWidth required>
-            <InputLabel id="movie_id-label">Movie</InputLabel>
-            <Select
-                labelId="movie_id-label"
-                name="movie_id"
-                value={formData.movie_id}
-                label="Movie"
-                onChange={handleChange}
-            >
-                <MenuItem value=""><em>-- Select Movie --</em></MenuItem>
-                {movies.map(movie => (
-                <MenuItem key={movie.movie_id} value={movie.movie_id}>
-                    {movie.title}
-                </MenuItem>
-                ))}
-            </Select>
+                <InputLabel id="movie_id-label">Movie</InputLabel>
+                <Select
+                    labelId="movie_id-label"
+                    name="movie_id"
+                    value={formData.movie_id}
+                    label="Movie"
+                    onChange={handleChange}
+                >
+                    <MenuItem value=""><em>-- Select Movie --</em></MenuItem>
+                    {movies.map(movie => (
+                    <MenuItem key={movie.movie_id} value={movie.movie_id}>
+                        {movie.title}
+                    </MenuItem>
+                    ))}
+                </Select>
             </FormControl>
 
-            <FormControl fullWidth required>
-            <InputLabel id="room_id-label">Room</InputLabel>
-            <Select
-                labelId="room_id-label"
-                name="room_id"
-                value={formData.room_id}
-                label="Room"
-                onChange={handleChange}
-            >
-                <MenuItem value=""><em>-- Select Room --</em></MenuItem>
-                {rooms.map(room => (
-                <MenuItem key={room.room_id} value={room.room_id}>
-                    Room {room.room_id} (Capacity: {room.room_capacity})
-                </MenuItem>
-                ))}
-            </Select>
-            </FormControl>
+<RoomMultiSelect
+        rooms={roomOptions}
+        selectedRooms={selectedRooms}
+        setSelectedRooms={setSelectedRooms}
+/>
 
               {/* Your custom DatePicker */}
               <BasicDatePicker
@@ -191,13 +175,10 @@ const AdminAddScreening = () => {
                 allowedDates={allowedDates}
               />
 
-
-
               <TimePicker
                 label="Start Time"
                 value={formData.start_time}
                 onChange={(newValue) => setFormData(prev => ({ ...prev, start_time: newValue }))}
-                renderInput={(params) => <TextField fullWidth required {...params} />}
                 ampm={false}
               />
 
@@ -205,7 +186,6 @@ const AdminAddScreening = () => {
                 label="End Time"
                 value={formData.end_time}
                 onChange={(newValue) => setFormData(prev => ({ ...prev, end_time: newValue }))}
-                renderInput={(params) => <TextField fullWidth required {...params} />}
                 ampm={false}
               />
 

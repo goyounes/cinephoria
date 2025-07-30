@@ -7,13 +7,16 @@ import { pool } from "./connect.js";
 //     return result_rows
 // }
 export async function  addScreening(screening){
+    if (!Array.isArray(room_ids) || room_ids.length === 0) {
+        throw new Error("room_ids must be a non-empty array");
+    }
     const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
                VALUES (?,?,?,?,?,?);  
               `
     const VALUES = [
         screening.cinema_id  , 
         screening.movie_id , 
-        screening.room_ids , 
+        screening.room_ids[0], 
         screening.start_date , 
         screening.start_time , 
         screening.end_time , 
@@ -22,21 +25,34 @@ export async function  addScreening(screening){
     return insertResult
 }
 export async function  addManyScreenings(screening){
-    const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
-               VALUES (?,?,?,?,?,?);  
-              `
-    const VALUES = [
-        /*movie_id : */ 1, 
-        /*cinema_id:*/  2, 
-        /*room_id:*/    5, 
-        /*start_date:*/  "2026-10-10", 
-        /*start_time:*/  "13:00:00", 
-        /*end_time:*/    "15:00:00",
-    ]
+    if (!Array.isArray(screening?.room_ids) || screening?.room_ids?.length === 0) {
+        throw new Error("room_ids must be a non-empty array");
+    }
+
+    const rows = [];
+    // for (const date of screening.start_date) {
+        for (const room_id of screening.room_ids) {
+            rows.push([
+                screening.movie_id,
+                screening.cinema_id,
+                room_id, //<--- multiply by how many rooms.
+                screening.start_date,
+                screening.start_time,
+                screening.end_time,
+            ]);
+        }
+    // }
+
+    const placeholders = rows.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
+    const VALUES = rows.flat();
+
+    const q = `
+        INSERT INTO screenings (movie_id, cinema_id, room_id, start_date, start_time, end_time)
+        VALUES ${placeholders};
+    `;
     const [insertResult] = await pool.query(q,VALUES);
     return insertResult
 }
-
 //New  Database Functions
 export async function getUpcomingScreenings(cinema_id,movie_id){    //How to handle filters query
     const q = `
