@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, addScreening, addManyScreenings} from '../controllers/screenings.js'; 
+import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 
@@ -34,7 +34,6 @@ router.post('/', verifyEmployeeJWT, async (req, res,next) => {
             end_time : req.body.end_time , 
         })
         
-
         res.status(201).json({
             message: "Screening added successfully to the database",
             screening: req.body,
@@ -90,6 +89,17 @@ router.get("/:id", verifyEmployeeJWT, async (req,res,next) => {
         const screenings = CombineQualitiesIdNames([rawscreenings])[0] 
         console.log("sending screening details",screenings)
         res.status(200).json(screenings)
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
+    const id = req.params.id
+    console.log("Deleting screening id =",id)
+    try {
+        const deleteResult = await deleteScreeningById(id)
+        res.status(204).json({message: "screening deleted succesfully"})
     } catch (error) {
         next(error)
     }

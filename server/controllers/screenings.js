@@ -305,6 +305,17 @@ export async function getAllScreeningsAdmin(cinema_id,movie_id){
 }
 
 
+
+export async function  deleteScreeningById(id){
+    const q = `
+        UPDATE screenings
+        SET isDeleted = TRUE
+        WHERE screening_id = ? 
+    `
+    const [result_rows] = await pool.query(q,[id]);
+    return result_rows
+}
+
 export async function  getQualities(){
     // This function retrieves raw SCREENINGS TABLE data
     const q = `SELECT * FROM qualities;`
