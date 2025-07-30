@@ -55,7 +55,7 @@ export const AuthContextProvider = ({ children }) => {
   const logout = async () => {
     try {
       const refreshToken = localStorage.getItem('refreshToken')
-      refreshToken &&  await axios.post("/api/auth/logout",null, {headers:{Authorization: `Bearer ${refreshToken}`}});
+      refreshToken &&  await axios.post("/api/auth/logout", { refreshToken });
     } catch (error) {
       console.error("Logout failed:", error);
     }
