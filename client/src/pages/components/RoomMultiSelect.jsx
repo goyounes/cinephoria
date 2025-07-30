@@ -28,6 +28,8 @@ const RoomMultiSelect = ({ rooms, selectedRooms, setSelectedRooms }) => {
           }).join(', ')
         }
         label="Rooms"
+        MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
+
       >
         {rooms.map((room) => (
           <MenuItem key={room.room_id} value={room.room_id}>

@@ -134,6 +134,7 @@ const AdminAddScreening = () => {
                 value={formData.cinema_id}
                 label="Cinema"
                 onChange={handleChange}
+                MenuProps={{ PaperProps: { sx: { maxHeight: 400 } } }}
             >
                 <MenuItem value=""><em>-- Select Cinema --</em></MenuItem>
                 {cinemas.map(cinema => (
@@ -152,6 +153,7 @@ const AdminAddScreening = () => {
                     value={formData.movie_id}
                     label="Movie"
                     onChange={handleChange}
+                    MenuProps={{ PaperProps: { sx: { maxHeight: 350 } } }}
                 >
                     <MenuItem value=""><em>-- Select Movie --</em></MenuItem>
                     {movies.map(movie => (
