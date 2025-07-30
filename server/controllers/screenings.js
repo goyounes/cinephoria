@@ -6,7 +6,22 @@ import { pool } from "./connect.js";
 //     const [result_rows] = await pool.query(q);
 //     return result_rows
 // }
-export async function  addScreening(s){
+export async function  addScreening(screening){
+    const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
+               VALUES (?,?,?,?,?,?);  
+              `
+    const VALUES = [
+        screening.cinema_id  , 
+        screening.movie_id , 
+        screening.room_ids , 
+        screening.start_date , 
+        screening.start_time , 
+        screening.end_time , 
+    ]
+    const [insertResult] = await pool.query(q,VALUES);
+    return insertResult
+}
+export async function  addManyScreenings(screening){
     const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
                VALUES (?,?,?,?,?,?);  
               `

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin} from '../controllers/screenings.js'; 
+import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, addScreening} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import {CombineGenresIdNames, CombineQualitiesIdNames} from '../utils/index.js';
 
@@ -32,8 +32,40 @@ router.get("/", verifyEmployeeJWT, async (req,res,next) => {
     }
 })
 
-router.post('/', (req, res,next) => {
-    // This is a placeholder for the POST route to add a new screening
+router.post('/', verifyEmployeeJWT, async (req, res,next) => {
+
+    if (!req.body.movie_id) { // we can add more validation using express-validator
+        const err = new Error("Missing movie id");
+        err.status = 400;
+        return next(err); 
+    }
+   
+    try {
+
+        console.log("hello")
+
+        const result = await addScreening({
+            cinema_id : req.body.cinema_id  , 
+            movie_id : req.body.movie_id , 
+            room_ids : req.body.room_id , //
+            start_date : req.body.start_date , //
+            start_time : req.body.start_time , //
+            end_time : req.body.end_time , //
+        })
+        
+
+        res.status(201).json({
+            message: "Screening added successfully to the database",
+            screening: req.body,
+            screeningInsertResult: result,
+        });
+
+    } catch (error) {
+        //delete the image if the add movie operation fails
+        console.error("Error during movie upload process:", error);
+        next(error); 
+    }
+
 });
 
 router.get("/upcoming", async (req,res,next) => {
