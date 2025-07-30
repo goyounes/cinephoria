@@ -194,7 +194,7 @@ export async function logoutService(req, res, next) {
 
 
 // Login functionality implemented using JWTs
-const ACCESS_JWT_EXPIRY = '15s';
+const ACCESS_JWT_EXPIRY = '15m';
 const REFRESH_JWT_EXPIRY = '7d';
 
 const generateTokens = (user_id, role_id, role_name, token_version) => {
