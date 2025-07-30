@@ -613,6 +613,7 @@ CREATE TABLE users (
     role_id INT DEFAULT 1,
     isVerified BOOL DEFAULT FALSE,
     refresh_token_version INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_name),
 	UNIQUE (user_email),
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
@@ -694,10 +695,10 @@ SELECT * FROM ticket_types;
 -- ---------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE tickets (
     ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+	ticket_type_id INT,
 	screening_id INT,
 	user_id INT,
     seat_id INT,
-    ticket_type_id INT,
 	QR_code CHAR(32),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (screening_id) REFERENCES screenings(screening_id),
@@ -732,26 +733,6 @@ VALUES
 
 
 SELECT * FROM tickets;
-
--- -------------------------------------------------------------------------------------------------------------
-CREATE TABLE messages (
-    message_id INT PRIMARY KEY AUTO_INCREMENT,
-    message_subject VARCHAR(255) NOT NULL,
-    message_text VARCHAR(255) NOT NULL,
-	message_sender_name VARCHAR(255) NOT NULL,
-	message_sender_email VARCHAR(255) NOT NULL,
-    isRead BOOL DEFAULT FALSE,
-    isDeleted BOOL DEFAULT FALSE,
-    isHandled BOOL DEFAULT FALSE
-);
-
-INSERT INTO messages(message_subject, message_text, message_sender_name, message_sender_email,isRead)
-VALUES 
-("Wierd TOpic", "Hello bla bla bla bla LKJ dklfj kjfklsdjf lkj ","RandomUser","User1@gmail.com",TRUE),
-("Unread message", "this colour means a message is not read, there no real function, this message has the property hard coded for now","BestUser","User1@compte.com",FALSE),
-("random things", "Not this time i tried to make filler text etc te ","ULTIMATE USER","User3@gmail.com",TRUE);
-
-SELECT * FROM messages;
 
 
 

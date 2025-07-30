@@ -55,7 +55,7 @@ export async function registerService (req, res, next) {
         const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
         await sendVerificationEmail(req.body.email, verificationLink);
 
-        res.status(201).json({ message: "User registered successfully. Please verify your email.", user_id });
+        res.status(201).json({ message: "User registered successfully. Please verify your email. The link will expire in 1h", user_id });
     } catch (error) {
         await connection.rollback();
         next(error);
@@ -211,6 +211,20 @@ export async function loginService (req, res, next) {
         const [data1] = await pool.query(q1 ,[email]);
         if (data1.length === 0) return next(new Error("This email does not exist"));
         const user = data1[0]
+        if (!user.isVerified){
+          const emailVerificationToken = jwt.sign(
+            { user_id, type: "email_verification" },
+            process.env.EMAIL_VERIFICATION_SECRET,
+            { expiresIn: "1h" }
+          );
+          // Build verification link
+          const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+          await sendVerificationEmail(req.body.email, verificationLink);
+
+          return next(new Error("Account not verified, please verify your email before logging in, another email has been sent to you with the verification link"));
+        }  
+          
+        
         user.role_name = getRoleNameById(user.role_id)
 
         // Get the user's password hash
