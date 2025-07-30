@@ -32,7 +32,8 @@ const RoomMultiSelect = ({ rooms, selectedRooms, setSelectedRooms }) => {
         {rooms.map((room) => (
           <MenuItem key={room.room_id} value={room.room_id}>
             <Checkbox checked={selectedRooms.includes(room.room_id)} />
-            <ListItemText primary={room.room_name} />
+            <ListItemText primary={`Room ${room.room_id} (Capacity: ${room.room_capacity})`} />
+            
           </MenuItem>
         ))}
       </Select>
