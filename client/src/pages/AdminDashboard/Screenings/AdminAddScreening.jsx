@@ -112,63 +112,62 @@ const AdminAddScreening = () => {
     }
   };
 
-  // For allowedDates, you can pass from cinemaRoomData or an array of strings
-  const allowedDates = []; // put allowed dates as strings "YYYY-MM-DD" if needed
+  const allowedDates = []; // allowed dates format"YYYY-MM-DD" if needed
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Container maxWidth="sm" sx={{ py: 4, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
     <Card elevation={4} sx={{ flexGrow: 1 }}>
-        <CardContent>
+    <CardContent>
         <Typography variant="h4" align="center" gutterBottom>
             Add New Screening
         </Typography>
 
         <Stack component="form" gap={2} id="NewScreeningForm" noValidate>
 
-            <FormControl fullWidth required>
-            <InputLabel id="cinema_id-label">Cinema</InputLabel>
-            <Select
-                labelId="cinema_id-label"
-                name="cinema_id"
-                value={formData.cinema_id}
-                label="Cinema"
-                onChange={handleChange}
-                MenuProps={{ PaperProps: { sx: { maxHeight: 400 } } }}
-            >
-                <MenuItem value=""><em>-- Select Cinema --</em></MenuItem>
-                {cinemas.map(cinema => (
-                <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
-                    {cinema.cinema_name}
-                </MenuItem>
-                ))}
-            </Select>
-            </FormControl>
+              <FormControl fullWidth required>
+              <InputLabel id="cinema_id-label">Cinema</InputLabel>
+              <Select
+                  labelId="cinema_id-label"
+                  name="cinema_id"
+                  value={formData.cinema_id}
+                  label="Cinema"
+                  onChange={handleChange}
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 400 } } }}
+              >
+                  <MenuItem value=""><em>-- Select Cinema --</em></MenuItem>
+                  {cinemas.map(cinema => (
+                  <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                      {cinema.cinema_name}
+                  </MenuItem>
+                  ))}
+              </Select>
+              </FormControl>
 
-            <FormControl fullWidth required>
-                <InputLabel id="movie_id-label">Movie</InputLabel>
-                <Select
-                    labelId="movie_id-label"
-                    name="movie_id"
-                    value={formData.movie_id}
-                    label="Movie"
-                    onChange={handleChange}
-                    MenuProps={{ PaperProps: { sx: { maxHeight: 350 } } }}
-                >
-                    <MenuItem value=""><em>-- Select Movie --</em></MenuItem>
-                    {movies.map(movie => (
-                    <MenuItem key={movie.movie_id} value={movie.movie_id}>
-                        {movie.title}
-                    </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+              <FormControl fullWidth required>
+                  <InputLabel id="movie_id-label">Movie</InputLabel>
+                  <Select
+                      labelId="movie_id-label"
+                      name="movie_id"
+                      value={formData.movie_id}
+                      label="Movie"
+                      onChange={handleChange}
+                      MenuProps={{ PaperProps: { sx: { maxHeight: 350 } } }}
+                  >
+                      <MenuItem value=""><em>-- Select Movie --</em></MenuItem>
+                      {movies.map(movie => (
+                      <MenuItem key={movie.movie_id} value={movie.movie_id}>
+                          {movie.title}
+                      </MenuItem>
+                      ))}
+                  </Select>
+              </FormControl>
 
-<RoomMultiSelect
-        rooms={roomOptions}
-        selectedRooms={selectedRooms}
-        setSelectedRooms={setSelectedRooms}
-/>
+              <RoomMultiSelect
+                      rooms={roomOptions}
+                      selectedRooms={selectedRooms}
+                      setSelectedRooms={setSelectedRooms}
+              />
 
               {/* Your custom DatePicker */}
               <BasicDatePicker
@@ -201,7 +200,7 @@ const AdminAddScreening = () => {
             </Button>
 
           </Stack>
-        </CardContent>
+      </CardContent>
       </Card>
     </Container>
 </LocalizationProvider>

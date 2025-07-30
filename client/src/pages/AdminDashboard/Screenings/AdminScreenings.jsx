@@ -298,7 +298,7 @@ const AdminScreenings = () => {
                {paginatedScreenings.map(screening => (
                <TableRow key={screening.screening_id} hover>
                   <TableCell>
-                     <Link to={`/screenings/${screening.screening_id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                     <Link to={`/admin/screenings/${screening.screening_id}/edit`} style={{ textDecoration: 'none', color: '#1976d2' }}>
                      {screening.screening_id}
                      </Link>
                   </TableCell>

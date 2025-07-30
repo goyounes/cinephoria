@@ -37,6 +37,7 @@ import AdminSideBar from './components/Layout/AdminSideBar';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminScreenings from './pages/AdminDashboard/Screenings/AdminScreenings';
 import AdminAddScreening from './pages/AdminDashboard/Screenings/AdminAddScreening';
+import AdminEditScreening from './pages/AdminDashboard/Screenings/AdminEditScreening';
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function App() {
               <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
               <Route path="/admin/screenings" element={<AdminScreenings/>} />
               <Route path="/admin/screenings/create" element={<AdminAddScreening/>} />
+              <Route path="/admin/screenings/:id/edit" element={<AdminEditScreening />} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
