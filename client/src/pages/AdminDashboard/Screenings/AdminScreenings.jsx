@@ -161,7 +161,7 @@ const AdminScreenings = () => {
 
             <Typography variant="h4" fontWeight="bold">🎥 Screenings List</Typography>
             
-            <Link to="/screenings/create" style={{ textDecoration: 'none' }}>
+            <Link to="/admin/screenings/create" style={{ textDecoration: 'none' }}>
                <Button variant="contained" startIcon={<AddIcon />} size="medium">
                   Add Screening
                </Button>

@@ -36,6 +36,7 @@ import { useAuth } from './context/AuthProvider';
 import AdminSideBar from './components/Layout/AdminSideBar';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminScreenings from './pages/AdminDashboard/Screenings/AdminScreenings';
+import AdminAddScreening from './pages/AdminDashboard/Screenings/AdminAddScreening';
 
 function App() {
   const location = useLocation();
@@ -67,6 +68,7 @@ function App() {
               <Route path="/admin/movies/create" element={<AdminAddMovie />} />
               <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
               <Route path="/admin/screenings" element={<AdminScreenings/>} />
+              <Route path="/admin/screenings/create" element={<AdminAddScreening/>} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
