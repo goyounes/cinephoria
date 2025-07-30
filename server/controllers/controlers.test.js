@@ -1,7 +1,6 @@
 import '../config/env.js';
 
 import { getCinemas, getRooms, getSeats } from "./cinemas.js";
-import { getMessages } from "./messages.js";
 import { addMovie, getGenres, getMovies, getMoviesWithGenres } from "./movies.js";
 import { getScreeningQualities, getScreenings, getUpcomingScreenings } from "./screenings.js";
 import { getRemainingSeats, getTickets } from "./tickets.js";
@@ -12,7 +11,6 @@ import { getUser, getUsers } from "./users.js";
 // console.table(await getRooms());
 // console.table(await getSeats());
 
-// console.table(await getMessages());
 // console.table(await getMovies());
 // console.table(await getMoviesWithGenres());
 // console.table(await getGenres());

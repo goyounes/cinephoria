@@ -1,7 +1,6 @@
 import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
-import { addMessage, getMessages } from '../controllers/messages.js';
 import  { verifyEmployeeJWT} from '../controllers/auth.js';
 import { sendContactAcknowledgment, sendContactMessage } from '../api/emailClient.js';
 

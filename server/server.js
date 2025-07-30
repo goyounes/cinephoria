@@ -61,43 +61,6 @@ app.post("/api/messages", async (req,res,next) => {
     }
 })
 
-// app.get('/tickets', async(req, res) => {
-//     try{
-//         res.status(200).json(tickets);
-//         const tickets = await db.getTickets()
-//     } catch (error) {
-//         next(error);
-//     }
-
-// });
-// app.post('/tickets', async(req, res) => {
-//     try{
-//         await db.addTicket(req.body);
-//         res.status(201).json("Ticket added successfully!");
-//     } catch (error) {
-//         next(error);
-//     }
-// })
-
-
-// app.get('/messages', async(req, res) => {
-//     try{
-//         const messages = await db.getMessages()
-//         res.status(200).json(messages);
-//     } catch (error) {
-//         next(error);
-//     }
-// });
-// app.post('/messages', async(req, res) => {
-//     try{
-//         await db.addMessage(req.body);
-//         res.status(201).json("Message added successfully!");
-//     } catch (error) {
-//         next(error);
-//     }
-// })
-
-
 
 app.use((err, req, res, next) => {
   console.log("Server: Middleware logging error stack ...");
