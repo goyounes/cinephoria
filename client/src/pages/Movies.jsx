@@ -197,6 +197,7 @@ const Movies = () => {
               <Box>
                 <BasicDatePicker
                   allowedDates={allowedScreeningDates}
+                  format={"ddd DD-MM-YYYY"}
                   value={selectedDate}
                   onChange={setSelectedDate}
                   sx={{ height: "100%" }}
