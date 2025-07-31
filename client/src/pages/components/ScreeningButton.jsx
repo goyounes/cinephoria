@@ -26,7 +26,7 @@ const ScreeningButton = ({screening, room_name}) => {
 
             <Stack width={80} height={100} justifyContent="center">
                 <Typography  variant="h5" sx={{mt: 1.5, fontWeight: "bold"}}>
-                    {dayjs(`1970-01-01T${screening.start_time}`).format("HH:mm")}
+                    {screening.start_time.substring(0, 5)}
                 </Typography>
                 <Typography
                     variant="caption"
@@ -37,8 +37,7 @@ const ScreeningButton = ({screening, room_name}) => {
                     textTransform: "none",
                     }}
                 >
-                    Ends at{" "}
-                    {dayjs(`1970-01-01T${screening.end_time}`).format("HH:mm")}
+                    Ends at {screening.end_time.substring(0, 5)}
                 </Typography>
                 <Typography variant="caption" sx={{mt: 1,textTransform: "none"}}>
                     {room_name}
