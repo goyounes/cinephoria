@@ -4,6 +4,7 @@ import {
   Button, CardContent, IconButton, CircularProgress
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "../../../api/axiosInstance.js";
 import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
@@ -177,12 +178,13 @@ const AdminEditCinema = () => {
             </Button>
 
             <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-              onClick={handleSubmit}
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={handleSubmit}
+                startIcon={<SaveIcon />}
             >
-              Save Changes
+            Save Changes
             </Button>
           </Stack>
         </CardContent>
