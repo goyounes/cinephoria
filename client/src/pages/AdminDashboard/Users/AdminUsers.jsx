@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from 'react'
-import axios from '../../../api/axiosInstance.js';
+import React, { useEffect, useState } from "react";
+import axios from "../../../api/axiosInstance.js";
+import { Link } from "react-router-dom";
 
-import { Link } from 'react-router-dom'
-import { Button } from '@mui/material';
+import {Container,Typography,Table,TableHead,TableBody,TableRow,TableCell,Button,Stack,Paper,CircularProgress} from "@mui/material";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const roles = {
-    1: 'user',
-    2: 'employee',
-    3: 'admin',
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`/api/users`);
-        const data = response.data
+        const response = await axios.get("/api/users"); //reponds with authorized users
+        const data = response.data;
         setUsers(data);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -27,42 +25,50 @@ const Users = () => {
   }, []);
 
   return (
-    <main>
-      <div className="container-3of4-center">
-        <div className="users-header">
-          <h1>Users List</h1>
-          <Link to="/admin/users/create"><Button variant='contained'>Add user</Button></Link>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>user id</th>
-              <th>username</th>
-              <th>email</th>
-              <th>first name</th>
-              <th>last name</th>
-              <th>role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.user_id}>
-                <td>{user.user_id}</td>
-                <td>
-                  <Link to={`/users/${user.user_id}`}>{user.user_name}</Link>
-                </td>
-                <td>{user.user_email}</td>
-                <td>{user.first_name}</td>
-                <td>{user.last_name}</td>
-                <td>{roles[user.role_id]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </main>
+    <Container sx={{ mt: 4 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" fontWeight="bold">
+          Admin Users
+        </Typography>
+        <Button variant="contained" component={Link} to="/admin/users/create">
+          Add User
+        </Button>
+      </Stack>
+
+      {loading ? (
+        <Stack alignItems="center" mt={4}>
+          <CircularProgress />
+        </Stack>
+      ) : (
+        <Paper elevation={3}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>User ID</TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>First Name</TableCell>
+                <TableCell>Last Name</TableCell>
+                <TableCell>Role</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.user_id}>
+                  <TableCell>{user.user_id}</TableCell>
+                  <TableCell>{user.user_name}</TableCell>
+                  <TableCell>{user.user_email}</TableCell>
+                  <TableCell>{user.first_name}</TableCell>
+                  <TableCell>{user.last_name}</TableCell>
+                  <TableCell>{user.role_name || user.role_id}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+      )}
+    </Container>
   );
 };
 
-
-export default Users
+export default Users;

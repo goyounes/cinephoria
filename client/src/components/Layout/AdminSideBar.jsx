@@ -15,7 +15,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 
-const drawerWidthOpen = 240;
+const drawerWidthOpen = 260;
 const drawerWidthClosed = 60;
 
 const AdminSideBar = () => {
@@ -128,13 +128,13 @@ const AdminSideBar = () => {
 
         { currentUser?.role_id >= 3 && (<ListItemButton
           component={Link}
-          to="/admin/users/create"
-          selected={location.pathname === '/admin/users/create'}
+          to="/admin/users"
+          selected={location.pathname === '/admin/users'}
           sx={{ justifyContent:'flex-start', px: 2.5 }}
         >
-          <Tooltip title="Create Account" placement="right" disableHoverListener={open}>
+          <Tooltip title="Authorized Users" placement="right" disableHoverListener={open}>
             <ListItemText
-              primary="👤 Create Account"
+              primary="👤 Authorized Users"
               slotProps={{ primary: { sx: { fontSize: '1.5rem', whiteSpace: 'nowrap' } } }}
             />
           </Tooltip>

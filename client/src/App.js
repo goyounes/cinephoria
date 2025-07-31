@@ -13,7 +13,7 @@ import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
 import AdminScreenings from './pages/AdminDashboard/Screenings/AdminScreenings';
 import AdminAddScreening from './pages/AdminDashboard/Screenings/AdminAddScreening';
 import AdminEditScreening from './pages/AdminDashboard/Screenings/AdminEditScreening';
-// import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
+import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 
@@ -81,6 +81,7 @@ function App() {
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
               <Route path="/admin/users/create" element={<AdminAddUser />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
             </Route>
 
             {/* Home */}
