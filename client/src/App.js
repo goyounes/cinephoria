@@ -36,6 +36,7 @@ import { useAuth } from './context/AuthProvider';
 import ProtectedRoutes from './pages/ProtectedRoutes';
 import NotAuthorized from './pages/NotAuthorized';
 import ScreeningStatistics from './pages/AdminDashboard/Statistics/ScreeningStatistics';
+import AdminAddCinema from './pages/AdminDashboard/Cinemas/AdminAddCinema';
 
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
               <Route path="/admin/screenings" element={<AdminScreenings/>} />
               <Route path="/admin/screenings/create" element={<AdminAddScreening/>} />
               <Route path="/admin/screenings/:id/edit" element={<AdminEditScreening />} />
+              <Route path="/admin/cinemas/create" element={<AdminAddCinema/>} />
               <Route path="/tickets" element={<AdminTickets />} />
             </Route>
 
