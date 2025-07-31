@@ -6,6 +6,17 @@ export async function  getUsers(){
     return result_rows
 }
 
+export async function  getAuthorizedUsers(){
+    const q = `
+        SELECT u.*, r.role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE u.role_id > 1; 
+    `
+    const [result_rows] = await pool.query(q);
+    return result_rows
+}
+
 export async function  getUser(user_id){
     const q = `SELECT * FROM users WHERE user_id = ?;`
     const [result_rows] = await pool.query(q,[user_id]);

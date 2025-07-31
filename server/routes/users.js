@@ -2,12 +2,12 @@ import { Router } from 'express';
 const router = Router();
 import axios from 'axios';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
-import { getUser, getUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
+import { getUser, getAuthorizedUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
 import { addUserService } from '../controllers/auth.js'; // assuming you have a controller to add users
 
-router.get("/",verifyEmployeeJWT,async (req,res,next) => {
+router.get("/",verifyAdminJWT,async (req,res,next) => {
     try {
-        const users = await getUsers() // this is a controller function that fetches users from the database
+        const users = await getAuthorizedUsers() // this is a controller function that fetches users from the database
         res.status(200).json(users)
     } catch (error) {
         next(error)
@@ -27,13 +27,11 @@ router.get("/",verifyEmployeeJWT,async (req,res,next) => {
 router.post('/', verifyAdminJWT, addUserService)
 
 
-router.get("/:id",async (req,res,next) => {
+router.get("/:id", verifyAdminJWT ,async (req,res,next) => {
     const id = req.params.id
     console.log("accesing API for user with user_id =",id)
     try {
-        const user = await getUser(id) // this is a controller function that fetches a user from the database
-        // if ('error' in user) throwError (user.error.message,user.error.status)
-        // res.status(200).render("pages/one_user.ejs",{user})
+        const user = await getUser(id) 
         res.status(200).json(user)
     } catch (error) {
         next(error) // network request or re-thrown error
