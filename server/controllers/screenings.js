@@ -131,7 +131,7 @@ export async function getUpcomingScreenings(cinema_id,movie_id){    //How to han
     const [result_rows] = await pool.query(q, [cinema_id, cinema_id, movie_id, movie_id])
     return result_rows
 }
-export async function getUpcomingScreeningsAdmin(cinema_id, movie_id) {
+export async function getUpcomingAndPastScreeningsAdmin(cinema_id, movie_id) {
     const q = `
         SELECT 
             screenings.*, 
@@ -173,8 +173,6 @@ export async function getUpcomingScreeningsAdmin(cinema_id, movie_id) {
             ? IS NULL OR screenings.cinema_id = ?
         ) AND (
             ? IS NULL OR screenings.movie_id = ?
-        ) AND (
-            screenings.start_date > CURDATE() OR (screenings.start_date = CURDATE() AND screenings.start_time > CURTIME())
         )
         ORDER BY screenings.start_date, screenings.start_time;
     `;

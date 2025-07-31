@@ -9,7 +9,7 @@ import { addMovie,  getGenres, deleteMovie, updateMovie,
     getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies,
     checkMovieIdAdmin} 
     from '../controllers/movies.js';
-import { getUpcomingScreenings , getUpcomingScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
+import { getUpcomingScreenings , getUpcomingAndPastScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
 import {s3, bucketName} from "../api/awsS3Client.js"
 
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
@@ -225,7 +225,7 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
             err.status = 404;
             return next(err);
         }
-        const rawScreenings = await getUpcomingScreeningsAdmin(cinema_id,movie_id )
+        const rawScreenings = await getUpcomingAndPastScreeningsAdmin(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         res.status(200).json(screenings)
     } catch (error) {
