@@ -1,7 +1,6 @@
 import { Stack, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import ScreeningStatButton from './ScreeningStatButton';
-import ScreeningButton from '../../components/ScreeningButton';
 
 
 const ScreeningsStatsTable = ({ screeningsByLocation }) => {
@@ -63,7 +62,7 @@ const RoomsBlock = ({ cinemaData }) => {
               key={screening.screening_id}
               to={`/admin/screenings/${screening.screening_id}/edit`}
             >
-              <ScreeningButton
+              <ScreeningStatButton
                 screening={screening}
                 room_name={roomData.room_name}
               />
