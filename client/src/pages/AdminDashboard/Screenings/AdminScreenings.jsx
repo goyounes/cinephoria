@@ -319,7 +319,7 @@ const AdminScreenings = () => {
 
                      <Button
                      component={Link}
-                     to={`/screenings/${screening.screening_id}/edit`}
+                     to={`/admin/screenings/${screening.screening_id}/edit`}
                      size="small"
                      variant="outlined"
                      startIcon={<EditNoteIcon />}
