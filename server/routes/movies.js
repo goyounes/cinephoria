@@ -383,7 +383,7 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
             }
         }
 
-        res.status(204).json({message: "movie deleted succesfully"})
+        res.status(200).json({message: "movie deleted succesfully"})
     } catch (error) {
         next(error) // network request or re-thrown error
     }

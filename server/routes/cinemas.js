@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import {addCinema, getCinemas, getRooms, addRoom, getSeats} from '../controllers/cinemas.js'; 
+import {addCinema, getCinemas, getRooms, addRoom, getSeats, deleteRoomById} from '../controllers/cinemas.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 router.get("/", async (req,res,next) => {
@@ -33,6 +33,16 @@ router.post("/rooms", verifyEmployeeJWT, async (req, res, next) => {
   try {
     const newRoom = await addRoom(req.body);
     res.status(201).json(newRoom);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/rooms/:id", verifyEmployeeJWT, async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const deleteResult = await deleteRoomById(id);
+    res.status(200).json({message: "room deleted succesfully"})
   } catch (err) {
     next(err);
   }

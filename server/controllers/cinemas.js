@@ -66,3 +66,13 @@ export async function addRoom({ room_name, room_capacity, cinema_id }) {
     connection.release();
   }
 }
+
+export async function  deleteRoomById(id){
+    const q = `
+        UPDATE rooms
+        SET isDeleted = TRUE
+        WHERE room_id = ? 
+    `
+    const [result_rows] = await pool.query(q,[id]);
+    return result_rows
+}

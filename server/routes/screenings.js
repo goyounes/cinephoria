@@ -1,5 +1,5 @@
 import { Router } from 'express';
-const router = Router();
+export const router = Router();
 
 import {getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings, updateScreening} from '../controllers/screenings.js'; 
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
@@ -141,7 +141,7 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     console.log("Deleting screening id =",id)
     try {
         const deleteResult = await deleteScreeningById(id)
-        res.status(204).json({message: "screening deleted succesfully"})
+        res.status(200).json({message: "screening deleted succesfully"})
     } catch (error) {
         next(error)
     }
