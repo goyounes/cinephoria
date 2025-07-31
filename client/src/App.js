@@ -38,6 +38,7 @@ import NotAuthorized from './pages/NotAuthorized';
 import ScreeningStatistics from './pages/AdminDashboard/Statistics/ScreeningStatistics';
 import AdminAddCinema from './pages/AdminDashboard/Cinemas/AdminAddCinema';
 import AdminEditCinema from './pages/AdminDashboard/Cinemas/AdminEditCinema';
+import AdminCinemas from './pages/AdminDashboard/Cinemas/AdminCinemas';
 
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
               <Route path="/admin/screenings" element={<AdminScreenings/>} />
               <Route path="/admin/screenings/create" element={<AdminAddScreening/>} />
               <Route path="/admin/screenings/:id/edit" element={<AdminEditScreening />} />
+              <Route path="/admin/cinemas" element={<AdminCinemas/>} />
               <Route path="/admin/cinemas/create" element={<AdminAddCinema/>} />
               <Route path="/admin/cinemas/:id/edit" element={<AdminEditCinema/>} />
               <Route path="/tickets" element={<AdminTickets />} />
