@@ -295,6 +295,11 @@ export async function refreshService(req, res, next) {
       return res.status(400).json({message: "Invalid refresh token"});
     }
 
+    // Check if access token user_id matches refresh token user_id
+    if (decodedAccess.user_id !== decodedRefresh.user_id) {
+      return res.status(400).json({ message: "Access token user does not match refresh token user" });
+    }
+
     // Check refresh token version matches
     const q = "SELECT refresh_token_version FROM users WHERE user_id = ?";
     const [rows] = await pool.query(q, [decodedAccess.user_id]);
