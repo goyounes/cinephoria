@@ -1,4 +1,4 @@
-import { pool } from "./connect.js";
+import { pool } from "../config/mysqlConnect.js";
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";

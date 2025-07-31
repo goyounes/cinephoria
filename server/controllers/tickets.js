@@ -1,4 +1,4 @@
-import { pool } from "./connect.js";
+import { pool } from "../config/mysqlConnect.js";
 import crypto from "crypto"
 export async function getMyTickets(user_id){
     const q = `

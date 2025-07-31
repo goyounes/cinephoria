@@ -162,8 +162,8 @@ VALUES
 (3,"Paris","42 Rue de Rivoli, 75004 Paris"),
 (4,"Toulouse","18 Rue du Languedoc, 31000 Toulouse"),
 (5,"Lille","77 Rue Nationale, 59800 Lille"),
-(6,"Charleroi (Belgique)","26 Rue Léon Bernus, 6000 Charleroi"),
-(7,"Liège (Belgique)","59 Quai de la Batte, 4020 Liège");
+(6,"Charleroi (Belgique)","26 Rue Leon Bernus, 6000 Charleroi"),
+(7,"Liege (Belgique)","59 Quai de la Batte, 4020 Liege");
 
 SELECT * FROM cinemas;
 -- ---------------------------------------------------------------------------------------------------------------------------

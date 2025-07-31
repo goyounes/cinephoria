@@ -1,4 +1,4 @@
-import { pool } from "./connect.js";
+import { pool } from "../config/mysqlConnect.js";
 
 export async function  getCinemas(){
     const q = `SELECT * FROM cinemas;`

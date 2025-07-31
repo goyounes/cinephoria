@@ -1,4 +1,4 @@
-import { pool } from "./connect.js";
+import { pool } from "../config/mysqlConnect.js";
 
 export async function  getMovies(){
     const q = `WHERE created_at > ? AND isDeleted = FALSE;`
