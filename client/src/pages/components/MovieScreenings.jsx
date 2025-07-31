@@ -13,7 +13,7 @@ import {Stack,Button,Typography,IconButton,Card,CardContent,} from "@mui/materia
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-import ScreeningsDisplay from "./ScreeningsDisplay";
+import ScreeningsTable from "./ScreeningsTable.jsx";
 import { useAuth } from "../../context/AuthProvider";
 
 dayjs.extend(customParseFormat)
@@ -187,7 +187,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
                 {screeningsForDate.length === 0 ? (
                   <Typography>No screenings available.</Typography>
                 ) : (
-                  <ScreeningsDisplay screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
+                  <ScreeningsTable screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
                 )}
               </>
             );
