@@ -144,8 +144,8 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
 
                 {screeningsForDate.length === 0 ? (
                   <Typography>No screenings available.</Typography>
-                ) : (<></>
-                  // <ScreeningsStatsTable screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
+                ) : (
+                  <ScreeningsStatsTable screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />
                 )}
               </>
             );
