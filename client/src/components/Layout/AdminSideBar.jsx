@@ -13,11 +13,13 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 
 const drawerWidthOpen = 240;
 const drawerWidthClosed = 60;
 
 const AdminSideBar = () => {
+  const {currentUser} = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(true);
 
@@ -70,7 +72,7 @@ const AdminSideBar = () => {
 
         <ListItemButton
           component={Link}
-          to="/admin"
+          to="/admin/dashboard"
           selected={location.pathname === '/admin'}
           sx={{ justifyContent:'flex-start', px: 2.5 }}
         >
@@ -109,6 +111,34 @@ const AdminSideBar = () => {
             />
           </Tooltip>
         </ListItemButton>
+
+        <ListItemButton
+          component={Link}
+          to="/admin/cinemas"
+          selected={location.pathname === '/admin/cinemas'}
+          sx={{ justifyContent:'flex-start', px: 2.5 }}
+        >
+          <Tooltip title="Cinemas" placement="right" disableHoverListener={open}>
+            <ListItemText
+              primary="🏢 Cinemas"
+              slotProps={{ primary: { sx: { fontSize: '1.5rem', whiteSpace: 'nowrap' } } }}
+            />
+          </Tooltip>
+        </ListItemButton>
+
+        { currentUser?.role_id >= 3 && (<ListItemButton
+          component={Link}
+          to="/admin/users/create"
+          selected={location.pathname === '/admin/users/create'}
+          sx={{ justifyContent:'flex-start', px: 2.5 }}
+        >
+          <Tooltip title="Create Account" placement="right" disableHoverListener={open}>
+            <ListItemText
+              primary="👤 Create Account"
+              slotProps={{ primary: { sx: { fontSize: '1.5rem', whiteSpace: 'nowrap' } } }}
+            />
+          </Tooltip>
+        </ListItemButton>)}
       </List>
     </Drawer>
   );

@@ -6,14 +6,14 @@ import RealNavBar from './components/Layout/RealNavBar';
 import Footer from './components/Layout/Footer';
 
 
-import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+// import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminMovies from './pages/AdminDashboard/Movies/AdminMovies';
 import AdminAddMovie from './pages/AdminDashboard/Movies/AdminAddMovie';
 import AdminEditMovie from './pages/AdminDashboard/Movies/AdminEditMovie';
 import AdminScreenings from './pages/AdminDashboard/Screenings/AdminScreenings';
 import AdminAddScreening from './pages/AdminDashboard/Screenings/AdminAddScreening';
 import AdminEditScreening from './pages/AdminDashboard/Screenings/AdminEditScreening';
-import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
+// import AdminUsers from './pages/AdminDashboard/Users/AdminUsers';
 import AdminAddUser from './pages/AdminDashboard/Users/AdminAddUser';
 import AdminTickets from './pages/AdminDashboard/Tickets/AdminTickets';
 
@@ -35,6 +35,7 @@ import ContactUs from './pages/ContactUs';
 import { useAuth } from './context/AuthProvider';
 import ProtectedRoutes from './pages/ProtectedRoutes';
 import NotAuthorized from './pages/NotAuthorized';
+import ScreeningStatistics from './pages/AdminDashboard/Statistics/ScreeningStatistics';
 
 
 function App() {
@@ -61,8 +62,8 @@ function App() {
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
-              <Route path="/admin"          element={<AdminDashboard />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin"          element={<ScreeningStatistics />} />
+              <Route path="/admin/dashboard" element={<ScreeningStatistics />} />
               <Route path="/admin/movies" element={<AdminMovies />} />
               <Route path="/admin/movies/create" element={<AdminAddMovie />} />
               <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
@@ -73,7 +74,6 @@ function App() {
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
-              <Route path="/users" element={<AdminUsers />} />
               <Route path="/admin/users/create" element={<AdminAddUser />} />
             </Route>
 
