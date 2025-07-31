@@ -81,7 +81,7 @@ const ScreeningStatistics = () => {
 				</FormControl>
 			</Stack>
 
-			{/* {selectedMovieId !== -1 && <MovieScreeningsCalendar movieId={selectedMovieId} cinema_id={selectedCinema?.cinema_id || null} />} */}
+			{selectedMovieId !== -1 && <MovieScreeningsCalendar movieId={selectedMovieId} cinema_id={selectedCinema?.cinema_id || null} />}
 			
 			{selectedMovieId === -1 && (
 				<Typography>
