@@ -15,7 +15,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
 import BasicDatePicker from './../../../components/UI/BasicDatePicker.jsx';
-import RoomMultiSelect from "../../components/RoomMultiSelect.jsx";
 import RoomSingleSelect from "../../components/RoomSingleSelect.jsx";
 
 const AdminEditScreening = () => {
