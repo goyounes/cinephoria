@@ -91,8 +91,8 @@ const AdminEditCinema = () => {
           cinema_id: cinemaId,
         };
         return room.isNew
-          ? axios.post("/api/rooms", payload)
-          : axios.put(`/api/rooms/${room.room_id}`, payload);
+          ? axios.post("/api/cinemas/rooms", payload)
+          : axios.put(`/api/cinemas/rooms/${room.room_id}`, payload);
       });
 
       await Promise.all(roomRequests);

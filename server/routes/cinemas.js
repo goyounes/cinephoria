@@ -1,6 +1,7 @@
 import { Router } from 'express';
 const router = Router();
-import {getCinemas, getRooms, getSeats} from '../controllers/cinemas.js'; 
+import {addCinema, getCinemas, getRooms, addRoom, getSeats} from '../controllers/cinemas.js'; 
+import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 
 router.get("/", async (req,res,next) => {
     try {
@@ -10,6 +11,14 @@ router.get("/", async (req,res,next) => {
         next(error)
     }
 })
+router.post("/", verifyEmployeeJWT ,async (req, res, next) => {
+  try {
+    const newCinema = await addCinema(req.body);
+    res.status(201).json(newCinema);
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get("/rooms", async (req,res,next) => {
     try {
@@ -19,5 +28,14 @@ router.get("/rooms", async (req,res,next) => {
         next(error)
     }
 })
+
+router.post("/rooms", verifyEmployeeJWT, async (req, res, next) => {
+  try {
+    const newRoom = await addRoom(req.body);
+    res.status(201).json(newRoom);
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default router;
