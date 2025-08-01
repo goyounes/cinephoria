@@ -17,6 +17,7 @@ const AdminEditCinema = () => {
 
   const [cinemaData, setCinemaData] = useState({ cinema_name: "", cinema_adresse: "" });
   const [rooms, setRooms] = useState([]);
+  const [deletedRoomIds, setDeletedRoomIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all data and isolate target cinema
@@ -72,18 +73,28 @@ const AdminEditCinema = () => {
   };
 
   const removeRoom = (index) => {
-    setRooms(prev => prev.filter((_, i) => i !== index));
+    setRooms(prev => {
+      const updated = [...prev];
+      const removed = updated.splice(index, 1)[0];
+
+      // Track only existing rooms for deletion
+      if (!removed.isNew && removed.room_id) {
+        setDeletedRoomIds(ids => [...ids, removed.room_id]);
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async () => {
     try {
-      // Update cinema
+      // Update cinema info
       await axios.put(`/api/cinemas/${cinemaId}`, {
         cinema_name: cinemaData.cinema_name,
         cinema_adresse: cinemaData.cinema_adresse,
       });
 
-      // Update/add rooms
+      // Update or add rooms
       const roomRequests = rooms.map(room => {
         const payload = {
           room_name: room.room_name,
@@ -95,7 +106,15 @@ const AdminEditCinema = () => {
           : axios.put(`/api/cinemas/rooms/${room.room_id}`, payload);
       });
 
-      await Promise.all(roomRequests);
+      // Delete removed rooms
+      const deleteRequests = deletedRoomIds.map(id =>
+        axios.delete(`/api/cinemas/rooms/${id}`)
+      );
+
+      await Promise.all([...roomRequests, ...deleteRequests]);
+
+      // Clear deletion queue
+      setDeletedRoomIds([]);
 
       showSnackbar("Cinema updated successfully", "success");
     } catch (err) {
@@ -178,13 +197,13 @@ const AdminEditCinema = () => {
             </Button>
 
             <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                onClick={handleSubmit}
-                startIcon={<SaveIcon />}
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={handleSubmit}
+              startIcon={<SaveIcon />}
             >
-            Save Changes
+              Save Changes
             </Button>
           </Stack>
         </CardContent>
