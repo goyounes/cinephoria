@@ -18,31 +18,29 @@ import {
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import axios from "../../../api/axiosInstance.js";
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
 
 const AdminCinemas = () => {
-  const showSnackbar = useSnackbar();
   const [cinemas, setCinemas] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCinemasAndRooms = async () => {
-    try {
-      const [cinemaRes, roomRes] = await Promise.all([
-        axios.get("/api/cinemas"),
-        axios.get("/api/cinemas/rooms")
-      ]);
-      setCinemas(cinemaRes.data);
-      setRooms(roomRes.data);
-    } catch (err) {
-      console.error("Failed to fetch cinemas or rooms", err);
-      showSnackbar("Failed to load cinemas", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   useEffect(() => {
+    const fetchCinemasAndRooms = async () => {
+      try {
+        const [cinemaRes, roomRes] = await Promise.all([
+          axios.get("/api/cinemas"),
+          axios.get("/api/cinemas/rooms")
+        ]);
+        setCinemas(cinemaRes.data);
+        setRooms(roomRes.data);
+      } catch (err) {
+        console.error("Failed to fetch cinemas or rooms", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchCinemasAndRooms();
   }, []);
 
