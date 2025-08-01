@@ -7,7 +7,7 @@ export async function  getCinemas(){
 }
 
 export async function  getRooms(){
-    const q = `SELECT * FROM rooms;`
+    const q = `SELECT * FROM rooms WHERE isDeleted = FALSE;`
     const [result_rows] = await pool.query(q);
     return result_rows
 }
@@ -25,6 +25,20 @@ export async function addCinema({ cinema_name, cinema_adresse }) {
   `;
   const [result] = await pool.query(q, [cinema_name, cinema_adresse]);
   return { cinema_id: result.insertId, cinema_name, cinema_adresse };
+}
+
+export async function updateCinema(id, { cinema_name, cinema_adresse }) {
+  const q = `
+    UPDATE cinemas
+    SET cinema_name = ?, cinema_adresse = ?
+    WHERE cinema_id = ?
+  `;
+  const [result] = await pool.query(q, [cinema_name, cinema_adresse, id]);
+
+  return {
+    result,
+    updatedCinema: { cinema_id: id, cinema_name, cinema_adresse },
+  };
 }
 
 export async function addRoom({ room_name, room_capacity, cinema_id }) {
@@ -65,6 +79,20 @@ export async function addRoom({ room_name, room_capacity, cinema_id }) {
   } finally {
     connection.release();
   }
+}
+
+export async function updateRoom(id, { room_name, room_capacity, cinema_id }) {
+  const q = `
+    UPDATE rooms
+    SET room_name = ?, room_capacity = ?, cinema_id = ?
+    WHERE room_id = ?
+  `;
+  const [result] = await pool.query(q, [room_name, room_capacity, cinema_id, id]);
+
+  return {
+    result,
+    updatedRoom: { room_id: id, room_name, room_capacity, cinema_id },
+  };
 }
 
 export async function  deleteRoomById(id){
