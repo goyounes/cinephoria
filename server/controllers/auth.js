@@ -1,4 +1,5 @@
 import { pool } from "../config/mysqlConnect.js";
+import { getRedisClient  } from '../config/redisConnect.js';
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
@@ -167,7 +168,6 @@ export async function resetPasswordService(req, res, next) {
 }
 
 
-const revokedRefreshTokens = {};
 export async function logoutService(req, res, next) {
 
   const { refreshToken } = req.body;
@@ -176,16 +176,21 @@ export async function logoutService(req, res, next) {
     return res.status(400).json({ message: "Refresh token required in body" });
   }
 
+  let decodedRefreshToken
   try {
-    jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
+    decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired refresh token" });
   }
   
   try {
     // Add refreshToken to revoked list (blacklist)
-    revokedRefreshTokens[refreshToken] = true;
-    // console.log("revoked tokens hashMap", revokedRefreshTokens)
+    const client = await getRedisClient();
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const expiresIn = decodedRefreshToken.exp - nowInSeconds;
+    await client.set(refreshToken, 'revoked', { EX: expiresIn });  //set support for expiration
+
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     next(error);
@@ -276,7 +281,10 @@ export async function refreshService(req, res, next) {
     if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
 
     // Check if refresh token is revoked (blacklisted)
-    if (revokedRefreshTokens[refreshToken]) {
+    const client = await getRedisClient();
+    const isRevoked = await client.exists(refreshToken);
+
+    if (isRevoked) {
       return res.status(403).json({ message: "Refresh token revoked (logged out)" });
     }
 
