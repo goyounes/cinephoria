@@ -1,7 +1,9 @@
 import { createClient } from 'redis';
 
+const redisHost = process.env.REDIS_HOST || 'localhost';  // Use env var or localhost
+
 const client = createClient({
-  url: 'redis://localhost:6379',
+  url: `redis://${redisHost}:6379`,
 });
 
 client.on('error', (err) => console.error('Redis Client Error', err));

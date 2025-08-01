@@ -11,6 +11,15 @@ services:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   server:
     build:
       context: ./server
@@ -20,10 +29,12 @@ services:
       - ./server/.env
     environment:
       - MYSQL_HOST=mysql
+      - REDIS_HOST=redis # added redis but i need to also set my server to make sure of this?
     ports:
       - "${PORT:-8080}:8080"
     depends_on:
       - mysql
+      - redis
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -48,3 +59,4 @@ services:
 
 volumes:
   mysql_data:
+  redis_data: 
