@@ -11,15 +11,16 @@ import { body, validationResult } from 'express-validator';
 router.post('/refresh', refreshService);
 router.post('/logout', logoutService);
 
-router.post('/verify-user', verifyUserJWT, (req, res) => {
-  res.status(200).json({ message: 'Token valid', user: req.user });
-});
-router.post('/verify-employee', verifyEmployeeJWT, (req, res) => {
-  res.status(200).json({ message: 'Token valid', user: req.user });
-});
-router.post('/verify-admin', verifyAdminJWT, (req, res) => {
-  res.status(200).json({ message: 'Token valid', user: req.user });
-});
+// for testing purposes
+// router.post('/verify-user', verifyUserJWT, (req, res) => {
+//   res.status(200).json({ message: 'Token valid', user: req.user });
+// });
+// router.post('/verify-employee', verifyEmployeeJWT, (req, res) => {
+//   res.status(200).json({ message: 'Token valid', user: req.user });
+// });
+// router.post('/verify-admin', verifyAdminJWT, (req, res) => {
+//   res.status(200).json({ message: 'Token valid', user: req.user });
+// });
 
 router.get('/verify-email', verifyEmailService);
 

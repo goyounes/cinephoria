@@ -40,18 +40,4 @@ router.get("/",verifyEmployeeJWT,async (req,res,next) => {
     }
 })
 
-router.get("/:id",async (req,res,next) => {
-    const id = req.params.id
-    console.log("accesing API for ticket with ticket_id =",id)
-    try {
-        const response = await axios.get(DB_API_URL+ "/tickets/" + id,{headers:{'X-Requested-By': 'backend-server'}})
-        const tickets = response.data
-        // if ('error' in tickets) throwError (tickets.error.message,tickets.error.status)
-        // res.status(200).render("pages/tickets.ejs",{tickets})
-        res.status(200).json(response.data)
-    } catch (error) {
-        next(error)
-    }
-})
-
 export default router;

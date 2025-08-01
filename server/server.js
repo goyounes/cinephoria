@@ -2,7 +2,6 @@ import './config/env.js';
 
 import experess from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 
 const app = experess();
 const PORT = process.env.PORT || 8080;
@@ -14,12 +13,10 @@ app.use(cors({
   credentials: true               // ✅ allow cookies and auth headers
 }));
 
-app.use(cookieParser());
 
 import usersRoutes from  './routes/users.js'
 import moviesRoutes from  './routes/movies.js'
 import screeningsRoutes from  './routes/screenings.js'
-import adminRoutes from  './routes/admin.js'
 import ticketsRoutes from  './routes/tickets.js'
 import checkoutRoutes from  './routes/checkout.js'
 import authRoutes from  './routes/auth.js'
@@ -32,7 +29,6 @@ app.use('/api/movies', moviesRoutes);
 app.use('/api/screenings', screeningsRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/tickets', ticketsRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/cinemas', cinemasRoutes);
 

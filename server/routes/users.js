@@ -14,16 +14,6 @@ router.get("/",verifyAdminJWT,async (req,res,next) => {
     }
 })
 
-// router.post('/', verifyAdminJWT, async(req, res,next) => {
-//     try {
-//         const userData = req.body;
-//         const response = await addUser(userData);        
-//         res.status(201).json({ message: "User registered successfully", user_id });
-//     } catch (error) {
-//         next(error)
-//     }
-// });
-
 router.post('/', verifyAdminJWT, addUserService)
 
 
