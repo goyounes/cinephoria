@@ -1,18 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  Box,
-  Chip,
-  Rating,
-  CircularProgress,
-} from "@mui/material";
+import {Container,Typography,TextField,Button,Card,CardContent,Stack,Box,Chip,Rating,CircularProgress} from "@mui/material";
 import StarsIcon from "@mui/icons-material/Stars";
 import SendIcon from "@mui/icons-material/Send";
 
@@ -50,7 +38,8 @@ const MovieReview = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`/api/movies/${id}/reviews`, {
+      await axios.post(`/api/movies/reviews`, {
+        movie_id: id,
         user_id: currentUser.user_id,
         score: reviewData.score,
         review: reviewData.review,
@@ -160,7 +149,7 @@ const MovieReview = () => {
             />
             <TextField
               name="review"
-              label="Optional comment"
+              label="Optional review"
               multiline
               rows={4}
               value={reviewData.review}
