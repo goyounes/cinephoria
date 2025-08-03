@@ -309,6 +309,38 @@ export async function getLatestMovies(){
     return result_rows
 }
 
+addReviewToMovie
+export async function addReviewToMovie(movie_id,user_id, score, review){
+    // check if the user has ticket for the movie with a past screening date
+    const q =  `
+        SELECT * 
+        FROM tickets
+        JOIN screenings ON tickets.screening_id = screenings.screening_id
+        WHERE 
+            screenings.movie_id = ? 
+        AND 
+            tickets.user_id = ?
+        AND 
+            screenings.start_date < CURDATE();
+    `
+    const [ticket_rows] = await pool.query(q, [movie_id, user_id]);
+
+    if (ticket_rows.length === 0) return null 
+
+    const q2 = `
+        INSERT INTO movies_reviews (movie_id, user_id, score, review) 
+        VALUES (?, ?, ?, ?);
+    `
+    const VALUES = [
+        movie_id,
+        user_id,
+        score,
+        review
+    ]
+    const [result_rows] = await pool.query(q2,VALUES);
+    return result_rows
+}
+
 export async function checkMovieIdAdmin (id){
     const q = `
         SELECT movies.movie_id

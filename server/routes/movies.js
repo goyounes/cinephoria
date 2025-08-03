@@ -2,12 +2,13 @@ import { Router } from 'express';
 const router = Router();
 
 import multer from 'multer';
-import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
+import { verifyAdminJWT, verifyEmployeeJWT, verifyUserJWT } from '../controllers/auth.js';
 
 import { addMovie,  getGenres, deleteMovie, updateMovie, 
     getOneMovieWithGenres, getMoviesWithGenres,
     getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies,
-    checkMovieIdAdmin} 
+    checkMovieIdAdmin,
+    addReviewToMovie} 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getUpcomingAndPastScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
 import {s3, bucketName} from "../api/awsS3Client.js"
@@ -389,5 +390,36 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
     }
 })
 
+router.post("/reviews", verifyUserJWT, async (req,res,next) => {
+    const { movie_id, review, user_id, score } = req.body;   
+    if (!movie_id || !score || !user_id) {
+        const err = new Error("Missing required fields: movie_id, user_id or score");
+        err.status = 400;
+        return next(err);
+    }   
+    try {
+        const found = await checkMovieIdAdmin(movie_id) // check movie exists in the db 
+        if (!found){
+            const err = new Error("No movie with this id was found");
+            err.status = 404;
+            return next(err);
+        }
+        
+        // Assuming you have a function to add a review
+        const result = await addReviewToMovie(movie_id, user_id, score, review);
+        
+        if (!result) {
+            const err = new Error("You can only review a movie after watching it");
+            err.status = 400;
+            return next(err);
+        }
 
+        res.status(201).json({
+            message: "Review added successfully",
+            review: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+})
 export default router;
