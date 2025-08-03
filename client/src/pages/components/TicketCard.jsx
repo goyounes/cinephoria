@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import QRCode from 'react-qr-code'
 
 const TicketCard = ({ ticket }) => (
@@ -7,21 +7,25 @@ const TicketCard = ({ ticket }) => (
     p={2}
     border="1px solid black"
     borderRadius={4}
-    width={300}
+    width={330}
   >
     <Typography variant="subtitle2" fontWeight={600}>
       {ticket.title}
     </Typography>
-    <Typography variant="body2">{ticket.cinema_name}</Typography>
-    <Typography variant="body2" mt={0.5}>
-      Seat #{ticket.seat_number}
-    </Typography>
-    <Typography variant="body2">
-      {ticket.start_date} at {ticket.start_time.substring(0, 5)}
-    </Typography>
-    <Box mt={1}>
-      <QRCode value={ticket.QR_code} size={96} />
-    </Box>
+    <Stack direction="row" justifyContent="space-between" >
+      <Box> 
+        <Typography variant="body2">{ticket.cinema_name}</Typography>
+        <Typography variant="body2" mt={0.5}>
+          Seat #{ticket.seat_number}
+        </Typography>
+        <Typography variant="body2">
+          {ticket.start_date} at {ticket.start_time.substring(0, 5)}
+        </Typography>
+      </Box>   
+      <Box mt={1}>
+        <QRCode value={ticket.QR_code} size={96} />
+      </Box>
+    </Stack>
   </Box>
 )
 
