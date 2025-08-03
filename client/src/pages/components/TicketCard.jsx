@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import QRCode from 'react-qr-code'
 
 const TicketCard = ({ ticket }) => (
