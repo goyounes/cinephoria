@@ -142,9 +142,6 @@ const Movies = () => {
             </Select>
           </FormControl>
 
-          {/* <Button size='large'>Filters</Button> */}
-          {/* <BasicModal></BasicModal> */}
-
           <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)} startIcon={<SearchIcon />}>
             Find movie
           </ResponsiveIconButton>
