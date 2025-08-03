@@ -39,6 +39,7 @@ import ScreeningStatistics from './pages/AdminDashboard/Statistics/ScreeningStat
 import AdminAddCinema from './pages/AdminDashboard/Cinemas/AdminAddCinema';
 import AdminEditCinema from './pages/AdminDashboard/Cinemas/AdminEditCinema';
 import AdminCinemas from './pages/AdminDashboard/Cinemas/AdminCinemas';
+import MovieReview from './pages/MovieReview';
 
 
 function App() {
@@ -90,6 +91,7 @@ function App() {
             <Route path="/reservation/" element={<Reservation />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id" element={<Movie />} />
+            <Route path="/movies/:id/review" element={<MovieReview/>} />
             <Route path="/contactus" element={<ContactUs />} />
 
             
