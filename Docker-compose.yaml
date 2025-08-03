@@ -1,62 +1,62 @@
 services:
   mysql:
-    image: mysql:8.0
-    command: --default-time-zone=SYSTEM
-    container_name: mysql_db
-    restart: always
+    image: mysql:8.0                     # Image officielle de MySQL version 8
+    command: --default-time-zone=SYSTEM  # Utiliser le fuseau horaire du système
+    container_name: mysql_db             # Nom du conteneur
+    restart: always                      # Redémarre automatiquement en cas d'arrêt
     environment:
-      MYSQL_ROOT_PASSWORD: 5599
-      MYSQL_DATABASE: cinephoria
+      MYSQL_ROOT_PASSWORD: 5599          # Mot de passe root
+      MYSQL_DATABASE: cinephoria         # Base de données créée au démarrage
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql        # Volume pour persister les données
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
 
   redis:
-    image: redis:7.0-alpine
-    container_name: redis_cache
-    restart: always
+    image: redis:7.0-alpine              # Image légère de Redis
+    container_name: redis_cache          # Nom du conteneur Redis
+    restart: always                      # Redémarre automatiquement
     ports:
-      - "6379:6379"
+      - "6379:6379"                      # Expose le port Redis
     volumes:
-      - redis_data:/data
+      - redis_data:/data                 # Volume pour les données Redis
 
   server:
     build:
-      context: ./server
-    container_name: backend_server
-    restart: unless-stopped
+      context: ./server                  # Dossier contenant le backend Node.js
+    container_name: backend_server       # Nom du conteneur backend
+    restart: unless-stopped              # Redémarre sauf si on l'arrête manuellement
     env_file:
-      - ./server/.env
+      - ./server/.env                    # Fichier d'environnement
     environment:
-      - MYSQL_HOST=mysql
-      - REDIS_HOST=redis # added redis but i need to also set my server to make sure of this?
+      - MYSQL_HOST=mysql                 # Lien vers le service MySQL
+      - REDIS_HOST=redis                 # Lien vers le service Redis
     ports:
-      - "${PORT:-8080}:8080"
+      - "${PORT:-8080}:8080"             # Port d'écoute du backend
     depends_on:
-      - mysql
-      - redis
+      - mysql                            # Attend que MySQL soit prêt
+      - redis                            # Attend que Redis soit prêt
     volumes:
-      - ./server:/app
-      - /app/node_modules
-    working_dir: /app
-    command: npm start
+      - ./server:/app                    # Montage du code backend
+      - /app/node_modules                # Préserve les modules node
+    working_dir: /app                    # Répertoire de travail dans le conteneur
+    command: npm start                   # Commande pour démarrer le serveur
 
   client:
     build:
-      context: ./client
-    container_name: frontend
-    restart: unless-stopped
+      context: ./client                 # Dossier contenant le frontend React
+    container_name: frontend            # Nom du conteneur frontend
+    restart: unless-stopped             # Redémarre sauf arrêt manuel
     environment:
-      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_API_URL=http://localhost:8080  # URL de l'API côté client
     ports:
-      - "3000:3000"
+      - "3000:3000"                     # Port d'écoute de React (développement)
     depends_on:
-      - server
+      - server                          # Attend que le serveur soit prêt
     volumes:
-      - ./client:/app
-    working_dir: /app
-    command: npm start
+      - ./client:/app                   # Montage du code client
+    working_dir: /app                   # Répertoire de travail dans le conteneur
+    command: npm start                  # Démarre le serveur React
 
 volumes:
-  mysql_data:
-  redis_data: 
+  mysql_data:                           # Volume persistant pour MySQL
+  redis_data:                           # Volume persistant pour Redis
