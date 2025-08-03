@@ -4,6 +4,7 @@ import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,Accordi
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TicketCard from '../components/TicketCard.jsx';
 import { useAuth } from '../../context/AuthProvider';
+import { Link } from 'react-router-dom'
 
 
 const Account = () => {
@@ -53,6 +54,7 @@ const Account = () => {
       if (!grouped[id]) {
         grouped[id] = {
           screening: {
+            movie_id: ticket.movie_id,
             title: ticket.title,
             cinema: ticket.cinema_name,
             date: ticket.start_date,
@@ -73,6 +75,7 @@ const Account = () => {
       if (!grouped[id]) {
         grouped[id] = {
           screening: {
+            movie_id: ticket.movie_id,
             title: ticket.title,
             cinema: ticket.cinema_name,
             date: ticket.start_date,
@@ -152,9 +155,6 @@ const Account = () => {
                               {title} @ {cinema} — {tickets.length} ticket
                               {tickets.length > 1 ? 's' : ''}
                             </Typography>
-                              <Button variant="outlined" size="small">
-                                Leave a Review
-                              </Button>
                           </Stack>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -163,6 +163,11 @@ const Account = () => {
                               <TicketCard key={ticket.QR_code} ticket={ticket} />
                             ))}
                           </TicketGroup>
+                            <Link to={`/movies/${screening.movie_id}/review`} >
+                              <Button variant="contained" size="small" sx={{ mt: 2,marginLeft:"30%", width:"40%",marginRight:"30%" }} >
+                                Leave a Review
+                              </Button>
+                            </Link>
                         </AccordionDetails>
                       </Accordion>
                     )
