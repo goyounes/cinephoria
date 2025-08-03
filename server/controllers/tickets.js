@@ -4,6 +4,7 @@ export async function getMyTickets(user_id){
     const q = `
     SELECT 
         tickets.QR_code , 
+        movies.movie_id,
         movies.title,
         movies.length,  
         cinemas.cinema_name, 
