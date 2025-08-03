@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 8080;
 app.use(experess.json());
 // app.use(cors());
 app.use(cors({
-  origin: 'http://localhost:3000', // ✅ must be specific, not '*'
-  credentials: true               // ✅ allow cookies and auth headers
+  origin: 'http://localhost:3000', 
+  credentials: true
 }));
 
 
