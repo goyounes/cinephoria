@@ -63,20 +63,20 @@ CREATE TABLE movies (
     isDeleted BOOL DEFAULT FALSE
 );
 
-INSERT INTO movies (title,  description, age_rating, is_team_pick, score, length) 
+INSERT INTO movies (title,  description, age_rating, is_team_pick, length) 
 VALUES
-('The Shawshank Redemption', 'Two imprisoned men form a deep friendship, finding solace and eventual redemption through acts of common decency.', 18, TRUE, 4.5,"01:30:30"),
-('The Dark Knight', 'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', 13, TRUE, 3.7,"01:30:30"),
-('Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', 13, TRUE, 2.5,"01:00:30"),
-('The Matrix', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', 13, TRUE, 1.5,"01:00:30"),
-('The Godfather', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 18, FALSE, 3.2,"01:10:30"),
-('Pulp Fiction', 'The lives of two mob hitmen, a boxer, a gangster’s wife, and a pair of diner bandits intertwine in four tales of violence and redemption',18,FALSE,4.3,"01:10:30"),
-('The Shawshank Redemption2', 'Two imprisoned men form a deep friendship, finding solace and eventual redemption through acts of common decency.', 18, TRUE, 4.5,"01:30:30"),
-('The Dark Knight2', 'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', 13, TRUE, 3.7,"01:30:30"),
-('Inception2', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', 13, TRUE, 2.5,"01:00:30"),
-('The Matrix2', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', 13, TRUE, 1.5,"01:00:30"),
-('The Godfather2', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 18, FALSE, 3.2,"01:10:30"),
-('Pulp Fiction2', 'The lives of two mob hitmen, a boxer, a gangster’s wife, and a pair of diner bandits intertwine in four tales of violence and redemption',18,FALSE,4.3,"01:10:30");
+('The Shawshank Redemption', 'Two imprisoned men form a deep friendship, finding solace and eventual redemption through acts of common decency.', 18, TRUE,"01:30:30"),
+('The Dark Knight', 'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', 13, TRUE,"01:30:30"),
+('Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', 13, TRUE,"01:00:30"),
+('The Matrix', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', 13, TRUE,"01:00:30"),
+('The Godfather', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 18, FALSE,"01:10:30"),
+('Pulp Fiction', 'The lives of two mob hitmen, a boxer, a gangster’s wife, and a pair of diner bandits intertwine in four tales of violence and redemption',18,FALSE,"01:10:30"),
+('The Shawshank Redemption2', 'Two imprisoned men form a deep friendship, finding solace and eventual redemption through acts of common decency.', 18, TRUE,"01:30:30"),
+('The Dark Knight2', 'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', 13, TRUE,"01:30:30"),
+('Inception2', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', 13, TRUE,"01:00:30"),
+('The Matrix2', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', 13, TRUE,"01:00:30"),
+('The Godfather2', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 18, FALSE,"01:10:30"),
+('Pulp Fiction2', 'The lives of two mob hitmen, a boxer, a gangster’s wife, and a pair of diner bandits intertwine in four tales of violence and redemption',18,FALSE,"01:10:30");
 
 UPDATE movies
 SET created_at = "2025-04-10 06:00:00"
@@ -145,7 +145,6 @@ VALUES
 (6,1);
 
 SELECT * FROM movie_genres;
-
 -- ---------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE cinemas (
@@ -648,7 +647,8 @@ SELECT * FROM users;
 CREATE TABLE users_credentials (
     user_id INT PRIMARY KEY,
     user_password_hash CHAR(60) NOT NULL,
-    password_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     failed_attempts INT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
@@ -677,6 +677,58 @@ VALUES
 
 
 SELECT * FROM users_credentials;
+
+-- ---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE movies_reviews (
+  review_id INT PRIMARY KEY AUTO_INCREMENT,
+  movie_id INT NOT NULL,
+  user_id INT NOT NULL,
+  score INT NOT NULL CHECK (score BETWEEN 1 AND 5),
+  comment VARCHAR(255) DEFAULT "(no comment)",
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (movie_id, user_id),
+  FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+DELIMITER //
+CREATE TRIGGER trg_review_insert
+AFTER INSERT ON movies_reviews
+FOR EACH ROW
+BEGIN
+  DECLARE new_avg DECIMAL(3,2);
+
+  SELECT ROUND(AVG(score), 1)
+  INTO new_avg
+  FROM movies_reviews
+  WHERE movie_id = NEW.movie_id;
+
+  UPDATE movies
+  SET score = new_avg
+  WHERE movie_id = NEW.movie_id;
+END;
+//
+DELIMITER ;
+-- no updates will be allowed
+-- no deletes will be allowed
+
+INSERT INTO movies_reviews (movie_id, user_id, score) VALUES
+(1, 1, 5), (1, 2, 4),
+(2, 1, 4), (2, 2, 3), (2, 3, 4),
+(3, 1, 2), (3, 2, 3),
+(4, 1, 1), (4, 2, 2),
+(5, 1, 4), (5, 2, 3), (5, 3, 2),
+(6, 1, 5), (6, 2, 4), (6, 3, 4),
+(7, 1, 5), (7, 2, 4),
+(8, 1, 4), (8, 2, 3), (8, 3, 4),
+(9, 1, 3), (9, 2, 2),
+(10, 1, 2), (10, 2, 1),
+(11, 1, 4), (11, 2, 3), (11, 3, 2),
+(12, 1, 5), (12, 2, 4), (12, 3, 4);
+
+SELECT * FROM movies_reviews ;
+
 
 -- -------------------------------------------------------------------------------------------------------------
 CREATE TABLE ticket_types (
