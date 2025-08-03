@@ -685,7 +685,7 @@ CREATE TABLE movies_reviews (
   movie_id INT NOT NULL,
   user_id INT NOT NULL,
   score INT NOT NULL CHECK (score BETWEEN 1 AND 5),
-  comment VARCHAR(255) DEFAULT "(no comment)",
+  review VARCHAR(255) DEFAULT "(no comment)",
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (movie_id, user_id),
   FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
