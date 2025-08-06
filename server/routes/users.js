@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import axios from 'axios';
+
 import { verifyAdminJWT, verifyEmployeeJWT } from '../controllers/auth.js';
 import { getUser, getAuthorizedUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
 import { addUserService } from '../controllers/auth.js'; // assuming you have a controller to add users

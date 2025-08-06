@@ -12,6 +12,11 @@ app.use(cors({
   credentials: true
 }));
 
+import { 
+  authLimiter, 
+  browsingLimiter, 
+  bookingLimiter 
+} from './config/rateLimiters.js';
 
 import usersRoutes from  './routes/users.js'
 import moviesRoutes from  './routes/movies.js'
@@ -23,13 +28,13 @@ import cinemasRoutes from  './routes/cinemas.js'
 import { sendContactAcknowledgment, sendContactMessage } from './api/emailClient.js';
 
 
-app.use('/api/users', usersRoutes);
-app.use('/api/movies', moviesRoutes);
-app.use('/api/screenings', screeningsRoutes);
-app.use('/api/checkout', checkoutRoutes);
-app.use('/api/tickets', ticketsRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/cinemas', cinemasRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/users', browsingLimiter, usersRoutes);
+app.use('/api/movies', browsingLimiter, moviesRoutes);
+app.use('/api/screenings', browsingLimiter, screeningsRoutes);
+app.use('/api/checkout', bookingLimiter, checkoutRoutes);
+app.use('/api/tickets', browsingLimiter, ticketsRoutes);
+app.use('/api/cinemas', browsingLimiter, cinemasRoutes);
 
 
 app.get('/', (req, res) => {
