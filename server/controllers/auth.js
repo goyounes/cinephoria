@@ -269,13 +269,6 @@ export async function loginService (req, res, next) {
 
 export async function refreshService(req, res, next) {
   try {
-    const authHeader = req.headers.authorization || req.headers.Authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(400).json({ message: "No access token provided" });
-    }
-
-    const accessToken = authHeader.split(' ')[1];
     const { refreshToken } = req.body;
 
     if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
@@ -289,12 +282,6 @@ export async function refreshService(req, res, next) {
     }
 
     // Verify access token first (MUST be valid signed token, just expired is okay)
-    let decodedAccess;
-    try {
-      decodedAccess = jwt.verify(accessToken, process.env.ACCESS_JWT_SECRET, { ignoreExpiration: true });
-    } catch (err) {
-      return res.status(401).json({ message: "Access token is not valid" });
-    }
 
     let decodedRefresh;
     try {
@@ -303,41 +290,38 @@ export async function refreshService(req, res, next) {
       return res.status(400).json({message: "Invalid refresh token"});
     }
 
-    // Check if access token user_id matches refresh token user_id
-    if (decodedAccess.user_id !== decodedRefresh.user_id) {
-      return res.status(400).json({ message: "Access token user does not match refresh token user" });
-    }
 
     // Check refresh token version matches
-    const q = "SELECT refresh_token_version FROM users WHERE user_id = ?";
-    const [rows] = await pool.query(q, [decodedAccess.user_id]);
+    const q = `
+      SELECT users.role_id, users.refresh_token_version, roles.role_name
+      FROM users JOIN roles ON users.role_id = roles.role_id
+      WHERE user_id = ?
+    `;
+    const [rows] = await pool.query(q, [decodedRefresh.user_id]);
     if (rows.length === 0) {
       return res.status(401).json({ message: "User not found" });
     }
-    const refresh_token_version = rows[0].refresh_token_version;
+    const { role_id, role_name, refresh_token_version } = rows[0];
 
     if (refresh_token_version !== decodedRefresh.token_version) {
 
       return res.status(401).json({message: "Token version mismatch"});
     }
 
-    // Generate new tokens
-    const new_token_version = refresh_token_version
+    // Generate new access token
     const { accessToken: newAccessToken } = generateTokens(
-      decodedAccess.user_id,
-      decodedAccess.role_id,
-      decodedAccess.role_name,
-      new_token_version
+      decodedRefresh.user_id,
+      role_id,
+      role_name,
+      refresh_token_version
     );
 
-
-    res.status(200).json({
-      accessToken: newAccessToken,
-    });
+    res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
     next(error);
   }
 }
+
 
 
 function createRoleMiddleware(roleCheckFunc) {
