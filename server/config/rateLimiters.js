@@ -27,6 +27,6 @@ export const createRateLimit = (windowMs, max, prefix) => {
   };
 };
 
-export const authLimiter = createRateLimit(15 * 60 * 1000, 5, 'auth_limit');        // 5   requests per 15 minutes
+export const authLimiter = createRateLimit(15 * 60 * 1000, 100, 'auth_limit');      // 100 requests per 15 minutes
 export const browsingLimiter = createRateLimit(60 * 1000, 100, 'browsing_limit');   // 100 requests per minute
 export const bookingLimiter = createRateLimit(60 * 60 * 1000, 10, 'booking_limit'); // 10  requests per hour
