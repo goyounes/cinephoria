@@ -17,6 +17,7 @@ export const AuthContextProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  const [accessTokenState, setAccessTokenState] = useState(null)
   const login = async (inputs) => {
     try {
       const res = await axios.post('/api/auth/login', inputs, { withCredentials: false });
@@ -24,7 +25,8 @@ export const AuthContextProvider = ({ children }) => {
       // first_name,// last_name,// isVerified,
 
       // Save tokens with expiry (adjust timeToLive as needed)
-      localStorage.setItem('accessToken', accessToken); 
+      // localStorage.setItem('accessToken', accessToken); 
+      setAccessTokenState(accessToken);
       localStorage.setItem('refreshToken', refreshToken);
 
       const user = {
@@ -61,20 +63,21 @@ export const AuthContextProvider = ({ children }) => {
     }
 
     setCurrentUser(null);
-    localStorage.removeItem('accessToken');
+    // localStorage.removeItem('accessToken');
+    setAccessTokenState(null);
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('currentUser');
   };
 
-   useLayoutEffect(() => {
+  useLayoutEffect(() => {
     // Request interceptor - attach token from current state (or localStorage)
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
         if (config.headers.Authorization) return config; //do not override already set Authorization header
 
-        const accessToken = localStorage.getItem('accessToken');
-        if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
+        // const accessToken = localStorage.getItem('accessToken');
+        if (accessTokenState) {
+          config.headers.Authorization = `Bearer ${accessTokenState}`;
         }
         return config;
       },
@@ -87,7 +90,11 @@ export const AuthContextProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (originalRequest.url.includes('/api/auth/refresh')) {
+          return Promise.reject(error);
+        }
+
+        if ( !originalRequest._retry) {
           originalRequest._retry = true;
 
           try {
@@ -97,7 +104,8 @@ export const AuthContextProvider = ({ children }) => {
             const response = await axios.post('/api/auth/refresh', { refreshToken });
             const newAccessToken = response.data.accessToken;
 
-            localStorage.setItem('accessToken', newAccessToken);
+            // localStorage.setItem('accessToken', newAccessToken);
+            setAccessTokenState(newAccessToken);
 
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return axios(originalRequest);
@@ -105,7 +113,8 @@ export const AuthContextProvider = ({ children }) => {
             // Refresh failed - clear user and tokens
             setCurrentUser(null);
             localStorage.removeItem('currentUser');
-            localStorage.removeItem('accessToken');
+            // localStorage.removeItem('accessToken');
+            setAccessTokenState(null);
             localStorage.removeItem('refreshToken');
             return Promise.reject(refreshError);
           }
@@ -120,7 +129,7 @@ export const AuthContextProvider = ({ children }) => {
       axios.interceptors.request.eject(requestInterceptor);
       axios.interceptors.response.eject(responseInterceptor);
     };
-  }, [currentUser]); // rerun when token changes or setCurrentUser fn changes
+  }, [accessTokenState]); // rerun when token changes or setCurrentUser fn changes
 
 
   const resetPasswordReq = async (email) => {
@@ -134,11 +143,11 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => { //sync across many browser windows
     const syncAuthAcrossTabs = (e) => {
-      if (e.key === 'accessToken') {
-        if (!e.newValue) {
-          setCurrentUser(null);
-        }
-      }
+      // if (e.key === 'accessToken') {
+      //   if (!e.newValue) {
+      //     setCurrentUser(null);
+      //   }
+      // }
       if (e.key === 'currentUser') {
         setCurrentUser(e.newValue ? JSON.parse(e.newValue) : null);
       }
