@@ -13,7 +13,7 @@ services:
 
   redis:
     image: redis:7.0-alpine              # Image légère de Redis
-    container_name: redis_cache          # Nom du conteneur Redis
+    container_name: redis_db          # Nom du conteneur Redis
     restart: always                      # Redémarre automatiquement
     ports:
       - "6379:6379"                      # Expose le port Redis
@@ -28,16 +28,16 @@ services:
     env_file:
       - ./server/.env                    # Fichier d'environnement
     environment:
-      - MYSQL_HOST=mysql                 # Lien vers le service MySQL
-      - REDIS_HOST=redis                 # Lien vers le service Redis
+      MYSQL_HOST: mysql                 # Lien vers le service MySQL
+      REDIS_HOST: redis                 # Lien vers le service Redis
     ports:
       - "${PORT:-8080}:8080"             # Port d'écoute du backend
     depends_on:
       - mysql                            # Attend que MySQL soit prêt
       - redis                            # Attend que Redis soit prêt
-    volumes:
-      - ./server:/app                    # Montage du code backend
-      - /app/node_modules                # Préserve les modules node
+    # volumes:                             # No hot reloading in prod build
+    #   - ./server:/app                    # Montage du code backend
+    #   - /app/node_modules                # Préserve les modules node
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm start                   # Commande pour démarrer le serveur
 

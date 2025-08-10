@@ -1,4 +1,5 @@
-FROM node:22
+# this file will build a container that exposes a react development server
+FROM node:22 
 
 WORKDIR /app
 
