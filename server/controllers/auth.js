@@ -220,6 +220,8 @@ export async function loginService (req, res, next) {
         if (data1.length === 0) return next(new Error("This email does not exist"));
         const user = data1[0]
         const { user_id } = user;
+
+        // Check if user is verified, if not send email verification link again to thier email
         if (!user.isVerified){
           const emailVerificationToken = jwt.sign(
             { user_id, type: "email_verification" },
@@ -231,10 +233,7 @@ export async function loginService (req, res, next) {
           await sendVerificationEmail(req.body.email, verificationLink);
 
           return next(new Error("Account not verified, please verify your email before logging in, another email has been sent to you with the verification link"));
-        }  
-          
-        
-        // user.role_name = getRoleNameById(user.role_id)
+        }          
 
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";

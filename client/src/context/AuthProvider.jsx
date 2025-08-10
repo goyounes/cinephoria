@@ -47,10 +47,11 @@ export const AuthContextProvider = ({ children }) => {
         formattedMessage = backendErrors.map(e => e.msg).join(", ");
       } else if (error.response?.data?.message) {
         formattedMessage = error.response.data.message;
+      } else if (error.response?.data?.error?.message) {
+        formattedMessage = error.response.data.error.message
       } else {
         formattedMessage = error.message || "Unknown error occurred";
       }
-      console.log("my custom made error: ", formattedMessage);
       throw new Error(formattedMessage);
     }
   };
@@ -95,7 +96,7 @@ export const AuthContextProvider = ({ children }) => {
           return Promise.reject(error);
         }
 
-        if ( !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           try {
