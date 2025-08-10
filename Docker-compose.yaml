@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: cinephoria         # Base de données créée au démarrage
     volumes:
       - mysql_data:/var/lib/mysql        # Volume pour persister les données
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
 
   redis:
     image: redis:7.0-alpine              # Image légère de Redis

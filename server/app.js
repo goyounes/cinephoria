@@ -28,13 +28,13 @@ import cinemasRoutes from  './routes/cinemas.js'
 import { sendContactAcknowledgment, sendContactMessage } from './api/emailClient.js';
 
 
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/users', browsingLimiter, usersRoutes);
-app.use('/api/movies', browsingLimiter, moviesRoutes);
-app.use('/api/screenings', browsingLimiter, screeningsRoutes);
-app.use('/api/checkout', bookingLimiter, checkoutRoutes);
-app.use('/api/tickets', browsingLimiter, ticketsRoutes);
-app.use('/api/cinemas', browsingLimiter, cinemasRoutes);
+app.use('/api/auth',        authLimiter,     authRoutes       );
+app.use('/api/users',       browsingLimiter, usersRoutes      );
+app.use('/api/movies',      browsingLimiter, moviesRoutes     );
+app.use('/api/screenings',  browsingLimiter, screeningsRoutes );
+app.use('/api/checkout',    bookingLimiter,  checkoutRoutes   );
+app.use('/api/tickets',     browsingLimiter, ticketsRoutes    );
+app.use('/api/cinemas',     browsingLimiter, cinemasRoutes    );
 
 
 app.get('/', (req, res) => {
