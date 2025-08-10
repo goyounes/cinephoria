@@ -50,6 +50,7 @@ export const AuthContextProvider = ({ children }) => {
       } else {
         formattedMessage = error.message || "Unknown error occurred";
       }
+      console.log("my custom made error: ", formattedMessage);
       throw new Error(formattedMessage);
     }
   };

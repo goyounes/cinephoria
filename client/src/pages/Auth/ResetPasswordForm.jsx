@@ -89,7 +89,7 @@ const ResetPasswordForm = () => {
         newPassword: formData.newPassword,
       });
 
-      showSnackbar("Password reset successful. Please check your email", "success");
+      showSnackbar("Password reset successful", "success");
       navigate('/auth/login');
     } catch (err) {
       const message =

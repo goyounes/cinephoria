@@ -216,6 +216,7 @@ export async function loginService (req, res, next) {
         const [data1] = await pool.query(q1 ,[email]);
         if (data1.length === 0) return next(new Error("This email does not exist"));
         const user = data1[0]
+        const user_id = user.user_id;
         if (!user.isVerified){
           const emailVerificationToken = jwt.sign(
             { user_id, type: "email_verification" },
@@ -385,12 +386,13 @@ export async function addUserService (req, res, next) {
         // Start transaction
         await connection.beginTransaction();
         // Insert new user into the database
-        const q2 = "INSERT INTO users (user_name, user_email, first_name, last_name,role_id) VALUES (?,?,?,?,?)";        const values2 = [
+        const q2 = "INSERT INTO users (user_name, user_email, first_name, last_name,role_id,isVerified) VALUES (?,?,?,?,?,?)";        const values2 = [
             req.body.username,
             req.body.email,
             req.body.firstName,
             req.body.lastName,
-            req.body.role_id
+            req.body.role_id,
+            1,  // Assuming new users are verified by default
         ];
         const [result] = await connection.query(q2, values2);
 
