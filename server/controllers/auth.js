@@ -4,8 +4,6 @@ import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
 
-const [rolesMap] = await pool.query("SELECT * FROM roles")
-const getRoleNameById = (id) => rolesMap.find(r => r.role_id === id)?.role_name || null;
 
 export async function registerService (req, res, next) {
     // Validate request body
@@ -212,11 +210,16 @@ export async function loginService (req, res, next) {
     const { email, password } = req.body; 
     try {
         // Check if user exists with the provided username
-        const q1 = "SELECT * FROM users WHERE user_email = ?";
+        const q1 = `
+          SELECT users.* , roles.role_name
+          FROM users 
+          JOIN roles ON users.role_id = roles.role_id
+          WHERE user_email = ?;
+        `
         const [data1] = await pool.query(q1 ,[email]);
         if (data1.length === 0) return next(new Error("This email does not exist"));
         const user = data1[0]
-        const user_id = user.user_id;
+        const { user_id } = user;
         if (!user.isVerified){
           const emailVerificationToken = jwt.sign(
             { user_id, type: "email_verification" },
@@ -231,7 +234,7 @@ export async function loginService (req, res, next) {
         }  
           
         
-        user.role_name = getRoleNameById(user.role_id)
+        // user.role_name = getRoleNameById(user.role_id)
 
         // Get the user's password hash
         const q2 = "SELECT user_password_hash FROM users_credentials WHERE user_id = ?";
