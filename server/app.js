@@ -67,10 +67,8 @@ app.use((err, req, res, next) => {
   console.error(err.stack); // Log the stack trace
   // res.status(err.status || 500).send(err.message || "Something broke in the web server !");
   res.status(err.status || 500).json({
-    error: {
       message: err.message || "Something broke in the web server !",
       status: err.status || 500
-    }
   });
 });
 
