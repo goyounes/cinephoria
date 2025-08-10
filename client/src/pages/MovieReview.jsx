@@ -48,8 +48,7 @@ const MovieReview = () => {
       setReviewData({ score: 0, review: "" });
       showSnackbar("Review submitted!", "success");
     } catch (err) {
-      const message =
-        err.response?.data?.error?.message || err.message || "Submission failed";
+      const message = err.response?.data?.error?.message || err.message || "Submission failed";
       showSnackbar(`Error: ${message}`, "error");
     }
   };
@@ -60,7 +59,7 @@ const MovieReview = () => {
         const res = await axios.get(`/api/movies/${id}`);
         setMovie(res.data);
       } catch (err) {
-        showSnackbar("Failed to load movie details", "error");
+        console.error("Failed to load movie details");
       } finally {
         setLoading(false);
       }
