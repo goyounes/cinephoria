@@ -41,21 +41,16 @@ services:
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm start                   # Commande pour démarrer le serveur
 
-  client:
+  nginx:
     build:
-      context: ./client                 # Dossier contenant le frontend React
-    container_name: frontend            # Nom du conteneur frontend
-    restart: unless-stopped             # Redémarre sauf arrêt manuel
-    environment:
-      - REACT_APP_API_URL=http://localhost:8080  # URL de l'API côté client
+      context: .           # project root (where both client and nginx folders exist)
+      dockerfile: ./nginx/Dockerfile  # correct path to nginx Dockerfile
+    container_name: nginx_frontend
     ports:
-      - "3000:3000"                     # Port d'écoute de React (développement)
+      - "3000:80"
     depends_on:
-      - server                          # Attend que le serveur soit prêt
-    volumes:
-      - ./client:/app                   # Montage du code client
-    working_dir: /app                   # Répertoire de travail dans le conteneur
-    command: npm start                  # Démarre le serveur React
+      - server
+    restart: unless-stopped
 
 volumes:
   mysql_data:                           # Volume persistant pour MySQL
