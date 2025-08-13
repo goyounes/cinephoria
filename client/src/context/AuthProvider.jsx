@@ -20,7 +20,7 @@ export const AuthContextProvider = ({ children }) => {
   const [accessTokenState, setAccessTokenState] = useState(null)
   const login = async (inputs) => {
     try {
-      const res = await axios.post('/api/auth/login', inputs, { withCredentials: true });
+      const res = await axios.post('/api/auth/login', inputs, { withCredentials: false });
       const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data;
       // first_name,// last_name,// isVerified,
 
@@ -96,7 +96,7 @@ export const AuthContextProvider = ({ children }) => {
           originalRequest._retry = true;
 
           try {
-            // No need to get refresh token from localStorage - it's in HTTP-only cookie
+            // Attempt to refresh token
             const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
             const newAccessToken = response.data.accessToken;
 
