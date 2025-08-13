@@ -168,10 +168,11 @@ export async function resetPasswordService(req, res, next) {
 
 export async function logoutService(req, res, next) {
 
-  const { refreshToken } = req.body;
+  // Get refresh token from HTTP-only cookie instead of request body
+  const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    return res.status(400).json({ message: "Refresh token required in body" });
+    return res.status(400).json({ message: "Refresh token required" });
   }
 
   let decodedRefreshToken
@@ -188,6 +189,13 @@ export async function logoutService(req, res, next) {
     const nowInSeconds = Math.floor(Date.now() / 1000);
     const expiresIn = decodedRefreshToken.exp - nowInSeconds;
     await client.set(refreshToken, 'revoked', { EX: expiresIn });  //set support for expiration
+
+    // Clear the HTTP-only cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
 
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
@@ -248,6 +256,14 @@ export async function loginService (req, res, next) {
         // create new token with same token version from user DB query
         const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, user.refresh_token_version);
 
+        // Set refresh token as HTTP-only cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // HTTPS in production
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+        });
+
         res.status(200).json({
           user_id: user.user_id,
           user_name: user.user_name,
@@ -258,7 +274,7 @@ export async function loginService (req, res, next) {
           role_name: user.role_name,
           isVerified: user.isVerified,
           accessToken,
-          refreshToken,
+          // refreshToken removed from response - now in HTTP-only cookie
         });
     }catch (error) {
         next(error);
@@ -272,7 +288,8 @@ export async function loginService (req, res, next) {
 
 export async function refreshService(req, res, next) {
   try {
-    const { refreshToken } = req.body;
+    // Get refresh token from HTTP-only cookie instead of request body
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
 

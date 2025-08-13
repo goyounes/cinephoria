@@ -20,14 +20,12 @@ export const AuthContextProvider = ({ children }) => {
   const [accessTokenState, setAccessTokenState] = useState(null)
   const login = async (inputs) => {
     try {
-      const res = await axios.post('/api/auth/login', inputs, { withCredentials: false });
-      const {user_id,user_name,user_email,role_id,role_name,accessToken,refreshToken} = res.data;
+      const res = await axios.post('/api/auth/login', inputs, { withCredentials: true });
+      const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data;
       // first_name,// last_name,// isVerified,
 
-      // Save tokens with expiry (adjust timeToLive as needed)
-      // localStorage.setItem('accessToken', accessToken); 
+      // Save access token in state (refresh token is now in HTTP-only cookie)
       setAccessTokenState(accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
 
       const user = {
         user_id,
@@ -58,16 +56,14 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken')
-      refreshToken &&  await axios.post("/api/auth/logout", { refreshToken });
+      // No need to send refresh token in body - it's in HTTP-only cookie
+      await axios.post("/api/auth/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("Logout failed:", error);
     }
 
     setCurrentUser(null);
-    // localStorage.removeItem('accessToken');
     setAccessTokenState(null);
-    localStorage.removeItem('refreshToken');
     localStorage.removeItem('currentUser');
   };
 
@@ -100,13 +96,10 @@ export const AuthContextProvider = ({ children }) => {
           originalRequest._retry = true;
 
           try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (!refreshToken) throw new Error('No refresh token');
-
-            const response = await axios.post('/api/auth/refresh', { refreshToken });
+            // No need to get refresh token from localStorage - it's in HTTP-only cookie
+            const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
             const newAccessToken = response.data.accessToken;
 
-            // localStorage.setItem('accessToken', newAccessToken);
             setAccessTokenState(newAccessToken);
 
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -115,9 +108,7 @@ export const AuthContextProvider = ({ children }) => {
             // Refresh failed - clear user and tokens
             setCurrentUser(null);
             localStorage.removeItem('currentUser');
-            // localStorage.removeItem('accessToken');
             setAccessTokenState(null);
-            localStorage.removeItem('refreshToken');
             return Promise.reject(refreshError);
           }
         }
