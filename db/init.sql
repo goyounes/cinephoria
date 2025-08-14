@@ -757,7 +757,8 @@ CREATE TABLE tickets (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_types(ticket_type_id),
-    UNIQUE (screening_id,seat_id)
+    UNIQUE (screening_id,seat_id),
+	UNIQUE (QR_code)
 );
 
 INSERT INTO tickets(screening_id,user_id,seat_id,ticket_type_id)

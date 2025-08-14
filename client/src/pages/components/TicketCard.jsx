@@ -15,12 +15,8 @@ const TicketCard = ({ ticket }) => (
     <Stack direction="row" justifyContent="space-between" >
       <Box> 
         <Typography variant="body2">{ticket.cinema_name}</Typography>
-        <Typography variant="body2" mt={0.5}>
-          Seat #{ticket.seat_number}
-        </Typography>
-        <Typography variant="body2">
-          {ticket.start_date} at {ticket.start_time.substring(0, 5)}
-        </Typography>
+        <Typography variant="body2" mt={0.5}>Seat #{ticket.seat_number} - {ticket.ticket_type_name}</Typography>
+        <Typography variant="body2">{ticket.start_date} at {ticket.start_time.substring(0, 5)}</Typography>
       </Box>   
       <Box mt={1}>
         {ticket.QR_code ? 

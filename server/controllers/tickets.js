@@ -4,6 +4,7 @@ export async function getMyTickets(user_id){
     const q = `
     SELECT 
         tickets.QR_code , 
+        ticket_types.ticket_type_name,
         movies.movie_id,
         movies.title,
         movies.length,  
@@ -14,6 +15,7 @@ export async function getMyTickets(user_id){
         screenings.end_time,
         seats.seat_number
     FROM tickets 
+    JOIN ticket_types ON tickets.ticket_type_id = ticket_types.ticket_type_id
     JOIN screenings ON tickets.screening_id = screenings.screening_id
     JOIN movies on screenings.movie_id = movies.movie_id
     JOIN cinemas ON screenings.cinema_id = cinemas.cinema_id
