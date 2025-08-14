@@ -40,7 +40,7 @@ const AddUser = () => {
         lastName: '',
         role_id: '',
       });
-      navigate('/users'); // Redirect to the users page
+      navigate('/admin/users'); // Redirect to the admin users page
     } catch (err) {
       showSnackbar("Failed to add User: " + err.message, "error");
     }
