@@ -313,7 +313,7 @@ export async function refreshService(req, res, next) {
 
     // Check refresh token version matches
     const q = `
-      SELECT users.role_id, users.refresh_token_version, roles.role_name
+      SELECT users.*, users.refresh_token_version, roles.role_name
       FROM users JOIN roles ON users.role_id = roles.role_id
       WHERE user_id = ?
     `;
@@ -321,22 +321,34 @@ export async function refreshService(req, res, next) {
     if (rows.length === 0) {
       return res.status(401).json({ message: "User not found" });
     }
-    const { role_id, role_name, refresh_token_version } = rows[0];
+    const user = rows[0];
 
-    if (refresh_token_version !== decodedRefresh.token_version) {
+    if (user.refresh_token_version !== decodedRefresh.token_version) {
 
       return res.status(401).json({message: "Token version mismatch"});
     }
 
     // Generate new access token
-    const { accessToken: newAccessToken } = generateTokens(
-      decodedRefresh.user_id,
-      role_id,
-      role_name,
-      refresh_token_version
+    const { accessToken } = generateTokens(
+      user.user_id,
+      user.role_id,
+      user.role_name,
+      user.refresh_token_version
     );
 
-    res.status(200).json({ accessToken: newAccessToken });
+    // res.status(200).json({ accessToken: newAccessToken });
+    res.status(200).json({
+      user_id: user.user_id,
+      user_name: user.user_name,
+      user_email: user.user_email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role_id: user.role_id,
+      role_name: user.role_name,
+      isVerified: user.isVerified,
+      accessToken, //new Access Token
+      // refreshToken removed from response - now in HTTP-only cookie
+    });
   } catch (error) {
     next(error);
   }

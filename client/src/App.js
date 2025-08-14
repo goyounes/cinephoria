@@ -63,6 +63,7 @@ function App() {
               <Route path="/checkout" element={<Checkout/>} />
               <Route path="/auth/account" element={<Account />} />
               <Route path="/auth/logout" element={<Logout />} />
+              <Route path="/movies/:id/review" element={<MovieReview/>} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
@@ -91,7 +92,6 @@ function App() {
             <Route path="/reservation/" element={<Reservation />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/movies/:id" element={<Movie />} />
-            <Route path="/movies/:id/review" element={<MovieReview/>} />
             <Route path="/contactus" element={<ContactUs />} />
 
             

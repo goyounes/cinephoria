@@ -26,7 +26,6 @@ export const AuthContextProvider = ({ children }) => {
 
       // Save access token in state (refresh token is now in HTTP-only cookie)
       setAccessTokenState(accessToken);
-
       const user = {
         user_id,
         user_name,
@@ -35,7 +34,7 @@ export const AuthContextProvider = ({ children }) => {
         role_name,
       };
       setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user)); // store user info for 1 days
+      localStorage.setItem('currentUser', JSON.stringify(user));
 
       return user;
     } catch (error) {
@@ -71,6 +70,8 @@ export const AuthContextProvider = ({ children }) => {
     // Request interceptor - attach token from current state (or localStorage)
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
+        console.log("Request Interceptor - Current User:", currentUser);
+        console.log("Request Interceptor - Access Token State:", accessTokenState);
         if (config.headers.Authorization) return config; //do not override already set Authorization header
 
         // const accessToken = localStorage.getItem('accessToken');
@@ -97,12 +98,23 @@ export const AuthContextProvider = ({ children }) => {
 
           try {
             // Attempt to refresh token
-            const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
-            const newAccessToken = response.data.accessToken;
+            const res =  await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+            const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data
+            const newAccessToken = accessToken;
 
             setAccessTokenState(newAccessToken);
+            const user = {
+              user_id,
+              user_name,
+              user_email,
+              role_id,
+              role_name,
+            };
+            setCurrentUser(user);
+            localStorage.setItem('currentUser', JSON.stringify(user));
 
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
             return axios(originalRequest);
           } catch (refreshError) {
             // Refresh failed - clear user and tokens
