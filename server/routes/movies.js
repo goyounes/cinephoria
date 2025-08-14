@@ -419,7 +419,7 @@ router.post("/reviews", verifyUserJWT, async (req,res,next) => {
             review: result,
         });
     } catch (error) {
-        next(error);
+        next(new Error("Failed to add review: "));
     }
 })
 export default router;

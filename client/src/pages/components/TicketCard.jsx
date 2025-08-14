@@ -23,7 +23,10 @@ const TicketCard = ({ ticket }) => (
         </Typography>
       </Box>   
       <Box mt={1}>
-        <QRCode value={ticket.QR_code} size={96} />
+        {ticket.QR_code ? 
+          (<QRCode value={ticket.QR_code} size={96} />)
+          :(<Box sx={{width: 96, height: 96, border: "1px solid black"}}> No QR code</Box>)
+        }
       </Box>
     </Stack>
   </Box>
