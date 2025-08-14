@@ -1,5 +1,5 @@
 services:
-  mysql:
+  mysql_dev:
     image: mysql:8.0                     # Image officielle de MySQL version 8
     command: --default-time-zone=SYSTEM  # Utiliser le fuseau horaire du système
     container_name: mysql_db_dev             # Nom du conteneur
@@ -11,7 +11,7 @@ services:
       - mysql_data_dev:/var/lib/mysql        # Volume pour persister les données
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
 
-  redis:
+  redis_dev:
     image: redis:7.0-alpine              # Image légère de Redis
     container_name: redis_db_dev          # Nom du conteneur Redis
     restart: always                      # Redémarre automatiquement
@@ -20,7 +20,7 @@ services:
     volumes:
       - redis_data_dev:/data                 # Volume pour les données Redis
 
-  server:
+  server_dev:
     build:
       context: ./server                  # Dossier contenant le backend Node.js
     container_name: backend_server_dev       # Nom du conteneur backend
@@ -28,20 +28,20 @@ services:
     env_file:
       - ./server/.env                    # Fichier d'environnement
     environment:
-      MYSQL_HOST: mysql                 # Lien vers le service MySQL
-      REDIS_HOST: redis                 # Lien vers le service Redis
+      MYSQL_HOST: mysql_dev                 # Lien vers le service MySQL
+      REDIS_HOST: redis_dev                 # Lien vers le service Redis
     ports:
       - "${PORT:-8080}:8080"             # Port d'écoute du backend
     depends_on:
-      - mysql                            # Attend que MySQL soit prêt
-      - redis                            # Attend que Redis soit prêt
+      - mysql_dev                            # Attend que MySQL soit prêt
+      - redis_dev                            # Attend que Redis soit prêt
     volumes:
       - ./server:/app                    # Montage du code backend
       - node_modules_server_dev:/app/node_modules  # Named volume for node_modules
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm run dev                 # Commande pour démarrer le serveur en mode dev (nodemon)
 
-  client:
+  client_dev:
     build:
       context: ./client                 # Dossier contenant le frontend React
     container_name: frontend_dev            # Nom du conteneur frontend
@@ -50,14 +50,26 @@ services:
       REACT_APP_API_URL: "http://localhost:8080"  # URL de l'API côté client
       WATCHPACK_POLLING: true     # This lets react actualy hot reload when files change
     ports:
-      - "3000:3000"                     # Port d'écoute de React (développement)
+      - "3001:3000"                     # Port d'écoute de React (développement) -si necessaire-    depends_on:
     depends_on:
-      - server                          # Attend que le serveur soit prêt
+      - server_dev                          # Attend que le serveur soit prêt
     volumes:
       - ./client:/app                   # Montage du code client
       - node_modules_client_dev:/app/node_modules
     working_dir: /app                   # Répertoire de travail dans le conteneur
     command: npm start                  # Démarre le serveur React
+
+  nginx_dev:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile.dev   # Use dev Dockerfile here
+    container_name: nginx_frontend_dev
+    ports:
+      - "3000:80"       # Map dev frontend port
+    depends_on:
+      - client_dev
+      - server_dev
+    restart: unless-stopped
 
 volumes:
   mysql_data_dev:                           # Volume persistant pour MySQL

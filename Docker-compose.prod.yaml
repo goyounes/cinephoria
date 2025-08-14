@@ -44,7 +44,7 @@ services:
   nginx:
     build:
       context: .           # project root (where both client and nginx folders exist)
-      dockerfile: ./nginx/Dockerfile  # correct path to nginx Dockerfile
+      dockerfile: ./nginx/Dockerfile.prod  # correct path to nginx Dockerfile
     container_name: nginx_frontend
     ports:
       - "3000:80"

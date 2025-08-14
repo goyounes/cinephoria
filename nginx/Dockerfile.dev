@@ -1,0 +1,7 @@
+FROM nginx:alpine
+
+# Copy dev nginx config
+COPY nginx/default.dev.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80 (React dev server proxy)
+EXPOSE 80
