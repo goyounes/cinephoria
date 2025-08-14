@@ -134,7 +134,7 @@ export const AuthContextProvider = ({ children }) => {
       axios.interceptors.request.eject(requestInterceptor);
       axios.interceptors.response.eject(responseInterceptor);
     };
-  }, [accessTokenState]); // rerun when token changes or setCurrentUser fn changes
+  }, [accessTokenState, currentUser]); // rerun when token changes or setCurrentUser fn changes
 
 
   const resetPasswordReq = async (email) => {
