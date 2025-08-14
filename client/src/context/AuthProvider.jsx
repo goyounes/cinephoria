@@ -70,8 +70,6 @@ export const AuthContextProvider = ({ children }) => {
     // Request interceptor - attach token from current state (or localStorage)
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
-        console.log("Request Interceptor - Current User:", currentUser);
-        console.log("Request Interceptor - Access Token State:", accessTokenState);
         if (config.headers.Authorization) return config; //do not override already set Authorization header
 
         // const accessToken = localStorage.getItem('accessToken');

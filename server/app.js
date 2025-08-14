@@ -8,10 +8,13 @@ export const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-// app.use(cors());
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
 }));
+
+console.log("current CORS URL IS: ",process.env.FRONTEND_URL)
 
 import { 
   authLimiter, 
