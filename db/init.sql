@@ -57,7 +57,7 @@ CREATE TABLE movies (
     description TEXT,
     age_rating INT,
     is_team_pick BOOL,
-    score DECIMAL(2,1),
+    score DECIMAL(2,1) DEFAULT 0,
     length TIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     isDeleted BOOL DEFAULT FALSE
