@@ -173,6 +173,7 @@ CREATE TABLE rooms (
     room_capacity INT NOT NULL,
     isDeleted BOOl DEFAULT FALSE,
 	cinema_id INT,
+    UNIQUE(cinema_id,room_name),
     FOREIGN KEY (cinema_id) REFERENCES cinemas(cinema_id)
 );
 
