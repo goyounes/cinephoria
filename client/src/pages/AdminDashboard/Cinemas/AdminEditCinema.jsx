@@ -23,6 +23,7 @@ const AdminEditCinema = () => {
   const [deletedRoomIds, setDeletedRoomIds] = useState([]);
   const [restoredRoomIds, setRestoredRoomIds] = useState([]);
   const [showDeletedRooms, setShowDeletedRooms] = useState(false);
+  const [roomNameErrors, setRoomNameErrors] = useState({}); // Missing state
   const [loading, setLoading] = useState(true);
 
   // Fetch all data and isolate target cinema
@@ -37,6 +38,7 @@ const AdminEditCinema = () => {
         const selectedCinema = cinemasRes.data.find(c => c.cinema_id === cinemaId);
         if (!selectedCinema) {
           showSnackbar("Cinema not found", "error");
+          navigate("/admin/cinemas"); // Better navigation
           return;
         }
 
@@ -56,7 +58,7 @@ const AdminEditCinema = () => {
       }
     };
     fetchData();
-  }, [cinemaId, showSnackbar]);
+  }, [cinemaId, showSnackbar, navigate]);
 
   // Handlers
   const handleCinemaChange = (e) => {
@@ -71,10 +73,22 @@ const AdminEditCinema = () => {
       updated[index][name] = value;
       return updated;
     });
+
+    // Clear room name error when user starts typing
+    if (name === "room_name") {
+      setRoomNameErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+    }
   };
 
   const addRoom = () => {
-    setRooms(prev => [...prev, { room_name: "", room_capacity: "", isNew: true }]);
+    setRooms(prev => [
+      ...prev,
+      { room_name: "", room_capacity: "", isNew: true },
+    ]);
   };
 
   const removeRoom = (index) => {
@@ -96,7 +110,7 @@ const AdminEditCinema = () => {
 
   const restoreRoom = (index) => {
     const room = rooms[index];
-    
+
     if (room.room_id) {
       // Remove from deleted list and add to restored list
       setDeletedRoomIds(prev => prev.filter(id => id !== room.room_id));
@@ -113,7 +127,38 @@ const AdminEditCinema = () => {
     showSnackbar("Room  '" + room.room_name + "' marked for restoration", "info");
   };
 
+  // Validate room names for duplicates
+  const validateRoomNames = () => {
+    const activeRooms = rooms.filter(room => !room.isDeleted);
+    const roomNames = activeRooms.map(room =>
+      room.room_name.trim().toLowerCase()
+    );
+    const errors = {};
+    let hasErrors = false;
+
+    activeRooms.forEach((room, displayIndex) => {
+      const actualIndex = rooms.findIndex(r =>
+        r.room_id ? r.room_id === room.room_id : r === room
+      );
+      const roomName = room.room_name.trim().toLowerCase();
+
+      if (roomName && roomNames.filter(name => name === roomName).length > 1) {
+        errors[actualIndex] = "Room name must be unique";
+        hasErrors = true;
+      }
+    });
+
+    setRoomNameErrors(errors);
+    return !hasErrors;
+  };
+
   const handleSubmit = async () => {
+    // Validate room names before submission
+    if (!validateRoomNames()) {
+      showSnackbar("Please fix duplicate room names", "error");
+      return;
+    }
+
     try {
       // Update cinema info
       await axios.put(`/api/cinemas/${cinemaId}`, {
@@ -144,7 +189,8 @@ const AdminEditCinema = () => {
 
       showSnackbar("Cinema updated successfully", "success");
 
-      navigate(0);
+      // Navigate back to cinema list or refresh current route
+      navigate(`/admin/cinemas/${cinemaId}`, { replace: true });
     } catch (err) {
       showSnackbar("Failed to update cinema", "error");
       console.error(err);
@@ -192,9 +238,7 @@ const AdminEditCinema = () => {
             />
 
             <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="h6">
-                Rooms
-              </Typography>
+              <Typography variant="h6">Rooms</Typography>
               
               {deletedRooms.length > 0 && (
                 <FormControlLabel
@@ -225,11 +269,19 @@ const AdminEditCinema = () => {
                 >
                   <TextField
                     required
-                    label={`Room #${actualIndex + 1} Name${room.isDeleted ? ' (Deleted)' : room.isRestored ? ' (Restoring)' : ''}`}
+                    label={`Room #${actualIndex + 1} Name${
+                      room.isDeleted
+                        ? " (Deleted)"
+                        : room.isRestored
+                        ? " (Restoring)"
+                        : ""
+                    }`}
                     name="room_name"
                     value={room.room_name}
                     onChange={(e) => handleRoomChange(actualIndex, e)}
                     disabled={room.isDeleted}
+                    error={!!roomNameErrors[actualIndex]}
+                    helperText={roomNameErrors[actualIndex]}
                     sx={{ flex: 2 }}
                   />
                   <TextField
