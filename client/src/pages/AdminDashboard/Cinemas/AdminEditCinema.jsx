@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Container, Card, Typography, Stack, TextField,
-  Button, CardContent, IconButton, CircularProgress,
+  Button, CardContent, IconButton,
   FormControlLabel, Checkbox
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,8 +23,7 @@ const AdminEditCinema = () => {
   const [deletedRoomIds, setDeletedRoomIds] = useState([]);
   const [restoredRoomIds, setRestoredRoomIds] = useState([]);
   const [showDeletedRooms, setShowDeletedRooms] = useState(false);
-  const [roomNameErrors, setRoomNameErrors] = useState({}); // Missing state
-  const [loading, setLoading] = useState(true);
+  const [roomNameErrors, setRoomNameErrors] = useState({});
 
   // Fetch all data and isolate target cinema
   useEffect(() => {
@@ -38,7 +37,7 @@ const AdminEditCinema = () => {
         const selectedCinema = cinemasRes.data.find(c => c.cinema_id === cinemaId);
         if (!selectedCinema) {
           showSnackbar("Cinema not found", "error");
-          navigate("/admin/cinemas"); // Better navigation
+          navigate("/admin/cinemas");
           return;
         }
 
@@ -53,8 +52,6 @@ const AdminEditCinema = () => {
       } catch (err) {
         showSnackbar("Error loading cinema info", "error");
         console.error(err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchData();
@@ -76,11 +73,7 @@ const AdminEditCinema = () => {
 
     // Clear room name error when user starts typing
     if (name === "room_name") {
-      setRoomNameErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[index];
-        return updated;
-      });
+      setRoomNameErrors({});
     }
   };
 
@@ -127,26 +120,33 @@ const AdminEditCinema = () => {
     showSnackbar("Room  '" + room.room_name + "' marked for restoration", "info");
   };
 
-  // Validate room names for duplicates
+  // Validate room names for duplicates (including deleted rooms)
   const validateRoomNames = () => {
-    const activeRooms = rooms.filter(room => !room.isDeleted);
-    const roomNames = activeRooms.map(room =>
-      room.room_name.trim().toLowerCase()
-    );
+    // Check all rooms (including deleted ones) for duplicates
+    const allRoomNames = rooms.map(room => room.room_name.trim().toLowerCase());
     const errors = {};
     let hasErrors = false;
+    let hasHiddenDuplicate = false;
 
-    activeRooms.forEach((room, displayIndex) => {
-      const actualIndex = rooms.findIndex(r =>
-        r.room_id ? r.room_id === room.room_id : r === room
-      );
+    rooms.forEach((room, index) => {
       const roomName = room.room_name.trim().toLowerCase();
-
-      if (roomName && roomNames.filter(name => name === roomName).length > 1) {
-        errors[actualIndex] = "Room name must be unique";
+      
+      if (roomName && allRoomNames.filter(name => name === roomName).length > 1) {
+        errors[index] = "Room name must be unique";
         hasErrors = true;
+        
+        // Check if any of the duplicates are deleted (hidden) rooms
+        const duplicateRooms = rooms.filter(r => r.room_name.trim().toLowerCase() === roomName);
+        if (duplicateRooms.some(r => r.isDeleted)) {
+          hasHiddenDuplicate = true;
+        }
       }
     });
+
+    // Show deleted rooms if there are hidden duplicates
+    if (hasHiddenDuplicate && !showDeletedRooms) {
+      setShowDeletedRooms(true);
+    }
 
     setRoomNameErrors(errors);
     return !hasErrors;
@@ -190,20 +190,12 @@ const AdminEditCinema = () => {
       showSnackbar("Cinema updated successfully", "success");
 
       // Navigate back to cinema list or refresh current route
-      navigate(`/admin/cinemas/${cinemaId}`, { replace: true });
+      navigate(0);
     } catch (err) {
       showSnackbar("Failed to update cinema", "error");
       console.error(err);
     }
   };
-
-  if (loading) {
-    return (
-      <Container sx={{ textAlign: "center", mt: 4 }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
 
   const activeRooms = rooms.filter(room => !room.isDeleted);
   const deletedRooms = rooms.filter(room => room.isDeleted);
