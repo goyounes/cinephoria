@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
 import {
   Container, Card, Typography, Stack, TextField,
-  Button, CardContent, IconButton, CircularProgress
+  Button, CardContent, IconButton, CircularProgress,
+  FormControlLabel, Checkbox
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import RestoreIcon from "@mui/icons-material/Restore";
 import axios from "../../../api/axiosInstance.js";
 import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const AdminEditCinema = () => {
   const { id } = useParams(); // cinema_id from URL
+  const navigate = useNavigate();
   const cinemaId = parseInt(id);
   const showSnackbar = useSnackbar();
 
   const [cinemaData, setCinemaData] = useState({ cinema_name: "", cinema_adresse: "" });
   const [rooms, setRooms] = useState([]);
   const [deletedRoomIds, setDeletedRoomIds] = useState([]);
+  const [restoredRoomIds, setRestoredRoomIds] = useState([]);
+  const [showDeletedRooms, setShowDeletedRooms] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Fetch all data and isolate target cinema
@@ -75,15 +80,37 @@ const AdminEditCinema = () => {
   const removeRoom = (index) => {
     setRooms(prev => {
       const updated = [...prev];
-      const removed = updated.splice(index, 1)[0];
+      const room = updated[index];
 
-      // Track only existing rooms for deletion
-      if (!removed.isNew && removed.room_id) {
-        setDeletedRoomIds(ids => [...ids, removed.room_id]);
+      // Mark existing rooms for deletion, remove new rooms entirely
+      if (!room.isNew && room.room_id) {
+        updated[index] = { ...room, isDeleted: true };
+        setDeletedRoomIds(ids => [...ids, room.room_id]);
+      } else {
+        updated.splice(index, 1);
       }
 
       return updated;
     });
+  };
+
+  const restoreRoom = (index) => {
+    const room = rooms[index];
+    
+    if (room.room_id) {
+      // Remove from deleted list and add to restored list
+      setDeletedRoomIds(prev => prev.filter(id => id !== room.room_id));
+      setRestoredRoomIds(prev => [...prev, room.room_id]);
+    }
+    
+    // Mark as not deleted in local state
+    setRooms(prev => {
+      const updated = [...prev];
+      updated[index] = { ...room, isDeleted: false, isRestored: true };
+      return updated;
+    });
+
+    showSnackbar("Room  '" + room.room_name + "' marked for restoration", "info");
   };
 
   const handleSubmit = async () => {
@@ -94,8 +121,9 @@ const AdminEditCinema = () => {
         cinema_adresse: cinemaData.cinema_adresse,
       });
 
-      // Update or add rooms
-      const roomRequests = rooms.map(room => {
+      // Update or add active rooms (including restored ones)
+      const activeRooms = rooms.filter(room => !room.isDeleted);
+      const roomRequests = activeRooms.map(room => {
         const payload = {
           room_name: room.room_name,
           room_capacity: parseInt(room.room_capacity),
@@ -106,17 +134,17 @@ const AdminEditCinema = () => {
           : axios.put(`/api/cinemas/rooms/${room.room_id}`, payload);
       });
 
-      // Delete removed rooms
-      const deleteRequests = deletedRoomIds.map(id =>
+      // Delete rooms that are marked for deletion (excluding restored ones)
+      const finalDeleteIds = deletedRoomIds.filter(id => !restoredRoomIds.includes(id));
+      const deleteRequests = finalDeleteIds.map(id =>
         axios.delete(`/api/cinemas/rooms/${id}`)
       );
 
       await Promise.all([...roomRequests, ...deleteRequests]);
 
-      // Clear deletion queue
-      setDeletedRoomIds([]);
-
       showSnackbar("Cinema updated successfully", "success");
+
+      navigate(0);
     } catch (err) {
       showSnackbar("Failed to update cinema", "error");
       console.error(err);
@@ -130,6 +158,11 @@ const AdminEditCinema = () => {
       </Container>
     );
   }
+
+  const activeRooms = rooms.filter(room => !room.isDeleted);
+  const deletedRooms = rooms.filter(room => room.isDeleted);
+  const hasActiveRooms = activeRooms.length > 0;
+  const displayedRooms = showDeletedRooms ? rooms : activeRooms;
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
@@ -158,39 +191,78 @@ const AdminEditCinema = () => {
               fullWidth
             />
 
-            <Typography variant="h6" mt={2}>
-              Rooms
-            </Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="h6">
+                Rooms
+              </Typography>
+              
+              {deletedRooms.length > 0 && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={showDeletedRooms}
+                      onChange={(e) => setShowDeletedRooms(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label={`Show deleted rooms (${deletedRooms.length})`}
+                />
+              )}
+            </Stack>
 
-            {rooms.map((room, index) => (
-              <Stack direction="row" spacing={2} key={room.room_id || index} alignItems="center">
-                <TextField
-                  required
-                  label={`Room #${index + 1} Name`}
-                  name="room_name"
-                  value={room.room_name}
-                  onChange={(e) => handleRoomChange(index, e)}
-                  sx={{ flex: 2 }}
-                />
-                <TextField
-                  required
-                  label="Capacity"
-                  name="room_capacity"
-                  type="number"
-                  value={room.room_capacity}
-                  onChange={(e) => handleRoomChange(index, e)}
-                  sx={{ flex: 1 }}
-                />
-                <IconButton
-                  aria-label="delete"
-                  color="error"
-                  onClick={() => removeRoom(index)}
-                  disabled={rooms.length <= 1}
+            {displayedRooms.map((room, index) => {
+              // Get the actual index in the full rooms array for proper handling
+              const actualIndex = rooms.findIndex(r => 
+                r.room_id ? r.room_id === room.room_id : r === room
+              );
+              
+              return (
+                <Stack 
+                  direction="row" 
+                  spacing={2} 
+                  key={room.room_id || actualIndex} 
+                  alignItems="center"
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </Stack>
-            ))}
+                  <TextField
+                    required
+                    label={`Room #${actualIndex + 1} Name${room.isDeleted ? ' (Deleted)' : room.isRestored ? ' (Restoring)' : ''}`}
+                    name="room_name"
+                    value={room.room_name}
+                    onChange={(e) => handleRoomChange(actualIndex, e)}
+                    disabled={room.isDeleted}
+                    sx={{ flex: 2 }}
+                  />
+                  <TextField
+                    required
+                    label="Capacity"
+                    name="room_capacity"
+                    type="number"
+                    value={room.room_capacity}
+                    onChange={(e) => handleRoomChange(actualIndex, e)}
+                    disabled={room.isDeleted}
+                    sx={{ flex: 1 }}
+                  />
+                  {room.isDeleted ? (
+                    <IconButton
+                      aria-label="restore"
+                      color="primary"
+                      onClick={() => restoreRoom(actualIndex)}
+                    >
+                      <RestoreIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      aria-label="delete"
+                      color="error"
+                      onClick={() => removeRoom(actualIndex)}
+                      disabled={!hasActiveRooms || activeRooms.length <= 1}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </Stack>
+              );
+            })}
 
             <Button variant="outlined" startIcon={<AddIcon />} onClick={addRoom}>
               Add Room
@@ -199,7 +271,6 @@ const AdminEditCinema = () => {
             <Button
               variant="contained"
               color="primary"
-              sx={{ mt: 2 }}
               onClick={handleSubmit}
               startIcon={<SaveIcon />}
             >

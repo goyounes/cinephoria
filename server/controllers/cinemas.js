@@ -7,7 +7,7 @@ export async function  getCinemas(){
 }
 
 export async function  getRooms(){
-    const q = `SELECT * FROM rooms WHERE isDeleted = FALSE;`
+    const q = `SELECT * FROM rooms`
     const [result_rows] = await pool.query(q);
     return result_rows
 }
@@ -84,7 +84,7 @@ export async function addRoom({ room_name, room_capacity, cinema_id }) {
 export async function updateRoom(id, { room_name, room_capacity, cinema_id }) {
   const q = `
     UPDATE rooms
-    SET room_name = ?, room_capacity = ?, cinema_id = ?
+    SET room_name = ?, room_capacity = ?, cinema_id = ?, isDeleted = FALSE
     WHERE room_id = ?
   `;
   const [result] = await pool.query(q, [room_name, room_capacity, cinema_id, id]);
