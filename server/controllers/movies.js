@@ -309,7 +309,6 @@ export async function getLatestMovies(){
     return result_rows
 }
 
-addReviewToMovie
 export async function addReviewToMovie(movie_id,user_id, score, review){
     // check if the user has ticket for the movie with a past screening date
     const q =  `

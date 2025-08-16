@@ -76,6 +76,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+.test.env
 .env
 .env.development.local
 .env.test.local
