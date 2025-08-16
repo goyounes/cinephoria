@@ -1,6 +1,4 @@
--- CREATE DATABASE cinephoria2; 
 
-USE cinephoria;
 
 CREATE TABLE genres (
     genre_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -790,11 +788,3 @@ VALUES
 (33,17,92,4),
 (33,18,93,4);
 SELECT * FROM tickets;
-
-
-
-
-
-
-
-
