@@ -14,7 +14,7 @@ app.use(cors({
   credentials: true
 }));
 
-console.log("current CORS URL IS: ",process.env.FRONTEND_URL)
+// console.log("current CORS URL IS: ",process.env.FRONTEND_URL)
 
 import { 
   authLimiter, 

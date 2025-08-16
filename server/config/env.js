@@ -9,6 +9,5 @@ if (process.env.NODE_ENV !== 'production') {
     console.log('Environment variables loaded successfully.');
   }
 } else {
-  console.log('Production mode detected — skipping .env loading');
-  console.log("loaded PORT is", process.env.PORT)
+  console.log('Production mode detected — skipping .env loading'," | loaded PORT is", process.env.PORT);
 }
