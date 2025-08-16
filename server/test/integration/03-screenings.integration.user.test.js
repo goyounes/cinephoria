@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../../config/dbTestUtils.js';
+import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../../config/dbTestUtils.js';
+import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -37,17 +37,17 @@ describe('Movies Integration Tests - User Level', () => {
       );
       testUserId = userResult.insertId;
 
-      // Generate user token
+      // Generate test user token
       userToken = jwt.sign(
         { user_id: testUserId, role_id: 1, role_name: 'user' },
         process.env.ACCESS_JWT_SECRET,
         { expiresIn: '15m' }
       );
 
-      // Add a ticket for movie_id 3 so user can review it (screening_id 33 has past date)
+      // Add a ticket for movie_id 3 so user can review it (screening_id 33 has past date 2024-12-30)
       await connection.execute(
         'INSERT INTO tickets (screening_id, user_id, seat_id, ticket_type_id) VALUES (?, ?, ?, ?)',
-        [33, testUserId, 94, 1] // screening_id 33 is for movie_id 3 with past date 2024-12-30
+        [33, testUserId, 94, 1]
       );
     } finally {
       connection.release();
@@ -187,7 +187,7 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should return 404 for non-existent movie', async () => {
       const response = await request(app)
-        .get('/api/movies/0')
+        .get('/api/movies/9999999999')
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -227,13 +227,17 @@ describe('Movies Integration Tests - User Level', () => {
       const response = await request(app)
         .get(`/api/movies/${movieId}/screenings?cinema_id=1`)
         .expect(200);
-
+      
       expect(Array.isArray(response.body)).toBe(true);
+      // Verify all returned screenings are for cinema_id 1
+      response.body.forEach(screening => {
+        expect(screening.cinema_id).toBe(1);
+      });
     });
 
     test('should return 404 for non-existent movie screenings', async () => {
       const response = await request(app)
-        .get('/api/movies/999999/screenings')
+        .get('/api/movies/9999999999/screenings')
         .expect(404);
 
       expect(response.body.message).toContain('No movie with this id was found');
@@ -273,9 +277,9 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should reject review for non-existent movie', async () => {
       const reviewData = {
-        movie_id: 999999,
+        movie_id: 9999999999, // Use a large non-existent ID instead of 0
         user_id: testUserId,
-        score: 8,
+        score: 5, // Use valid score (1-5 range)
         review: 'Great movie!'
       };
 

@@ -59,6 +59,6 @@ export async function cleanupTestDatabase() {
 
 export async function resetConnection() {
   // Just refresh the connection pool without touching data
-  const { pool } = await import('./mysqlConnect.js');
+  const { pool } = await import('../../config/mysqlConnect.js');
   await pool.execute('SELECT 1'); // Simple ping to ensure connection is alive
 }

@@ -1,6 +1,6 @@
 // Global test setup
 import { jest } from '@jest/globals';
-import { getRateLimitRedis, getAuthRedis } from './redisConnect.js';
+import { getRateLimitRedis, getAuthRedis } from '../../config/redisConnect.js';
 
 // Mock console.log for cleaner test output
 const originalConsoleLog = console.log;

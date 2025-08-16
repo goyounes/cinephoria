@@ -13,5 +13,5 @@ export default {
   testTimeout: 30000,
   maxWorkers: 1,
   forceExit: true,
-  setupFilesAfterEnv: ['<rootDir>/config/testSetup.js']
+  setupFilesAfterEnv: ['<rootDir>/test/utils/testSetup.js']
 }
