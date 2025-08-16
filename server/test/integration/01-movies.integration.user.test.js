@@ -6,56 +6,31 @@ import { setupTestDatabase, cleanupTestDatabase, resetTestData } from '../../con
 // Load test environment
 process.env.NODE_ENV = 'test';
 const testEnv = await import('dotenv');
-testEnv.config({ path: '.test.env' });
+testEnv.config({ path: '.test.env', quiet: true });
 
 // Import app after environment is set
 const { default: app } = await import('../../app.js');
 const { pool } = await import('../../config/mysqlConnect.js');
 
-describe('Movies Integration Tests', () => {
-  let userToken, employeeToken, adminToken;
-  let testUserId, testEmployeeId, testAdminId;
+describe('Movies Integration Tests - User Level', () => {
+  let userToken;
+  let testUserId;
 
   beforeAll(async () => {
     await setupTestDatabase();
     
-    // Create test users with different roles
+    // Create test user
     const connection = await pool.getConnection();
     try {
-      // Create test users
       const [userResult] = await connection.execute(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
       testUserId = userResult.insertId;
 
-      const [employeeResult] = await connection.execute(
-        'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
-        ['testemployee', 'test@employee.com', 'Test', 'Employee', 2, 1]
-      );
-      testEmployeeId = employeeResult.insertId;
-
-      const [adminResult] = await connection.execute(
-        'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
-        ['testadmin', 'test@admin.com', 'Test', 'Admin', 3, 1]
-      );
-      testAdminId = adminResult.insertId;
-
-      // Generate tokens
+      // Generate user token
       userToken = jwt.sign(
         { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      employeeToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      adminToken = jwt.sign(
-        { user_id: testAdminId, role_id: 3, role_name: 'admin' },
         process.env.ACCESS_JWT_SECRET,
         { expiresIn: '15m' }
       );
@@ -73,7 +48,7 @@ describe('Movies Integration Tests', () => {
     await resetTestData();
   }, 30000);
 
-  describe('GET /api/movies', () => {
+  describe('GET /api/movies - Public Access', () => {
     test('should return all movies with genres and image URLs', async () => {
       const response = await request(app)
         .get('/api/movies')
@@ -105,7 +80,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('GET /api/movies/genres', () => {
+  describe('GET /api/movies/genres - Public Access', () => {
     test('should return all available genres', async () => {
       const response = await request(app)
         .get('/api/movies/genres')
@@ -132,7 +107,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('GET /api/movies/upcoming', () => {
+  describe('GET /api/movies/upcoming - Public Access', () => {
     test('should return upcoming movies only', async () => {
       const response = await request(app)
         .get('/api/movies/upcoming')
@@ -162,7 +137,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('GET /api/movies/latest', () => {
+  describe('GET /api/movies/latest - Public Access', () => {
     test('should return latest movies', async () => {
       const response = await request(app)
         .get('/api/movies/latest')
@@ -178,7 +153,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('GET /api/movies/:id', () => {
+  describe('GET /api/movies/:id - Public Access', () => {
     test('should return specific movie by ID', async () => {
       // First get a movie ID from the list
       const moviesResponse = await request(app).get('/api/movies');
@@ -211,7 +186,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('GET /api/movies/:id/screenings', () => {
+  describe('GET /api/movies/:id/screenings - Public Access', () => {
     test('should return screenings for a specific movie', async () => {
       // Get a movie ID first
       const moviesResponse = await request(app).get('/api/movies');
@@ -250,8 +225,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('POST /api/movies/reviews - User Reviews', () => {
-
+  describe('POST /api/movies/reviews - User Authentication Required', () => {
     test('should reject review without authentication', async () => {
       const reviewData = {
         movie_id: 1,
@@ -317,51 +291,7 @@ describe('Movies Integration Tests', () => {
     });
   });
 
-  describe('Admin/Employee Only Routes', () => {
-    describe('GET /api/movies/upcoming/all', () => {
-      test('should allow employee access', async () => {
-        const response = await request(app)
-          .get('/api/movies/upcoming/all')
-          .set('Authorization', `Bearer ${employeeToken}`)
-          .expect(200);
-
-        expect(Array.isArray(response.body)).toBe(true);
-      });
-
-      test('should deny regular user access', async () => {
-        await request(app)
-          .get('/api/movies/upcoming/all')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(403);
-      });
-
-      test('should deny unauthenticated access', async () => {
-        await request(app)
-          .get('/api/movies/upcoming/all')
-          .expect(401);
-      });
-    });
-
-    describe('GET /api/movies/:id/screenings/all', () => {
-      test('should allow employee to see all screenings', async () => {
-        const response = await request(app)
-          .get('/api/movies/1/screenings/all')
-          .set('Authorization', `Bearer ${employeeToken}`)
-          .expect(200);
-
-        expect(Array.isArray(response.body)).toBe(true);
-      });
-
-      test('should deny regular user access', async () => {
-        await request(app)
-          .get('/api/movies/1/screenings/all')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(403);
-      });
-    });
-  });
-
-  describe('Error Handling', () => {
+  describe('Error Handling - Public Endpoints', () => {
     test('should handle database connection errors gracefully', async () => {
       // This test would require mocking or temporarily breaking the DB connection
       // For now, we test that the error handling middleware works
