@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { generateEmailVerificationLink, generatePasswordResetLink } from '../../utils/index.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -712,12 +713,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         connection.release();
       }
 
-      // Manually create verification token (simulating what would be in email)
-      const emailVerificationToken = jwt.sign(
-        { user_id: unverifiedUserId, type: 'email_verification' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '1h' }
-      );
+      // Use utility function to create verification link (same as production code)
+      const { token: emailVerificationToken } = generateEmailVerificationLink(unverifiedUserId);
 
       // Simulate clicking the email verification link
       const verifyResponse = await request(app)
@@ -771,12 +768,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         connection.release();
       }
 
-      // Manually create password reset token (simulating what would be in email)
-      const passwordResetToken = jwt.sign(
-        { user_id: userId, type: 'password_reset' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '15m' }
-      );
+      // Use utility function to create password reset link (same as production code)
+      const { token: passwordResetToken } = generatePasswordResetLink(userId);
 
       // Simulate clicking the password reset link and submitting new password
       const newPassword = 'SimulatedResetPass123!';
@@ -869,26 +862,13 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     test('should validate email link URL format expectations', async () => {
       // This test verifies that our token creation matches what the actual email system expects
       
-      // Simulate the backend URL format for email verification (from registerService)
+      // Use utility functions to generate links (same as production code)
       const userId = registeredUserId;
-      const emailVerificationToken = jwt.sign(
-        { user_id: userId, type: "email_verification" },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: "1h" }
-      );
+      const { link: verificationLink, token: emailVerificationToken } = generateEmailVerificationLink(userId);
+      const { link: resetLink, token: resetToken } = generatePasswordResetLink(userId);
       
-      // The actual verification link format from the code
-      const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+      // Validate URL formats
       expect(verificationLink).toMatch(/^http:\/\/localhost:\d+\/api\/auth\/verify-email\?token=.+$/);
-
-      // Simulate the frontend URL format for password reset (from resetPasswordReqService)
-      const resetToken = jwt.sign(
-        { user_id: userId, type: "password_reset" },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: "15m" }
-      );
-      
-      const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
       expect(resetLink).toMatch(/^http:\/\/localhost:\d+\/auth\/reset-password\?token=.+$/);
 
       // Extract and test the tokens

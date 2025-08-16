@@ -3,6 +3,7 @@ import { getAuthRedis } from '../config/redisConnect.js';
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
+import { generateEmailVerificationLink, generatePasswordResetLink } from "../utils/index.js";
 
 
 export async function registerService (req, res, next) {
@@ -45,13 +46,7 @@ export async function registerService (req, res, next) {
         await connection.commit();
         // sendWelcomeEmail(req.body.email, req.body.username)
         // sendVerificationEmail(req.body.email, req.body.username)
-        const emailVerificationToken = jwt.sign(
-          { user_id, type: "email_verification" },
-          process.env.EMAIL_VERIFICATION_SECRET,
-          { expiresIn: "1h" }
-        );
-        // Build verification link
-        const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+        const { link: verificationLink } = generateEmailVerificationLink(user_id);
         await sendVerificationEmail(req.body.email, verificationLink);
 
         res.status(201).json({ message: "User registered successfully. Please verify your email. The link will expire in 1h", user_id });
@@ -111,13 +106,7 @@ export async function resetPasswordReqService(req, res, next) {
     const user_id = rows[0].user_id;
 
     // 2. Generate a secure token
-    const resetToken = jwt.sign(
-      { user_id, type: "password_reset" },
-      process.env.PASSWORD_RESET_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
+    const { link: resetLink } = generatePasswordResetLink(user_id);
     await sendPasswordResetEmail(email, resetLink);
 
     res.status(200).json({ message: "Password reset email sent" });
@@ -231,13 +220,7 @@ export async function loginService (req, res, next) {
 
         // Check if user is verified, if not send email verification link again to thier email
         if (!user.isVerified){
-          const emailVerificationToken = jwt.sign(
-            { user_id, type: "email_verification" },
-            process.env.EMAIL_VERIFICATION_SECRET,
-            { expiresIn: "1h" }
-          );
-          // Build verification link
-          const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+          const { link: verificationLink } = generateEmailVerificationLink(user_id);
           await sendVerificationEmail(req.body.email, verificationLink);
 
           return next(new Error("Account not verified, please verify your email before logging in, another email has been sent to you with the verification link"));
