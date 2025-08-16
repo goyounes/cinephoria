@@ -6,13 +6,7 @@ import { getRateLimitRedis, getAuthRedis } from './redisConnect.js';
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 
-// Mock rate limiters early - before any imports
-jest.mock('../config/rateLimiters.js', () => ({
-  authLimiter: (req, res, next) => next(),
-  browsingLimiter: (req, res, next) => next(),
-  bookingLimiter: (req, res, next) => next(),
-  createRateLimit: () => (req, res, next) => next()
-}));
+// No longer need to mock rate limiters - using dependency injection instead
 
 beforeAll(async () => {
   // Suppress console.log during tests unless needed
