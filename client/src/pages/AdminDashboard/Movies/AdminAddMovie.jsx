@@ -20,7 +20,6 @@ const AddMovie = () => {
     length_seconds: "",
     age_rating: "",
     is_team_pick: "",
-    score: "",
   })
   const [imageFile, setImageFile] = useState(null);
   const [genresList, setGenresList] = useState([]); // Assuming genres are fetched from an API
@@ -45,19 +44,6 @@ const AddMovie = () => {
     });
   };
 
-const handleFloatChange = (e) => {
-  const val = e.target.value;
-  if (val === "" || /^\d*\.?\d{0,1}$/.test(val)) {
-    let num = parseFloat(val);
-    const min = e.target.min ? +e.target.min : -Infinity;
-    const max = e.target.max ? +e.target.max : Infinity;
-    if (!isNaN(num)) {
-      if (num > max) num = max;
-      if (num < min) num = min;
-    }
-    setMovieData(prev => ({ ...prev, [e.target.name]: val === "" ? "" : num }));
-  }
-};
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -229,20 +215,6 @@ useEffect(() => {
           </Select>
           <FormHelperText>Is this movie a favourite among the cinema crew?</FormHelperText>
         </FormControl>
-
-
-        <TextField
-          required
-          fullWidth
-          label="Score"
-          name="score"
-          type="number"
-          helperText="score between 0.0 ~ 5.0"
-          slotProps={{htmlInput: {step: 0.1, min: 0, max: 5.0}}}
-          // slotProps={{ step: 0.1, min: 0, max: 5.0 }}
-          onChange={handleFloatChange}
-          value={movieData.score}
-        />
 
         <Button variant="contained" color="primary" onClick={handleSubmit} startIcon={<AddIcon/>}>
           Add Movie

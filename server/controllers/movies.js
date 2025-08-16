@@ -14,8 +14,8 @@ export async function  addMovie(movie){
         await connection.beginTransaction();
 
         const q = `
-            INSERT INTO movies (title, poster_img_name,  description, age_rating, is_team_pick, score, length) 
-            VALUES (?,?,?,?,?,?,?);
+            INSERT INTO movies (title, poster_img_name,  description, age_rating, is_team_pick, length) 
+            VALUES (?,?,?,?,?,?);
         `
         const VALUES = [
             movie.title , 
@@ -23,7 +23,6 @@ export async function  addMovie(movie){
             movie.description, //
             movie.age_rating, //
             movie.is_team_pick, //
-            movie.score, //
             movie.length,//
         ]
         const [insertResult] = await connection.query(q,VALUES);
@@ -132,7 +131,6 @@ export async function updateMovie(id,movie){
               description = ?,
               age_rating = ?, 
               is_team_pick = ?, 
-              score = ?, 
               length = ?
             WHERE movie_id = ? ;
         `
@@ -141,7 +139,6 @@ export async function updateMovie(id,movie){
             movie.description, //
             movie.age_rating, //
             movie.is_team_pick, //
-            movie.score, //
             movie.length,//
             id,
         ]

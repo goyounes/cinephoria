@@ -95,7 +95,6 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
                 description :   req.body.description,
                 age_rating : req.body.age_rating || 0, 
                 is_team_pick : req.body.is_team_pick || 0, 
-                score :  req.body.score || 0, 
                 length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`,
                 genres : req.body.selectedGenres
         })
@@ -321,7 +320,6 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
                 description :   req.body.description,
                 age_rating : req.body.age_rating || 0, 
                 is_team_pick : req.body.is_team_pick || 0, 
-                score :  req.body.score || 0, 
                 length : `${req.body.length_hours|| "00"}:${req.body.length_minutes|| "00"}:${req.body.length_seconds|| "00"}`,
                 genres : req.body.selectedGenres
         })
