@@ -4,10 +4,34 @@ import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { generateEmailVerificationLink, generatePasswordResetLink } from '../../utils/index.js';
 
+// Mock the email client to prevent actual email sending during tests
+jest.mock('../../api/emailClient.js', () => ({
+  sendVerificationEmail: jest.fn().mockResolvedValue({
+    statusCode: 202,
+    body: { message: 'Mock verification email sent' },
+    headers: {}
+  }),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue({
+    statusCode: 202,
+    body: { message: 'Mock password reset email sent' },
+    headers: {}
+  }),
+  sendContactMessage: jest.fn().mockResolvedValue({
+    statusCode: 202,
+    body: { message: 'Mock contact email sent' },
+    headers: {}
+  }),
+  sendContactAcknowledgment: jest.fn().mockResolvedValue({
+    statusCode: 202,
+    body: { message: 'Mock acknowledgment email sent' },
+    headers: {}
+  })
+}));
+
 // Load test environment
 process.env.NODE_ENV = 'test';
 const testEnv = await import('dotenv');
-testEnv.config({ path: '.test.env', quiet: true });
+testEnv.config({ path: '.test.env'});
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
@@ -418,10 +442,30 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
   describe('Password Reset Flow', () => {
     test('should successfully request password reset for existing user', async () => {
+
+  console.log('🔍 Test user email:', testUserData.email);
+  console.log('🔍 Registered user ID:', registeredUserId);
+  
+  // Check if user exists in database
+  const connection = await pool.getConnection();
+  try {
+    const [users] = await connection.execute(
+      'SELECT user_id, user_email FROM users',
+      [testUserData.email]
+    );
+    console.log('🔍 Users found in DB:', users);
+  } finally {
+    connection.release();
+  }
+
       const response = await request(app)
         .post('/api/auth/reset-password-req')
         .send({ email: testUserData.email })
-        .expect(200);
+
+
+      console.log('Status:', response.status);
+      console.log('Body:', response.body);
+      console.log('Error:', response.error);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toBe('Password reset email sent');
@@ -459,12 +503,12 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should successfully reset password with valid token', async () => {
       // Generate password reset token
-      passwordResetToken = jwt.sign(
-        { user_id: registeredUserId, type: 'password_reset' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '15m' }
-      );
-
+      // passwordResetToken = jwt.sign(
+      //   { user_id: registeredUserId, type: 'password_reset' },
+      //   process.env.PASSWORD_RESET_SECRET,
+      //   { expiresIn: '15m' }
+      // );
+      const { token: passwordResetToken } = generatePasswordResetLink(registeredUserId);
       const newPassword = 'NewTestPass123!';
       
       const response = await request(app)
@@ -752,7 +796,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // First request password reset to ensure user exists
       await request(app)
         .post('/api/auth/reset-password-req')
-        .send({ email: testEmail })
+        .send({ email: testEmail })      
         .expect(200);
 
       // Get user ID for token creation
