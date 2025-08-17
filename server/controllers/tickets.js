@@ -77,7 +77,7 @@ export async function bookingService(req, res, next,options = {}) {
     if (total_price !== computedTotalPrice) {
         const err = new Error("Total price mismatch")
         err.status = 400
-        next(err)
+        return next(err)
     }
 
     const connection = await pool.getConnection();
@@ -106,7 +106,7 @@ export async function bookingService(req, res, next,options = {}) {
         if (seats.length < nbrOfTickets) {
             const err = new Error("Not enough seats available")
             err.status = 400
-            next(err)
+            return next(err)
         }
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 1000));
