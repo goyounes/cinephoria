@@ -29,7 +29,5 @@ async function testConnectionWithRetry(retries = 0) {
   }
 }
 
-testConnectionWithRetry();
-// console.log(pool)
-// async function testConnection() {    try {        const connection = await pool.getConnection();        console.log("Connected to MySQL!");        connection.release();     } catch (error) {        console.error("Connection failed:", error);    }}
-// testConnection();
+// Export the connection test function for explicit use by server startup
+export { testConnectionWithRetry };
