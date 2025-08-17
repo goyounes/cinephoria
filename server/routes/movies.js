@@ -389,9 +389,11 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
 })
 
 router.post("/reviews", verifyUserJWT, async (req,res,next) => {
-    const { movie_id, review, user_id, score } = req.body;   
-    if (!movie_id || !score || !user_id) {
-        const err = new Error("Missing required fields: movie_id, user_id or score");
+    // Use authenticated user's ID from JWT token, not from request body
+    const user_id = req.user.user_id;
+    const { movie_id, review, score } = req.body;   
+    if (!movie_id || !score) {
+        const err = new Error("Missing required fields: movie_id or score");
         err.status = 400;
         return next(err);
     }   

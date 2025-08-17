@@ -248,8 +248,7 @@ describe('Movies Integration Tests - User Level', () => {
     test('should reject review without authentication', async () => {
       const reviewData = {
         movie_id: 1,
-        user_id: testUserId,
-        score: 8,
+        score: 5,
         review: 'Great movie!'
       };
 
@@ -263,7 +262,7 @@ describe('Movies Integration Tests - User Level', () => {
       const incompleteReviewData = {
         movie_id: 1,
         review: 'Great movie!'
-        // Missing user_id and score
+        // Missing score
       };
 
       const response = await request(app)
@@ -278,8 +277,7 @@ describe('Movies Integration Tests - User Level', () => {
     test('should reject review for non-existent movie', async () => {
       const reviewData = {
         movie_id: 9999999999, // Use a large non-existent ID instead of 0
-        user_id: testUserId,
-        score: 5, // Use valid score (1-5 range)
+        score: 5, 
         review: 'Great movie!'
       };
 
@@ -295,8 +293,7 @@ describe('Movies Integration Tests - User Level', () => {
     test('should reject review if user has not watched the movie', async () => {
       const reviewData = {
         movie_id: 1,
-        user_id: testUserId,
-        score: 8,
+        score: 5,
         review: 'Great movie!'
       };
 
@@ -312,8 +309,7 @@ describe('Movies Integration Tests - User Level', () => {
     test('should successfully create review for movie user has watched', async () => {
       const reviewData = {
         movie_id: 3, // User has ticket for movie_id 3
-        user_id: testUserId,
-        score: 5, // Score must be between 1 and 5 due to CHECK constraint
+        score: 5,
         review: 'Great movie! Really enjoyed it.'
       };
 
