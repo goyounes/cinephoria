@@ -4,11 +4,6 @@ import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../util
 import { signAccessToken } from '../../utils/index.js';
 import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
 
-// Load test environment
-process.env.NODE_ENV = 'test';
-const testEnv = await import('dotenv');
-testEnv.config({ path: '.test.env', quiet: true });
-
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
 

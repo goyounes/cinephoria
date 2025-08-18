@@ -1,4 +1,8 @@
 // Global test setup
+process.env.NODE_ENV = 'test';
+const testEnv = await import('dotenv');
+testEnv.config({ path: '.test.env', quiet: true });
+
 import { jest } from '@jest/globals';
 import { getRateLimitRedis, getAuthRedis } from '../../config/redisConnect.js';
 
