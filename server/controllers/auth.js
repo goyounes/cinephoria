@@ -3,7 +3,12 @@ import { getAuthRedis } from '../config/redisConnect.js';
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
-import { generateEmailVerificationLink, generatePasswordResetLink } from "../utils/index.js";
+import { 
+  generateEmailVerificationLink, 
+  generatePasswordResetLink, 
+  signAccessToken, 
+  signRefreshToken 
+} from "../utils/index.js";
 
 
 export async function registerService (req, res, next) {
@@ -193,16 +198,13 @@ export async function logoutService(req, res, next) {
 }
 
 
+  // const generateTokens = (user_id, role_id, role_name, token_version) => {
+  //   const accessToken = signAccessToken(user_id, role_id, role_name);
+  //   const refreshToken = signRefreshToken(user_id, token_version);
+  //   return { accessToken, refreshToken };
+  // };
+  
 // Login functionality implemented using JWTs
-const ACCESS_JWT_EXPIRY = '15m';
-const REFRESH_JWT_EXPIRY = '7d';
-
-const generateTokens = (user_id, role_id, role_name, token_version) => {
-  const accessToken = jwt.sign({ user_id, role_id, role_name}, process.env.ACCESS_JWT_SECRET, { expiresIn: ACCESS_JWT_EXPIRY });
-  const refreshToken = jwt.sign({ user_id, token_version }, process.env.REFRESH_JWT_SECRET, { expiresIn: REFRESH_JWT_EXPIRY });
-  return { accessToken, refreshToken };
-};
-
 export async function loginService (req, res, next) {
     const { email, password } = req.body; 
     try {
@@ -237,8 +239,10 @@ export async function loginService (req, res, next) {
         if (!isPasswordValid) return next(new Error("Invalid password"));
 
         // create new token with same token version from user DB query
-        const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, user.refresh_token_version);
-
+        // const { accessToken, refreshToken } = generateTokens(user.user_id, user.role_id, user.role_name, user.refresh_token_version);
+        const accessToken = signAccessToken(user.user_id, user.role_id, user.role_name);
+        const refreshToken = signRefreshToken(user.user_id, user.refresh_token_version);
+        
         // Set refresh token as HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -312,12 +316,7 @@ export async function refreshService(req, res, next) {
     }
 
     // Generate new access token
-    const { accessToken } = generateTokens(
-      user.user_id,
-      user.role_id,
-      user.role_name,
-      user.refresh_token_version
-    );
+    const accessToken = signAccessToken(user.user_id, user.role_id, user.role_name);
 
     // res.status(200).json({ accessToken: newAccessToken });
     res.status(200).json({

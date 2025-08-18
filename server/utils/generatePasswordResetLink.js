@@ -1,12 +1,8 @@
-import jwt from 'jsonwebtoken';
+import { signPasswordResetToken } from './jwtTokens.js';
 
 // Generates a password reset link (refactored from resetPasswordReqService)
 export default function generatePasswordResetLink(user_id) {
-  const resetToken = jwt.sign(
-    { user_id, type: "password_reset" },
-    process.env.PASSWORD_RESET_SECRET,
-    { expiresIn: "15m" }
-  );
+  const resetToken = signPasswordResetToken(user_id);
   
   const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
   
