@@ -3,6 +3,8 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import dayjs from 'dayjs';
+import { signAccessToken } from '../../utils/index.js';
+import { signExpiredAccessToken, signTokenWithWrongSecret } from '../utils/jwtTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -52,23 +54,9 @@ describe('Screenings Integration Tests - Employee Level', () => {
       testAdminId = adminResult.insertId;
 
       // Generate tokens
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      employeeToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      adminToken = jwt.sign(
-        { user_id: testAdminId, role_id: 3, role_name: 'admin' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
+      employeeToken = signAccessToken(testEmployeeId, 2, 'employee');
+      adminToken = signAccessToken(testAdminId, 3, 'admin');
     } finally {
       connection.release();
     }
@@ -487,11 +475,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
   describe('Authentication and Authorization Edge Cases', () => {
     test('should handle expired token', async () => {
-      const expiredToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '-1m' }
-      );
+      const expiredToken = signExpiredAccessToken(testEmployeeId, 2, 'employee');
 
       await request(app)
         .get('/api/screenings')
@@ -500,11 +484,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
     });
 
     test('should handle invalid token signature', async () => {
-      const invalidToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        'wrong-secret',
-        { expiresIn: '15m' }
-      );
+      const invalidToken = signTokenWithWrongSecret(testEmployeeId, 2, 'employee');
 
       await request(app)
         .get('/api/screenings')

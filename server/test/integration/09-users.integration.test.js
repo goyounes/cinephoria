@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { signAccessToken } from '../../utils/index.js';
+import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -53,23 +54,9 @@ describe('Users Integration Tests', () => {
       testAdminId = adminResult.insertId;
 
       // Generate test tokens
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      employeeToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      adminToken = jwt.sign(
-        { user_id: testAdminId, role_id: 3, role_name: 'admin' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
+      employeeToken = signAccessToken(testEmployeeId, 2, 'employee');
+      adminToken = signAccessToken(testAdminId, 3, 'admin');
 
     } finally {
       connection.release();
@@ -353,14 +340,7 @@ describe('Users Integration Tests', () => {
     });
 
     test('should reject expired JWT token', async () => {
-      const expiredToken = jwt.sign(
-        { user_id: testAdminId, role_id: 3, role_name: 'admin' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '0s' }
-      );
-
-      // Wait a moment to ensure token is expired
-      await new Promise(resolve => setTimeout(resolve, 100));
+      const expiredToken = signExpiredAccessToken(testAdminId, 3, 'admin');
 
       await request(app)
         .get('/api/users')

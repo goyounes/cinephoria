@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { signAccessToken } from '../../utils/index.js';
+import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -39,11 +41,7 @@ describe('Tickets Integration Tests', () => {
       testUserId = userResult.insertId;
 
       // Generate test tokens
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
 
       // Add some tickets for the user to test the owned endpoint
       await connection.execute(
@@ -143,11 +141,7 @@ describe('Tickets Integration Tests', () => {
         );
         const newUserId = userResult.insertId;
 
-        newUserToken = jwt.sign(
-          { user_id: newUserId, role_id: 1, role_name: 'user' },
-          process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '15m' }
-        );
+        newUserToken = signAccessToken(newUserId, 1, 'user');
       } finally {
         connection.release();
       }
@@ -190,14 +184,7 @@ describe('Tickets Integration Tests', () => {
     });
 
     test('should reject expired JWT token', async () => {
-      const expiredToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '0s' }
-      );
-
-      // Wait a moment to ensure token is expired
-      await new Promise(resolve => setTimeout(resolve, 100));
+      const expiredToken = signExpiredAccessToken(testUserId, 1, 'user');
 
       await request(app)
         .get('/api/tickets/owned')
@@ -231,11 +218,7 @@ describe('Tickets Integration Tests', () => {
           [35, otherUserId, 96, 1, 'other-user-ticket']
         );
 
-        otherUserToken = jwt.sign(
-          { user_id: otherUserId, role_id: 1, role_name: 'user' },
-          process.env.ACCESS_JWT_SECRET,
-          { expiresIn: '15m' }
-        );
+        otherUserToken = signAccessToken(otherUserId, 1, 'user');
       } finally {
         connection.release();
       }

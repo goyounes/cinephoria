@@ -2,7 +2,17 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
-import { generateEmailVerificationLink, generatePasswordResetLink } from '../../utils/index.js';
+import { 
+  generateEmailVerificationLink, 
+  generatePasswordResetLink,
+  signEmailVerificationToken,
+  signPasswordResetToken
+} from '../../utils/index.js';
+import { 
+  signExpiredEmailVerificationToken,
+  signExpiredPasswordResetToken,
+  signWrongTypeToken
+} from '../utils/jwtTestUtils.js';
 
 // Mock the email client to prevent actual email sending during tests
 jest.mock('../../api/emailClient.js', () => ({
@@ -203,11 +213,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   describe('Email Verification Flow', () => {
     beforeAll(() => {
       // Generate a test verification token for our registered user
-      emailVerificationToken = jwt.sign(
-        { user_id: registeredUserId, type: 'email_verification' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '1h' }
-      );
+      emailVerificationToken = signEmailVerificationToken(registeredUserId);
     });
 
     test('should successfully verify email with valid token', async () => {
@@ -263,11 +269,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject verification with expired token', async () => {
-      const expiredToken = jwt.sign(
-        { user_id: registeredUserId, type: 'email_verification' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '-1h' }
-      );
+      const expiredToken = signExpiredEmailVerificationToken(registeredUserId);
 
       const response = await request(app)
         .get(`/api/auth/verify-email?token=${expiredToken}`)
@@ -278,11 +280,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject verification with wrong token type', async () => {
-      const wrongTypeToken = jwt.sign(
-        { user_id: registeredUserId, type: 'password_reset' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '1h' }
-      );
+      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
 
       const response = await request(app)
         .get(`/api/auth/verify-email?token=${wrongTypeToken}`)
@@ -293,11 +291,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject verification for non-existent user', async () => {
-      const nonExistentUserToken = jwt.sign(
-        { user_id: 999999, type: 'email_verification' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '1h' }
-      );
+      const nonExistentUserToken = signEmailVerificationToken(999999);
 
       const response = await request(app)
         .get(`/api/auth/verify-email?token=${nonExistentUserToken}`)
@@ -544,11 +538,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject password reset with expired token', async () => {
-      const expiredToken = jwt.sign(
-        { user_id: registeredUserId, type: 'password_reset' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '-1m' }
-      );
+      const expiredToken = signExpiredPasswordResetToken(registeredUserId);
 
       const response = await request(app)
         .post('/api/auth/reset-password')
@@ -575,11 +565,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject password reset with wrong token type', async () => {
-      const wrongTypeToken = jwt.sign(
-        { user_id: registeredUserId, type: 'email_verification' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '15m' }
-      );
+      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
 
       const response = await request(app)
         .post('/api/auth/reset-password')
@@ -594,11 +580,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject password reset with weak new password', async () => {
-      const validToken = jwt.sign(
-        { user_id: registeredUserId, type: 'password_reset' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '15m' }
-      );
+      const validToken = signPasswordResetToken(registeredUserId);
 
       const response = await request(app)
         .post('/api/auth/reset-password')
@@ -844,22 +826,14 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should test email verification token edge cases', async () => {
       // Test expired verification token
-      const expiredToken = jwt.sign(
-        { user_id: 999, type: 'email_verification' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '-1h' }
-      );
+      const expiredToken = signExpiredEmailVerificationToken(999);
 
       await request(app)
         .get(`/api/auth/verify-email?token=${expiredToken}`)
         .expect(410);
 
       // Test invalid token type
-      const wrongTypeToken = jwt.sign(
-        { user_id: 999, type: 'password_reset' },
-        process.env.EMAIL_VERIFICATION_SECRET,
-        { expiresIn: '1h' }
-      );
+      const wrongTypeToken = signWrongTypeToken(999, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
 
       await request(app)
         .get(`/api/auth/verify-email?token=${wrongTypeToken}`)
@@ -873,11 +847,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should test password reset token edge cases', async () => {
       // Test expired reset token
-      const expiredResetToken = jwt.sign(
-        { user_id: registeredUserId, type: 'password_reset' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '-1m' }
-      );
+      const expiredResetToken = signExpiredPasswordResetToken(registeredUserId);
 
       await request(app)
         .post('/api/auth/reset-password')
@@ -888,11 +858,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(410);
 
       // Test wrong token type
-      const wrongTypeResetToken = jwt.sign(
-        { user_id: registeredUserId, type: 'email_verification' },
-        process.env.PASSWORD_RESET_SECRET,
-        { expiresIn: '15m' }
-      );
+      const wrongTypeResetToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
 
       await request(app)
         .post('/api/auth/reset-password')

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { signAccessToken } from '../../utils/index.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -38,11 +38,7 @@ describe('Movies Integration Tests - User Level', () => {
       testUserId = userResult.insertId;
 
       // Generate test user token
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
 
       // Add a ticket for movie_id 3 so user can review it (screening_id 33 has past date 2024-12-30)
       await connection.execute(

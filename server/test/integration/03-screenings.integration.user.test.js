@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { signAccessToken } from '../../utils/index.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -38,11 +39,7 @@ describe('Screenings Integration Tests - User Level', () => {
       testUserId = userResult.insertId;
 
       // Generate user token
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
     } finally {
       connection.release();
     }

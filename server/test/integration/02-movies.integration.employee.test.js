@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { signAccessToken } from '../../utils/index.js';
+import { signExpiredAccessToken, signTokenWithWrongSecret } from '../utils/jwtTestUtils.js';
 
 // Load test environment
 process.env.NODE_ENV = 'test';
@@ -51,23 +53,9 @@ describe('Movies Integration Tests - Employee Level', () => {
       testAdminId = adminResult.insertId;
 
       // Generate tokens
-      userToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      employeeToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      adminToken = jwt.sign(
-        { user_id: testAdminId, role_id: 3, role_name: 'admin' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      userToken = signAccessToken(testUserId, 1, 'user');
+      employeeToken = signAccessToken(testEmployeeId, 2, 'employee');
+      adminToken = signAccessToken(testAdminId, 3, 'admin');
     } finally {
       connection.release();
     }
@@ -214,11 +202,7 @@ describe('Movies Integration Tests - Employee Level', () => {
   describe('Token Validation Edge Cases', () => {
     test('should handle expired token', async () => {
       // Create an expired token
-      const expiredToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '-1m' } // Already expired
-      );
+      const expiredToken = signExpiredAccessToken(testEmployeeId, 2, 'employee');
 
       await request(app)
         .get('/api/movies/upcoming/all')
@@ -228,11 +212,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should handle token with insufficient role', async () => {
       // Create token with role 1 (user) trying to access employee endpoint
-      const insufficientToken = jwt.sign(
-        { user_id: testUserId, role_id: 1, role_name: 'user' },
-        process.env.ACCESS_JWT_SECRET,
-        { expiresIn: '15m' }
-      );
+      const insufficientToken = signAccessToken(testUserId, 1, 'user');
 
       await request(app)
         .get('/api/movies/upcoming/all')
@@ -241,11 +221,7 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should handle token signed with wrong secret', async () => {
-      const wrongSecretToken = jwt.sign(
-        { user_id: testEmployeeId, role_id: 2, role_name: 'employee' },
-        'wrong-secret',
-        { expiresIn: '15m' }
-      );
+      const wrongSecretToken = signTokenWithWrongSecret(testEmployeeId, 2, 'employee');
 
       await request(app)
         .get('/api/movies/upcoming/all')
