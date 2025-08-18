@@ -40,6 +40,8 @@ services:
     #   - /app/node_modules                # Préserve les modules node
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm start                   # Commande pour démarrer le serveur
+    volumes:
+      - ./db:/db
 
   nginx:
     build:

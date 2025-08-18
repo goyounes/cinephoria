@@ -37,6 +37,7 @@ services:
       - redis_dev                            # Attend que Redis soit prêt
     volumes:
       - ./server:/app                    # Montage du code backend
+      - ./db:/db
       - node_modules_server_dev:/app/node_modules  # Named volume for node_modules
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm run dev                 # Commande pour démarrer le serveur en mode dev (nodemon)
