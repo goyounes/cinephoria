@@ -109,8 +109,10 @@ export async function bookingService(req, res, next,options = {}) {
             return next(err)
         }
         // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 50)); //50ms for now
+        //TODO: Implement a real paiment flow
         console.log("Payment processed");
+
         // Prepare ticket insert statement
         const insertTicketQuery = `
             INSERT INTO tickets (screening_id, user_id, seat_id, ticket_type_id, QR_code)
