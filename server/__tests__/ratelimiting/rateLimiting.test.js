@@ -1,14 +1,29 @@
 import request from 'supertest';
+import { setupTestDatabase, cleanupTestDatabase } from '../utils/dbTestUtils.js';
 
-// Load test environment but DON'T import testSetup.js to avoid mocking rate limiters
-process.env.NODE_ENV = 'test';
-const testEnv = await import('dotenv');
-testEnv.config({ path: '.test.env', quiet: true });
+// Import createApp function and actual rate limiters like server.js
+const { default: createApp } = await import('../../app.js');
+import { 
+  authLimiter, 
+  browsingLimiter, 
+  bookingLimiter 
+} from '../../config/rateLimiters.js';
 
-// Import app directly without the test setup that mocks rate limiters
-const { default: app } = await import('../../app.js');
+// Create app with actual rate limiters for testing
+const app = createApp({
+  authLimiter,
+  browsingLimiter,
+  bookingLimiter
+});
 
 describe('Rate Limiting Integration Tests', () => {
+  beforeAll(async () => {
+    await setupTestDatabase();
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase();
+  });
   describe('Browsing Rate Limiter - Public Access', () => {
     test('should rate limit after 100 requests per minute', async () => {
       const endpoint = '/api/movies';
