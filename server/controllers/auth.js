@@ -421,7 +421,7 @@ export async function addUserService (req, res, next) {
 
         await connection.commit();
 
-        res.status(201).json({ message: "User registered successfully", user_id });
+        res.status(201).json({ message: "User added successfully", user_id });
     } catch (error) {
         await connection.rollback();
         next(error);
