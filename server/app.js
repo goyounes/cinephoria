@@ -1,7 +1,4 @@
-import './config/env.js';
-
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import usersRoutes from  './routes/users.js'
@@ -19,11 +16,6 @@ export default function createApp(rateLimiters) {
 
   app.use(express.json());
   app.use(cookieParser());
-
-  app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
-  }));
 
   // Use injected rate limiters
   const { authLimiter, browsingLimiter, bookingLimiter } = rateLimiters;
@@ -62,8 +54,7 @@ export default function createApp(rateLimiters) {
 
   app.use((err, req, res, next) => {
     console.log("Server: Middleware logging error stack ...");
-    console.error(err.stack); // Log the stack trace
-    // res.status(err.status || 500).send(err.message || "Something broke in the web server !");
+    console.error(err.stack);
     res.status(err.status || 500).json({
         message: err.message || "Something broke in the web server !",
         status: err.status || 500
@@ -72,4 +63,3 @@ export default function createApp(rateLimiters) {
 
   return app;
 }
-

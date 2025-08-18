@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 
 if (process.env.NODE_ENV !== 'production') {
-  const result = dotenv.config({ path: './.env', quiet: process.env.NODE_ENV === 'test' });
+  const result = dotenv.config({ path: './.env' });
 
-  if (result.error && process.env.NODE_ENV !== 'test') {
+  if (result.error) {
     console.warn('Warning: .env file not found or failed to load.');
-  } else if (process.env.NODE_ENV !== 'test') {
+  } else {
     console.log('Environment variables loaded successfully.');
   }
 } else {

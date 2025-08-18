@@ -1,3 +1,6 @@
+import './config/env.js';
+
+import cors from 'cors';
 import createApp from "./app.js";
 import { 
   authLimiter, 
@@ -15,6 +18,12 @@ const app = createApp({
   browsingLimiter,
   bookingLimiter
 });
+
+// Add CORS configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
 // Test database and Redis connections before starting server
 await testConnectionWithRetry();
