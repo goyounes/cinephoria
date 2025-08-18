@@ -5,6 +5,7 @@ import {
   bookingLimiter 
 } from './config/rateLimiters.js';
 import { testConnectionWithRetry } from './config/mysqlConnect.js';
+import { testRedisConnectionWithRetry } from './config/redisConnect.js';
 
 const PORT = process.env.PORT || 8080;
 
@@ -15,8 +16,9 @@ const app = createApp({
   bookingLimiter
 });
 
-// Test database connection before starting server
+// Test database and Redis connections before starting server
 await testConnectionWithRetry();
+await testRedisConnectionWithRetry();
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
