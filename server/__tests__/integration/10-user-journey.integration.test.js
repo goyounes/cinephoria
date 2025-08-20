@@ -21,11 +21,6 @@ describe('Complete User Journey Integration Tests', () => {
   let newAdminToken;
   let testUserData;
   let newAdminId;
-  let existingMovieId;
-  let existingCinemaId;
-  let existingScreeningId;
-  let existingRoomId;
-  let availableSeatIds = [];
   let createdTicketIds = [];
   let newCinemaId, newMovieId, newScreeningId, newRoomId;
 
@@ -56,50 +51,6 @@ describe('Complete User Journey Integration Tests', () => {
       });
 
     adminToken = adminLoginResponse.body.accessToken;
-    
-    // Note: User registration and login will be done in a separate test
-
-    // Get existing data from database to use for journey
-    const [movieRows] = await pool.query(`
-      SELECT movie_id, title FROM movies WHERE isDeleted = FALSE LIMIT 1
-    `);
-    existingMovieId = movieRows[0].movie_id;
-
-    const [cinemaRows] = await pool.query(`
-      SELECT cinema_id, cinema_name FROM cinemas WHERE isDeleted = FALSE LIMIT 1
-    `);
-    existingCinemaId = cinemaRows[0].cinema_id;
-
-    const [roomRows] = await pool.query(`
-      SELECT room_id FROM rooms WHERE cinema_id = ? AND isDeleted = FALSE LIMIT 1
-    `, [existingCinemaId]);
-    existingRoomId = roomRows[0].room_id;
-
-    // Get future screening data for booking
-    const [screeningRows] = await pool.query(`
-      SELECT screening_id FROM screenings 
-      WHERE movie_id = ? AND room_id = ? AND isDeleted = FALSE 
-        AND (start_date > CURDATE() OR (start_date = CURDATE() AND start_time > CURTIME()))
-        AND start_date <= CURDATE() + INTERVAL 14 DAY
-      LIMIT 1
-    `, [existingMovieId, existingRoomId]);
-    
-    if (screeningRows.length > 0) {
-      existingScreeningId = screeningRows[0].screening_id;
-    }
-
-    // Get available seats for the screening
-    const [seatRows] = await pool.query(`
-      SELECT seat_id FROM seats 
-      WHERE room_id = ? AND isDeleted = FALSE 
-        AND seat_id NOT IN (
-          SELECT seat_id FROM tickets 
-          WHERE screening_id = ? AND seat_id IS NOT NULL
-        )
-      LIMIT 5
-    `, [existingRoomId, existingScreeningId]);
-
-    availableSeatIds = seatRows.map(row => row.seat_id);
   }, 30000);
 
   afterAll(async () => {
@@ -114,7 +65,6 @@ describe('Complete User Journey Integration Tests', () => {
   describe('Admin Capabilities Verification', () => {
     test('should authenticate existing admin user', async () => {
       expect(adminToken).toBeDefined();
-      console.log('✓ Existing admin authentication successful');
     });
 
     test('should create a new admin user via existing admin', async () => {
@@ -148,7 +98,6 @@ describe('Complete User Journey Integration Tests', () => {
 
       newAdminToken = newAdminLoginResponse.body.accessToken;
       expect(newAdminToken).toBeDefined();
-      console.log('✓ New admin user created and authenticated successfully');
     });
 
     test('should create cinema, movie, and screening with new admin', async () => {
@@ -214,10 +163,6 @@ describe('Complete User Journey Integration Tests', () => {
 
       const createMovieResponse = await movieRequest;
 
-      if (createMovieResponse.status !== 201) {
-        console.log('Movie creation failed:', createMovieResponse.body);
-        throw new Error(`Movie creation failed with status ${createMovieResponse.status}: ${JSON.stringify(createMovieResponse.body)}`);
-      }
 
       expect(createMovieResponse.body.message).toContain('Movie added successfully');
       newMovieId = createMovieResponse.body.movieInsertResult.insertId;
@@ -252,7 +197,7 @@ describe('Complete User Journey Integration Tests', () => {
         newScreeningId = createScreeningResponse.body.screeningInsertResult[0]?.insertId;
       }
       
-      console.log(`✓ New admin created complete cinema content: cinema, movie, and screening (ID: ${newScreeningId})`);
+      expect(newScreeningId).toBeDefined();
     });
 
     test('should register and verify a new user', async () => {
@@ -295,8 +240,7 @@ describe('Complete User Journey Integration Tests', () => {
       expect(loginResponse.status).toBe(200);
       expect(loginResponse.body).toHaveProperty('accessToken');
       userToken = loginResponse.body.accessToken;
-      
-      console.log('✓ User registered, verified, and authenticated successfully');
+      expect(userToken).toBeDefined();
     });
   });
 
@@ -313,7 +257,6 @@ describe('Complete User Journey Integration Tests', () => {
       const targetMovie = moviesResponse.body.find(movie => movie.movie_id === newMovieId);
       expect(targetMovie).toBeDefined();
       expect(targetMovie.title).toBe('New Admin Movie');
-      console.log(`✓ User can browse movies - found admin's movie: ${targetMovie.title}`);
     });
 
     test('should get movie details', async () => {
@@ -324,15 +267,9 @@ describe('Complete User Journey Integration Tests', () => {
       expect(movieResponse.body.movie_id).toBe(newMovieId);
       expect(movieResponse.body.title).toBe('New Admin Movie');
       expect(movieResponse.body.genres).toBeInstanceOf(Array);
-      console.log(`✓ User can view movie details: ${movieResponse.body.title}`);
     });
 
     test('should get movie screenings', async () => {
-      if (!newScreeningId) {
-        console.log('⚠ No new screening available, skipping screening tests');
-        return;
-      }
-
       const screeningsResponse = await request(app)
         .get(`/api/movies/${newMovieId}/screenings?cinema_id=${newCinemaId}`)
         .expect(200);
@@ -342,43 +279,27 @@ describe('Complete User Journey Integration Tests', () => {
       
       const targetScreening = screeningsResponse.body.find(s => s.screening_id === newScreeningId);
       expect(targetScreening).toBeDefined();
-      console.log(`✓ User can view screenings for the admin's movie at admin's cinema`);
     });
 
     test('should view screening details with seat information', async () => {
-      if (!newScreeningId) {
-        console.log('⚠ No new screening available, skipping screening details test');
-        return;
-      }
-
-      // Check screening details which include seat availability info
       const screeningResponse = await request(app)
         .get(`/api/screenings/upcoming/${newScreeningId}`)
         .expect(200);
 
       expect(screeningResponse.body).toHaveProperty('screening_id');
-      expect(screeningResponse.body).toHaveProperty('title'); // API returns 'title' not 'movie_title'
+      expect(screeningResponse.body).toHaveProperty('title');
       expect(screeningResponse.body.title).toBe('New Admin Movie');
       expect(screeningResponse.body).toHaveProperty('cinema_name');
       expect(screeningResponse.body.cinema_name).toBe('New Admin Cinema');
-      // Screenings include seat availability data based on other integration tests
+      
       if (screeningResponse.body.total_seats) {
         expect(screeningResponse.body).toHaveProperty('total_seats');
         expect(screeningResponse.body).toHaveProperty('booked_seats');
         expect(screeningResponse.body).toHaveProperty('seats_left');
-        console.log(`✓ User can view admin's screening details with seat info: ${screeningResponse.body.seats_left}/${screeningResponse.body.total_seats} available`);
-      } else {
-        console.log('✓ User can view admin\'s screening details');
       }
     });
 
     test('should complete checkout and book tickets', async () => {
-      if (!newScreeningId) {
-        console.log('⚠ No new screening available, skipping booking test');
-        return;
-      }
-
-      // Get ticket types first
       const ticketTypesResponse = await request(app)
         .get('/api/tickets/types')
         .expect(200);
@@ -409,18 +330,10 @@ describe('Complete User Journey Integration Tests', () => {
       expect(checkoutResponse.body).toHaveProperty('seat_ids');
       expect(checkoutResponse.body.seat_ids).toHaveLength(2);
       
-      // Store seat IDs that were assigned for later tests
-      createdTicketIds = checkoutResponse.body.seat_ids; // For now, using seat_ids as reference
-      
-      console.log(`✓ User successfully booked ${checkoutResponse.body.tickets_booked} tickets for admin's screening at seats ${checkoutResponse.body.seat_ids.join(', ')}`);
+      createdTicketIds = checkoutResponse.body.seat_ids;
     });
 
     test('should retrieve user tickets', async () => {
-      if (createdTicketIds.length === 0) {
-        console.log('⚠ No tickets booked, skipping ticket retrieval test');
-        return;
-      }
-
       const ticketsResponse = await request(app)
         .get('/api/tickets/owned')
         .set('Authorization', `Bearer ${userToken}`)
@@ -428,25 +341,18 @@ describe('Complete User Journey Integration Tests', () => {
 
       expect(ticketsResponse.body).toBeInstanceOf(Array);
       
-      // Find tickets for our new screening (we can't match exact ticket IDs but we can check for our screening)
       const ourTickets = ticketsResponse.body.filter(t => t.screening_id === newScreeningId);
-      expect(ourTickets.length).toBeGreaterThanOrEqual(2); // At least the 2 we just booked
+      expect(ourTickets.length).toBeGreaterThanOrEqual(2);
       
       const ticket = ourTickets[0];
-      expect(ticket).toHaveProperty('title'); // API returns 'title' not 'movie_title'
+      expect(ticket).toHaveProperty('title');
       expect(ticket.title).toBe('New Admin Movie');
       expect(ticket).toHaveProperty('cinema_name');
       expect(ticket.cinema_name).toBe('New Admin Cinema');
       expect(ticket).toHaveProperty('QR_code');
-      console.log(`✓ User retrieved ${ourTickets.length} tickets for the admin's screening`);
     });
 
     test('should handle movie review business logic correctly', async () => {
-      if (createdTicketIds.length === 0) {
-        console.log('⚠ No tickets booked, skipping review test');
-        return;
-      }
-
       const reviewData = {
         movie_id: newMovieId,
         score: 8,
@@ -456,18 +362,10 @@ describe('Complete User Journey Integration Tests', () => {
       const reviewResponse = await request(app)
         .post('/api/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(reviewData);
+        .send(reviewData)
+        .expect(400);
 
-      if (reviewResponse.status === 201) {
-        expect(reviewResponse.body.message).toBe('Review added successfully');
-        expect(reviewResponse.body.review_id).toBeDefined();
-        console.log('✓ User can add reviews after watching movies');
-      } else if (reviewResponse.status === 400) {
-        // This is expected - user can only review movies after the screening has passed
-        console.log('✓ Review validation works - users can only review past screenings');
-      } else {
-        throw new Error(`Unexpected review response: ${reviewResponse.status}`);
-      }
+      expect(reviewResponse.body.message).toContain('You can only review a movie after watching it');
     });
   });
 
@@ -492,9 +390,7 @@ describe('Complete User Journey Integration Tests', () => {
         .send(checkoutData)
         .expect(401);
 
-      // API might return different error response formats
       expect(response.status).toBe(401);
-      console.log('✓ Authentication required for bookings');
     });
 
     test('should handle non-existent movie gracefully', async () => {
@@ -503,7 +399,6 @@ describe('Complete User Journey Integration Tests', () => {
         .expect(404);
 
       expect(response.status).toBe(404);
-      console.log('✓ Non-existent movie handled gracefully');
     });
 
     test('should handle invalid screening ID gracefully', async () => {
@@ -512,7 +407,6 @@ describe('Complete User Journey Integration Tests', () => {
         .expect(404);
 
       expect(response.status).toBe(404);
-      console.log('✓ Non-existent screening handled gracefully');
     });
 
     test('should prevent booking without required ticket data', async () => {
@@ -528,7 +422,6 @@ describe('Complete User Journey Integration Tests', () => {
         .expect(400);
 
       expect(response.status).toBe(400);
-      console.log('✓ Incomplete booking data rejected');
     });
   });
 });
