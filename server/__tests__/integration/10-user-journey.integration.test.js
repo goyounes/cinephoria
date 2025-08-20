@@ -18,8 +18,10 @@ const { pool } = await import('../../config/mysqlConnect.js');
 describe('Complete User Journey Integration Tests', () => {
   let adminToken;
   let userToken;
+  let newAdminToken;
   let testAdminData;
   let testUserData;
+  let newAdminId;
   let existingMovieId;
   let existingCinemaId;
   let existingScreeningId;
@@ -30,61 +32,32 @@ describe('Complete User Journey Integration Tests', () => {
   beforeAll(async () => {
     await setupTestDatabase();
     
-    // Test admin data (role_id: 3)
-    testAdminData = {
-      user_name: 'journeyadmin',
-      user_email: 'journeyadmin@cinephoria.com',
-      first_name: 'Journey',
-      last_name: 'Admin',
-      user_password: 'AdminPass123!',
-      role_id: 3
+    // Use existing admin from database (admin@admin.com/adminadmin)
+    const existingAdminData = {
+      email: 'admin@admin.com',
+      password: 'adminadmin'
     };
 
-    // Test user data (role_id: 1)
+    // Test user data for registration (role_id: 1)
     testUserData = {
-      user_name: 'journeyuser',
-      user_email: 'journeyuser@example.com',
-      first_name: 'Journey',
-      last_name: 'User',
-      user_password: 'UserPass123!',
-      role_id: 1
+      username: 'journeyuser',
+      email: 'journeyuser@example.com',
+      firstName: 'Journey',
+      lastName: 'User',
+      password: 'UserPass123!'
     };
 
-    // Add users manually to database
-    const bcrypt = await import('bcrypt');
-    
-    for (const userData of [testAdminData, testUserData]) {
-      const passwordHash = await bcrypt.hash(userData.user_password, 10);
-      
-      const [userResult] = await pool.query(`
-        INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified, refresh_token_version)
-        VALUES (?, ?, ?, ?, ?, TRUE, 1)
-      `, [userData.user_name, userData.user_email, userData.first_name, userData.last_name, userData.role_id]);
-
-      // Add user credentials
-      await pool.query(`
-        INSERT INTO users_credentials (user_id, user_password_hash)
-        VALUES (?, ?)
-      `, [userResult.insertId, passwordHash]);
-    }
-
-    // Login to get tokens
+    // Login with existing admin
     const adminLoginResponse = await request(app)
       .post('/api/auth/login')
       .send({
-        email: testAdminData.user_email,
-        password: testAdminData.user_password
-      });
-    
-    const userLoginResponse = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: testUserData.user_email,
-        password: testUserData.user_password
+        email: existingAdminData.email,
+        password: existingAdminData.password
       });
 
     adminToken = adminLoginResponse.body.accessToken;
-    userToken = userLoginResponse.body.accessToken;
+    
+    // Note: User registration and login will be done in a separate test
 
     // Get existing data from database to use for journey
     const [movieRows] = await pool.query(`
@@ -139,59 +112,182 @@ describe('Complete User Journey Integration Tests', () => {
   }, 30000);
 
   describe('Admin Capabilities Verification', () => {
-    test('should authenticate admin user', async () => {
+    test('should authenticate existing admin user', async () => {
       expect(adminToken).toBeDefined();
-      expect(userToken).toBeDefined();
-      console.log('✓ Admin and user authentication successful');
+      console.log('✓ Existing admin authentication successful');
     });
 
-    test('should create a new cinema with rooms', async () => {
+    test('should create a new admin user via existing admin', async () => {
+      const newAdminData = {
+        username: 'newjourneyadmin',
+        email: 'newjourneyadmin@cinephoria.com',
+        firstName: 'New',
+        lastName: 'Admin',
+        password: 'NewAdminPass123!',
+        role_id: 3
+      };
+
+      const createAdminResponse = await request(app)
+        .post('/api/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(newAdminData)
+        .expect(201);
+
+      expect(createAdminResponse.body.message).toContain('User added successfully');
+      expect(createAdminResponse.body).toHaveProperty('user_id');
+      newAdminId = createAdminResponse.body.user_id;
+
+      // Login with the newly created admin
+      const newAdminLoginResponse = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: newAdminData.email,
+          password: newAdminData.password
+        })
+        .expect(200);
+
+      newAdminToken = newAdminLoginResponse.body.accessToken;
+      expect(newAdminToken).toBeDefined();
+      console.log('✓ New admin user created and authenticated successfully');
+    });
+
+    test('should create cinema, movie, and screening with new admin', async () => {
+      // 1. Create cinema
       const cinemaData = {
-        cinema_name: 'Journey Test Cinema',
-        cinema_adresse: '123 Test Street, Test City'
+        cinema_name: 'New Admin Cinema',
+        cinema_adresse: '456 Admin Street, Admin City'
       };
 
       const cinemaResponse = await request(app)
         .post('/api/cinemas')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${newAdminToken}`)
         .send(cinemaData)
         .expect(201);
 
-      expect(cinemaResponse.body.cinema_name).toBe('Journey Test Cinema');
-      expect(cinemaResponse.body.cinema_id).toBeDefined();
-      console.log('✓ Admin can create cinemas');
+      expect(cinemaResponse.body.cinema_name).toBe('New Admin Cinema');
+      const newCinemaId = cinemaResponse.body.cinema_id;
 
-      // Create room in the cinema
+      // 2. Create room in the cinema
       const roomData = {
-        room_name: 'Test Theater 1',
-        room_capacity: 10,
-        cinema_id: cinemaResponse.body.cinema_id
+        room_name: 'Admin Theater 1',
+        room_capacity: 20,
+        cinema_id: newCinemaId
       };
 
       const roomResponse = await request(app)
         .post('/api/cinemas/rooms')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${newAdminToken}`)
         .send(roomData)
         .expect(201);
 
-      expect(roomResponse.body.room_name).toBe('Test Theater 1');
-      expect(roomResponse.body.seats_created).toBe(10);
-      console.log('✓ Admin can create rooms with automatic seat generation');
+      expect(roomResponse.body.room_name).toBe('Admin Theater 1');
+      const newRoomId = roomResponse.body.room_id;
+
+      // 3. Create movie
+      const movieData = {
+        title: 'New Admin Movie',
+        description: 'A movie created by the new admin',
+        age_rating: 13,
+        is_team_pick: 1,
+        length_hours: '2',
+        length_minutes: '15',
+        length_seconds: '00',
+        selectedGenres: [1, 5, 10] // Action, Comedy, Drama
+      };
+
+      let movieRequest = request(app)
+        .post('/api/movies')
+        .set('Authorization', `Bearer ${newAdminToken}`)
+        .field('title', movieData.title)
+        .field('description', movieData.description)
+        .field('age_rating', movieData.age_rating)
+        .field('is_team_pick', movieData.is_team_pick)
+        .field('length_hours', movieData.length_hours)
+        .field('length_minutes', movieData.length_minutes)
+        .field('length_seconds', movieData.length_seconds);
+
+      // Add each genre as a separate field (this is how arrays work in multipart forms)
+      movieData.selectedGenres.forEach(genreId => {
+        movieRequest = movieRequest.field('selectedGenres', genreId);
+      });
+
+      const createMovieResponse = await movieRequest;
+
+      if (createMovieResponse.status !== 201) {
+        console.log('Movie creation failed:', createMovieResponse.body);
+        throw new Error(`Movie creation failed with status ${createMovieResponse.status}: ${JSON.stringify(createMovieResponse.body)}`);
+      }
+
+      expect(createMovieResponse.body.message).toContain('Movie added successfully');
+      const newMovieId = createMovieResponse.body.movieInsertResult.insertId;
+
+      // 4. Create screening
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      const screeningData = {
+        movie_id: newMovieId,
+        cinema_id: newCinemaId,
+        room_ids: [newRoomId],
+        start_date: tomorrowStr,
+        start_time: '19:00:00',
+        end_time: '21:30:00'
+      };
+
+      const createScreeningResponse = await request(app)
+        .post('/api/screenings')
+        .set('Authorization', `Bearer ${newAdminToken}`)
+        .send(screeningData)
+        .expect(201);
+
+      expect(createScreeningResponse.body.message).toContain('Screening added successfully');
+      
+      console.log('✓ New admin created complete cinema content: cinema, movie, and screening');
     });
 
-    test('should view ticket types', async () => {
-      const ticketTypesResponse = await request(app)
-        .get('/api/tickets/types')
-        .expect(200);
+    test('should register and verify a new user', async () => {
+      // 1. Register new user
+      const registrationResponse = await request(app)
+        .post('/api/auth/register')
+        .send(testUserData);
 
-      expect(ticketTypesResponse.body).toBeInstanceOf(Array);
-      expect(ticketTypesResponse.body.length).toBeGreaterThan(0);
+      expect(registrationResponse.status).toBe(201);
+      expect(registrationResponse.body.message).toContain('User registered successfully');
+      expect(registrationResponse.body).toHaveProperty('user_id');
+
+      // 2. Verify user in database is unverified
+      const [userRows] = await pool.query(
+        'SELECT user_id, user_name, user_email, isVerified FROM users WHERE user_email = ?',
+        [testUserData.email]
+      );
       
-      const ticketType = ticketTypesResponse.body[0];
-      expect(ticketType).toHaveProperty('ticket_type_id');
-      expect(ticketType).toHaveProperty('ticket_type_name');
-      expect(ticketType).toHaveProperty('ticket_type_price');
-      console.log(`✓ Admin can view ticket types (${ticketTypesResponse.body.length} types available)`);
+      expect(userRows).toHaveLength(1);
+      expect(userRows[0].isVerified).toBe(0);
+      
+      // 3. Generate verification token and simulate clicking the email link
+      const { generateEmailVerificationLink } = await import('../../utils/index.js');
+      const { link, token } = generateEmailVerificationLink(userRows[0].user_id);
+      
+      // Extract token from link and hit the verification endpoint
+      const verifyResponse = await request(app)
+        .get(`/api/auth/verify-email?token=${token}`);
+      
+      expect(verifyResponse.status).toBe(200);
+
+      // 4. Login with the registered and verified user
+      const loginResponse = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: testUserData.email,
+          password: testUserData.password
+        });
+
+      expect(loginResponse.status).toBe(200);
+      expect(loginResponse.body).toHaveProperty('accessToken');
+      userToken = loginResponse.body.accessToken;
+      
+      console.log('✓ User registered, verified, and authenticated successfully');
     });
   });
 
