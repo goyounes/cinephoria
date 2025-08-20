@@ -260,7 +260,6 @@ describe('Checkout Integration Tests', () => {
         `, [testScreeningData.screening_id]);
         
         const availableSeats = roomInfo[0].room_capacity - bookedSeats[0].count;
-        console.log(`Before concurrent test - Room capacity: ${roomInfo[0].room_capacity}, Booked: ${bookedSeats[0].count}, Available: ${availableSeats}`);
         
         // Create multiple simultaneous booking requests
         const bookingData = {
@@ -283,10 +282,6 @@ describe('Checkout Integration Tests', () => {
 
         const responses = await Promise.all(promises);
         
-        // Debug: Log all response statuses and any error messages
-        responses.forEach((r, i) => {
-          console.log(`Concurrent booking ${i + 1}: Status ${r.status}`, r.status !== 200 ? r.body : 'Success');
-        });
         
         // At least one should succeed, others might fail due to seat availability
         const successfulResponses = responses.filter(r => r.status === 200);
@@ -511,9 +506,6 @@ describe('Checkout Integration Tests', () => {
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
-        if (response.status !== 200) {
-          console.log('QR Code Test Error Response:', response.status, response.body);
-        }
         expect(response.status).toBe(200);
 
         // Check that QR codes are unique in database

@@ -431,30 +431,10 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
   describe('Password Reset Flow', () => {
     test.skip('should successfully request password reset for existing user', async () => {
-
-  console.log('🔍 Test user email:', testUserData.email);
-  console.log('🔍 Registered user ID:', registeredUserId);
-  
-  // Check if user exists in database
-  const connection = await pool.getConnection();
-  try {
-    const [users] = await connection.execute(
-      'SELECT user_id, user_email FROM users',
-      [testUserData.email]
-    );
-    console.log('🔍 Users found in DB:', users);
-  } finally {
-    connection.release();
-  }
-
       const response = await request(app)
         .post('/api/auth/reset-password-req')
         .send({ email: testUserData.email })
-
-
-      console.log('Status:', response.status);
-      console.log('Body:', response.body);
-      console.log('Error:', response.error);
+        .expect(200);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toBe('Password reset email sent');
