@@ -5,8 +5,10 @@ services:
     container_name: mysql_db             # Nom du conteneur
     restart: always                      # Redémarre automatiquement en cas d'arrêt
     environment:
-      MYSQL_ROOT_PASSWORD: 5599          # Mot de passe root
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_DATABASE: cinephoria         # Base de données créée au démarrage
+    secrets:
+      - mysql_root_password
     volumes:
       - mysql_data:/var/lib/mysql        # Volume pour persister les données
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
@@ -57,3 +59,7 @@ services:
 volumes:
   mysql_data:                           # Volume persistant pour MySQL
   redis_data:                           # Volume persistant pour Redis
+
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password.txt
