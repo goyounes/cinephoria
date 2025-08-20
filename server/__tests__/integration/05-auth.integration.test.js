@@ -398,7 +398,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(errorMessages).toContain('Password is required');
     });
 
-    test.skip('should re-send verification email for unverified user login attempt (test re-registers user)', async () => {
+    test('should re-send verification email for unverified user login attempt (test re-registers user)', async () => {
       // Create an unverified user for this test
       const unverifiedUserData = {
         username: 'unverifieduser',
@@ -430,7 +430,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   });
 
   describe('Password Reset Flow', () => {
-    test.skip('should successfully request password reset for existing user', async () => {
+    test('should successfully request password reset for existing user', async () => {
       const response = await request(app)
         .post('/api/auth/reset-password-req')
         .send({ email: testUserData.email })
@@ -746,7 +746,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(500); // Expected to fail since no password was set
     });
 
-    test.skip('should reset password (with manual token creation using same function as production)', async () => {
+    test('should reset password (with manual token creation using same function as production)', async () => {
       // Use the existing verified user
       const testEmail = testUserData.email;
 
@@ -875,7 +875,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   });
 
   describe('Authentication Edge Cases and Security', () => {
-    test.skip('should handle concurrent registration attempts gracefully', async () => {
+    test('should handle concurrent registration attempts gracefully', async () => {
       const userData1 = {
         username: 'concurrent1',
         email: 'concurrent1@example.com',
@@ -949,7 +949,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect([400, 500]).toContain(response.status);
     });
 
-    test.skip('should handle special characters in user data', async () => {
+    test('should handle special characters in user data', async () => {
       const specialCharsData = {
         username: 'user_123',
         email: 'user+test@example.com',
