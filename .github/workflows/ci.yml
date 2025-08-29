@@ -1,0 +1,72 @@
+# CI Pipeline for Cinephoria Cinema Booking Application
+# Runs tests, builds Docker images, and performs security scans
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, dev ]  # Trigger on pushes to main and dev branches
+  pull_request:
+    branches: [ main ]       # Trigger on PRs to main branch
+
+jobs:
+  # CONTINUOUS INTEGRATION (CI) - Testing Phase
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Check out the source code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Install Docker Compose (required for running test containers)
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+      
+    # Set up Docker Buildx for advanced Docker features
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    # Create test environment configuration file
+    # This sets up all environment variables needed for testing
+    - name: Create test environment file
+      run: |
+        mkdir -p server
+        cat > server/.test.env << EOF
+        NODE_ENV=test
+        MYSQL_HOST=mysql_test
+        MYSQL_USER=root
+        MYSQL_PASSWORD=5599
+        MYSQL_DATABASE=cinephoria_test
+        REDIS_HOST=redis_test
+        ACCESS_JWT_SECRET=test_access_jwt_secret_for_ci_only
+        REFRESH_JWT_SECRET=test_refresh_jwt_secret_for_ci_only
+        EMAIL_VERIFICATION_SECRET=test_email_verification_secret_for_ci_only
+        PASSWORD_RESET_SECRET=test_password_reset_secret_for_ci_only
+        SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+        S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+        S3_BUCKET_REGION=${{ secrets.S3_BUCKET_REGION }}
+        S3_BUCKET_ACCES_KEY=${{ secrets.S3_BUCKET_ACCES_KEY }}
+        S3_BUCKET_SECRET_ACCES_KEY=${{ secrets.S3_BUCKET_SECRET_ACCES_KEY }}
+        FRONTEND_URL=http://localhost:3000
+        BACKEND_URL=http://localhost:8080
+        EOF
+        
+    # Run the complete test suite using Docker Compose
+    # This includes unit tests, integration tests
+    - name: Run tests
+      run: |
+        docker-compose -f Docker-compose.test.yaml up --abort-on-container-exit
+        
+    # Generate test coverage report (optional step that always runs)
+    #- name: Generate coverage report
+    # 'if : always()'
+    #  run: |
+    #    docker-compose -f Docker-compose.test.yaml run --rm -e CI=true test_runner npm run test:coverage
+        
+    # Clean up Docker containers and volumes to save space
+    - name: Clean up
+      if: success()
+      run: |
+        docker-compose -f Docker-compose.test.yaml down -v       

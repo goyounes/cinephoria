@@ -1,6 +1,6 @@
 diagrams
 .vscode
-
+.secrets
 # Logs
 logs
 *.log
