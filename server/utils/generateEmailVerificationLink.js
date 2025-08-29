@@ -4,7 +4,7 @@ import { signEmailVerificationToken } from './jwtTokens.js';
 export default function generateEmailVerificationLink(user_id) {
   const emailVerificationToken = signEmailVerificationToken(user_id);
   
-  const verificationLink = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${emailVerificationToken}`;
+  const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
   
   return {
     link: verificationLink,

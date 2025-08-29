@@ -30,6 +30,7 @@ import Logout  from './pages/Auth/Logout';
 import Login from './pages/Auth/Login';
 import ResetPasswordReq from './pages/Auth/ResetPasswordReq'
 import ResetPasswordForm from './pages/Auth/ResetPasswordForm';
+import VerifyEmail from './pages/Auth/VerifyEmail';
 import ContactUs from './pages/ContactUs';
 
 import { useAuth } from './context/AuthProvider';
@@ -95,9 +96,10 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
 
             
-            {/* Tickets */}
+            {/* Auth */}
             <Route path="/auth/reset-password-req" element={<ResetPasswordReq />} />
             <Route path="/auth/reset-password" element={<ResetPasswordForm />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
           </Routes>
