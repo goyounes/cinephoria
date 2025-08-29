@@ -5,21 +5,12 @@ services:
     container_name: mysql_test
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_ROOT_PASSWORD: 5599
       MYSQL_DATABASE: cinephoria_test
     ports:
       - "3307:3306"                        # Different port to avoid conflicts
     volumes:
       - mysql_test_data:/var/lib/mysql     # Separate volume for test data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    secrets:
-      - mysql_root_password
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
-      timeout: 5s
-      retries: 10
-      interval: 5s
-      start_period: 30s
 
   redis_test:
     image: redis:7.0-alpine
@@ -29,36 +20,6 @@ services:
       - "6380:6379"                        # Different port to avoid conflicts
     volumes:
       - redis_test_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 3s
-      retries: 5
-      interval: 5s
-      start_period: 10s
-
-  server_test:
-    build:
-      context: ./server
-    container_name: server_test
-    restart: "no"                          # Don't restart - tests should run once
-    env_file:
-      - ./server/.test.env                 # Use test env file like dev uses .env
-    environment:
-      # Override specific values for test containers
-      MYSQL_HOST: mysql_test
-      REDIS_HOST: redis_test
-    depends_on:
-      mysql_test:
-        condition: service_healthy
-      redis_test:
-        condition: service_healthy
-    volumes:
-      - ./server:/app                      # Mount source for test access
-      - node_modules_test:/app/node_modules # Separate node_modules for test
-    working_dir: /app
-    command: npm run test                  # Run tests automatically when container starts
-    profiles:
-      - test                              # Only start when test profile is active
 
   test_runner:
     build:
@@ -66,25 +27,17 @@ services:
     container_name: test_runner
     restart: "no"
     env_file:
-      - ./server/.test.env                 # Use test env file like dev uses .env
+      - ./server/.test.env
     environment:
-      # Override specific values for test containers
       MYSQL_HOST: mysql_test
       REDIS_HOST: redis_test
     depends_on:
-      mysql_test:
-        condition: service_healthy
-      redis_test:
-        condition: service_healthy
-    volumes:
-      - ./server:/app
-      - ./db:/db                           # Mount db folder for test database access
-      - node_modules_test:/app/node_modules
-    working_dir: /app
+      - mysql_test
+      - redis_test
     command: |
       sh -c "
-        echo 'Waiting for services to be fully ready...'
-        sleep 5
+        echo 'Waiting 30 seconds for services to be fully ready...'
+        sleep 30
         echo 'Starting test suite...'
         npm run test
         echo 'Test suite completed!'
@@ -94,7 +47,3 @@ volumes:
   mysql_test_data:    # Separate volume for test MySQL data
   redis_test_data:    # Separate volume for test Redis data  
   node_modules_test:  # Separate volume for test node_modules
-
-secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt

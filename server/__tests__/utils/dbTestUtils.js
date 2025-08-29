@@ -1,8 +1,8 @@
 import mysql from 'mysql2/promise';
 import fs from 'fs';
 
-// Read init.sql file content
-const initSql = fs.readFileSync('../db/init.sql', 'utf8')
+// Read init.sql file content from the same folder
+const initSql = fs.readFileSync('./__tests__/utils/init.sql', 'utf8')
   .replace(/DELIMITER \/\/[\s\S]*?DELIMITER ;/g, ''); // Remove DELIMITER syntax for mysql2 compatibility
 
 export async function setupTestDatabase() {
