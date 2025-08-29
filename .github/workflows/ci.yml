@@ -1,35 +1,29 @@
 # CI Pipeline for Cinephoria Cinema Booking Application
-# Runs tests, builds Docker images, and performs security scans
-name: CI/CD Pipeline
+# Runs tests and performs code quality checks
+name: CI Pipeline
 
 on:
   push:
-    branches: [ main, dev ]  # Trigger on pushes to main and dev branches
+    branches: [ dev ]
   pull_request:
-    branches: [ main ]       # Trigger on PRs to main branch
+    branches: [ dev ]
 
 jobs:
-  # CONTINUOUS INTEGRATION (CI) - Testing Phase
   test:
     runs-on: ubuntu-latest
     
     steps:
-    # Check out the source code from the repository
     - name: Checkout code
       uses: actions/checkout@v4
       
-    # Install Docker Compose (required for running test containers)
     - name: Install Docker Compose
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose
       
-    # Set up Docker Buildx for advanced Docker features
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    # Create test environment configuration file
-    # This sets up all environment variables needed for testing
     - name: Create test environment file
       run: |
         mkdir -p server
@@ -53,20 +47,11 @@ jobs:
         BACKEND_URL=http://localhost:8080
         EOF
         
-    # Run the complete test suite using Docker Compose
-    # This includes unit tests, integration tests
     - name: Run tests
       run: |
         docker-compose -f Docker-compose.test.yaml up --abort-on-container-exit
         
-    # Generate test coverage report (optional step that always runs)
-    #- name: Generate coverage report
-    # 'if : always()'
-    #  run: |
-    #    docker-compose -f Docker-compose.test.yaml run --rm -e CI=true test_runner npm run test:coverage
-        
-    # Clean up Docker containers and volumes to save space
     - name: Clean up
-      if: success()
+      if: always()
       run: |
-        docker-compose -f Docker-compose.test.yaml down -v       
+        docker-compose -f Docker-compose.test.yaml down -v
