@@ -18,13 +18,21 @@ const authRedis = createClient({
   database: 1,
 });
 
+// Cache Redis Client (Database 2)
+const cacheRedis = createClient({
+  ...baseConfig,
+  database: 2,
+});
+
 rateLimitRedis.on('error', (err) => console.error('Rate Limit Redis Error', err));
 authRedis.on('error', (err) => console.error('Auth Redis Error', err));
+cacheRedis.on('error', (err) => console.error('Cache Redis Error', err));
 
 export async function connectRedis() {
   await Promise.all([
     rateLimitRedis.connect(),
-    authRedis.connect()
+    authRedis.connect(),
+    cacheRedis.connect()
   ]);
 }
 
@@ -38,24 +46,33 @@ export async function getAuthRedis() {
   return authRedis;
 }
 
+export async function getCacheRedis() {
+  if (!cacheRedis.isOpen) await cacheRedis.connect();
+  return cacheRedis;
+}
+
 async function testRedisConnectionWithRetry(retries = 0) {
   try {
     // Create fresh clients for testing (like MySQL getConnection)
     const rateLimitClient = createClient({ ...baseConfig, database: 0 });
     const authClient = createClient({ ...baseConfig, database: 1 });
+    const cacheClient = createClient({ ...baseConfig, database: 2 });
     
     await rateLimitClient.connect();
     await authClient.connect();
+    await cacheClient.connect();
     
     // Test ping
     await Promise.all([
       rateLimitClient.ping(),
-      authClient.ping()
+      authClient.ping(),
+      cacheClient.ping()
     ]);
     
     // Clean up test connections
     rateLimitClient.close();
     authClient.close();
+    cacheClient.close();
     
     console.log("Connected to Redis!");
   } catch (error) {
