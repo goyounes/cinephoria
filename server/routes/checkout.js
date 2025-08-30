@@ -21,7 +21,7 @@ router.post("/complete",
     
     body('ticket_types.*.count')
       .notEmpty().withMessage('Ticket count is required')
-      .isInt({ min: 1 }).withMessage('Ticket count must be at least 1'),
+      .isInt({ min: 0 }).withMessage('Ticket count must be 0 or greater'),
     
     body('ticket_types.*.ticket_type_price')
       .notEmpty().withMessage('Ticket price is required')
@@ -29,7 +29,7 @@ router.post("/complete",
     
     body('total_price')
       .notEmpty().withMessage('Total price is required')
-      .isFloat({ min: 0 }).withMessage('Total price must be a positive number'),
+      .isFloat({ min: 0.01 }).withMessage('Total price must be greater than 0'),
   ],
   (req, res, next) => {
     const errors = validationResult(req);
