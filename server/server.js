@@ -6,7 +6,7 @@ import {
   authLimiter, 
   browsingLimiter, 
   bookingLimiter 
-} from './config/rateLimiters.js';
+} from './middleware/rateLimiters.js';
 import { testConnectionWithRetry } from './config/mysqlConnect.js';
 import { testRedisConnectionWithRetry } from './config/redisConnect.js';
 

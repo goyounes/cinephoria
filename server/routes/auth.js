@@ -3,8 +3,8 @@ const router = Router();
 
 import { verifyEmailService, resetPasswordReqService, resetPasswordService, 
   registerService, loginService, logoutService,
-  verifyUserJWT , verifyEmployeeJWT , verifyAdminJWT, 
   refreshService} from '../controllers/auth.js';
+import { verifyUserJWT, verifyEmployeeJWT, verifyAdminJWT } from '../middleware/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 
 // uses refresh token for the route

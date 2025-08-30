@@ -7,7 +7,7 @@ import {
   authLimiter, 
   browsingLimiter, 
   bookingLimiter 
-} from '../../config/rateLimiters.js';
+} from '../../middleware/rateLimiters.js';
 
 // Create app with actual rate limiters for testing
 const app = createApp({

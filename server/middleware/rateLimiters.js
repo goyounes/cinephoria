@@ -1,4 +1,4 @@
-import { getRateLimitRedis } from './redisConnect.js';
+import { getRateLimitRedis } from '../config/redisConnect.js';
 
 //  custom rate limiter factory because of compatibility issues with express-rate-limit and rate-limit-redis
 //  this allows us to use Redis for rate limiting without the need for a separate package
