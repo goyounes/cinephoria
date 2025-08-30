@@ -2,7 +2,15 @@ import { Router } from 'express';
 const router = Router();
 
 import multer from 'multer';
-import { verifyAdminJWT, verifyEmployeeJWT, verifyUserJWT } from '../controllers/auth.js';
+import { verifyAdminJWT, verifyEmployeeJWT, verifyUserJWT } from '../middleware/authMiddleware.js';
+
+// Cache middleware imports
+import { 
+    tryCache,
+    saveToCache,
+    invalidateCache
+} from '../middleware/cacheMiddleware.js';
+import { CACHE_TTL } from '../middleware/cacheUtils.js';
 
 import { addMovie,  getGenres, deleteMovie, updateMovie, 
     getOneMovieWithGenres, getMoviesWithGenres,
@@ -26,7 +34,9 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 upload.single('poster_img_file') // 'poster_img_file' is the field name in the form
 
-router.get("/", async (req,res,next) => {
+router.get("/", 
+    tryCache('cache:movies:with_genres', CACHE_TTL.MOVIES),
+    async (req,res,next) => {
     try {
         const rawMovies = await getMoviesWithGenres()
         const movies = CombineGenresIdNames(rawMovies)
@@ -41,12 +51,14 @@ router.get("/", async (req,res,next) => {
         };
 
         res.status(200).json(movies)
+        saveToCache(req, movies);
     } catch (error) {
         next(error)
     }
 })
 
-router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,res,next) => {
+router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), 
+    async (req,res,next) => {
     if (!req.body.title) {
         const err = new Error("Missing movie title");
         err.status = 400;
@@ -105,6 +117,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
             movie: req.body,
             movieInsertResult: result,
         });
+        invalidateCache('movies');
 
     } catch (error) {
         //delete the image if the add movie operation fails
@@ -128,7 +141,9 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'), async (req,
 })
 
 //Not used yet..
-router.get("/latest",async (req,res,next) => {
+router.get("/latest",
+    tryCache('cache:movies:latest', CACHE_TTL.MOVIES),
+    async (req,res,next) => {
     try {
         const rawMovies = await getLatestMovies()
         const movies = CombineGenresIdNames(rawMovies)
@@ -142,12 +157,15 @@ router.get("/latest",async (req,res,next) => {
             movie.imageUrl =  url; // Add the URL to the movie object
         };
         res.status(200).json(movies)
+        saveToCache(req, movies);
     } catch (error) {
         next(error)
     }
 })
 
-router.get("/upcoming",async (req,res,next) => {
+router.get("/upcoming",
+    tryCache('cache:movies:upcoming:all', CACHE_TTL.MOVIES),
+    async (req,res,next) => {
     try {
         const rawMovies = await getUpcomingMoviesWithGenres()
         const movies = CombineGenresIdNames(rawMovies)
@@ -162,12 +180,15 @@ router.get("/upcoming",async (req,res,next) => {
         };
 
         res.status(200).json(movies)
+        saveToCache(req, movies);
     } catch (error) {
         next(error)
     }
 })
 
-router.get("/upcoming/all",verifyEmployeeJWT ,async (req,res,next) => {
+router.get("/upcoming/all",verifyEmployeeJWT,
+    tryCache('cache:movies:upcoming:admin', CACHE_TTL.MOVIES),
+    async (req,res,next) => {
     try {
         const rawMovies = await getUpcomingMoviesWithGenresAdmin()
         const movies = CombineGenresIdNames(rawMovies)
@@ -182,22 +203,28 @@ router.get("/upcoming/all",verifyEmployeeJWT ,async (req,res,next) => {
         };
 
         res.status(200).json(movies)
+        saveToCache(req, movies);
     } catch (error) {
         next(error)
     }
 })
 
 
-router.get("/genres",async (req,res,next) => {
+router.get("/genres",
+    tryCache('cache:genres', CACHE_TTL.STATIC_DATA),
+    async (req,res,next) => {
     try {
         const genres = await getGenres()
         res.status(200).json(genres)
+        saveToCache(req, genres);
     }   catch (error) {
         next(error)
     }
 })
 
-router.get("/:id/screenings", async (req,res,next) => {
+router.get("/:id/screenings",
+    (req, res, next) => tryCache(`cache:screenings:upcoming:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
+    async (req,res,next) => {
     const movie_id = req.params.id
     const cinema_id = req.query.cinema_id || null; 
     try {
@@ -210,12 +237,15 @@ router.get("/:id/screenings", async (req,res,next) => {
         const rawScreenings = await getUpcomingScreenings(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         res.status(200).json(screenings)
+        saveToCache(req, screenings);
     } catch (error) {
         next(error)
     }
 })
 
-router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
+router.get("/:id/screenings/all", verifyEmployeeJWT,
+    (req, res, next) => tryCache(`cache:screenings:all:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
+    async (req,res,next) => {
     const movie_id = req.params.id
     const cinema_id = req.query.cinema_id || null; 
     try {
@@ -228,13 +258,16 @@ router.get("/:id/screenings/all", verifyEmployeeJWT, async (req,res,next) => {
         const rawScreenings = await getUpcomingAndPastScreeningsAdmin(cinema_id,movie_id )
         const screenings = CombineQualitiesIdNames(rawScreenings)
         res.status(200).json(screenings)
+        saveToCache(req, screenings);
     } catch (error) {
         next(error)
     }
 })
 
 // Movie resource managment links
-router.get("/:id",async (req,res,next) => {
+router.get("/:id",
+    (req, res, next) => tryCache(`cache:movie:${req.params.id}:with_genres`, CACHE_TTL.MOVIES)(req, res, next),
+    async (req,res,next) => {
     const id = req.params.id
     console.log("accesing DB for movie with movie_id =",id)
     try {
@@ -256,12 +289,14 @@ router.get("/:id",async (req,res,next) => {
         movie.imageUrl =  url; // Add the URL to the movie object
 
         res.status(200).json(movie)
+        saveToCache(req, movie);
     } catch (error) {
         next(error) // network request or re-thrown error
     }
 })
 
-router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (req,res,next) => {
+router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),
+    async (req,res,next) => {
     const id = req.params.id
     // console.log(req.body)
     if (!req.body.title) {
@@ -325,11 +360,12 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
         })
 
         res.status(201).json({
-            message: "Movie added successfully to the database",
+            message: "Movie updated successfully to the database",
             imageName: imageName,
             movie: req.body,
             movieInsertResult: result,
         });
+        invalidateCache('movies');
 
     } catch (error) {
         //delete the image if the add movie operation fails
@@ -352,7 +388,8 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),async (re
     }
 })
 
-router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
+router.delete("/:id", verifyEmployeeJWT,
+    async (req,res,next) => {
     const id = req.params.id
     console.log("Deleting movie with movie_id =",id)
     try {
@@ -383,6 +420,7 @@ router.delete("/:id", verifyEmployeeJWT, async (req,res,next) => {
         }
 
         res.status(200).json({message: "movie deleted succesfully"})
+        invalidateCache('movies');
     } catch (error) {
         next(error) // network request or re-thrown error
     }

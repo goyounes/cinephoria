@@ -1,6 +1,6 @@
 import { Router } from 'express';
 const router = Router();
-import { verifyUserJWT } from '../controllers/auth.js'
+import { verifyUserJWT } from '../middleware/authMiddleware.js'
 import { bookingService, bookingServiceAdmin } from '../controllers/tickets.js';
 import { body, validationResult } from 'express-validator';
 
