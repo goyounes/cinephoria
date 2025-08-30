@@ -6,7 +6,7 @@ on:
   push:
     branches: [ dev ]
   pull_request:
-    branches: [ dev ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -44,7 +44,6 @@ jobs:
         S3_BUCKET_ACCES_KEY=${{ secrets.S3_BUCKET_ACCES_KEY }}
         S3_BUCKET_SECRET_ACCES_KEY=${{ secrets.S3_BUCKET_SECRET_ACCES_KEY }}
         FRONTEND_URL=http://localhost:3000
-        BACKEND_URL=http://localhost:8080
         EOF
         
     - name: Run tests

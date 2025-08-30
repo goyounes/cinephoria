@@ -37,9 +37,6 @@ services:
     depends_on:
       - mysql                            # Attend que MySQL soit prêt
       - redis                            # Attend que Redis soit prêt
-    # volumes:                             # No hot reloading in prod build
-    #   - ./server:/app                    # Montage du code backend
-    #   - /app/node_modules                # Préserve les modules node
     working_dir: /app                    # Répertoire de travail dans le conteneur
     command: npm start                   # Commande pour démarrer le serveur
     volumes:
