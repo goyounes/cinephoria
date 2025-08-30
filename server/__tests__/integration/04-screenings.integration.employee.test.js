@@ -350,7 +350,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
         .send(updateData)
         .expect(201);
 
-      expect(response.body.message).toContain('Screening added successfully');
+      expect(response.body.message).toContain('Screening updated successfully');
     });
 
     test('should deny regular user access to update screenings', async () => {
