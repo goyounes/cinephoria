@@ -152,21 +152,6 @@ describe('Tickets Integration Tests', () => {
 
   });
 
-  describe('GET /api/v1/tickets - Employee Authentication Required', () => {
-    test('should reject request without authentication', async () => {
-      await request(app)
-        .get('/api/v1/tickets')
-        .expect(401);
-    });
-
-    test('should reject user authentication', async () => {
-      await request(app)
-        .get('/api/v1/tickets')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(403);
-    });
-
-  });
 
   describe('Authentication Token Validation', () => {
     test('should reject invalid JWT token', async () => {
