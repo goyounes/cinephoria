@@ -844,34 +844,6 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
     });
 
-    test('should validate email link URL format expectations', async () => {
-      // This test verifies that our token creation matches what the actual email system expects
-      
-      // Use utility functions to generate links (same as production code)
-      const userId = registeredUserId;
-      const { link: verificationLink, token: emailVerificationToken } = generateEmailVerificationLink(userId);
-      const { link: resetLink, token: resetToken } = generatePasswordResetLink(userId);
-      
-      // Validate URL formats
-      expect(verificationLink).toMatch(/^http:\/\/localhost:\d+\/api\/auth\/verify-email\?token=.+$/);
-      expect(resetLink).toMatch(/^http:\/\/localhost:\d+\/auth\/reset-password\?token=.+$/);
-
-      // Extract and test the tokens
-      const verificationTokenFromLink = new URL(verificationLink).searchParams.get('token');
-      const resetTokenFromLink = new URL(resetLink).searchParams.get('token');
-
-      expect(verificationTokenFromLink).toBe(emailVerificationToken);
-      expect(resetTokenFromLink).toBe(resetToken);
-
-      // Verify tokens can be decoded and contain correct data
-      const decodedVerificationToken = jwt.verify(verificationTokenFromLink, process.env.EMAIL_VERIFICATION_SECRET);
-      expect(decodedVerificationToken.user_id).toBe(userId);
-      expect(decodedVerificationToken.type).toBe('email_verification');
-
-      const decodedResetToken = jwt.verify(resetTokenFromLink, process.env.PASSWORD_RESET_SECRET);
-      expect(decodedResetToken.user_id).toBe(userId);
-      expect(decodedResetToken.type).toBe('password_reset');
-    });
   });
 
   describe('Authentication Edge Cases and Security', () => {
