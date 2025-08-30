@@ -22,7 +22,7 @@ const SearchMovieModal = ({ modalOpen, setModalOpen }) => {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const moviesRes = await axios.get('/api/movies');
+        const moviesRes = await axios.get('/api/v1/movies');
         setMovies(moviesRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);

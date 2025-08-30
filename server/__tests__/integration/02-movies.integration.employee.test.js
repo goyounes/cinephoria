@@ -65,10 +65,10 @@ describe('Movies Integration Tests - Employee Level', () => {
     await resetConnection();
   }, 30000);
 
-  describe('GET /api/movies/upcoming/all - Employee/Admin Only', () => {
+  describe('GET /api/v1/movies/upcoming/all - Employee/Admin Only', () => {
     test('should allow employee access to all upcoming movies', async () => {
       const response = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -84,7 +84,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should allow admin access to all upcoming movies', async () => {
       const response = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -93,7 +93,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should deny regular user access', async () => {
       const response = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
 
@@ -102,7 +102,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should deny unauthenticated access', async () => {
       const response = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .expect(401);
 
       expect(response.body).toHaveProperty('message');
@@ -110,23 +110,23 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should handle invalid token', async () => {
       await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', 'Bearer invalid-token')
         .expect(400);
     });
 
     test('should handle malformed Authorization header', async () => {
       await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', 'InvalidFormat')
         .expect(401);
     });
   });
 
-  describe('GET /api/movies/:id/screenings/all - Employee/Admin Only', () => {
+  describe('GET /api/v1/movies/:id/screenings/all - Employee/Admin Only', () => {
     test('should allow employee to see all screenings for a movie', async () => {
       const response = await request(app)
-        .get('/api/movies/1/screenings/all')
+        .get('/api/v1/movies/1/screenings/all')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -143,7 +143,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should allow admin to see all screenings for a movie', async () => {
       const response = await request(app)
-        .get('/api/movies/1/screenings/all')
+        .get('/api/v1/movies/1/screenings/all')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -152,7 +152,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should deny regular user access', async () => {
       const response = await request(app)
-        .get('/api/movies/1/screenings/all')
+        .get('/api/v1/movies/1/screenings/all')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
 
@@ -161,13 +161,13 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should deny unauthenticated access', async () => {
       await request(app)
-        .get('/api/movies/1/screenings/all')
+        .get('/api/v1/movies/1/screenings/all')
         .expect(401);
     });
 
     test('should handle non-existent movie', async () => {
       const response = await request(app)
-        .get('/api/movies/9999999999/screenings/all')
+        .get('/api/v1/movies/9999999999/screenings/all')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(404);
 
@@ -176,7 +176,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should filter by cinema_id when provided', async () => {
       const response = await request(app)
-        .get('/api/movies/1/screenings/all?cinema_id=1')
+        .get('/api/v1/movies/1/screenings/all?cinema_id=1')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -185,7 +185,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should include past screenings (difference from public endpoint)', async () => {
       const response = await request(app)
-        .get('/api/movies/1/screenings/all')
+        .get('/api/v1/movies/1/screenings/all')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -200,7 +200,7 @@ describe('Movies Integration Tests - Employee Level', () => {
       const expiredToken = signExpiredAccessToken(testEmployeeId, 2, 'employee');
 
       await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
     });
@@ -210,7 +210,7 @@ describe('Movies Integration Tests - Employee Level', () => {
       const insufficientToken = signAccessToken(testUserId, 1, 'user');
 
       await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${insufficientToken}`)
         .expect(403);
     });
@@ -219,7 +219,7 @@ describe('Movies Integration Tests - Employee Level', () => {
       const wrongSecretToken = signTokenWithWrongSecret(testEmployeeId, 2, 'employee');
 
       await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${wrongSecretToken}`)
         .expect(400);
     });
@@ -228,7 +228,7 @@ describe('Movies Integration Tests - Employee Level', () => {
   describe('Data Integrity and Business Logic', () => {
     test('should return consistent data structure across employee endpoints', async () => {
       const upcomingResponse = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -236,7 +236,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         const movie = upcomingResponse.body[0];
         
         const screeningsResponse = await request(app)
-          .get(`/api/movies/${movie.movie_id}/screenings/all`)
+          .get(`/api/v1/movies/${movie.movie_id}/screenings/all`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .expect(200);
 
@@ -247,9 +247,9 @@ describe('Movies Integration Tests - Employee Level', () => {
 
     test('should handle concurrent requests with same employee token', async () => {
       const requests = [
-        request(app).get('/api/movies/upcoming/all').set('Authorization', `Bearer ${employeeToken}`),
-        request(app).get('/api/movies/1/screenings/all').set('Authorization', `Bearer ${employeeToken}`),
-        request(app).get('/api/movies/upcoming/all').set('Authorization', `Bearer ${employeeToken}`)
+        request(app).get('/api/v1/movies/upcoming/all').set('Authorization', `Bearer ${employeeToken}`),
+        request(app).get('/api/v1/movies/1/screenings/all').set('Authorization', `Bearer ${employeeToken}`),
+        request(app).get('/api/v1/movies/upcoming/all').set('Authorization', `Bearer ${employeeToken}`)
       ];
 
       const responses = await Promise.all(requests);
@@ -266,7 +266,7 @@ describe('Movies Integration Tests - Employee Level', () => {
       // Test error handling when database is temporarily unavailable
       // In a real scenario, you might mock the database connection to fail
       const response = await request(app)
-        .get('/api/movies/upcoming/all')
+        .get('/api/v1/movies/upcoming/all')
         .set('Authorization', `Bearer ${employeeToken}`);
 
       // Should either succeed or fail gracefully with proper error message

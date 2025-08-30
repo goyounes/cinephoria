@@ -54,10 +54,10 @@ describe('Movies Integration Tests - User Level', () => {
     await resetConnection(); // Just refreshes connection, no data clearing
   }, 30000);
 
-  describe('GET /api/movies - Public Access', () => {
+  describe('GET /api/v1/movies - Public Access', () => {
     test('should return all movies with genres and image URLs', async () => {
       const response = await request(app)
-        .get('/api/movies')
+        .get('/api/v1/movies')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -74,7 +74,7 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should return movies with properly combined genres', async () => {
       const response = await request(app)
-        .get('/api/movies')
+        .get('/api/v1/movies')
         .expect(200);
 
       const movieWithGenres = response.body.find(m => m.genres && m.genres.length > 0);
@@ -86,10 +86,10 @@ describe('Movies Integration Tests - User Level', () => {
     });
   });
 
-  describe('GET /api/movies/genres - Public Access', () => {
+  describe('GET /api/v1/movies/genres - Public Access', () => {
     test('should return all available genres', async () => {
       const response = await request(app)
-        .get('/api/movies/genres')
+        .get('/api/v1/movies/genres')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -103,7 +103,7 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should include expected genres from init data', async () => {
       const response = await request(app)
-        .get('/api/movies/genres')
+        .get('/api/v1/movies/genres')
         .expect(200);
 
       const genreNames = response.body.map(g => g.genre_name);
@@ -113,10 +113,10 @@ describe('Movies Integration Tests - User Level', () => {
     });
   });
 
-  describe('GET /api/movies/upcoming - Public Access', () => {
+  describe('GET /api/v1/movies/upcoming - Public Access', () => {
     test('should return upcoming movies only', async () => {
       const response = await request(app)
-        .get('/api/movies/upcoming')
+        .get('/api/v1/movies/upcoming')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -143,10 +143,10 @@ describe('Movies Integration Tests - User Level', () => {
     });
   });
 
-  describe('GET /api/movies/latest - Public Access', () => {
+  describe('GET /api/v1/movies/latest - Public Access', () => {
     test('should return latest movies', async () => {
       const response = await request(app)
-        .get('/api/movies/latest')
+        .get('/api/v1/movies/latest')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -159,14 +159,14 @@ describe('Movies Integration Tests - User Level', () => {
     });
   });
 
-  describe('GET /api/movies/:id - Public Access', () => {
+  describe('GET /api/v1/movies/:id - Public Access', () => {
     test('should return specific movie by ID', async () => {
       // First get a movie ID from the list
-      const moviesResponse = await request(app).get('/api/movies');
+      const moviesResponse = await request(app).get('/api/v1/movies');
       const movieId = moviesResponse.body[0].movie_id;
 
       const response = await request(app)
-        .get(`/api/movies/${movieId}`)
+        .get(`/api/v1/movies/${movieId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('movie_id', movieId);
@@ -178,7 +178,7 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should return 404 for non-existent movie', async () => {
       const response = await request(app)
-        .get('/api/movies/9999999999')
+        .get('/api/v1/movies/9999999999')
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -187,19 +187,19 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should return 404 for invalid movie ID', async () => {
       await request(app)
-        .get('/api/movies/invalid-id')
+        .get('/api/v1/movies/invalid-id')
         .expect(404);
     });
   });
 
-  describe('GET /api/movies/:id/screenings - Public Access', () => {
+  describe('GET /api/v1/movies/:id/screenings - Public Access', () => {
     test('should return screenings for a specific movie', async () => {
       // Get a movie ID first
-      const moviesResponse = await request(app).get('/api/movies');
+      const moviesResponse = await request(app).get('/api/v1/movies');
       const movieId = moviesResponse.body[0].movie_id;
 
       const response = await request(app)
-        .get(`/api/movies/${movieId}/screenings`)
+        .get(`/api/v1/movies/${movieId}/screenings`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -212,11 +212,11 @@ describe('Movies Integration Tests - User Level', () => {
     });
 
     test('should filter screenings by cinema_id when provided', async () => {
-      const moviesResponse = await request(app).get('/api/movies');
+      const moviesResponse = await request(app).get('/api/v1/movies');
       const movieId = moviesResponse.body[0].movie_id;
 
       const response = await request(app)
-        .get(`/api/movies/${movieId}/screenings?cinema_id=1`)
+        .get(`/api/v1/movies/${movieId}/screenings?cinema_id=1`)
         .expect(200);
       
       expect(Array.isArray(response.body)).toBe(true);
@@ -228,14 +228,14 @@ describe('Movies Integration Tests - User Level', () => {
 
     test('should return 404 for non-existent movie screenings', async () => {
       const response = await request(app)
-        .get('/api/movies/9999999999/screenings')
+        .get('/api/v1/movies/9999999999/screenings')
         .expect(404);
 
       expect(response.body.message).toContain('No movie with this id was found');
     });
   });
 
-  describe('POST /api/movies/reviews - User Authentication Required', () => {
+  describe('POST /api/v1/movies/reviews - User Authentication Required', () => {
     test('should reject review without authentication', async () => {
       const reviewData = {
         movie_id: 1,
@@ -244,7 +244,7 @@ describe('Movies Integration Tests - User Level', () => {
       };
 
       await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .send(reviewData)
         .expect(401);
     });
@@ -257,7 +257,7 @@ describe('Movies Integration Tests - User Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
         .send(incompleteReviewData)
         .expect(400);
@@ -273,7 +273,7 @@ describe('Movies Integration Tests - User Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
         .send(reviewData)
         .expect(404);
@@ -289,7 +289,7 @@ describe('Movies Integration Tests - User Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
         .send(reviewData)
         .expect(400);
@@ -305,7 +305,7 @@ describe('Movies Integration Tests - User Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
         .send(reviewData);
 
@@ -320,7 +320,7 @@ describe('Movies Integration Tests - User Level', () => {
       // This test would require mocking or temporarily breaking the DB connection
       // For now, we test that the error handling middleware works
       const response = await request(app)
-        .get('/api/movies/invalid-format-id')
+        .get('/api/v1/movies/invalid-format-id')
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -329,7 +329,7 @@ describe('Movies Integration Tests - User Level', () => {
     test('should handle S3 connection errors gracefully', async () => {
       // Test continues even if S3 is unavailable (should still return movie data without imageUrl)
       const response = await request(app)
-        .get('/api/movies')
+        .get('/api/v1/movies')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);

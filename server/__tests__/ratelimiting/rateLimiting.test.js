@@ -26,7 +26,7 @@ describe('Rate Limiting Integration Tests', () => {
   });
   describe('Browsing Rate Limiter - Public Access', () => {
     test('should rate limit after 100 requests per minute', async () => {
-      const endpoint = '/api/movies';
+      const endpoint = '/api/v1/movies';
       
       // Make requests sequentially to better control the flow
       const responses = [];

@@ -37,7 +37,7 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
 
       const fetchScreenings = async () => {
          try {
-            let url = `/api/movies/${movieId}/screenings/all`;
+            let url = `/api/v1/movies/${movieId}/screenings/all`;
             if (cinema_id) {
                const query = new URLSearchParams({ cinema_id});
                url += `?${query.toString()}`;

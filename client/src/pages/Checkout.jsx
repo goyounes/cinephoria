@@ -29,12 +29,12 @@ const Checkout = () => {
    useEffect(() => {
       const fetchData = async () => {
          try {
-            const movieRes = await axios.get(`/api/movies/${movie_id}`);
-            const ticketTypesRes = await axios.get("/api/tickets/types");
+            const movieRes = await axios.get(`/api/v1/movies/${movie_id}`);
+            const ticketTypesRes = await axios.get("/api/v1/tickets/types");
 
             const screeningUrl = isAdmin
-            ? `/api/screenings/${screening_id}`
-            : `/api/screenings/upcoming/${screening_id}`;
+            ? `/api/v1/screenings/${screening_id}`
+            : `/api/v1/screenings/upcoming/${screening_id}`;
             const screeningsRes = await axios.get(screeningUrl);
 
             setMovie(movieRes.data);

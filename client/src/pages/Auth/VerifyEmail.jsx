@@ -19,7 +19,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`/api/auth/verify-email?token=${token}`);
+        const response = await axios.get(`/api/v1/auth/verify-email?token=${token}`);
         setStatus('success');
         setMessage(response.data.message || 'Email successfully verified!');
       } catch (error) {

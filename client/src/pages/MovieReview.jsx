@@ -38,7 +38,7 @@ const MovieReview = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`/api/movies/reviews`, {
+      await axios.post(`/api/v1/movies/reviews`, {
         movie_id: id,
         user_id: currentUser.user_id,
         score: reviewData.score,
@@ -56,7 +56,7 @@ const MovieReview = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const res = await axios.get(`/api/movies/${id}`);
+        const res = await axios.get(`/api/v1/movies/${id}`);
         setMovie(res.data);
       } catch (err) {
         console.error("Failed to load movie details");

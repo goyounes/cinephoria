@@ -17,7 +17,7 @@ const Account = () => {
   useEffect(() => {
     async function fetchTickets() {
       try {
-        const res = await axios.get('/api/tickets/owned')
+        const res = await axios.get('/api/v1/tickets/owned')
         setTickets(res.data || [])
       } catch {
         setError('Failed to fetch tickets')

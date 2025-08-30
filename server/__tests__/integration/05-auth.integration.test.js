@@ -82,7 +82,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   describe('User Registration Flow', () => {
     test('should successfully register a new user', async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(testUserData)
         .expect(201);
 
@@ -127,7 +127,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     test('should reject registration with duplicate username', async () => {
       // Try to register same user again
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(testUserData)
         .expect(500);
 
@@ -143,7 +143,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(invalidEmailData)
         .expect(400);
 
@@ -160,7 +160,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(weakPasswordData)
         .expect(400);
 
@@ -177,7 +177,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(incompleteData)
         .expect(400);
 
@@ -196,7 +196,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(spacedUsernameData)
         .expect(400);
 
@@ -213,7 +213,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should successfully verify email with valid token', async () => {
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${emailVerificationToken}`)
+        .get(`/api/v1/auth/verify-email?token=${emailVerificationToken}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('message');
@@ -237,7 +237,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     test('should reject verification attempt for already verified user', async () => {
       // Try to verify again
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${emailVerificationToken}`)
+        .get(`/api/v1/auth/verify-email?token=${emailVerificationToken}`)
         .expect(409);
 
       expect(response.body).toHaveProperty('message');
@@ -246,7 +246,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject verification with missing token', async () => {
       const response = await request(app)
-        .get('/api/auth/verify-email')
+        .get('/api/v1/auth/verify-email')
         .expect(400);
 
       expect(response.body).toHaveProperty('message');
@@ -257,7 +257,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const invalidToken = 'invalid.token.here';
       
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${invalidToken}`)
+        .get(`/api/v1/auth/verify-email?token=${invalidToken}`)
         .expect(500);
 
       expect(response.body).toHaveProperty('message');
@@ -267,7 +267,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const expiredToken = signExpiredEmailVerificationToken(registeredUserId);
 
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${expiredToken}`)
+        .get(`/api/v1/auth/verify-email?token=${expiredToken}`)
         .expect(410);
 
       expect(response.body).toHaveProperty('message');
@@ -278,7 +278,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const wrongTypeToken = signWrongTypeToken(registeredUserId, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
 
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${wrongTypeToken}`)
+        .get(`/api/v1/auth/verify-email?token=${wrongTypeToken}`)
         .expect(400);
 
       expect(response.body).toHaveProperty('message');
@@ -289,7 +289,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const nonExistentUserToken = signEmailVerificationToken(999999);
 
       const response = await request(app)
-        .get(`/api/auth/verify-email?token=${nonExistentUserToken}`)
+        .get(`/api/v1/auth/verify-email?token=${nonExistentUserToken}`)
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -305,7 +305,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginData)
         .expect(200);
 
@@ -327,7 +327,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Verify the access token works with protected endpoints by making a test request
       const protectedResponse = await request(app)
-        .get('/api/tickets/owned') // This endpoint requires user authentication (verifyUserJWT)
+        .get('/api/v1/tickets/owned') // This endpoint requires user authentication (verifyUserJWT)
         .set('Authorization', `Bearer ${response.body.accessToken}`)
         .expect(200); // Should succeed with valid token
 
@@ -348,7 +348,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(wrongPasswordData)
         .expect(500);
 
@@ -363,7 +363,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(nonExistentEmailData)
         .expect(500);
 
@@ -378,7 +378,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send(invalidEmailData)
         .expect(400);
 
@@ -388,7 +388,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject login with missing credentials', async () => {
       const response = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({})
         .expect(400);
 
@@ -410,13 +410,13 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Register the user (will be unverified)
       const registerResponse = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(unverifiedUserData)
         .expect(201);
 
       // Attempt to login with unverified user
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: unverifiedUserData.email,
           password: unverifiedUserData.password
@@ -432,7 +432,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   describe('Password Reset Flow', () => {
     test('should successfully request password reset for existing user', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password-req')
+        .post('/api/v1/auth/reset-password-req')
         .send({ email: testUserData.email })
         .expect(200);
 
@@ -442,7 +442,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject password reset request for non-existent email', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password-req')
+        .post('/api/v1/auth/reset-password-req')
         .send({ email: 'nonexistent@example.com' })
         .expect(404);
 
@@ -452,7 +452,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject password reset request with invalid email format', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password-req')
+        .post('/api/v1/auth/reset-password-req')
         .send({ email: 'invalid-email' })
         .expect(400);
 
@@ -462,7 +462,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject password reset request with missing email', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password-req')
+        .post('/api/v1/auth/reset-password-req')
         .send({})
         .expect(400);
 
@@ -481,7 +481,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const newPassword = 'NewTestPass123!';
       
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: passwordResetToken,
           newPassword: newPassword
@@ -493,7 +493,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Verify login works with new password
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: newPassword
@@ -504,7 +504,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Verify old password no longer works
       await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password
@@ -516,7 +516,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const expiredToken = signExpiredPasswordResetToken(registeredUserId);
 
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: expiredToken,
           newPassword: 'NewPassword123!'
@@ -529,7 +529,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject password reset with invalid token', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: 'invalid.token.here',
           newPassword: 'NewPassword123!'
@@ -543,7 +543,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const wrongTypeToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
 
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: wrongTypeToken,
           newPassword: 'NewPassword123!'
@@ -558,7 +558,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const validToken = signPasswordResetToken(registeredUserId);
 
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: validToken,
           newPassword: 'weak'
@@ -571,7 +571,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject password reset with missing fields', async () => {
       const response = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({})
         .expect(400);
 
@@ -589,7 +589,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     beforeAll(async () => {
       // Login to get refresh token cookie
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: 'NewTestPass123!' // Password from previous test
@@ -602,7 +602,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should successfully refresh access token with valid refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Cookie', validRefreshCookie)
         .expect(200);
 
@@ -618,7 +618,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Verify the refreshed token works with protected endpoints
       const protectedResponse = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${response.body.accessToken}`)
         .expect(200);
 
@@ -627,7 +627,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject refresh with missing refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .expect(401);
 
       expect(response.body).toHaveProperty('message');
@@ -636,7 +636,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject refresh with invalid refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Cookie', 'refreshToken=invalid.token.here')
         .expect(400);
 
@@ -651,7 +651,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     beforeAll(async () => {
       // Login to get refresh token
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: 'NewTestPass123!'
@@ -663,7 +663,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should successfully logout with valid refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Cookie', refreshCookie)
         .expect(200);
 
@@ -679,7 +679,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
     test('should reject logout attempt with missing refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/logout')
+        .post('/api/v1/auth/logout')
         .expect(400);
 
       expect(response.body).toHaveProperty('message');
@@ -689,7 +689,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     test('should reject refresh attempt with logged out (revoked) token', async () => {
       // Try to use the refresh token after logout - should be revoked
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Cookie', refreshCookie)
         .expect(403);
 
@@ -719,7 +719,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Simulate clicking the email verification link
       const verifyResponse = await request(app)
-        .get(`/api/auth/verify-email?token=${emailVerificationToken}`)
+        .get(`/api/v1/auth/verify-email?token=${emailVerificationToken}`)
         .expect(200);
 
       expect(verifyResponse.body.message).toBe('Email successfully verified');
@@ -738,7 +738,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Now user should be able to login
       await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'emailsim@example.com',
           password: 'TestPass123!' // This won't work since we didn't set password
@@ -752,7 +752,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // First request password reset to ensure user exists
       await request(app)
-        .post('/api/auth/reset-password-req')
+        .post('/api/v1/auth/reset-password-req')
         .send({ email: testEmail })      
         .expect(200);
 
@@ -775,7 +775,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // Simulate clicking the password reset link and submitting new password
       const newPassword = 'SimulatedResetPass123!';
       const resetResponse = await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: passwordResetToken,
           newPassword: newPassword
@@ -786,7 +786,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Verify login works with new password
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testEmail,
           password: newPassword
@@ -804,19 +804,19 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const expiredToken = signExpiredEmailVerificationToken(999);
 
       await request(app)
-        .get(`/api/auth/verify-email?token=${expiredToken}`)
+        .get(`/api/v1/auth/verify-email?token=${expiredToken}`)
         .expect(410);
 
       // Test invalid token type
       const wrongTypeToken = signWrongTypeToken(999, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
 
       await request(app)
-        .get(`/api/auth/verify-email?token=${wrongTypeToken}`)
+        .get(`/api/v1/auth/verify-email?token=${wrongTypeToken}`)
         .expect(400);
 
       // Test malformed token
       await request(app)
-        .get('/api/auth/verify-email?token=invalid.token.here')
+        .get('/api/v1/auth/verify-email?token=invalid.token.here')
         .expect(500);
     });
 
@@ -825,7 +825,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const expiredResetToken = signExpiredPasswordResetToken(registeredUserId);
 
       await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: expiredResetToken,
           newPassword: 'NewPassword123!'
@@ -836,7 +836,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       const wrongTypeResetToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
 
       await request(app)
-        .post('/api/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: wrongTypeResetToken,
           newPassword: 'NewPassword123!'
@@ -866,8 +866,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Make concurrent registration requests
       const [response1, response2] = await Promise.all([
-        request(app).post('/api/auth/register').send(userData1),
-        request(app).post('/api/auth/register').send(userData2)
+        request(app).post('/api/v1/auth/register').send(userData1),
+        request(app).post('/api/v1/auth/register').send(userData2)
       ]);
 
       // Both should succeed since they have different usernames/emails
@@ -887,7 +887,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Should either reject or handle safely (not crash the server)
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(maliciousData);
 
       // Either validation error or successful registration (but no SQL injection)
@@ -914,7 +914,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(longInputData);
 
       // Should handle gracefully (either validation error or database constraint error)
@@ -931,7 +931,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(specialCharsData);
 
       // Should handle special characters properly
@@ -948,7 +948,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       };
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(invalidDomainData)
         .expect(400);
 

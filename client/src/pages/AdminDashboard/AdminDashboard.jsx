@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get("/api/admin/messages"); // Replace with your actual API
+        const res = await axios.get("/api/v1/admin/messages"); // Replace with your actual API
         setMessages(res.data);
       } catch (err) {
         console.error("Error fetching messages:", err);

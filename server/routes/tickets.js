@@ -25,19 +25,4 @@ router.get("/owned", verifyUserJWT,async (req,res,next) => {
     }
 })
 
-
-
-
-
-router.get("/",verifyEmployeeJWT,async (req,res,next) => {
-    try {
-        const response = await axios.get("/tickets")
-        const tickets = response.data
-        // res.status(200).render("pages/tickets.ejs",{tickets})
-        res.status(200).json(response.data)
-    } catch (error) {
-        // next(error)
-    }
-})
-
 export default router;

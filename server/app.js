@@ -20,19 +20,19 @@ export default function createApp(rateLimiters) {
   // Use injected rate limiters
   const { authLimiter, browsingLimiter, bookingLimiter } = rateLimiters;
 
-  app.use('/api/auth',        authLimiter,     authRoutes       );
-  app.use('/api/users',       browsingLimiter, usersRoutes      );
-  app.use('/api/movies',      browsingLimiter, moviesRoutes     );
-  app.use('/api/screenings',  browsingLimiter, screeningsRoutes );
-  app.use('/api/checkout',    bookingLimiter,  checkoutRoutes   );
-  app.use('/api/tickets',     browsingLimiter, ticketsRoutes    );
-  app.use('/api/cinemas',     browsingLimiter, cinemasRoutes    );
+  app.use('/api/v1/auth',        authLimiter,     authRoutes       );
+  app.use('/api/v1/users',       browsingLimiter, usersRoutes      );
+  app.use('/api/v1/movies',      browsingLimiter, moviesRoutes     );
+  app.use('/api/v1/screenings',  browsingLimiter, screeningsRoutes );
+  app.use('/api/v1/checkout',    bookingLimiter,  checkoutRoutes   );
+  app.use('/api/v1/tickets',     browsingLimiter, ticketsRoutes    );
+  app.use('/api/v1/cinemas',     browsingLimiter, cinemasRoutes    );
 
   app.get('/', (req, res) => {
       res.send('Hello from the backend!');
   });
 
-  app.post("/api/messages", async (req,res,next) => {
+  app.post("/api/v1/messages", async (req,res,next) => {
       try {
           await sendContactMessage({
               name : req.body.message_sender_name,

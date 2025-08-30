@@ -37,7 +37,7 @@ const EditMovie = () => {
     useEffect(() => {
       async function fetchMovie() {
         try {
-            const res = await axios.get(`/api/movies/${id}`);
+            const res = await axios.get(`/api/v1/movies/${id}`);
             const data = res.data
             setMovie(data);
             const [hours,minutes,seconds]= data.length.split(":")
@@ -82,7 +82,7 @@ const EditMovie = () => {
         });
     };
 
-    const handleSubmit = async () => {//Change the code so that it uses axios.put(/movies/${id}) instead of axios.post' 
+    const handleSubmit = async () => {
         
         const formData = new FormData();
 
@@ -103,7 +103,7 @@ const EditMovie = () => {
         }
 
         try {
-          await axios.put(`/api/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
+          await axios.put(`/api/v1/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
           showSnackbar("Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
         } catch (error) {
@@ -117,7 +117,7 @@ const EditMovie = () => {
     useEffect(() => {
         async function fetchGenres() {  
         try {
-            const res = await axios.get('/api/movies/genres'); 
+            const res = await axios.get('/api/v1/movies/genres'); 
             const data = res.data;
             setGenresList(data);  
         } catch (err) {

@@ -56,7 +56,7 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }) => {
       }
       // call backend to process the chekout
       try {
-         await axios.post("/api/checkout/complete", {...order,card: cardInfo});
+         await axios.post("/api/v1/checkout/complete", {...order,card: cardInfo});
       } catch (error) {
          showSnackbar(
             `Failed during Backend Processing: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,

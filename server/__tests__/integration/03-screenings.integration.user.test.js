@@ -49,10 +49,10 @@ describe('Screenings Integration Tests - User Level', () => {
     await resetConnection();
   }, 30000);
 
-  describe('GET /api/screenings/upcoming - Public Access', () => {
+  describe('GET /api/v1/screenings/upcoming - Public Access', () => {
     test('should return upcoming screenings with complete details', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -84,7 +84,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should only return screenings within 14 days', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       const today = new Date();
@@ -100,7 +100,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should only return future screenings (not past)', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       const now = new Date();
@@ -113,7 +113,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should not include deleted screenings', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       // All returned screenings should be active (not deleted)
@@ -124,7 +124,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should return screenings ordered by date and time', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       if (response.body.length > 1) {
@@ -137,16 +137,16 @@ describe('Screenings Integration Tests - User Level', () => {
     });
   });
 
-  describe('GET /api/screenings/upcoming/:id - Public Access', () => {
+  describe('GET /api/v1/screenings/upcoming/:id - Public Access', () => {
     test('should return specific upcoming screening details', async () => {
       // First get a screening ID from the list
-      const screeningsResponse = await request(app).get('/api/screenings/upcoming');
+      const screeningsResponse = await request(app).get('/api/v1/screenings/upcoming');
       
       if (screeningsResponse.body.length > 0) {
         const screeningId = screeningsResponse.body[0].screening_id;
 
         const response = await request(app)
-          .get(`/api/screenings/upcoming/${screeningId}`)
+          .get(`/api/v1/screenings/upcoming/${screeningId}`)
           .expect(200);
 
         expect(response.body).toHaveProperty('screening_id', screeningId);
@@ -195,7 +195,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should return 404 for non-existent screening', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming/999999')
+        .get('/api/v1/screenings/upcoming/999999')
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -206,7 +206,7 @@ describe('Screenings Integration Tests - User Level', () => {
       // This test assumes there might be past screenings in the database
       // that shouldn't be accessible via the upcoming endpoint
       const response = await request(app)
-        .get('/api/screenings/upcoming/1')
+        .get('/api/v1/screenings/upcoming/1')
         .expect(404);
     });
 
@@ -214,7 +214,7 @@ describe('Screenings Integration Tests - User Level', () => {
       // This would require setting up a deleted screening in the test data
       // For now, we test with a likely non-existent ID
       const response = await request(app)
-        .get('/api/screenings/upcoming/999999')
+        .get('/api/v1/screenings/upcoming/999999')
         .expect(404);
 
       expect(response.body.message).toContain('Screening not found');
@@ -222,7 +222,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should handle invalid screening ID format', async () => {
       await request(app)
-        .get('/api/screenings/upcoming/invalid-id')
+        .get('/api/v1/screenings/upcoming/invalid-id')
         .expect(404);
     });
   });
@@ -230,7 +230,7 @@ describe('Screenings Integration Tests - User Level', () => {
   describe('Authentication Not Required for Public Endpoints', () => {
     test('upcoming screenings should work without authentication', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -238,20 +238,20 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('specific upcoming screening should work without authentication', async () => {
       // Get a screening ID first
-      const screeningsResponse = await request(app).get('/api/screenings/upcoming');
+      const screeningsResponse = await request(app).get('/api/v1/screenings/upcoming');
       
       if (screeningsResponse.body.length > 0) {
         const screeningId = screeningsResponse.body[0].screening_id;
 
         await request(app)
-          .get(`/api/screenings/upcoming/${screeningId}`)
+          .get(`/api/v1/screenings/upcoming/${screeningId}`)
           .expect(200);
       }
     });
 
     test('should not expose admin-only data in public endpoints', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       response.body.forEach(screening => {
@@ -265,7 +265,7 @@ describe('Screenings Integration Tests - User Level', () => {
   describe('Data Validation and Integrity', () => {
     test('should return valid date and time formats', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       response.body.forEach(screening => {
@@ -280,7 +280,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should return consistent seat availability calculations', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       response.body.forEach(screening => {
@@ -295,7 +295,7 @@ describe('Screenings Integration Tests - User Level', () => {
 
     test('should handle screenings with no qualities gracefully', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming')
+        .get('/api/v1/screenings/upcoming')
         .expect(200);
 
       // Should not break when qualities are null/empty
@@ -312,7 +312,7 @@ describe('Screenings Integration Tests - User Level', () => {
       // This would require mocking database failures
       // For now, test that the API responds appropriately
       const response = await request(app)
-        .get('/api/screenings/upcoming');
+        .get('/api/v1/screenings/upcoming');
 
       // Should either succeed or fail with proper error structure
       if (response.status !== 200) {
@@ -323,11 +323,11 @@ describe('Screenings Integration Tests - User Level', () => {
     test('should handle malformed requests gracefully', async () => {
       // Test with various malformed requests
       await request(app)
-        .get('/api/screenings/upcoming/')
+        .get('/api/v1/screenings/upcoming/')
         .expect(200); // Trailing slash should still work
 
       await request(app)
-        .get('/api/screenings/upcoming/abc')
+        .get('/api/v1/screenings/upcoming/abc')
         .expect(404); // Non-numeric ID should return 404
     });
   });

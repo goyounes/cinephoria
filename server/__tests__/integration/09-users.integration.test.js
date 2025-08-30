@@ -67,30 +67,30 @@ describe('Users Integration Tests', () => {
     await resetConnection();
   }, 30000);
 
-  describe('GET /api/users - Admin Authentication Required', () => {
+  describe('GET /api/v1/users - Admin Authentication Required', () => {
     test('should reject request without authentication', async () => {
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .expect(401);
     });
 
     test('should reject user authentication', async () => {
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     test('should reject employee authentication', async () => {
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(403);
     });
 
     test('should return authorized users for admin', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -114,7 +114,7 @@ describe('Users Integration Tests', () => {
 
     test('should include role names with user data', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -131,7 +131,7 @@ describe('Users Integration Tests', () => {
     });
   });
 
-  describe('POST /api/users - Admin Authentication Required', () => {
+  describe('POST /api/v1/users - Admin Authentication Required', () => {
     test('should reject request without authentication', async () => {
       const userData = {
         username: 'newuser',
@@ -143,7 +143,7 @@ describe('Users Integration Tests', () => {
       };
 
       await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .send(userData)
         .expect(401);
     });
@@ -159,7 +159,7 @@ describe('Users Integration Tests', () => {
       };
 
       await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${userToken}`)
         .send(userData)
         .expect(403);
@@ -176,7 +176,7 @@ describe('Users Integration Tests', () => {
       };
 
       await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(userData)
         .expect(403);
@@ -193,7 +193,7 @@ describe('Users Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(userData);
 
@@ -224,7 +224,7 @@ describe('Users Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(incompleteData);
 
@@ -244,7 +244,7 @@ describe('Users Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(userData);
 
@@ -263,7 +263,7 @@ describe('Users Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(userData);
 
@@ -273,30 +273,30 @@ describe('Users Integration Tests', () => {
     });
   });
 
-  describe('GET /api/users/:id - Admin Authentication Required', () => {
+  describe('GET /api/v1/users/:id - Admin Authentication Required', () => {
     test('should reject request without authentication', async () => {
       await request(app)
-        .get(`/api/users/${testEmployeeId}`)
+        .get(`/api/v1/users/${testEmployeeId}`)
         .expect(401);
     });
 
     test('should reject user authentication', async () => {
       await request(app)
-        .get(`/api/users/${testEmployeeId}`)
+        .get(`/api/v1/users/${testEmployeeId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     test('should reject employee authentication', async () => {
       await request(app)
-        .get(`/api/users/${testEmployeeId}`)
+        .get(`/api/v1/users/${testEmployeeId}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(403);
     });
 
     test('should return specific user for admin', async () => {
       const response = await request(app)
-        .get(`/api/users/${testEmployeeId}`)
+        .get(`/api/v1/users/${testEmployeeId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -310,7 +310,7 @@ describe('Users Integration Tests', () => {
 
     test('should return 404 for non-existent user', async () => {
       const response = await request(app)
-        .get('/api/users/999999')
+        .get('/api/v1/users/999999')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
 
@@ -320,7 +320,7 @@ describe('Users Integration Tests', () => {
 
     test('should handle invalid user ID format', async () => {
       await request(app)
-        .get('/api/users/invalid-id')
+        .get('/api/v1/users/invalid-id')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
@@ -329,7 +329,7 @@ describe('Users Integration Tests', () => {
   describe('Authentication Token Validation', () => {
     test('should reject invalid JWT token', async () => {
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', 'Bearer invalid-token')
         .expect(400);
     });
@@ -338,14 +338,14 @@ describe('Users Integration Tests', () => {
       const expiredToken = signExpiredAccessToken(testAdminId, 3, 'admin');
 
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
     });
 
     test('should reject malformed authorization header', async () => {
       await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', 'InvalidFormat')
         .expect(401);
     });
@@ -356,7 +356,7 @@ describe('Users Integration Tests', () => {
       // This would require mocking the database to simulate connection failure
       // For now, we test that valid requests work correctly
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -367,7 +367,7 @@ describe('Users Integration Tests', () => {
   describe('Data Security and Access Control', () => {
     test('should only return authorized users (role_id > 1)', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -382,9 +382,9 @@ describe('Users Integration Tests', () => {
 
     test('should enforce strict admin-only access', async () => {
       const endpoints = [
-        { method: 'get', path: '/api/users' },
-        { method: 'post', path: '/api/users' },
-        { method: 'get', path: `/api/users/${testEmployeeId}` }
+        { method: 'get', path: '/api/v1/users' },
+        { method: 'post', path: '/api/v1/users' },
+        { method: 'get', path: `/api/v1/users/${testEmployeeId}` }
       ];
 
       for (const endpoint of endpoints) {
@@ -404,7 +404,7 @@ describe('Users Integration Tests', () => {
 
     test('should not expose sensitive user data unnecessarily', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 

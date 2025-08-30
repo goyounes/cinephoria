@@ -74,7 +74,7 @@ describe('Checkout Integration Tests', () => {
 
     // Login to get tokens
     const userLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testUserData.user_email,
         password: testUserData.user_password
@@ -83,7 +83,7 @@ describe('Checkout Integration Tests', () => {
     userToken = userLoginResponse.body.accessToken;
 
     const employeeLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testEmployeeData.user_email,
         password: testEmployeeData.user_password
@@ -93,7 +93,7 @@ describe('Checkout Integration Tests', () => {
 
     // Get ticket types
     const ticketTypesResponse = await request(app)
-      .get('/api/tickets/types');
+      .get('/api/v1/tickets/types');
     expect(ticketTypesResponse.status).toBe(200);
     testTicketTypes = ticketTypesResponse.body;
 
@@ -119,11 +119,11 @@ describe('Checkout Integration Tests', () => {
     await resetConnection();
   });
 
-  describe('POST /api/checkout/complete', () => {
+  describe('POST /api/v1/checkout/complete', () => {
     describe('User Authentication', () => {
       test('should reject unauthenticated requests', async () => {
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .send({
             screening_id: testScreeningData.screening_id,
             ticket_types: [{ type_id: testTicketTypes[0].ticket_type_id, count: 1, ticket_type_price: testTicketTypes[0].ticket_type_price }],
@@ -136,7 +136,7 @@ describe('Checkout Integration Tests', () => {
 
       test('should reject requests with invalid token', async () => {
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', 'Bearer invalid_token')
           .send({
             screening_id: testScreeningData.screening_id,
@@ -163,7 +163,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -195,7 +195,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -217,7 +217,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -237,7 +237,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -275,7 +275,7 @@ describe('Checkout Integration Tests', () => {
 
         const promises = Array(3).fill(null).map(() => 
           request(app)
-            .post('/api/checkout/complete')
+            .post('/api/v1/checkout/complete')
             .set('Authorization', `Bearer ${userToken}`)
             .send(bookingData)
         );
@@ -324,7 +324,7 @@ describe('Checkout Integration Tests', () => {
 
         // Regular user should be rejected
         const userResponse = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -332,7 +332,7 @@ describe('Checkout Integration Tests', () => {
 
         // Employee should succeed
         const employeeResponse = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(bookingData);
 
@@ -353,7 +353,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(bookingData);
 
@@ -365,7 +365,7 @@ describe('Checkout Integration Tests', () => {
     describe('Input Validation', () => {
       test('should reject booking without required fields', async () => {
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send({});
 
@@ -388,7 +388,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -408,7 +408,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -441,7 +441,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -471,7 +471,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 
@@ -502,7 +502,7 @@ describe('Checkout Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/checkout/complete')
+          .post('/api/v1/checkout/complete')
           .set('Authorization', `Bearer ${userToken}`)
           .send(bookingData);
 

@@ -11,7 +11,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/api/users"); //reponds with authorized users
+        const response = await axios.get("/api/v1/users"); //reponds with authorized users
         const data = response.data;
         setUsers(data);
       } catch (error) {

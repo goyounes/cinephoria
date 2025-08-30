@@ -30,8 +30,8 @@ const AdminEditCinema = () => {
     const fetchData = async () => {
       try {
         const [cinemasRes, roomsRes] = await Promise.all([
-          axios.get("/api/cinemas"),
-          axios.get("/api/cinemas/rooms")
+          axios.get("/api/v1/cinemas"),
+          axios.get("/api/v1/cinemas/rooms")
         ]);
 
         const selectedCinema = cinemasRes.data.find(c => c.cinema_id === cinemaId);
@@ -161,7 +161,7 @@ const AdminEditCinema = () => {
 
     try {
       // Update cinema info
-      await axios.put(`/api/cinemas/${cinemaId}`, {
+      await axios.put(`/api/v1/cinemas/${cinemaId}`, {
         cinema_name: cinemaData.cinema_name,
         cinema_adresse: cinemaData.cinema_adresse,
       });
@@ -175,14 +175,14 @@ const AdminEditCinema = () => {
           cinema_id: cinemaId,
         };
         return room.isNew
-          ? axios.post("/api/cinemas/rooms", payload)
-          : axios.put(`/api/cinemas/rooms/${room.room_id}`, payload);
+          ? axios.post("/api/v1/cinemas/rooms", payload)
+          : axios.put(`/api/v1/cinemas/rooms/${room.room_id}`, payload);
       });
 
       // Delete rooms that are marked for deletion (excluding restored ones)
       const finalDeleteIds = deletedRoomIds.filter(id => !restoredRoomIds.includes(id));
       const deleteRequests = finalDeleteIds.map(id =>
-        axios.delete(`/api/cinemas/rooms/${id}`)
+        axios.delete(`/api/v1/cinemas/rooms/${id}`)
       );
 
       await Promise.all([...roomRequests, ...deleteRequests]);

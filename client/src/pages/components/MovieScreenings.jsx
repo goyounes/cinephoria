@@ -51,7 +51,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
 
       const fetchScreenings = async () => {
          try {
-            let url = `/api/movies/${movieId}/screenings`;
+            let url = `/api/v1/movies/${movieId}/screenings`;
             if (isAdmin) url += `/all`;
             if (cinema_id) {
                const query = new URLSearchParams({ cinema_id});

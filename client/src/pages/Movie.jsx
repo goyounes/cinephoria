@@ -21,7 +21,7 @@ const Movie = () => {
    useEffect(() => {
       const fetchMovie = async () => {
          try {
-            const res = await axios.get(`/api/movies/${id}`);
+            const res = await axios.get(`/api/v1/movies/${id}`);
             setMovie(res.data);
             if (location.state?.showScreenings) setShowScreenings(true);
          } catch (err) {

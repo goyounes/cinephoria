@@ -65,9 +65,9 @@ const Movies = () => {
         try {
           // Fetch data depending on user role
           const [moviesRes, cinemaRes, genreRes] = await Promise.all([
-          axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
-          axios.get("/api/cinemas"),
-          axios.get("/api/movies/genres"),
+          axios.get(isAdmin ? "/api/v1/movies/upcoming/all" : "/api/v1/movies/upcoming"),
+          axios.get("/api/v1/cinemas"),
+          axios.get("/api/v1/movies/genres"),
           ]);
           setMoviesScreenings( moviesRes.data );
           setCinemas(cinemaRes.data);
@@ -83,7 +83,7 @@ const Movies = () => {
    useEffect(() => {
       const fetchAllMovies = async () => {
          try {
-            const res = await axios.get("/api/movies");
+            const res = await axios.get("/api/v1/movies");
             setAllMovies(res.data);
          } catch (err) {
             console.error("Error fetching all movies:", err);

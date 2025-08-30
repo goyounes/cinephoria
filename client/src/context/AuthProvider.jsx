@@ -20,7 +20,7 @@ export const AuthContextProvider = ({ children }) => {
   const [accessTokenState, setAccessTokenState] = useState(null)
   const login = async (inputs) => {
     try {
-      const res = await axios.post('/api/auth/login', inputs, { withCredentials: false });
+      const res = await axios.post('/api/v1/auth/login', inputs, { withCredentials: false });
       const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data;
       // first_name,// last_name,// isVerified,
 
@@ -56,7 +56,7 @@ export const AuthContextProvider = ({ children }) => {
   const logout = async () => {
     try {
       // No need to send refresh token in body - it's in HTTP-only cookie
-      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+      await axios.post("/api/v1/auth/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -87,7 +87,7 @@ export const AuthContextProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
-        if (originalRequest.url.includes('/api/auth/refresh')) {
+        if (originalRequest.url.includes('/api/v1/auth/refresh')) {
           return Promise.reject(error);
         }
 
@@ -96,7 +96,7 @@ export const AuthContextProvider = ({ children }) => {
 
           try {
             // Attempt to refresh token
-            const res =  await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+            const res =  await axios.post('/api/v1/auth/refresh', {}, { withCredentials: true });
             const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data
             const newAccessToken = accessToken;
 
@@ -137,7 +137,7 @@ export const AuthContextProvider = ({ children }) => {
 
   const resetPasswordReq = async (email) => {
     try {
-      const res = await axios.post("/api/auth/reset-password-req", { email });
+      const res = await axios.post("/api/v1/auth/reset-password-req", { email });
       return res.data;
     } catch (error) {
       throw error;

@@ -63,10 +63,10 @@ describe('Tickets Integration Tests', () => {
     await resetConnection();
   }, 30000);
 
-  describe('GET /api/tickets/types - Public Access', () => {
+  describe('GET /api/v1/tickets/types - Public Access', () => {
     test('should return all ticket types without authentication', async () => {
       const response = await request(app)
-        .get('/api/tickets/types')
+        .get('/api/v1/tickets/types')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -82,7 +82,7 @@ describe('Tickets Integration Tests', () => {
 
     test('should include expected ticket types from init data', async () => {
       const response = await request(app)
-        .get('/api/tickets/types')
+        .get('/api/v1/tickets/types')
         .expect(200);
 
       const typeNames = response.body.map(t => t.ticket_type_name);
@@ -92,16 +92,16 @@ describe('Tickets Integration Tests', () => {
     });
   });
 
-  describe('GET /api/tickets/owned - User Authentication Required', () => {
+  describe('GET /api/v1/tickets/owned - User Authentication Required', () => {
     test('should reject request without authentication', async () => {
       await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .expect(401);
     });
 
     test('should return user\'s tickets with authentication', async () => {
       const response = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -142,7 +142,7 @@ describe('Tickets Integration Tests', () => {
       }
 
       const response = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${newUserToken}`)
         .expect(200);
 
@@ -152,28 +152,26 @@ describe('Tickets Integration Tests', () => {
 
   });
 
-  describe('GET /api/tickets - Employee Authentication Required', () => {
+  describe('GET /api/v1/tickets - Employee Authentication Required', () => {
     test('should reject request without authentication', async () => {
       await request(app)
-        .get('/api/tickets')
+        .get('/api/v1/tickets')
         .expect(401);
     });
 
     test('should reject user authentication', async () => {
       await request(app)
-        .get('/api/tickets')
+        .get('/api/v1/tickets')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
-    // Note: The GET /api/tickets endpoint has a broken axios.get("/tickets") call
-    // that doesn't work properly. Skipping tests for this non-functional endpoint.
   });
 
   describe('Authentication Token Validation', () => {
     test('should reject invalid JWT token', async () => {
       await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', 'Bearer invalid-token')
         .expect(400);
     });
@@ -182,14 +180,14 @@ describe('Tickets Integration Tests', () => {
       const expiredToken = signExpiredAccessToken(testUserId, 1, 'user');
 
       await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
     });
 
     test('should reject malformed authorization header', async () => {
       await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', 'InvalidFormat')
         .expect(401);
     });
@@ -220,13 +218,13 @@ describe('Tickets Integration Tests', () => {
 
       // Get original user's tickets
       const originalResponse = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       // Get other user's tickets
       const otherResponse = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${otherUserToken}`)
         .expect(200);
 
@@ -248,7 +246,7 @@ describe('Tickets Integration Tests', () => {
 
     test('should return complete ticket information with joins', async () => {
       const response = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 

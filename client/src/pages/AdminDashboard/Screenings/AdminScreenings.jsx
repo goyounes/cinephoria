@@ -26,7 +26,7 @@ const AdminScreenings = () => {
 
    const fetchScreenings = async () => {
       try {
-         const response = await axios.get('/api/screenings');
+         const response = await axios.get('/api/v1/screenings');
          setScreenings(response.data);
       } catch (error) {
          console.error('Error fetching screenings:', error);
@@ -145,7 +145,7 @@ const AdminScreenings = () => {
 
    const handleDelete = async (id) => {
       try {
-         await axios.delete(`/api/screenings/${id}`);
+         await axios.delete(`/api/v1/screenings/${id}`);
          await fetchScreenings();
       } catch (error) {
          console.error("Error deleting screening with id: " + id, error);

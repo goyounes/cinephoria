@@ -44,7 +44,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     // Login with existing admin
     const adminLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: existingAdminData.email,
         password: existingAdminData.password
@@ -78,7 +78,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const createAdminResponse = await request(app)
-        .post('/api/users')
+        .post('/api/v1/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(newAdminData)
         .expect(201);
@@ -89,7 +89,7 @@ describe('Complete User Journey Integration Tests', () => {
 
       // Login with the newly created admin
       const newAdminLoginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: newAdminData.email,
           password: newAdminData.password
@@ -108,7 +108,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const cinemaResponse = await request(app)
-        .post('/api/cinemas')
+        .post('/api/v1/cinemas')
         .set('Authorization', `Bearer ${newAdminToken}`)
         .send(cinemaData)
         .expect(201);
@@ -124,7 +124,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const roomResponse = await request(app)
-        .post('/api/cinemas/rooms')
+        .post('/api/v1/cinemas/rooms')
         .set('Authorization', `Bearer ${newAdminToken}`)
         .send(roomData)
         .expect(201);
@@ -145,7 +145,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       let movieRequest = request(app)
-        .post('/api/movies')
+        .post('/api/v1/movies')
         .set('Authorization', `Bearer ${newAdminToken}`)
         .field('title', movieData.title)
         .field('description', movieData.description)
@@ -182,7 +182,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const createScreeningResponse = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${newAdminToken}`)
         .send(screeningData)
         .expect(201);
@@ -203,7 +203,7 @@ describe('Complete User Journey Integration Tests', () => {
     test('should register and verify a new user', async () => {
       // 1. Register new user
       const registrationResponse = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send(testUserData);
 
       expect(registrationResponse.status).toBe(201);
@@ -225,13 +225,13 @@ describe('Complete User Journey Integration Tests', () => {
       
       // Extract token from link and hit the verification endpoint
       const verifyResponse = await request(app)
-        .get(`/api/auth/verify-email?token=${token}`);
+        .get(`/api/v1/auth/verify-email?token=${token}`);
       
       expect(verifyResponse.status).toBe(200);
 
       // 4. Login with the registered and verified user
       const loginResponse = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUserData.email,
           password: testUserData.password
@@ -247,7 +247,7 @@ describe('Complete User Journey Integration Tests', () => {
   describe('Complete User Journey Story', () => {
     test('should browse upcoming movies', async () => {
       const moviesResponse = await request(app)
-        .get('/api/movies/upcoming')
+        .get('/api/v1/movies/upcoming')
         .expect(200);
 
       expect(moviesResponse.body).toBeInstanceOf(Array);
@@ -261,7 +261,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should get movie details', async () => {
       const movieResponse = await request(app)
-        .get(`/api/movies/${newMovieId}`)
+        .get(`/api/v1/movies/${newMovieId}`)
         .expect(200);
 
       expect(movieResponse.body.movie_id).toBe(newMovieId);
@@ -271,7 +271,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should get movie screenings', async () => {
       const screeningsResponse = await request(app)
-        .get(`/api/movies/${newMovieId}/screenings?cinema_id=${newCinemaId}`)
+        .get(`/api/v1/movies/${newMovieId}/screenings?cinema_id=${newCinemaId}`)
         .expect(200);
 
       expect(screeningsResponse.body).toBeInstanceOf(Array);
@@ -283,7 +283,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should view screening details with seat information', async () => {
       const screeningResponse = await request(app)
-        .get(`/api/screenings/upcoming/${newScreeningId}`)
+        .get(`/api/v1/screenings/upcoming/${newScreeningId}`)
         .expect(200);
 
       expect(screeningResponse.body).toHaveProperty('screening_id');
@@ -301,7 +301,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should complete checkout and book tickets', async () => {
       const ticketTypesResponse = await request(app)
-        .get('/api/tickets/types')
+        .get('/api/v1/tickets/types')
         .expect(200);
       
       const ticketTypes = ticketTypesResponse.body;
@@ -320,7 +320,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const checkoutResponse = await request(app)
-        .post('/api/checkout/complete')
+        .post('/api/v1/checkout/complete')
         .set('Authorization', `Bearer ${userToken}`)
         .send(checkoutData)
         .expect(200);
@@ -335,7 +335,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should retrieve user tickets', async () => {
       const ticketsResponse = await request(app)
-        .get('/api/tickets/owned')
+        .get('/api/v1/tickets/owned')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
@@ -360,7 +360,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const reviewResponse = await request(app)
-        .post('/api/movies/reviews')
+        .post('/api/v1/movies/reviews')
         .set('Authorization', `Bearer ${userToken}`)
         .send(reviewData)
         .expect(400);
@@ -371,7 +371,7 @@ describe('Complete User Journey Integration Tests', () => {
 
   describe('Error Handling and Edge Cases', () => {
     test('should require authentication for ticket booking', async () => {
-      const ticketTypesResponse = await request(app).get('/api/tickets/types');
+      const ticketTypesResponse = await request(app).get('/api/v1/tickets/types');
       const ticketTypes = ticketTypesResponse.body;
 
       const checkoutData = {
@@ -386,7 +386,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/checkout/complete')
+        .post('/api/v1/checkout/complete')
         .send(checkoutData)
         .expect(401);
 
@@ -395,7 +395,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should handle non-existent movie gracefully', async () => {
       const response = await request(app)
-        .get('/api/movies/99999')
+        .get('/api/v1/movies/99999')
         .expect(404);
 
       expect(response.status).toBe(404);
@@ -403,7 +403,7 @@ describe('Complete User Journey Integration Tests', () => {
 
     test('should handle invalid screening ID gracefully', async () => {
       const response = await request(app)
-        .get('/api/screenings/upcoming/99999')
+        .get('/api/v1/screenings/upcoming/99999')
         .expect(404);
 
       expect(response.status).toBe(404);
@@ -416,7 +416,7 @@ describe('Complete User Journey Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/checkout/complete')
+        .post('/api/v1/checkout/complete')
         .set('Authorization', `Bearer ${userToken}`)
         .send(incompleteCheckoutData)
         .expect(400);

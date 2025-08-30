@@ -66,10 +66,10 @@ describe('Screenings Integration Tests - Employee Level', () => {
     await resetConnection();
   }, 30000);
 
-  describe('GET /api/screenings - Employee/Admin Only', () => {
+  describe('GET /api/v1/screenings - Employee/Admin Only', () => {
     test('should allow employee access to all screenings', async () => {
       const response = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -92,7 +92,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should allow admin access to all screenings', async () => {
       const response = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -101,7 +101,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should deny regular user access', async () => {
       const response = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
 
@@ -110,7 +110,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should deny unauthenticated access', async () => {
       const response = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .expect(401);
 
       expect(response.body).toHaveProperty('message');
@@ -118,7 +118,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should include past screenings (unlike public endpoint)', async () => {
       const response = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -127,18 +127,18 @@ describe('Screenings Integration Tests - Employee Level', () => {
     });
   });
 
-  describe('GET /api/screenings/:id - Employee/Admin Only', () => {
+  describe('GET /api/v1/screenings/:id - Employee/Admin Only', () => {
     test('should allow employee to view specific screening details', async () => {
       // First get a screening ID from the admin list
       const screeningsResponse = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`);
       
       if (screeningsResponse.body.length > 0) {
         const screeningId = screeningsResponse.body[0].screening_id;
 
         const response = await request(app)
-          .get(`/api/screenings/${screeningId}`)
+          .get(`/api/v1/screenings/${screeningId}`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .expect(200);
 
@@ -162,20 +162,20 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should deny regular user access to admin screening details', async () => {
       await request(app)
-        .get('/api/screenings/1')
+        .get('/api/v1/screenings/1')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     test('should deny unauthenticated access', async () => {
       await request(app)
-        .get('/api/screenings/1')
+        .get('/api/v1/screenings/1')
         .expect(401);
     });
 
     test('should return 404 for non-existent screening', async () => {
       const response = await request(app)
-        .get('/api/screenings/999999')
+        .get('/api/v1/screenings/999999')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(404);
 
@@ -183,7 +183,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
     });
   });
 
-  describe('POST /api/screenings - Employee/Admin Only', () => {
+  describe('POST /api/v1/screenings - Employee/Admin Only', () => {
     test('should allow employee to create new screenings', async () => {
       const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
       
@@ -197,7 +197,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(newScreening)
         .expect(201);
@@ -221,7 +221,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(newScreening)
         .expect(201);
@@ -242,7 +242,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${userToken}`)
         .send(newScreening)
         .expect(403);
@@ -256,7 +256,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(incompleteScreening)
         .expect(400);
@@ -277,7 +277,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(pastScreening)
         .expect(400);
@@ -298,7 +298,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(multiRoomScreening)
         .expect(201);
@@ -308,7 +308,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
     });
   });
 
-  describe('PUT /api/screenings/:id - Employee/Admin Only', () => {
+  describe('PUT /api/v1/screenings/:id - Employee/Admin Only', () => {
     test('should allow employee to update existing screening', async () => {
       const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
       
@@ -323,14 +323,14 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const createResponse = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(createData)
         .expect(201);
 
       // Get the screening ID (this might need adjustment based on actual response structure)
       const screenings = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`);
       
       const screeningId = screenings.body[0].screening_id;
@@ -345,7 +345,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .put(`/api/screenings/${screeningId}`)
+        .put(`/api/v1/screenings/${screeningId}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(updateData)
         .expect(201);
@@ -366,7 +366,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       await request(app)
-        .put('/api/screenings/1')
+        .put('/api/v1/screenings/1')
         .set('Authorization', `Bearer ${userToken}`)
         .send(updateData)
         .expect(403);
@@ -379,7 +379,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .put('/api/screenings/1')
+        .put('/api/v1/screenings/1')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(incompleteUpdate)
         .expect(400);
@@ -400,7 +400,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .put('/api/screenings/1')
+        .put('/api/v1/screenings/1')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(pastUpdate)
         .expect(400);
@@ -409,18 +409,18 @@ describe('Screenings Integration Tests - Employee Level', () => {
     });
   });
 
-  describe('DELETE /api/screenings/:id - Employee/Admin Only', () => {
+  describe('DELETE /api/v1/screenings/:id - Employee/Admin Only', () => {
     test('should allow employee to delete screening', async () => {
       // First get a screening ID
       const screenings = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`);
       
       if (screenings.body.length > 0) {
         const screeningId = screenings.body[0].screening_id;
 
         const response = await request(app)
-          .delete(`/api/screenings/${screeningId}`)
+          .delete(`/api/v1/screenings/${screeningId}`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .expect(200);
 
@@ -430,14 +430,14 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should allow admin to delete screening', async () => {
       const screenings = await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${adminToken}`);
       
       if (screenings.body.length > 0) {
         const screeningId = screenings.body[0].screening_id;
 
         const response = await request(app)
-          .delete(`/api/screenings/${screeningId}`)
+          .delete(`/api/v1/screenings/${screeningId}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -447,20 +447,20 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
     test('should deny regular user access to delete screenings', async () => {
       await request(app)
-        .delete('/api/screenings/1')
+        .delete('/api/v1/screenings/1')
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     test('should deny unauthenticated access to delete screenings', async () => {
       await request(app)
-        .delete('/api/screenings/1')
+        .delete('/api/v1/screenings/1')
         .expect(401);
     });
 
     test('should handle deletion of non-existent screening gracefully', async () => {
       const response = await request(app)
-        .delete('/api/screenings/999999')
+        .delete('/api/v1/screenings/999999')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -473,7 +473,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       const expiredToken = signExpiredAccessToken(testEmployeeId, 2, 'employee');
 
       await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401);
     });
@@ -482,19 +482,19 @@ describe('Screenings Integration Tests - Employee Level', () => {
       const invalidToken = signTokenWithWrongSecret(testEmployeeId, 2, 'employee');
 
       await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', `Bearer ${invalidToken}`)
         .expect(400);
     });
 
     test('should handle malformed Authorization header', async () => {
       await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', 'InvalidFormat')
         .expect(401);
 
       await request(app)
-        .get('/api/screenings')
+        .get('/api/v1/screenings')
         .set('Authorization', 'Bearer')
         .expect(401);
     });
@@ -514,7 +514,7 @@ describe('Screenings Integration Tests - Employee Level', () => {
       };
 
       const response = await request(app)
-        .post('/api/screenings')
+        .post('/api/v1/screenings')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(invalidTimeScreening);
 
@@ -536,9 +536,9 @@ describe('Screenings Integration Tests - Employee Level', () => {
 
       // Make multiple concurrent requests
       const requests = [
-        request(app).post('/api/screenings').set('Authorization', `Bearer ${employeeToken}`).send(screeningData),
-        request(app).get('/api/screenings').set('Authorization', `Bearer ${employeeToken}`),
-        request(app).post('/api/screenings').set('Authorization', `Bearer ${adminToken}`).send({...screeningData, room_ids: [2]})
+        request(app).post('/api/v1/screenings').set('Authorization', `Bearer ${employeeToken}`).send(screeningData),
+        request(app).get('/api/v1/screenings').set('Authorization', `Bearer ${employeeToken}`),
+        request(app).post('/api/v1/screenings').set('Authorization', `Bearer ${adminToken}`).send({...screeningData, room_ids: [2]})
       ];
 
       const responses = await Promise.all(requests);

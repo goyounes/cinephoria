@@ -101,7 +101,7 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      await axios.post(`/api/auth/register`, formData);
+      await axios.post(`/api/v1/auth/register`, formData);
       showSnackbar("Registered successfully!", "success");
       navigate('/home');
     } catch (err) {

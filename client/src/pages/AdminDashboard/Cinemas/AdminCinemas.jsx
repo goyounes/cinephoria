@@ -30,8 +30,8 @@ const AdminCinemas = () => {
     const fetchCinemasAndRooms = async () => {
       try {
         const [cinemaRes, roomRes] = await Promise.all([
-          axios.get("/api/cinemas"),
-          axios.get("/api/cinemas/rooms")
+          axios.get("/api/v1/cinemas"),
+          axios.get("/api/v1/cinemas/rooms")
         ]);
         setCinemas(cinemaRes.data);
         setRooms(roomRes.data);

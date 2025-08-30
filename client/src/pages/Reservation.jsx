@@ -32,8 +32,8 @@ const Reservation = () => {
       const fetchInitialData = async () => {
          try {
             const [moviesRes, cinemaRes] = await Promise.all([
-               axios.get(isAdmin ? "/api/movies/upcoming/all" : "/api/movies/upcoming"),
-               axios.get("/api/cinemas"),
+               axios.get(isAdmin ? "/api/v1/movies/upcoming/all" : "/api/v1/movies/upcoming"),
+               axios.get("/api/v1/cinemas"),
             ]);
 
             setMovies(moviesRes.data);

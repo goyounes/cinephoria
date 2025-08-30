@@ -13,7 +13,7 @@ const ScreeningStatistics = () => {
 	useEffect(() => {
 		const fetchInitialData = async () => {
 			try {
-				const [cinemaRes, movieRes] = await Promise.all([axios.get("/api/cinemas"), axios.get("/api/movies")]);
+				const [cinemaRes, movieRes] = await Promise.all([axios.get("/api/v1/cinemas"), axios.get("/api/v1/movies")]);
 				setAllCinemas(cinemaRes.data);
 				setAllMovies(movieRes.data);
 			} catch (error) {

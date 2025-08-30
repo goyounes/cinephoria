@@ -38,9 +38,9 @@ const AdminAddScreening = () => {
         const fetchData = async () => {
         try {
             const [cinemasRes,roomsRes, moviesRes] = await Promise.all([
-            axios.get("/api/cinemas"),
-            axios.get("/api/cinemas/rooms"),
-            axios.get("/api/movies")
+            axios.get("/api/v1/cinemas"),
+            axios.get("/api/v1/cinemas/rooms"),
+            axios.get("/api/v1/movies")
             ]);
 
             const CinemasWithRoomsArr = cinemasRes?.data?.map(cinema => {
@@ -103,7 +103,7 @@ const AdminAddScreening = () => {
     };
 
     try {
-      await axios.post("/api/screenings", payload);
+      await axios.post("/api/v1/screenings", payload);
       showSnackbar("Screening added successfully! You can continue to add other screenings", "success");
     } catch (error) {
       const customMessage = "\nAxios: " + error.message + "\nServer: " + (error.response?.data?.error?.message || "Server error");

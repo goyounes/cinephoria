@@ -65,7 +65,7 @@ const AddMovie = () => {
     }
 
     try {
-      await axios.post('/api/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
+      await axios.post('/api/v1/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       showSnackbar("Movie added successfully!", "success");
     } catch (error) {
       const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
@@ -78,7 +78,7 @@ const AddMovie = () => {
 useEffect(() => {
     async function fetchGenres() {  
       try {
-        const res = await axios.get('/api/movies/genres'); 
+        const res = await axios.get('/api/v1/movies/genres');
         const data = res.data;
         setGenresList(data);  
       } catch (err) {

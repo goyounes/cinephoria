@@ -76,7 +76,7 @@ describe('Cinemas Integration Tests', () => {
 
     // Login to get tokens
     const userLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testUserData.user_email,
         password: testUserData.user_password
@@ -85,7 +85,7 @@ describe('Cinemas Integration Tests', () => {
     userToken = userLoginResponse.body.accessToken;
 
     const employeeLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testEmployeeData.user_email,
         password: testEmployeeData.user_password
@@ -94,7 +94,7 @@ describe('Cinemas Integration Tests', () => {
     employeeToken = employeeLoginResponse.body.accessToken;
 
     const adminLoginResponse = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testAdminData.user_email,
         password: testAdminData.user_password
@@ -108,10 +108,10 @@ describe('Cinemas Integration Tests', () => {
     await resetConnection();
   });
 
-  describe('GET /api/cinemas', () => {
+  describe('GET /api/v1/cinemas', () => {
     test('should return all cinemas for unauthenticated users (public access)', async () => {
       const response = await request(app)
-        .get('/api/cinemas');
+        .get('/api/v1/cinemas');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -128,7 +128,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should return all cinemas for authenticated users', async () => {
       const response = await request(app)
-        .get('/api/cinemas')
+        .get('/api/v1/cinemas')
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(response.status).toBe(200);
@@ -137,7 +137,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should return all cinemas including deleted ones in raw query', async () => {
       const response = await request(app)
-        .get('/api/cinemas');
+        .get('/api/v1/cinemas');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -147,7 +147,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('POST /api/cinemas', () => {
+  describe('POST /api/v1/cinemas', () => {
     describe('Authentication & Authorization', () => {
       test('should reject unauthenticated requests', async () => {
         const cinemaData = {
@@ -156,7 +156,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .send(cinemaData);
 
         expect(response.status).toBe(401);
@@ -169,7 +169,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${userToken}`)
           .send(cinemaData);
 
@@ -183,7 +183,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -200,7 +200,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${adminToken}`)
           .send(cinemaData);
 
@@ -218,7 +218,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -231,7 +231,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -245,7 +245,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -262,7 +262,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -280,7 +280,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas')
+          .post('/api/v1/cinemas')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(cinemaData);
 
@@ -301,7 +301,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/cinemas/:id', () => {
+  describe('PUT /api/v1/cinemas/:id', () => {
     let testCinemaId;
 
     beforeAll(async () => {
@@ -312,7 +312,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/cinemas')
+        .post('/api/v1/cinemas')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(cinemaData);
 
@@ -327,7 +327,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put(`/api/cinemas/${testCinemaId}`)
+          .put(`/api/v1/cinemas/${testCinemaId}`)
           .send(updateData);
 
         expect(response.status).toBe(401);
@@ -340,7 +340,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put(`/api/cinemas/${testCinemaId}`)
+          .put(`/api/v1/cinemas/${testCinemaId}`)
           .set('Authorization', `Bearer ${userToken}`)
           .send(updateData);
 
@@ -354,7 +354,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put(`/api/cinemas/${testCinemaId}`)
+          .put(`/api/v1/cinemas/${testCinemaId}`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(updateData);
 
@@ -371,7 +371,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put(`/api/cinemas/${testCinemaId}`)
+          .put(`/api/v1/cinemas/${testCinemaId}`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(updateData);
 
@@ -385,7 +385,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put(`/api/cinemas/${testCinemaId}`)
+          .put(`/api/v1/cinemas/${testCinemaId}`)
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(updateData);
 
@@ -400,7 +400,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .put('/api/cinemas/99999')
+          .put('/api/v1/cinemas/99999')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(updateData);
 
@@ -410,10 +410,10 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('GET /api/cinemas/rooms', () => {
+  describe('GET /api/v1/cinemas/rooms', () => {
     test('should return all rooms for unauthenticated users (public access)', async () => {
       const response = await request(app)
-        .get('/api/cinemas/rooms');
+        .get('/api/v1/cinemas/rooms');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -431,7 +431,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should return all rooms for authenticated users', async () => {
       const response = await request(app)
-        .get('/api/cinemas/rooms')
+        .get('/api/v1/cinemas/rooms')
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(response.status).toBe(200);
@@ -439,7 +439,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('POST /api/cinemas/rooms', () => {
+  describe('POST /api/v1/cinemas/rooms', () => {
     let testCinemaForRooms;
 
     beforeAll(async () => {
@@ -450,7 +450,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/cinemas')
+        .post('/api/v1/cinemas')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(cinemaData);
 
@@ -466,7 +466,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas/rooms')
+          .post('/api/v1/cinemas/rooms')
           .send(roomData);
 
         expect(response.status).toBe(401);
@@ -480,7 +480,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas/rooms')
+          .post('/api/v1/cinemas/rooms')
           .set('Authorization', `Bearer ${userToken}`)
           .send(roomData);
 
@@ -495,7 +495,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas/rooms')
+          .post('/api/v1/cinemas/rooms')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(roomData);
 
@@ -517,7 +517,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas/rooms')
+          .post('/api/v1/cinemas/rooms')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(roomData);
 
@@ -553,7 +553,7 @@ describe('Cinemas Integration Tests', () => {
         };
 
         const response = await request(app)
-          .post('/api/cinemas/rooms')
+          .post('/api/v1/cinemas/rooms')
           .set('Authorization', `Bearer ${employeeToken}`)
           .send(roomData);
 
@@ -570,7 +570,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/cinemas/rooms/:id', () => {
+  describe('PUT /api/v1/cinemas/rooms/:id', () => {
     let testRoomId;
 
     beforeAll(async () => {
@@ -585,7 +585,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/cinemas/rooms')
+        .post('/api/v1/cinemas/rooms')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(roomData);
 
@@ -603,7 +603,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/cinemas/rooms/${testRoomId}`)
+        .put(`/api/v1/cinemas/rooms/${testRoomId}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(updateData);
 
@@ -619,7 +619,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/cinemas/rooms/${testRoomId}`)
+        .put(`/api/v1/cinemas/rooms/${testRoomId}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(updateData);
 
@@ -638,7 +638,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .put('/api/cinemas/rooms/99999')
+        .put('/api/v1/cinemas/rooms/99999')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(updateData);
 
@@ -647,7 +647,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('DELETE /api/cinemas/rooms/:id', () => {
+  describe('DELETE /api/v1/cinemas/rooms/:id', () => {
     let testRoomToDelete;
 
     beforeAll(async () => {
@@ -662,7 +662,7 @@ describe('Cinemas Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/cinemas/rooms')
+        .post('/api/v1/cinemas/rooms')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send(roomData);
 
@@ -671,7 +671,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should allow employee to soft delete room', async () => {
       const response = await request(app)
-        .delete(`/api/cinemas/rooms/${testRoomToDelete}`)
+        .delete(`/api/v1/cinemas/rooms/${testRoomToDelete}`)
         .set('Authorization', `Bearer ${employeeToken}`);
 
       expect(response.status).toBe(200);
@@ -688,14 +688,14 @@ describe('Cinemas Integration Tests', () => {
 
     test('should reject unauthenticated deletion requests', async () => {
       const response = await request(app)
-        .delete(`/api/cinemas/rooms/${testRoomToDelete}`);
+        .delete(`/api/v1/cinemas/rooms/${testRoomToDelete}`);
 
       expect(response.status).toBe(401);
     });
 
     test('should reject regular user deletion requests', async () => {
       const response = await request(app)
-        .delete(`/api/cinemas/rooms/${testRoomToDelete}`)
+        .delete(`/api/v1/cinemas/rooms/${testRoomToDelete}`)
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(response.status).toBe(403);
@@ -707,7 +707,7 @@ describe('Cinemas Integration Tests', () => {
       // This test would require a way to simulate database failures
       // For now, we'll test with malformed requests
       const response = await request(app)
-        .post('/api/cinemas')
+        .post('/api/v1/cinemas')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send({ invalid: 'data' });
 
@@ -716,7 +716,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should handle invalid JSON in request body', async () => {
       const response = await request(app)
-        .post('/api/cinemas')
+        .post('/api/v1/cinemas')
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('Content-Type', 'application/json')
         .send('invalid json');

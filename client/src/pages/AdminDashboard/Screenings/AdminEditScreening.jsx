@@ -38,10 +38,10 @@ const AdminEditScreening = () => {
     const fetchInitialData = async () => {
       try {
         const [cinemasRes, roomsRes, moviesRes, screeningRes] = await Promise.all([
-          axios.get("/api/cinemas"),
-          axios.get("/api/cinemas/rooms"),
-          axios.get("/api/movies"),
-          axios.get(`/api/screenings/${id}`)
+          axios.get("/api/v1/cinemas"),
+          axios.get("/api/v1/cinemas/rooms"),
+          axios.get("/api/v1/movies"),
+          axios.get(`/api/v1/screenings/${id}`)
         ]);
 
         const cinemaRoomMap = cinemasRes.data.map(cinema => {
@@ -101,7 +101,7 @@ const AdminEditScreening = () => {
     };
 
     try {
-      await axios.put(`/api/screenings/${id}`, payload);
+      await axios.put(`/api/v1/screenings/${id}`, payload);
       showSnackbar("Screening updated successfully!", "success");
     } catch (error) {
       const msg = error.response?.data?.error?.message || error.message;

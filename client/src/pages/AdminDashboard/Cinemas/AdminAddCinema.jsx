@@ -74,7 +74,7 @@ const AdminAddCinema = () => {
 
     try {
       // 1. Add cinema first
-      const cinemaRes = await axios.post("/api/cinemas", {
+      const cinemaRes = await axios.post("/api/v1/cinemas", {
         cinema_name: cinemaData.cinema_name,
         cinema_adresse: cinemaData.cinema_adresse,
       });
@@ -83,7 +83,7 @@ const AdminAddCinema = () => {
       // 2. Add rooms linked to cinemaId
       await Promise.all(
         rooms.map((room) =>
-          axios.post("/api/cinemas/rooms", {
+          axios.post("/api/v1/cinemas/rooms", {
             room_name: room.room_name,
             room_capacity: parseInt(room.room_capacity),
             cinema_id: cinemaId,

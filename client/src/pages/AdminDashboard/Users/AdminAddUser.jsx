@@ -29,7 +29,7 @@ const AddUser = () => {
     e.preventDefault();
     try {
 
-      await axios.post(`/api/users`,formData);
+      await axios.post(`/api/v1/users`,formData);
 	    showSnackbar( "User added successfully!", "success");
 
       setFormData({
