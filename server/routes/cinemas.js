@@ -19,7 +19,7 @@ router.get("/",
       res.status(200).json(cinemas)
       saveToCache(req, cinemas);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 router.post("/", verifyEmployeeJWT,
@@ -29,7 +29,7 @@ router.post("/", verifyEmployeeJWT,
     res.status(201).json(newCinema);
     invalidateCache('cinemas');
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
@@ -41,7 +41,7 @@ router.get("/rooms",
         res.status(200).json(rooms)
         saveToCache(req, rooms);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -52,7 +52,7 @@ router.post("/rooms", verifyEmployeeJWT,
     res.status(201).json(newRoom);
     invalidateCache('cinemas');
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 router.put("/rooms/:id", verifyEmployeeJWT,
@@ -85,7 +85,7 @@ router.delete("/rooms/:id", verifyEmployeeJWT,
     res.status(200).json({message: "room deleted succesfully"})
     invalidateCache('cinemas');
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 

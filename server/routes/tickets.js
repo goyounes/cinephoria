@@ -20,7 +20,7 @@ router.get("/types",
         res.status(200).json(ticketTypes)
         saveToCache(req, ticketTypes);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -31,7 +31,7 @@ router.get("/owned", verifyUserJWT,
         const myTickets = await getMyTickets(user.user_id)
         res.status(200).json(myTickets)
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 

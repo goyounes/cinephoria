@@ -112,7 +112,7 @@ export async function bookingService(req, res, next,options = {}) {
     } catch (error) {
         await connection.rollback();
         console.error("Booking error:", error);
-        next(error);
+        return next(error);
     } finally {
         connection.release();
     }

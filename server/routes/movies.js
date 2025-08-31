@@ -53,7 +53,7 @@ router.get("/",
         res.status(200).json(movies)
         saveToCache(req, movies);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -136,7 +136,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'),
                 console.error("Failed to delete image from S3 after operation failure:", deleteError);
             }
         }
-        next(error); 
+        return next(error); 
     }
 })
 
@@ -159,7 +159,7 @@ router.get("/latest",
         res.status(200).json(movies)
         saveToCache(req, movies);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -182,7 +182,7 @@ router.get("/upcoming",
         res.status(200).json(movies)
         saveToCache(req, movies);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -205,7 +205,7 @@ router.get("/upcoming/all",verifyEmployeeJWT,
         res.status(200).json(movies)
         saveToCache(req, movies);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -218,7 +218,7 @@ router.get("/genres",
         res.status(200).json(genres)
         saveToCache(req, genres);
     }   catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -239,7 +239,7 @@ router.get("/:id/screenings",
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -260,7 +260,7 @@ router.get("/:id/screenings/all", verifyEmployeeJWT,
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -291,7 +291,7 @@ router.get("/:id",
         res.status(200).json(movie)
         saveToCache(req, movie);
     } catch (error) {
-        next(error) // network request or re-thrown error
+        return next(error) // network request or re-thrown error
     }
 })
 
@@ -384,7 +384,7 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),
                 console.error("Failed to delete image from S3 after operation failure:", deleteError);
             }
         }
-        next(error); 
+        return next(error); 
     }
 })
 
@@ -415,14 +415,14 @@ router.delete("/:id", verifyEmployeeJWT,
                 console.log(`Image  "${movie.poster_img_name}" deleted from S3`);
             } catch (deleteError) {
                 console.error("Failed to delete image from S3:", deleteError);
-                next(deleteError);
+                return next(deleteError);
             }
         }
 
         res.status(200).json({message: "movie deleted succesfully"})
         invalidateCache('movies');
     } catch (error) {
-        next(error) // network request or re-thrown error
+        return next(error) // network request or re-thrown error
     }
 })
 

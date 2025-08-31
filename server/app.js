@@ -48,7 +48,7 @@ export default function createApp(rateLimiters) {
           }) 
           res.status(200).json({message:"Message sent succesfully"})
       } catch (error) {
-          next(error)
+          return next(error)
       }
   })
 

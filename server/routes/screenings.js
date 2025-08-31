@@ -23,7 +23,7 @@ router.get("/", verifyEmployeeJWT,
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -60,7 +60,7 @@ router.post('/', verifyEmployeeJWT,
 
     } catch (error) {
         console.error("Error during movie upload process:", error);
-        next(error); 
+        return next(error); 
     }
 
 });
@@ -73,7 +73,7 @@ router.get("/upcoming",
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -94,7 +94,7 @@ router.get("/upcoming/:id",
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -117,7 +117,7 @@ router.get("/:id", verifyEmployeeJWT,
         res.status(200).json(screenings)
         saveToCache(req, screenings);
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -155,7 +155,7 @@ router.put("/:id", verifyEmployeeJWT,
 
     } catch (error) {
         console.error("Error during movie upload process:", error);
-        next(error); 
+        return next(error); 
     }
 
 });
@@ -169,7 +169,7 @@ router.delete("/:id", verifyEmployeeJWT,
         res.status(200).json({message: "screening deleted succesfully"})
         invalidateCache('screenings');
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 

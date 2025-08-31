@@ -11,7 +11,7 @@ router.get("/",verifyAdminJWT,async (req,res,next) => {
         const users = await getAuthorizedUsers() // this is a controller function that fetches users from the database
         res.status(200).json(users)
     } catch (error) {
-        next(error)
+        return next(error)
     }
 })
 
@@ -68,7 +68,7 @@ router.get("/:id", verifyAdminJWT ,async (req,res,next) => {
         }
         res.status(200).json(user)
     } catch (error) {
-        next(error) // network request or re-thrown error
+        return next(error) // network request or re-thrown error
     }
 })
 

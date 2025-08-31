@@ -32,7 +32,7 @@ function createRoleMiddleware(roleCheckFunc) {
 
       next();
     } catch (error) {
-      next(error)
+      return next(error)
     }
   };
 }

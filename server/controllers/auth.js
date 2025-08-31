@@ -57,7 +57,7 @@ export async function registerService (req, res, next) {
         res.status(201).json({ message: "User registered successfully. Please verify your email. The link will expire in 1h", user_id });
     } catch (error) {
         await connection.rollback();
-        next(error);
+        return next(error);
     }finally {
         if (connection)   connection.release();
     }
@@ -116,7 +116,7 @@ export async function resetPasswordReqService(req, res, next) {
 
     res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
@@ -193,16 +193,10 @@ export async function logoutService(req, res, next) {
 
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
-
-  // const generateTokens = (user_id, role_id, role_name, token_version) => {
-  //   const accessToken = signAccessToken(user_id, role_id, role_name);
-  //   const refreshToken = signRefreshToken(user_id, token_version);
-  //   return { accessToken, refreshToken };
-  // };
   
 // Login functionality implemented using JWTs
 export async function loginService (req, res, next) {
@@ -264,7 +258,7 @@ export async function loginService (req, res, next) {
           // refreshToken removed from response - now in HTTP-only cookie
         });
     }catch (error) {
-        next(error);
+        return next(error);
     }
 
 }
@@ -332,7 +326,7 @@ export async function refreshService(req, res, next) {
       // refreshToken removed from response - now in HTTP-only cookie
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -383,7 +377,7 @@ export async function addUserService (req, res, next) {
         res.status(201).json({ message: "User added successfully", user_id });
     } catch (error) {
         await connection.rollback();
-        next(error);
+        return next(error);
     }finally {
         if (connection) connection.release();
     }
