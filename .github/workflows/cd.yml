@@ -52,13 +52,15 @@ jobs:
         script: |
           cd /home/ubuntu/cinephoria-deploy
           
-          # Clean up unused Docker images, containers, volumes, networks to avoid failing deploys because of no diskspace
-          docker system prune -af --volumes
+          # Clean up
+          docker container prune -f           # stopped containers
+          docker image prune -a -f            # unused images (old versions)
+          docker network prune -f             # unused networks
 
           # Pull new images and restart services
           docker compose pull
           docker compose up -d
           
-          # Optional: Health check
-          sleep 30
+          # Optional Health check
+          sleep 60
           curl -f http://localhost:8080 || echo "Service not ready yet"
