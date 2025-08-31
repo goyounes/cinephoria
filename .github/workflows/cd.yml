@@ -26,16 +26,20 @@ jobs:
         docker compose -f Docker-compose.prod.yaml build
         docker tag cinephoria-server:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-server:latest
         docker tag cinephoria-nginx:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx:latest
+        docker tag cinephoria-nginx-ssl:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx-ssl:latest
         
         # Also tag with commit SHA for versioning
         docker tag ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-server:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-server:${{ github.sha }}
         docker tag ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx:${{ github.sha }}
+        docker tag ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx-ssl:latest ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx-ssl:${{ github.sha }}
         
         # Push both latest and SHA tagged versions
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-server:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx-ssl:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-server:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx:${{ github.sha }}
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/cinephoria-nginx-ssl:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest

@@ -12,6 +12,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql        # Volume pour persister les données
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
+    networks:
+      - cinephoria_network
 
   redis:
     image: redis:7.0-alpine              # Image légère de Redis
@@ -21,6 +23,8 @@ services:
       - "6379:6379"                      # Expose le port Redis
     volumes:
       - redis_data:/data                 # Volume pour les données Redis
+    networks:
+      - cinephoria_network
 
   server:
     build:
@@ -32,6 +36,8 @@ services:
     environment:
       MYSQL_HOST: mysql                 # Lien vers le service MySQL
       REDIS_HOST: redis                 # Lien vers le service Redis
+    networks:
+      - cinephoria_network
     ports:
       - "${PORT:-8080}:8080"             # Port d'écoute du backend
     depends_on:
@@ -42,20 +48,43 @@ services:
     volumes:
       - ./db:/db
 
+  nginx-ssl:
+    build:
+      context: ./nginx-ssl
+    container_name: nginx_ssl_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    volumes:
+      - ssl_certificates:/etc/letsencrypt
+      - ssl_challenges:/var/www/certbot
+    networks:
+      - cinephoria_network
+
   nginx:
     build:
       context: .           # project root (where both client and nginx folders exist)
       dockerfile: ./nginx/Dockerfile.prod  # correct path to nginx Dockerfile
     container_name: nginx_frontend
-    ports:
-      - "3000:80"
+    expose:
+      - "80"
     depends_on:
       - server
     restart: unless-stopped
+    networks:
+      - cinephoria_network
 
 volumes:
   mysql_data:                           # Volume persistant pour MySQL
   redis_data:                           # Volume persistant pour Redis
+  ssl_certificates:                     # Volume persistant pour les certificats SSL
+  ssl_challenges:                       # Volume pour les défis Let's Encrypt
+
+networks:
+  cinephoria_network:                   # Réseau interne pour les services
 
 secrets:
   mysql_root_password:
