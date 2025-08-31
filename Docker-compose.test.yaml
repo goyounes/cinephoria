@@ -24,6 +24,7 @@ services:
   test_runner:
     build:
       context: ./server
+      dockerfile: Dockerfile.test
     container_name: test_runner
     restart: "no"
     env_file:

@@ -52,6 +52,9 @@ jobs:
         script: |
           cd /home/ubuntu/cinephoria-deploy
           
+          # Clean up unused Docker images, containers, volumes, networks to avoid failing deploys because of no diskspace
+          docker system prune -af --volumes
+
           # Pull new images and restart services
           docker compose pull
           docker compose up -d
