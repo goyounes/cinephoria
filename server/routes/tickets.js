@@ -6,7 +6,8 @@ import { getTicketTypes, getMyTickets } from '../controllers/tickets.js';
 
 // Cache middleware imports
 import { 
-    tryCache
+    tryCache,
+    saveToCache
 } from '../middleware/cacheMiddleware.js';
 import { CACHE_TTL } from '../middleware/cacheUtils.js';
 
