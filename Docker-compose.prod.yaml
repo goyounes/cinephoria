@@ -58,6 +58,8 @@ services:
     depends_on:
       - nginx
     restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
     volumes:
       - ssl_certificates:/etc/letsencrypt
       - ssl_challenges:/var/www/certbot
