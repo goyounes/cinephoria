@@ -1,11 +1,5 @@
 import { pool } from "../config/mysqlConnect.js";
 
-export async function  getMovies(){
-    const q = `WHERE created_at > ? AND isDeleted = FALSE;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
-
 export async function  addMovie(movie){
 
     const connection = await pool.getConnection();
