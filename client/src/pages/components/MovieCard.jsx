@@ -5,7 +5,7 @@ const MovieCard = ({ movie, to, state, onClick }) => {
   const Component = to ? Link : "div";
 
   return (
-    <Box sx={{ width: 225 }} onClick={onClick} role="button">
+    <Box sx={{ width: { xs: 150, sm: 180, md: 225 } }} onClick={onClick} role="button">
       <Card
         component={Component}
         {...(to ? { to, state } : {})}  // <-- pass state along with to
@@ -30,7 +30,7 @@ const MovieCard = ({ movie, to, state, onClick }) => {
           alt={`Poster for ${movie.title}`}
           sx={{
             width: "100%",
-            height: 300,
+            height: { xs: 200, sm: 240, md: 300 },
             objectFit: "cover",
           }}
         />
