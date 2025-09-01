@@ -1,10 +1,10 @@
 import { pool } from "../config/mysqlConnect.js";
 
-export async function  getUsers(){
-    const q = `SELECT * FROM users;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
+// export async function  getUsers(){
+//     const q = `SELECT * FROM users;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
 
 export async function  getAuthorizedUsers(){
     const q = `
@@ -23,11 +23,11 @@ export async function  getUser(user_id){
     return result_rows[0]
 }
 
-export async function  getRoles(){
-    const q = `SELECT * FROM roles;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
+// export async function  getRoles(){
+//     const q = `SELECT * FROM roles;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
 
 // export async function addUser (userData) {
 //     console.log("request body -->",userData)
