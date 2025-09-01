@@ -285,6 +285,27 @@ describe('Screenings Integration Tests - Employee Level', () => {
       expect(response.body.message).toContain('Date cannot be in the past');
     });
 
+    test('should reject screening creation with empty room_ids array', async () => {
+      const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
+      
+      const newScreening = {
+        movie_id: 1,
+        cinema_id: 1,
+        room_ids: [],
+        start_date: tomorrow,
+        start_time: '18:00:00',
+        end_time: '20:30:00'
+      };
+
+      const response = await request(app)
+        .post('/api/v1/screenings')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(newScreening)
+        .expect(400);
+
+      expect(response.body.message).toContain('room_ids must be a non-empty array');
+    });
+
     test('should create multiple screenings for multiple rooms', async () => {
       const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
       
