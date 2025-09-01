@@ -48,13 +48,13 @@ const cinemas = [
 const Footer = () => {
   return (
     <Stack 
-      zIndex={999}
       component="footer"
       sx={{
         backgroundColor: '#2c3e50',
         color: 'white',
         px: 2,
         py: 3,
+        zIndex: 1300,
       }}
     >
       <Typography variant="h6" textAlign="center" gutterBottom>

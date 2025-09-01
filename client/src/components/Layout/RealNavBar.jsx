@@ -69,7 +69,7 @@ const RealNavBar = () => {
   };
 
   return (
-    <AppBar position="sticky" color="primary" elevation={0} sx={{ height: 100, display:"flex", justifyContent:'center' }}>
+    <AppBar position="sticky" color="primary" elevation={0} sx={{ height: 100, display:"flex", justifyContent:'center', zIndex: 1400 }}>
       <Container >
       <Toolbar sx={{flexGrow:1 , display:"flex", alignItems:"stretch", justifyContent:"space-between"}}>
           

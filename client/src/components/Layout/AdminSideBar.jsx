@@ -8,6 +8,8 @@ import {
   IconButton,
   Tooltip,
   Stack,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 // import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -21,7 +23,14 @@ const drawerWidthClosed = 60;
 const AdminSideBar = () => {
   const {currentUser} = useAuth();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(true);
+  
+  const getDrawerWidth = () => {
+    if (isMobile && !open) return 0;
+    return open ? drawerWidthOpen : drawerWidthClosed;
+  };
 
   const toggleDrawer = () => setOpen(!open);
 
@@ -29,17 +38,17 @@ const AdminSideBar = () => {
     <Drawer
       variant="permanent"
       sx={{
-        width: open ? drawerWidthOpen : drawerWidthClosed,
+        width: getDrawerWidth(),
         position: 'fixed',
         flexShrink: 0,
-        zIndex: 0,
+        zIndex: 1300,
         transition: (theme) =>
           theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.standard,
           }),
         '& .MuiDrawer-paper': {
-          width: open ? drawerWidthOpen : drawerWidthClosed,
+          width: getDrawerWidth(),
           bgcolor: '#f7f7f7e5',
           overflowX: 'hidden',
           transition: (theme) =>
