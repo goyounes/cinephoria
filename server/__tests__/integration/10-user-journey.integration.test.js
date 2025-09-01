@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import dayjs from 'dayjs';
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
@@ -168,15 +169,13 @@ describe('Complete User Journey Integration Tests', () => {
       newMovieId = createMovieResponse.body.movieInsertResult.insertId;
 
       // 4. Create screening
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
 
       const screeningData = {
         movie_id: newMovieId,
         cinema_id: newCinemaId,
         room_ids: [newRoomId],
-        start_date: tomorrowStr,
+        start_date: tomorrow,
         start_time: '19:00:00',
         end_time: '21:30:00'
       };
