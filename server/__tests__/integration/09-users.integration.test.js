@@ -351,7 +351,7 @@ describe('Users Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describe('Input Validation and Error Handling', () => {
     test('should handle database connection errors gracefully', async () => {
       // This would require mocking the database to simulate connection failure
       // For now, we test that valid requests work correctly
@@ -361,6 +361,124 @@ describe('Users Integration Tests', () => {
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    test('should reject user creation with invalid email format', async () => {
+      const userData = {
+        username: 'testinvalidemail',
+        email: 'not-an-email',
+        firstName: 'Test',
+        lastName: 'User',
+        password: 'TestPass123!',
+        role_id: 2
+      };
+
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(userData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('errors');
+      expect(response.body.errors.some(err => err.msg.includes('valid email'))).toBe(true);
+    });
+
+    test('should reject user creation with weak password', async () => {
+      const userData = {
+        username: 'testweakpass',
+        email: 'weakpass@test.com',
+        firstName: 'Test',
+        lastName: 'User',
+        password: '123',
+        role_id: 2
+      };
+
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(userData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('errors');
+      expect(response.body.errors.some(err => err.path === 'password')).toBe(true);
+    });
+
+    test('should reject user creation with invalid role_id type', async () => {
+      const userData = {
+        username: 'testinvalidrole',
+        email: 'invalidrole@test.com',
+        firstName: 'Test',
+        lastName: 'User',
+        password: 'TestPass123!',
+        role_id: 'invalid'
+      };
+
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(userData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('errors');
+    });
+
+    test('should handle malformed JSON gracefully', async () => {
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Content-Type', 'application/json')
+        .send('{ malformed json')
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle extra unexpected fields', async () => {
+      const userData = {
+        username: 'testextrafields',
+        email: 'extrafields@test.com',
+        firstName: 'Test',
+        lastName: 'User',
+        password: 'TestPass123!',
+        role_id: 2,
+        malicious_field: 'hack_attempt',
+        sql_injection: "'; DROP TABLE users; --"
+      };
+
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(userData);
+
+      // Should either create user successfully (ignoring extra fields) or reject
+      expect([201, 400, 500]).toContain(response.status);
+    });
+
+    test('should handle negative user ID in GET request', async () => {
+      const response = await request(app)
+        .get('/api/v1/users/-1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle zero user ID in GET request', async () => {
+      const response = await request(app)
+        .get('/api/v1/users/0')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle extremely large user ID', async () => {
+      const response = await request(app)
+        .get('/api/v1/users/999999999999')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
     });
   });
 

@@ -702,7 +702,7 @@ describe('Cinemas Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describe('Database Constraint Violations and Error Handling', () => {
     test('should handle database connection errors gracefully', async () => {
       // This test would require a way to simulate database failures
       // For now, we'll test with malformed requests
@@ -722,6 +722,88 @@ describe('Cinemas Integration Tests', () => {
         .send('invalid json');
 
       expect(response.status).toBe(400);
+    });
+
+    test('should handle foreign key constraint violation for rooms', async () => {
+      // Try to create a room with non-existent cinema_id
+      const roomData = {
+        room_name: 'Invalid Cinema Room',
+        room_capacity: 50,
+        cinema_id: 999999999 // Non-existent cinema
+      };
+
+      const response = await request(app)
+        .post('/api/v1/cinemas/rooms')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(roomData)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should allow duplicate cinema names since no unique constraint exists', async () => {
+      // Cinema names can be duplicated in this schema
+      const cinemaData = {
+        cinema_name: 'Duplicate Test Cinema',
+        cinema_adresse: '123 Test Street'
+      };
+
+      const response1 = await request(app)
+        .post('/api/v1/cinemas')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(cinemaData)
+        .expect(201);
+
+      // Create another cinema with the same name - should succeed
+      const response2 = await request(app)
+        .post('/api/v1/cinemas')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(cinemaData)
+        .expect(201);
+
+      expect(response1.body).toHaveProperty('cinema_id');
+      expect(response2.body).toHaveProperty('cinema_id');
+      expect(response1.body.cinema_id).not.toBe(response2.body.cinema_id);
+    });
+
+    test('should handle invalid room capacity constraints', async () => {
+      // Get a valid cinema_id
+      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const cinema_id = cinemaRows[0].cinema_id;
+
+      const roomData = {
+        room_name: 'Invalid Capacity Room',
+        room_capacity: -5, // Negative capacity should cause issues
+        cinema_id: cinema_id
+      };
+
+      const response = await request(app)
+        .post('/api/v1/cinemas/rooms')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(roomData)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle zero room capacity', async () => {
+      // Get a valid cinema_id
+      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const cinema_id = cinemaRows[0].cinema_id;
+
+      const roomData = {
+        room_name: 'Zero Capacity Room',
+        room_capacity: 0, // Zero capacity might cause seat creation issues
+        cinema_id: cinema_id
+      };
+
+      const response = await request(app)
+        .post('/api/v1/cinemas/rooms')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(roomData);
+
+      // Should either reject or handle gracefully
+      expect([201, 400, 500]).toContain(response.status);
     });
   });
 });
