@@ -15,6 +15,7 @@ const MovieReview = () => {
 
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [existingReview, setExistingReview] = useState(null);
 
   const [reviewData, setReviewData] = useState({
     score: 0,
@@ -59,14 +60,38 @@ const MovieReview = () => {
         const res = await axios.get(`/api/v1/movies/${id}`);
         setMovie(res.data);
       } catch (err) {
-        console.error("Failed to load movie details");
-      } finally {
-        setLoading(false);
+        console.error("Failed to load movie details:", err);
       }
     };
 
-    fetchMovie();
-  }, [id]);
+    const fetchExistingReview = async () => {
+      try {
+        const res = await axios.get(`/api/v1/movies/${id}/reviews/me`);
+        if (res.data) {
+          setExistingReview(res.data);
+          setReviewData({
+            score: res.data.score,
+            review: res.data.review || "",
+          });
+        }
+      } catch (err) {
+        if (err.response?.status !== 404) {
+          console.error("Failed to load existing review:", err);
+        }
+        // 404 is expected if no review exists
+      }
+    };
+
+    const loadData = async () => {
+      await fetchMovie();
+      if (currentUser?.user_id) {
+        await fetchExistingReview();
+      }
+      setLoading(false);
+    };
+
+    loadData();
+  }, [id, currentUser?.user_id]);
 
   if (loading) {
     return (
@@ -136,7 +161,7 @@ const MovieReview = () => {
       <Card elevation={4}>
         <CardContent>
           <Typography variant="h5" align="center" gutterBottom>
-            Leave a Review
+            {existingReview ? "Your Review" : "Leave a Review"}
           </Typography>
 
           <Stack spacing={2} component="form" onSubmit={handleSubmit}>
@@ -145,25 +170,29 @@ const MovieReview = () => {
               value={reviewData.score}
               precision={1}
               onChange={handleRatingChange}
+              readOnly={existingReview}
             />
             <TextField
               name="review"
-              label="Optional review"
+              label={existingReview ? "Your review" : "Optional review"}
               multiline
               rows={4}
               value={reviewData.review}
               onChange={handleChange}
               placeholder="Your thoughts about the movie..."
+              disabled={existingReview}
             />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              endIcon={<SendIcon />}
-              disabled={reviewData.score === 0}
-            >
-              Submit Review
-            </Button>
+            {!existingReview && (
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                endIcon={<SendIcon />}
+                disabled={reviewData.score === 0}
+              >
+                Submit Review
+              </Button>
+            )}
           </Stack>
         </CardContent>
       </Card>

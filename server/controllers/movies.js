@@ -337,6 +337,16 @@ export async function addReviewToMovie(movie_id,user_id, score, review){
     return result_rows
 }
 
+export async function getUserReviewForMovie(movie_id, user_id) {
+    const q = `
+        SELECT movie_id, user_id, score, review, created_at 
+        FROM movies_reviews 
+        WHERE movie_id = ? AND user_id = ?
+    `;
+    const [result_rows] = await pool.query(q, [movie_id, user_id]);
+    return result_rows[0] || null;
+}
+
 export async function checkMovieIdAdmin (id){
     const q = `
         SELECT movies.movie_id

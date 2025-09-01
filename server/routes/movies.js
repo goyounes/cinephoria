@@ -16,7 +16,7 @@ import { addMovie,  getGenres, deleteMovie, updateMovie,
     getOneMovieWithGenres, getMoviesWithGenres,
     getUpcomingMoviesWithGenres, getUpcomingMoviesWithGenresAdmin,  getLatestMovies,
     checkMovieIdAdmin,
-    addReviewToMovie} 
+    addReviewToMovie, getUserReviewForMovie} 
     from '../controllers/movies.js';
 import { getUpcomingScreenings , getUpcomingAndPastScreeningsAdmin, getAllScreeningsAdmin} from '../controllers/screenings.js';
 import {s3, bucketName} from "../api/awsS3Client.js"
@@ -426,6 +426,33 @@ router.delete("/:id", verifyEmployeeJWT,
     }
 })
 
+router.get("/:id/reviews/me", verifyUserJWT, async (req, res, next) => {
+    const movie_id = req.params.id;
+    const userId = req.user.user_id; // Get from JWT token
+    
+    try {
+        // Check if movie exists
+        const movieExists = await checkMovieIdAdmin(movie_id);
+        if (!movieExists) {
+            const err = new Error("Movie not found");
+            err.status = 404;
+            return next(err);
+        }
+        
+        const review = await getUserReviewForMovie(movie_id, userId);
+        
+        if (!review) {
+            const err = new Error("Review not found");
+            err.status = 404;
+            return next(err);
+        }
+        
+        res.status(200).json(review);
+    } catch (error) {
+        return next(error);
+    }
+});
+
 router.post("/reviews", verifyUserJWT, async (req,res,next) => {
     // Use authenticated user's ID from JWT token, not from request body
     const user_id = req.user.user_id;
@@ -457,7 +484,8 @@ router.post("/reviews", verifyUserJWT, async (req,res,next) => {
             review: result,
         });
     } catch (error) {
-        next(new Error("Failed to add review: "));
+        next(new Error("Failed to add review: ",error.message));
+        console.error(error)
     }
 })
 export default router;
