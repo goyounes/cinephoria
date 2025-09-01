@@ -315,6 +315,61 @@ describe('Movies Integration Tests - User Level', () => {
     });
   });
 
+  describe('GET /api/v1/movies/:id/reviews/me - User Authentication Required', () => {
+    test('should reject request without authentication', async () => {
+      await request(app)
+        .get('/api/v1/movies/3/reviews/me')
+        .expect(401);
+    });
+
+    test('should return 404 for non-existent movie', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/9999999999/reviews/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(404);
+
+      expect(response.body.message).toContain('Movie not found');
+    });
+
+    test('should return 404 when user has no review for the movie', async () => {
+      // Movie ID 1 exists but user has no review for it
+      const response = await request(app)
+        .get('/api/v1/movies/1/reviews/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(404);
+
+      expect(response.body.message).toContain('Review not found');
+    });
+
+    test('should successfully retrieve user review for movie', async () => {
+      // First ensure a review exists by creating one (or trying to)
+      const reviewData = {
+        movie_id: 3,
+        score: 4,
+        review: 'Excellent cinematography and great story!'
+      };
+
+      // Try to create the review - it might already exist from other tests
+      await request(app)
+        .post('/api/v1/movies/reviews')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send(reviewData);
+      // Don't check the status since it might be 201 (created) or 500 (duplicate)
+
+      // Now retrieve the review - there should definitely be one
+      const response = await request(app)
+        .get('/api/v1/movies/3/reviews/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('movie_id', 3);
+      expect(response.body).toHaveProperty('user_id', testUserId);
+      expect(response.body).toHaveProperty('score');
+      expect(response.body).toHaveProperty('review');
+      expect(response.body).toHaveProperty('created_at');
+    });
+  });
+
   describe('Error Handling - Public Endpoints', () => {
     test('should handle database connection errors gracefully', async () => {
       // This test would require mocking or temporarily breaking the DB connection
