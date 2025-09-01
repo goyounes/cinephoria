@@ -13,6 +13,7 @@ const fullScreenStyle = {
   bgcolor: 'background.paper',
   boxShadow: 24,
   overflowY: 'auto',
+  zIndex: 1400,
 };
 
 const SearchMovieModal = ({ modalOpen, setModalOpen }) => {
@@ -37,7 +38,7 @@ const SearchMovieModal = ({ modalOpen, setModalOpen }) => {
   );
 
   return (
-    <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+    <Modal open={modalOpen} onClose={() => setModalOpen(false)} sx={{ zIndex: 1400 }}>
       <Box sx={fullScreenStyle}>
         <Container
           maxWidth="xl"
