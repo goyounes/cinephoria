@@ -40,6 +40,11 @@ router.post('/', verifyEmployeeJWT,
         err.status = 400;
         return next(err); 
     }
+    if (!Array.isArray(room_ids) || room_ids.length === 0) {
+        const err = new Error("room_ids must be a non-empty array");
+        err.status = 400;
+        return next(err);
+    }
     try {
 
         const result = await addManyScreenings({

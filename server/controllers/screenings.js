@@ -48,10 +48,6 @@ export async function  updateScreening(id,screening){
 }
 
 export async function  addManyScreenings(screening){
-    if (!Array.isArray(screening?.room_ids) || screening?.room_ids?.length === 0) {
-        throw new Error("room_ids must be a non-empty array");
-    }
-
     const rows = [];
     // for (const date of screening.start_date) {
         for (const room_id of screening.room_ids) {
