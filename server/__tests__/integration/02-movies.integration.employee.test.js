@@ -261,6 +261,73 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
   });
 
+  describe('DELETE /api/v1/movies/:id - Employee/Admin Only', () => {
+    test('should allow employee to delete movie', async () => {
+      // Get a movie to delete
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieToDelete = moviesResponse.body[0];
+
+      const response = await request(app)
+        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('movie deleted succesfully');
+    });
+
+    test('should allow admin to delete movie', async () => {
+      // Get a movie to delete
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieToDelete = moviesResponse.body[1]; // Use second movie
+
+      const response = await request(app)
+        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('movie deleted succesfully');
+    });
+
+    test('should reject deletion by regular user', async () => {
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieToDelete = moviesResponse.body[0];
+
+      await request(app)
+        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
+    });
+
+    test('should reject unauthenticated deletion', async () => {
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieToDelete = moviesResponse.body[0];
+
+      await request(app)
+        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .expect(401);
+    });
+
+    test('should handle deletion of non-existent movie', async () => {
+      const response = await request(app)
+        .delete('/api/v1/movies/999999999')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle invalid movie ID format', async () => {
+      const response = await request(app)
+        .delete('/api/v1/movies/invalid-id')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
   describe('Error Handling for Employee Endpoints', () => {
     test('should handle database errors gracefully', async () => {
       // Test error handling when database is temporarily unavailable

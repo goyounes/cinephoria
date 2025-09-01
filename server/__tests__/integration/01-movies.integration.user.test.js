@@ -141,6 +141,28 @@ describe('Movies Integration Tests - User Level', () => {
         }
       });
     });
+
+    test('should include genres with upcoming movies', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/upcoming')
+        .expect(200);
+
+      if (response.body.length > 0) {
+        const movie = response.body[0];
+        expect(movie).toHaveProperty('genres');
+        expect(Array.isArray(movie.genres) || movie.genres === null).toBe(true);
+      }
+    });
+
+    test('should handle empty upcoming movies gracefully', async () => {
+      // This test ensures the function handles cases with no upcoming movies
+      const response = await request(app)
+        .get('/api/v1/movies/upcoming')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      // Should return empty array if no upcoming movies, not error
+    });
   });
 
   describe('GET /api/v1/movies/latest - Public Access', () => {
@@ -385,6 +407,68 @@ describe('Movies Integration Tests - User Level', () => {
       // Test continues even if S3 is unavailable (should still return movie data without imageUrl)
       const response = await request(app)
         .get('/api/v1/movies')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    test('should handle malformed movie ID gracefully', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/not-a-number')
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle very large movie ID', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/999999999999999')
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle negative movie ID', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/-1')
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle zero movie ID', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/0')
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle special characters in movie ID', async () => {
+      const response = await request(app)
+        .get('/api/v1/movies/special!@#$%')
+        .expect(404);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    test('should handle empty screening query parameters', async () => {
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieId = moviesResponse.body[0].movie_id;
+
+      const response = await request(app)
+        .get(`/api/v1/movies/${movieId}/screenings?cinema_id=`)
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    test('should handle invalid cinema_id parameter', async () => {
+      const moviesResponse = await request(app).get('/api/v1/movies');
+      const movieId = moviesResponse.body[0].movie_id;
+
+      const response = await request(app)
+        .get(`/api/v1/movies/${movieId}/screenings?cinema_id=invalid`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
