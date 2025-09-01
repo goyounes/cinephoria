@@ -11,7 +11,7 @@ import {
   signRefreshToken,
   signEmailVerificationToken,
   signPasswordResetToken
-} from '../../utils/index.js';
+} from './index.js';
 
 describe('Utils Index - All Exports', () => {
   describe('Function Exports', () => {
