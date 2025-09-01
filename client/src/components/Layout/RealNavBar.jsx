@@ -152,24 +152,24 @@ const RealNavBar = () => {
             <Divider />
             <List>
               {isAdmin && (
-                <ListItem button component={Link} to="/admin/dashboard" onClick={handleMobileMenuClose}>
+                <ListItem button component={Link} to="/admin/dashboard" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                   <ListItemIcon><DashboardIcon /></ListItemIcon>
                   <ListItemText primary="Dashboard" />
                 </ListItem>
               )}
-              <ListItem button component={Link} to="/" onClick={handleMobileMenuClose}>
+              <ListItem button component={Link} to="/" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItem>
-              <ListItem button component={Link} to="/reservation" onClick={handleMobileMenuClose}>
+              <ListItem button component={Link} to="/reservation" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><EventSeatIcon /></ListItemIcon>
                 <ListItemText primary="Reservation" />
               </ListItem>
-              <ListItem button component={Link} to="/movies" onClick={handleMobileMenuClose}>
+              <ListItem button component={Link} to="/movies" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><MovieIcon /></ListItemIcon>
                 <ListItemText primary="Movies" />
               </ListItem>
-              <ListItem button component={Link} to="/contactus" onClick={handleMobileMenuClose}>
+              <ListItem button component={Link} to="/contactus" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><ContactMailIcon /></ListItemIcon>
                 <ListItemText primary="Contact" />
               </ListItem>
@@ -184,22 +184,22 @@ const RealNavBar = () => {
               <Collapse in={accountExpanded} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   { !isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/login" onClick={handleMobileMenuClose}>
+                    <ListItem button component={Link} to="/auth/login" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Login" sx={{ pl: 4 }} />
                     </ListItem>
                   )}
                   { !isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/register" onClick={handleMobileMenuClose}>
+                    <ListItem button component={Link} to="/auth/register" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Register" sx={{ pl: 4 }} />
                     </ListItem>
                   )}
                   { isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/account" onClick={handleMobileMenuClose}>
+                    <ListItem button component={Link} to="/auth/account" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Profile" sx={{ pl: 4 }} />
                     </ListItem>
                   )}
                   { isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/logout" onClick={handleMobileMenuClose}>
+                    <ListItem button component={Link} to="/auth/logout" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Logout" sx={{ pl: 4 }} />
                     </ListItem>
                   )}
