@@ -261,12 +261,123 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
   });
 
+  describe('POST /api/v1/movies - Employee/Admin Only', () => {
+    test('should allow employee to create new movie', async () => {
+      const movieData = {
+        title: 'Test Movie for Employee',
+        description: 'A test movie created by employee',
+        age_rating: 'PG-13',
+        is_team_pick: 0,
+        length_hours: '02',
+        length_minutes: '00',
+        length_seconds: '00',
+        selectedGenres: JSON.stringify([1, 2]) // Action, Adventure
+      };
+
+      // Create a mock image buffer
+      const mockImageBuffer = Buffer.from('fake-image-data');
+
+      const response = await request(app)
+        .post('/api/v1/movies')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .field('title', movieData.title)
+        .field('description', movieData.description)
+        .field('age_rating', movieData.age_rating)
+        .field('is_team_pick', movieData.is_team_pick.toString())
+        .field('length_hours', movieData.length_hours)
+        .field('length_minutes', movieData.length_minutes)
+        .field('length_seconds', movieData.length_seconds)
+        .field('selectedGenres', movieData.selectedGenres)
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
+        .expect(201);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Movie added successfully');
+      expect(response.body).toHaveProperty('movie');
+      expect(response.body.movie).toHaveProperty('title', movieData.title);
+    });
+
+    test('should allow admin to create new movie', async () => {
+      const movieData = {
+        title: 'Test Movie for Admin',
+        description: 'A test movie created by admin',
+        age_rating: 'R',
+        is_team_pick: 1,
+        length_hours: '02',
+        length_minutes: '30',
+        length_seconds: '00',
+        selectedGenres: JSON.stringify([3, 4]) // Comedy, Drama
+      };
+
+      const mockImageBuffer = Buffer.from('fake-image-data');
+
+      const response = await request(app)
+        .post('/api/v1/movies')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .field('title', movieData.title)
+        .field('description', movieData.description)
+        .field('age_rating', movieData.age_rating)
+        .field('is_team_pick', movieData.is_team_pick.toString())
+        .field('length_hours', movieData.length_hours)
+        .field('length_minutes', movieData.length_minutes)
+        .field('length_seconds', movieData.length_seconds)
+        .field('selectedGenres', movieData.selectedGenres)
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
+        .expect(201);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Movie added successfully');
+    });
+
+    test('should reject movie creation by regular user', async () => {
+      const movieData = {
+        title: 'Unauthorized Movie',
+        description: 'This should fail',
+        age_rating: 'PG',
+        is_team_pick: 0,
+        length: 90
+      };
+
+      const mockImageBuffer = Buffer.from('fake-image-data');
+
+      await request(app)
+        .post('/api/v1/movies')
+        .set('Authorization', `Bearer ${userToken}`)
+        .field('title', movieData.title)
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
+        .expect(403);
+    });
+
+    test('should require title field', async () => {
+      const mockImageBuffer = Buffer.from('fake-image-data');
+
+      const response = await request(app)
+        .post('/api/v1/movies')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .field('description', 'Movie without title')
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Missing movie title');
+    });
+
+    test('should require authentication', async () => {
+      const mockImageBuffer = Buffer.from('fake-image-data');
+
+      await request(app)
+        .post('/api/v1/movies')
+        .field('title', 'Unauthenticated Movie')
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
+        .expect(401);
+    });
+  });
+
   describe('DELETE /api/v1/movies/:id - Employee/Admin Only', () => {
     test('should allow employee to delete movie', async () => {
       // Get a movie to delete
       const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToDelete = moviesResponse.body[0];
-
+      const movieToDelete = moviesResponse.body[moviesResponse.body.length - 1];// last movie which is the one we just added
       const response = await request(app)
         .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
         .set('Authorization', `Bearer ${employeeToken}`)

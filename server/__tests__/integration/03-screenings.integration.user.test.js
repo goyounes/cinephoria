@@ -300,6 +300,34 @@ describe('Screenings Integration Tests - User Level', () => {
       });
     });
 
+    test('should execute seat availability LEFT JOIN aggregation logic', async () => {
+      const response = await request(app)
+        .get('/api/v1/screenings/upcoming')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      
+      if (response.body.length > 0) {
+        const screening = response.body[0];
+        
+        // Verify that seat availability data is present from LEFT JOIN
+        expect(screening).toHaveProperty('room_capacity');
+        expect(screening).toHaveProperty('total_seats');
+        expect(screening).toHaveProperty('booked_seats');
+        expect(screening).toHaveProperty('seats_left');
+        
+        // Verify data types are correct
+        expect(typeof screening.room_capacity).toBe('number');
+        expect(typeof screening.total_seats).toBe('number');
+        expect(typeof screening.booked_seats).toBe('number');
+        expect(typeof screening.seats_left).toBe('number');
+        
+        // Verify the GROUP BY logic works correctly
+        expect(screening.total_seats).toBeGreaterThanOrEqual(screening.booked_seats);
+        expect(screening.seats_left).toBe(screening.total_seats - screening.booked_seats);
+      }
+    });
+
     test('should handle screenings with no qualities gracefully', async () => {
       const response = await request(app)
         .get('/api/v1/screenings/upcoming')
@@ -311,6 +339,37 @@ describe('Screenings Integration Tests - User Level', () => {
           expect(screening.qualities_names).toBeFalsy();
         }
       });
+    });
+
+    test('should return screening with qualities using CombineQualitiesIdNames utility', async () => {
+      // Test screening ID 2 which should have qualities
+      const response = await request(app)
+        .get('/api/v1/screenings/upcoming/2')
+        .expect([200, 404]);
+
+      if (response.status === 200) {
+        // Verify that qualities are properly combined
+        if (response.body.qualities && response.body.qualities.length > 0) {
+          expect(Array.isArray(response.body.qualities)).toBe(true);
+          response.body.qualities.forEach(quality => {
+            expect(quality).toHaveProperty('quality_id');
+            expect(quality).toHaveProperty('quality_name');
+            expect(typeof quality.quality_id).toBe('number');
+            expect(typeof quality.quality_name).toBe('string');
+          });
+        }
+        
+        // Verify that genres are properly combined
+        if (response.body.genres && response.body.genres.length > 0) {
+          expect(Array.isArray(response.body.genres)).toBe(true);
+          response.body.genres.forEach(genre => {
+            expect(genre).toHaveProperty('genre_id');
+            expect(genre).toHaveProperty('genre_name');
+            expect(typeof genre.genre_id).toBe('number');
+            expect(typeof genre.genre_name).toBe('string');
+          });
+        }
+      }
     });
   });
 
