@@ -137,6 +137,7 @@ const RealNavBar = () => {
             onClose={handleMobileMenuClose}
             sx={{
               display: { xs: 'block', md: 'none' },
+              zIndex: 1500,
               '& .MuiDrawer-paper': {
                 width: 280,
                 boxSizing: 'border-box',
