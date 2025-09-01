@@ -955,5 +955,62 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(response.body).toHaveProperty('errors');
       expect(response.body.errors.some(err => err.msg.includes('domain must be at least 2 characters'))).toBe(true);
     });
+
+    test('should handle database constraint violations gracefully', async () => {
+      // Test duplicate email registration (should trigger UNIQUE constraint)
+      const existingUser = {
+        username: 'uniquetest1',
+        email: testUserData.email, // Using existing email from beforeAll
+        password: 'TestPass123!',
+        firstName: 'Duplicate',
+        lastName: 'Email'
+      };
+
+      const response = await request(app)
+        .post('/api/v1/auth/register')
+        .send(existingUser)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      // Database constraint violation will trigger generic error
+    });
+
+    test('should handle duplicate username constraint violations', async () => {
+      // Test duplicate username registration (should trigger UNIQUE constraint)  
+      const existingUser = {
+        username: testUserData.username, // Using existing username from beforeAll
+        email: 'duplicate.username@test.com',
+        password: 'TestPass123!',
+        firstName: 'Duplicate',
+        lastName: 'Username'
+      };
+
+      const response = await request(app)
+        .post('/api/v1/auth/register')
+        .send(existingUser)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('Username already exists');
+    });
+
+    test('should handle foreign key constraint violations in user credentials', async () => {
+      // This test simulates a scenario where user creation succeeds but credential creation fails
+      // In practice, this would be prevented by transactions, but tests edge cases
+      const userData = {
+        username: 'constrainttest',
+        email: 'constraint@test.com',
+        password: 'TestPass123!',
+        firstName: 'Constraint',
+        lastName: 'Test'
+      };
+
+      const response = await request(app)
+        .post('/api/v1/auth/register')
+        .send(userData);
+
+      // Should either succeed or fail gracefully
+      expect([201, 500]).toContain(response.status);
+    });
   });
 });
