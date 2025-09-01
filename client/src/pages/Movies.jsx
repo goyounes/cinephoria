@@ -120,85 +120,89 @@ const Movies = () => {
 
       <Card sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>Movies</Typography>
-        <Stack direction="row" spacing={2} alignItems="stretch">
-          <FormControl sx={{ width: 360 }}>
-            <InputLabel id="cinema-select-label">Cinema</InputLabel>
-            <Select
-              labelId="cinema-select-label"
-              value={selectedCinema ? selectedCinema.cinema_id : ""}
-              label="Cinema"
-              onChange={(e) => {
-                const selected = cinemas.find((c) => c.cinema_id === e.target.value);
-                setSelectedCinema(selected || null);
-              }}
-              sx={{ height: "100%" }}
-            >
-              <MenuItem value="">None</MenuItem>
-              {cinemas.map((cinema) => (
-                <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
-                  {cinema.cinema_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <Stack spacing={2}>
+          {/* Line 1: Cinema + Search + Filter */}
+          <Stack direction="row" spacing={2} alignItems="stretch">
+            <FormControl sx={{ width: { xs: '100%', md: 360 } }}>
+              <InputLabel id="cinema-select-label">Cinema</InputLabel>
+              <Select
+                labelId="cinema-select-label"
+                value={selectedCinema ? selectedCinema.cinema_id : ""}
+                label="Cinema"
+                onChange={(e) => {
+                  const selected = cinemas.find((c) => c.cinema_id === e.target.value);
+                  setSelectedCinema(selected || null);
+                }}
+                sx={{ height: "100%" }}
+              >
+                <MenuItem value="">None</MenuItem>
+                {cinemas.map((cinema) => (
+                  <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                    {cinema.cinema_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-          <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)} startIcon={<SearchIcon />}>
-            Find movie
-          </ResponsiveIconButton>
-
-          <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open} />
-
-          <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)} startIcon={<TuneIcon />}>
-            Filter by genres
-          </ResponsiveIconButton>
-          <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
-            <Stack spacing={2}>
-              <Typography variant="h6" gutterBottom>
-                Filter by genres
-              </Typography>
-              <Autocomplete
-                multiple
-                filterSelectedOptions
-                openOnFocus
-                options={genresList}
-                getOptionLabel={(option) => option.genre_name}
-                value={selectedGenres}
-                onChange={(event, newValue) => setSelectedGenres(newValue)}
-                renderInput={(params) => (
-                  <TextField {...params} placeholder="Add genres" />
-                )}
-              />
-              <Button variant="contained" onClick={handleM2ValidateExit}>
-                Validate
-              </Button>
-            </Stack>
-          </ModalWrapper>
-
-          {!showPicker ? (
-            <ResponsiveIconButton
-              size="large"
-              variant="outlined"
-              startIcon={<EventIcon />}
-              onClick={intilizePicker}
-            >
-              Pick a Date
+            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)} startIcon={<SearchIcon />}>
+              Find movie
             </ResponsiveIconButton>
-          ) : (
-            <>
-              <Box>
-                <BasicDatePicker
-                  allowedDates={allowedScreeningDates}
-                  format={"ddd DD-MM-YYYY"}
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                  sx={{ height: "100%" }}
+
+            <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open} />
+
+            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)} startIcon={<TuneIcon />}>
+              Filter by genres
+            </ResponsiveIconButton>
+            <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
+              <Stack spacing={2}>
+                <Typography variant="h6" gutterBottom>
+                  Filter by genres
+                </Typography>
+                <Autocomplete
+                  multiple
+                  filterSelectedOptions
+                  openOnFocus
+                  options={genresList}
+                  getOptionLabel={(option) => option.genre_name}
+                  value={selectedGenres}
+                  onChange={(event, newValue) => setSelectedGenres(newValue)}
+                  renderInput={(params) => (
+                    <TextField {...params} placeholder="Add genres" />
+                  )}
                 />
-              </Box>
-              <IconButton aria-label="Clear date" onClick={clearPicker}>
-                <ClearIcon />
-              </IconButton>
-            </>
-          )}
+                <Button variant="contained" onClick={handleM2ValidateExit}>
+                  Validate
+                </Button>
+              </Stack>
+            </ModalWrapper>
+          </Stack>
+
+          {/* Line 2: Date controls only */}
+            {!showPicker ? (
+              <ResponsiveIconButton
+                size="large"
+                variant="outlined"
+                startIcon={<EventIcon />}
+                onClick={intilizePicker}
+              >
+                Pick a Date
+              </ResponsiveIconButton>
+            ) : (
+              <Stack direction="row" spacing={2} alignItems="stretch">
+                <Box sx={{ flexGrow: 1 }}>
+                  <BasicDatePicker
+                    allowedDates={allowedScreeningDates}
+                    format={"ddd DD-MM-YYYY"}
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    sx={{ height: "100%", width: "100%" }}
+                  />
+                </Box>
+                <IconButton aria-label="Clear date" onClick={clearPicker}>
+                  <ClearIcon />
+                </IconButton>
+              </Stack>
+            )}
         </Stack>
       </Card>
 
