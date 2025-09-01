@@ -120,9 +120,9 @@ const Movies = () => {
 
       <Card sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>Movies</Typography>
-        <Stack spacing={2}>
-          {/* Line 1: Cinema + Search + Filter */}
-          <Stack direction="row" spacing={2} alignItems="stretch">
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="stretch">
+          {/* Cinema + Search + Filter */}
+          <Stack direction="row" spacing={2} alignItems="stretch" sx={{ flexGrow: { xs: 1, md: 0 } }}>
             <FormControl sx={{ width: { xs: '100%', md: 360 } }}>
               <InputLabel id="cinema-select-label">Cinema</InputLabel>
               <Select
@@ -177,18 +177,20 @@ const Movies = () => {
             </ModalWrapper>
           </Stack>
 
-          {/* Line 2: Date controls only */}
+          {/* Date controls only */}
+          <Stack direction="row" spacing={2} alignItems="stretch" sx={{ width: { xs: '100%', md: 'auto' } }}>
             {!showPicker ? (
               <ResponsiveIconButton
                 size="large"
                 variant="outlined"
                 startIcon={<EventIcon />}
                 onClick={intilizePicker}
+                sx={{ width: '100%' }}
               >
                 Pick a Date
               </ResponsiveIconButton>
             ) : (
-              <Stack direction="row" spacing={2} alignItems="stretch">
+              <>
                 <Box sx={{ flexGrow: 1 }}>
                   <BasicDatePicker
                     allowedDates={allowedScreeningDates}
@@ -201,8 +203,9 @@ const Movies = () => {
                 <IconButton aria-label="Clear date" onClick={clearPicker}>
                   <ClearIcon />
                 </IconButton>
-              </Stack>
+              </>
             )}
+          </Stack>
         </Stack>
       </Card>
 
