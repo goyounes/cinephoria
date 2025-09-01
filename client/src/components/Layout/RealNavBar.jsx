@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
 // import cinephoriaSm from '../assets/cinephoria-sm.png';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthProvider";
 
 const NavButton = ({ label, Icon, to, onClick }) => {
@@ -50,6 +50,7 @@ const RealNavBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountExpanded, setAccountExpanded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const open = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -68,8 +69,30 @@ const RealNavBar = () => {
     setAccountExpanded(!accountExpanded);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setIsScrolled(scrollTop > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <AppBar position="sticky" color="primary" elevation={0} sx={{ height: 100, display:"flex", justifyContent:'center', zIndex: 1400 }}>
+    <AppBar 
+      position="sticky" 
+      color="primary" 
+      elevation={0}
+      sx={{ 
+        height: 100, 
+        display:"flex", 
+        justifyContent:'center', 
+        zIndex: 1400,
+        boxShadow: isScrolled ? '0 4px 8px rgba(0,0,0,0.5)' : 'none',
+        transition: 'box-shadow 0.3s ease-in-out'
+      }}
+    >
       <Container >
       <Toolbar sx={{flexGrow:1 , display:"flex", alignItems:"stretch", justifyContent:"space-between"}}>
           
@@ -107,6 +130,7 @@ const RealNavBar = () => {
               onClose={handleMenuClose}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
               transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+              sx={{ zIndex: 1500 }}
               slotProps={{paper: {
                   sx: {
                     minWidth: anchorEl ? anchorEl.offsetWidth : undefined, // Match trigger button width
