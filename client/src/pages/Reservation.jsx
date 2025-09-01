@@ -77,40 +77,44 @@ const Reservation = () => {
          </Card>
          <Card sx={{ p: 2 }}>
          <Typography variant="h4" gutterBottom>Reservation</Typography>
-         <Stack direction="row" spacing={2} alignItems="stretch">
-            <FormControl sx={{ width: 360 }}>
-               <InputLabel id="cinema-select-label">Cinema</InputLabel>
-               <Select
-               labelId="cinema-select-label"
-               value={selectedCinema?.cinema_id || ""}
-               label="Cinema"
-               onChange={(e) => {
-                  const selected = cinemas.find(c => c.cinema_id === e.target.value);
-                  setSelectedCinema(selected || null);
-                  setSelectedMovieId(-1)
-               }}
+         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'stretch' }}>
+            {/* Cinema Select and Search Button group */}
+            <Stack direction="row" spacing={2} alignItems="stretch" sx={{ flexGrow: { xs: 1, md: 0 } }}>
+               <FormControl sx={{ width: { xs: '100%', md: 360 } }}>
+                  <InputLabel id="cinema-select-label">Cinema</InputLabel>
+                  <Select
+                  labelId="cinema-select-label"
+                  value={selectedCinema?.cinema_id || ""}
+                  label="Cinema"
+                  onChange={(e) => {
+                     const selected = cinemas.find(c => c.cinema_id === e.target.value);
+                     setSelectedCinema(selected || null);
+                     setSelectedMovieId(-1)
+                  }}
+                  >
+                  <MenuItem value="">All</MenuItem>
+                  {cinemas.map(cinema => (
+                     <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
+                        {cinema.cinema_name}
+                     </MenuItem>
+                  ))}
+                  </Select>
+               </FormControl>
+
+               <ResponsiveIconButton
+                  size="large"
+                  variant="outlined"
+                  onClick={() => setModalOpen(true)}
+                  startIcon={<SearchIcon />}
                >
-               <MenuItem value="">All</MenuItem>
-               {cinemas.map(cinema => (
-                  <MenuItem key={cinema.cinema_id} value={cinema.cinema_id}>
-                     {cinema.cinema_name}
-                  </MenuItem>
-               ))}
-               </Select>
-            </FormControl>
+                  Find movie
+               </ResponsiveIconButton>
 
-            <ResponsiveIconButton
-               size="large"
-               variant="outlined"
-               onClick={() => setModalOpen(true)}
-               startIcon={<SearchIcon />}
-            >
-               Find movie
-            </ResponsiveIconButton>
+               <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
+            </Stack>
 
-            <SearchMovieModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
-
-            <FormControl sx={{ width: 150 }}>
+            {/* Tickets - responsive positioning */}
+            <FormControl sx={{ width: { xs: '100%', md: 150 } }}>
                <InputLabel id="number-of-tickets-select-label">Tickets</InputLabel>
                <Select
                labelId="number-of-tickets-select-label"
