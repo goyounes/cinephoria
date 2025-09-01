@@ -34,6 +34,7 @@ import VerifyEmail from './pages/Auth/VerifyEmail';
 import ContactUs from './pages/ContactUs';
 
 import { useAuth } from './context/AuthProvider';
+import TitleWrapper from './components/TitleWrapper';
 import ProtectedRoutes from './pages/ProtectedRoutes';
 import NotAuthorized from './pages/NotAuthorized';
 import ScreeningStatistics from './pages/AdminDashboard/Statistics/ScreeningStatistics';
@@ -58,50 +59,50 @@ function App() {
           {showSidebar && <AdminSideBar />}
 
           <Routes >
-            <Route path="/not-authorized" element={<NotAuthorized/>} />
+            <Route path="/not-authorized" element={<TitleWrapper title="Not Authorized"><NotAuthorized/></TitleWrapper>} />
 
             <Route element={<ProtectedRoutes requiredRoleId={1}/>}>
-              <Route path="/checkout" element={<Checkout/>} />
-              <Route path="/auth/account" element={<Account />} />
-              <Route path="/auth/logout" element={<Logout />} />
-              <Route path="/movies/:id/review" element={<MovieReview/>} />
+              <Route path="/checkout" element={<TitleWrapper title="Checkout"><Checkout/></TitleWrapper>} />
+              <Route path="/auth/account" element={<TitleWrapper title="My Account"><Account /></TitleWrapper>} />
+              <Route path="/auth/logout" element={<TitleWrapper title="Logout"><Logout /></TitleWrapper>} />
+              <Route path="/movies/:id/review" element={<TitleWrapper title="Write Review"><MovieReview/></TitleWrapper>} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={2}/>}>
-              <Route path="/admin"          element={<ScreeningStatistics />} />
-              <Route path="/admin/dashboard" element={<ScreeningStatistics />} />
-              <Route path="/admin/movies" element={<AdminMovies />} />
-              <Route path="/admin/movies/create" element={<AdminAddMovie />} />
-              <Route path="/admin/movies/:id/edit" element={<AdminEditMovie />} />
-              <Route path="/admin/screenings" element={<AdminScreenings/>} />
-              <Route path="/admin/screenings/create" element={<AdminAddScreening/>} />
-              <Route path="/admin/screenings/:id/edit" element={<AdminEditScreening />} />
-              <Route path="/admin/cinemas" element={<AdminCinemas/>} />
-              <Route path="/admin/cinemas/create" element={<AdminAddCinema/>} />
-              <Route path="/admin/cinemas/:id/edit" element={<AdminEditCinema/>} />
-              <Route path="/tickets" element={<AdminTickets />} />
+              <Route path="/admin" element={<TitleWrapper title="Admin Dashboard"><ScreeningStatistics /></TitleWrapper>} />
+              <Route path="/admin/dashboard" element={<TitleWrapper title="Admin Dashboard"><ScreeningStatistics /></TitleWrapper>} />
+              <Route path="/admin/movies" element={<TitleWrapper title="Admin Movies"><AdminMovies /></TitleWrapper>} />
+              <Route path="/admin/movies/create" element={<TitleWrapper title="Add Movie"><AdminAddMovie /></TitleWrapper>} />
+              <Route path="/admin/movies/:id/edit" element={<TitleWrapper title="Edit Movie"><AdminEditMovie /></TitleWrapper>} />
+              <Route path="/admin/screenings" element={<TitleWrapper title="Admin Screenings"><AdminScreenings/></TitleWrapper>} />
+              <Route path="/admin/screenings/create" element={<TitleWrapper title="Add Screening"><AdminAddScreening/></TitleWrapper>} />
+              <Route path="/admin/screenings/:id/edit" element={<TitleWrapper title="Edit Screening"><AdminEditScreening /></TitleWrapper>} />
+              <Route path="/admin/cinemas" element={<TitleWrapper title="Admin Cinemas"><AdminCinemas/></TitleWrapper>} />
+              <Route path="/admin/cinemas/create" element={<TitleWrapper title="Add Cinema"><AdminAddCinema/></TitleWrapper>} />
+              <Route path="/admin/cinemas/:id/edit" element={<TitleWrapper title="Edit Cinema"><AdminEditCinema/></TitleWrapper>} />
+              <Route path="/tickets" element={<TitleWrapper title="Admin Tickets"><AdminTickets /></TitleWrapper>} />
             </Route>
 
             <Route element={<ProtectedRoutes requiredRoleId={3}/>}>
-              <Route path="/admin/users/create" element={<AdminAddUser />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/users/create" element={<TitleWrapper title="Add User"><AdminAddUser /></TitleWrapper>} />
+              <Route path="/admin/users" element={<TitleWrapper title="Admin Users"><AdminUsers /></TitleWrapper>} />
             </Route>
 
             {/* Home */}
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/reservation/" element={<Reservation />} />
-            <Route path="/movies" element={<Movies />} />
-            <Route path="/movies/:id" element={<Movie />} />
-            <Route path="/contactus" element={<ContactUs />} />
+            <Route path="/" element={<TitleWrapper title="Home"><Home /></TitleWrapper>} />
+            <Route path="/home" element={<TitleWrapper title="Home"><Home /></TitleWrapper>} />
+            <Route path="/reservation/" element={<TitleWrapper title="Book Tickets"><Reservation /></TitleWrapper>} />
+            <Route path="/movies" element={<TitleWrapper title="Movies"><Movies /></TitleWrapper>} />
+            <Route path="/movies/:id" element={<TitleWrapper title="Movie Details"><Movie /></TitleWrapper>} />
+            <Route path="/contactus" element={<TitleWrapper title="Contact Us"><ContactUs /></TitleWrapper>} />
 
             
             {/* Auth */}
-            <Route path="/auth/reset-password-req" element={<ResetPasswordReq />} />
-            <Route path="/auth/reset-password" element={<ResetPasswordForm />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth/reset-password-req" element={<TitleWrapper title="Reset Password"><ResetPasswordReq /></TitleWrapper>} />
+            <Route path="/auth/reset-password" element={<TitleWrapper title="Reset Password"><ResetPasswordForm /></TitleWrapper>} />
+            <Route path="/verify-email" element={<TitleWrapper title="Verify Email"><VerifyEmail /></TitleWrapper>} />
+            <Route path="/auth/login" element={<TitleWrapper title="Login"><Login /></TitleWrapper>} />
+            <Route path="/auth/register" element={<TitleWrapper title="Register"><Register /></TitleWrapper>} />
           </Routes>
       </Container>
 
