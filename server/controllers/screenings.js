@@ -6,21 +6,21 @@ import { pool } from "../config/mysqlConnect.js";
 //     const [result_rows] = await pool.query(q);
 //     return result_rows
 // }
-export async function  addScreening(screening){
-    const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
-               VALUES (?,?,?,?,?,?);  
-              `
-    const VALUES = [
-        screening.cinema_id  , 
-        screening.movie_id , 
-        screening.room_ids[0], // Assuming room_ids is an array and we take the only room for now
-        screening.start_date , 
-        screening.start_time , 
-        screening.end_time , 
-    ]
-    const [insertResult] = await pool.query(q,VALUES);
-    return insertResult
-}
+// export async function  addScreening(screening){
+//     const q = `INSERT INTO screenings(movie_id,cinema_id,room_id,start_date,start_time,end_time)
+//                VALUES (?,?,?,?,?,?);  
+//               `
+//     const VALUES = [
+//         screening.cinema_id  , 
+//         screening.movie_id , 
+//         screening.room_ids[0], // Assuming room_ids is an array and we take the only room for now
+//         screening.start_date , 
+//         screening.start_time , 
+//         screening.end_time , 
+//     ]
+//     const [insertResult] = await pool.query(q,VALUES);
+//     return insertResult
+// }
 export async function  updateScreening(id,screening){
     const updateQuery = `
         UPDATE screenings
@@ -337,15 +337,15 @@ export async function  deleteScreeningById(id){
     return result_rows
 }
 
-export async function  getQualities(){
-    // This function retrieves raw SCREENINGS TABLE data
-    const q = `SELECT * FROM qualities;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
-export async function  getScreeningQualities(){
-    // This function retrieves raw SCREENINGS TABLE data
-    const q = `SELECT * FROM screening_qualities;`
-    const [result_rows] = await pool.query(q);
-    return result_rows
-}
+// export async function  getQualities(){
+//     // This function retrieves raw SCREENINGS TABLE data
+//     const q = `SELECT * FROM qualities;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
+// export async function  getScreeningQualities(){
+//     // This function retrieves raw SCREENINGS TABLE data
+//     const q = `SELECT * FROM screening_qualities;`
+//     const [result_rows] = await pool.query(q);
+//     return result_rows
+// }
