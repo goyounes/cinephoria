@@ -18,6 +18,24 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
+// Create a minimal valid JPEG buffer for testing
+const createMockJpegBuffer = () => {
+  // This creates a minimal 1x1 pixel JPEG that should pass most validation
+  return Buffer.from([
+    0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48,
+    0x00, 0x48, 0x00, 0x00, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
+    0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0A, 0x0C, 0x14, 0x0D, 0x0C, 0x0B, 0x0B, 0x0C, 0x19, 0x12,
+    0x13, 0x0F, 0x14, 0x1D, 0x1A, 0x1F, 0x1E, 0x1D, 0x1A, 0x1C, 0x1C, 0x20, 0x24, 0x2E, 0x27, 0x20,
+    0x22, 0x2C, 0x23, 0x1C, 0x1C, 0x28, 0x37, 0x29, 0x2C, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1F, 0x27,
+    0x39, 0x3D, 0x38, 0x32, 0x3C, 0x2E, 0x33, 0x34, 0x32, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x00, 0x01,
+    0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xFF, 0xC4, 0x00, 0x14,
+    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x08, 0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xDA, 0x00, 0x0C, 0x03, 0x01, 0x00, 0x02,
+    0x11, 0x03, 0x11, 0x00, 0x3F, 0x00, 0x80, 0x00, 0xFF, 0xD9
+  ]);
+};
+
 describe('Movies Integration Tests - Employee Level', () => {
   let userToken, employeeToken, adminToken;
   let testUserId, testEmployeeId, testAdminId;
@@ -263,108 +281,90 @@ describe('Movies Integration Tests - Employee Level', () => {
 
   describe('POST /api/v1/movies - Employee/Admin Only', () => {
     test('should allow employee to create new movie', async () => {
-      const movieData = {
-        title: 'Test Movie for Employee',
-        description: 'A test movie created by employee',
-        age_rating: 13,
-        is_team_pick: 0,
-        length_hours: '02',
-        length_minutes: '00',
-        length_seconds: '00',
-        selectedGenres: JSON.stringify([1, 2]) // Action, Adventure
-      };
+      const mockImageBuffer = createMockJpegBuffer();
+      const genres = [1, 2]; // Action, Adventure
 
-      // Create a mock image buffer
-      const mockImageBuffer = Buffer.from('fake-image-data');
-
-      const response = await request(app)
+      const request_builder = request(app)
         .post('/api/v1/movies')
         .set('Authorization', `Bearer ${employeeToken}`)
-        .field('title', movieData.title)
-        .field('description', movieData.description)
-        .field('age_rating', movieData.age_rating)
-        .field('is_team_pick', movieData.is_team_pick.toString())
-        .field('length_hours', movieData.length_hours)
-        .field('length_minutes', movieData.length_minutes)
-        .field('length_seconds', movieData.length_seconds)
-        .field('selectedGenres', movieData.selectedGenres)
-        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
-        .expect([201, 500]); // Accept both success and S3 error
+        .field('title', 'Test Movie for Employee')
+        .field('description', 'A test movie created by employee')
+        .field('age_rating', '13')
+        .field('is_team_pick', '0')
+        .field('length_hours', '02')
+        .field('length_minutes', '00')
+        .field('length_seconds', '00')
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg');
+
+      // Add genres as separate fields
+      genres.forEach(genreId => {
+        request_builder.field('selectedGenres[]', genreId.toString());
+      });
+
+      const response = await request_builder.expect([201, 500]);
 
       if (response.status === 201) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie added successfully');
         expect(response.body).toHaveProperty('movie');
-        expect(response.body.movie).toHaveProperty('title', movieData.title);
+        expect(response.body.movie).toHaveProperty('title', 'Test Movie for Employee');
       } else {
         // If S3 is not available in test environment, that's expected
-        console.warn(response.body);
+        console.warn('Movie creation failed:', response.body);
       }
     });
 
     test('should allow admin to create new movie', async () => {
-      const movieData = {
-        title: 'Test Movie for Admin',
-        description: 'A test movie created by admin',
-        age_rating: 13,
-        is_team_pick: 1,
-        length_hours: '02',
-        length_minutes: '30',
-        length_seconds: '00',
-        selectedGenres: JSON.stringify([3, 4]) // Comedy, Drama
-      };
+      const mockImageBuffer = createMockJpegBuffer();
+      const genres = [3, 4]; // Comedy, Drama
 
-      const mockImageBuffer = Buffer.from('fake-image-data');
-
-      const response = await request(app)
+      const request_builder = request(app)
         .post('/api/v1/movies')
         .set('Authorization', `Bearer ${adminToken}`)
-        .field('title', movieData.title)
-        .field('description', movieData.description)
-        .field('age_rating', movieData.age_rating)
-        .field('is_team_pick', movieData.is_team_pick.toString())
-        .field('length_hours', movieData.length_hours)
-        .field('length_minutes', movieData.length_minutes)
-        .field('length_seconds', movieData.length_seconds)
-        .field('selectedGenres', movieData.selectedGenres)
-        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
-        .expect([201, 500]); // Accept both success and S3 error
+        .field('title', 'Test Movie for Admin')
+        .field('description', 'A test movie created by admin')
+        .field('age_rating', '13')
+        .field('is_team_pick', '1')
+        .field('length_hours', '02')
+        .field('length_minutes', '30')
+        .field('length_seconds', '00')
+        .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg');
+
+      // Add genres as separate fields
+      genres.forEach(genreId => {
+        request_builder.field('selectedGenres[]', genreId.toString());
+      });
+
+      const response = await request_builder.expect([201, 500]);
 
       if (response.status === 201) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie added successfully');
       } else {
-        // If S3 is not available in test environment, that's expected
-        console.warn(response.body);
+        console.warn('Movie creation failed:', response.body);
       }
     });
 
     test('should reject movie creation by regular user', async () => {
-      const movieData = {
-        title: 'Unauthorized Movie',
-        description: 'This should fail',
-        age_rating: 13,
-        is_team_pick: 0,
-        length: 90
-      };
-
-      const mockImageBuffer = Buffer.from('fake-image-data');
+      const mockImageBuffer = createMockJpegBuffer();
 
       await request(app)
         .post('/api/v1/movies')
         .set('Authorization', `Bearer ${userToken}`)
-        .field('title', movieData.title)
+        .field('title', 'Unauthorized Movie')
+        .field('selectedGenres[]', '1')
         .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
         .expect(403);
     });
 
     test('should require title field', async () => {
-      const mockImageBuffer = Buffer.from('fake-image-data');
+      const mockImageBuffer = createMockJpegBuffer();
 
       const response = await request(app)
         .post('/api/v1/movies')
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('description', 'Movie without title')
+        .field('selectedGenres[]', '1')
         .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
         .expect(400);
 
@@ -373,11 +373,12 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should require authentication', async () => {
-      const mockImageBuffer = Buffer.from('fake-image-data');
+      const mockImageBuffer = createMockJpegBuffer();
 
       await request(app)
         .post('/api/v1/movies')
         .field('title', 'Unauthenticated Movie')
+        .field('selectedGenres[]', '1')
         .attach('poster_img_file', mockImageBuffer, 'test-poster.jpg')
         .expect(401);
     });
@@ -389,38 +390,33 @@ describe('Movies Integration Tests - Employee Level', () => {
       const moviesResponse = await request(app).get('/api/v1/movies');
       const movieToUpdate = moviesResponse.body[0];
 
-      const updateData = {
-        title: 'Updated Movie Title',
-        description: 'Updated movie description',
-        age_rating: 13,
-        is_team_pick: 1,
-        length_hours: '01',
-        length_minutes: '45',
-        length_seconds: '00',
-        selectedGenres: JSON.stringify([1, 3]) // Action, Comedy
-      };
+      const mockImageBuffer = createMockJpegBuffer();
+      const genres = [1, 3]; // Action, Comedy
 
-      const mockImageBuffer = Buffer.from('updated-image-data');
-
-      const response = await request(app)
+      const request_builder = request(app)
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${employeeToken}`)
-        .field('title', updateData.title)
-        .field('description', updateData.description)
-        .field('age_rating', updateData.age_rating)
-        .field('is_team_pick', updateData.is_team_pick.toString())
-        .field('length_hours', updateData.length_hours)
-        .field('length_minutes', updateData.length_minutes)
-        .field('length_seconds', updateData.length_seconds)
-        .field('selectedGenres', updateData.selectedGenres)
-        .attach('poster_img_file', mockImageBuffer, 'updated-poster.jpg')
-        .expect([200, 500]); // Accept both success and S3 error
+        .field('title', 'Updated Movie Title')
+        .field('description', 'Updated movie description')
+        .field('age_rating', '13')
+        .field('is_team_pick', '1')
+        .field('length_hours', '01')
+        .field('length_minutes', '45')
+        .field('length_seconds', '00')
+        .attach('poster_img_file', mockImageBuffer, 'updated-poster.jpg');
+
+      // Add genres as separate fields
+      genres.forEach(genreId => {
+        request_builder.field('selectedGenres[]', genreId.toString());
+      });
+
+      const response = await request_builder.expect([200, 500]);
 
       if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie updated successfully');
       } else {
-        console.warn(response.body);
+        console.warn('Movie update failed:', response.body);
       }
     });
 
@@ -428,35 +424,31 @@ describe('Movies Integration Tests - Employee Level', () => {
       const moviesResponse = await request(app).get('/api/v1/movies');
       const movieToUpdate = moviesResponse.body[1] || moviesResponse.body[0];
 
-      const updateData = {
-        title: 'Admin Updated Movie',
-        description: 'Updated by admin',
-        age_rating: 13,
-        is_team_pick: 0,
-        length_hours: '02',
-        length_minutes: '15',
-        length_seconds: '00',
-        selectedGenres: JSON.stringify([2, 4]) // Adventure, Drama
-      };
+      const genres = [2, 4]; // Adventure, Drama
 
-      const response = await request(app)
+      const request_builder = request(app)
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .field('title', updateData.title)
-        .field('description', updateData.description)
-        .field('age_rating', updateData.age_rating)
-        .field('is_team_pick', updateData.is_team_pick.toString())
-        .field('length_hours', updateData.length_hours)
-        .field('length_minutes', updateData.length_minutes)
-        .field('length_seconds', updateData.length_seconds)
-        .field('selectedGenres', updateData.selectedGenres)
-        .expect([200, 500]); // Accept both success and S3 error
+        .field('title', 'Admin Updated Movie')
+        .field('description', 'Updated by admin')
+        .field('age_rating', '13')
+        .field('is_team_pick', '0')
+        .field('length_hours', '02')
+        .field('length_minutes', '15')
+        .field('length_seconds', '00');
+
+      // Add genres as separate fields
+      genres.forEach(genreId => {
+        request_builder.field('selectedGenres[]', genreId.toString());
+      });
+
+      const response = await request_builder.expect(201);
 
       if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie updated successfully');
       } else {
-        console.warn(response.body);
+        console.warn('Movie update failed:', response.body);
       }
     });
 
@@ -464,35 +456,31 @@ describe('Movies Integration Tests - Employee Level', () => {
       const moviesResponse = await request(app).get('/api/v1/movies');
       const movieToUpdate = moviesResponse.body[0];
 
-      const updateData = {
-        title: 'Updated Without Image',
-        description: 'No new image upload',
-        age_rating: 13,
-        is_team_pick: 0,
-        length_hours: '01',
-        length_minutes: '30',
-        length_seconds: '00',
-        selectedGenres: JSON.stringify([1]) // Action only
-      };
+      const genres = [1]; // Action only
 
-      const response = await request(app)
+      const request_builder = request(app)
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${employeeToken}`)
-        .field('title', updateData.title)
-        .field('description', updateData.description)
-        .field('age_rating', updateData.age_rating)
-        .field('is_team_pick', updateData.is_team_pick.toString())
-        .field('length_hours', updateData.length_hours)
-        .field('length_minutes', updateData.length_minutes)
-        .field('length_seconds', updateData.length_seconds)
-        .field('selectedGenres', updateData.selectedGenres)
-        .expect([200, 500]); // Accept both success and S3 error
+        .field('title', 'Updated Without Image')
+        .field('description', 'No new image upload')
+        .field('age_rating', '13')
+        .field('is_team_pick', '0')
+        .field('length_hours', '01')
+        .field('length_minutes', '30')
+        .field('length_seconds', '00');
+
+      // Add genres as separate fields
+      genres.forEach(genreId => {
+        request_builder.field('selectedGenres[]', genreId.toString());
+      });
+
+      const response = await request_builder.expect(201);
 
       if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie updated successfully');
       } else {
-        console.warn(response.body);
+        console.warn('Movie update failed:', response.body);
       }
     });
 
@@ -504,6 +492,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${userToken}`)
         .field('title', 'Unauthorized Update')
+        .field('selectedGenres[]', '1')
         .expect(403);
     });
 
@@ -515,6 +504,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('description', 'Missing title')
+        .field('selectedGenres[]', '1')
         .expect(400);
 
       expect(response.body).toHaveProperty('message');
@@ -526,6 +516,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         .put('/api/v1/movies/999999')
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('title', 'Non-existent Movie')
+        .field('selectedGenres[]', '1')
         .expect(404);
 
       expect(response.body).toHaveProperty('message');
@@ -536,24 +527,17 @@ describe('Movies Integration Tests - Employee Level', () => {
       const moviesResponse = await request(app).get('/api/v1/movies');
       const movieToUpdate = moviesResponse.body[0];
 
-      const updateData = {
-        title: 'Movie Without Genres',
-        description: 'Testing empty genres',
-        selectedGenres: JSON.stringify([]) // Empty genres array
-      };
-
       const response = await request(app)
         .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
         .set('Authorization', `Bearer ${employeeToken}`)
-        .field('title', updateData.title)
-        .field('description', updateData.description)
-        .field('selectedGenres', updateData.selectedGenres)
-        .expect([200, 500]); // Accept both success and S3 error
+        .field('title', 'Movie Without Genres')
+        .field('description', 'Testing empty genres')
+        .expect(201);
 
       if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
       } else {
-        console.warn(response.body);
+        console.warn('Movie update failed:', response.body);
       }
     });
   });
