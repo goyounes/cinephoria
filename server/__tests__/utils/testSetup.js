@@ -4,7 +4,7 @@ const testEnv = await import('dotenv');
 testEnv.config({ path: '.test.env', quiet: true });
 
 import { jest } from '@jest/globals';
-import { getRateLimitRedis, getAuthRedis } from '../../config/redisConnect.js';
+import { getRateLimitRedis, getAuthRedis, getCacheRedis } from '../../config/redisConnect.js';
 
 // Mock console.log for cleaner test output
 const originalConsoleLog = console.log;
@@ -23,10 +23,12 @@ beforeAll(async () => {
   try {
     const rateLimitRedis = await getRateLimitRedis();
     const authRedis = await getAuthRedis();
+    const cacheRedis = await getCacheRedis();
     
     await Promise.all([
       rateLimitRedis.flushDb(),
-      authRedis.flushDb()
+      authRedis.flushDb(),
+      cacheRedis.flushDb()
     ]);
   } catch (error) {
     // Continue if Redis is not available
