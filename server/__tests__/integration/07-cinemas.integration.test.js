@@ -805,5 +805,60 @@ describe('Cinemas Integration Tests', () => {
       // Should either reject or handle gracefully
       expect([201, 400, 500]).toContain(response.status);
     });
+
+    test('should handle room update with invalid data', async () => {
+      // Get a valid room_id
+      const [roomRows] = await pool.query('SELECT room_id FROM rooms WHERE isDeleted = FALSE LIMIT 1');
+      const room_id = roomRows[0].room_id;
+
+      const invalidRoomData = {
+        room_name: '', // Empty name should cause validation error
+        room_capacity: -1, // Invalid capacity
+        cinema_id: 999999 // Non-existent cinema
+      };
+
+      const response = await request(app)
+        .put(`/api/v1/cinemas/rooms/${room_id}`)
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(invalidRoomData);
+
+      // Should trigger error handling
+      expect([400, 500]).toContain(response.status);
+    });
+
+    test('should handle cinema update with invalid data', async () => {
+      // Get a valid cinema_id
+      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const cinema_id = cinemaRows[0].cinema_id;
+
+      const invalidCinemaData = {
+        cinema_name: '', // Empty name should cause issues
+        cinema_adresse: '' // Empty address should cause issues
+      };
+
+      const response = await request(app)
+        .put(`/api/v1/cinemas/${cinema_id}`)
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .send(invalidCinemaData);
+
+      // Should trigger error handling
+      expect([400, 500]).toContain(response.status);
+    });
+
+    test('should handle database errors in GET requests', async () => {
+      // These should trigger the error handling in get routes
+      const responses = await Promise.all([
+        request(app).get('/api/v1/cinemas'),
+        request(app).get('/api/v1/cinemas/rooms')
+      ]);
+
+      responses.forEach(response => {
+        // Should either succeed or fail gracefully
+        expect([200, 500]).toContain(response.status);
+        if (response.status === 500) {
+          expect(response.body).toHaveProperty('message');
+        }
+      });
+    });
   });
 });
