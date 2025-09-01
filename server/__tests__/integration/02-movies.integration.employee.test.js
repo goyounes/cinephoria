@@ -303,14 +303,14 @@ describe('Movies Integration Tests - Employee Level', () => {
 
       const response = await request_builder.expect([201, 500]);
 
-      if (response.status === 201) {
+      if (response.status == 201) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie added successfully');
         expect(response.body).toHaveProperty('movie');
         expect(response.body.movie).toHaveProperty('title', 'Test Movie for Employee');
       } else {
         // If S3 is not available in test environment, that's expected
-        console.warn('Movie creation failed:', response.body);
+        console.warn('Movie update failed:', response.body, "response.status:",response.status);
       }
     });
 
@@ -337,11 +337,11 @@ describe('Movies Integration Tests - Employee Level', () => {
 
       const response = await request_builder.expect([201, 500]);
 
-      if (response.status === 201) {
+      if (response.status == 201) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie added successfully');
       } else {
-        console.warn('Movie creation failed:', response.body);
+        console.warn('Movie update failed:', response.body, "response.status:",response.status);
       }
     });
 
@@ -412,11 +412,11 @@ describe('Movies Integration Tests - Employee Level', () => {
 
       const response = await request_builder.expect([200, 500]);
 
-      if (response.status === 200) {
+      if (response.status == 201) {
         expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('Movie updated successfully');
+        expect(response.body.message).toContain('Movie updated successfully to the database');
       } else {
-        console.warn('Movie update failed:', response.body);
+        console.warn('Movie update failed:', response.body, "response.status:",response.status);
       }
     });
 
@@ -444,12 +444,8 @@ describe('Movies Integration Tests - Employee Level', () => {
 
       const response = await request_builder.expect(201);
 
-      if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('Movie updated successfully');
-      } else {
-        console.warn('Movie update failed:', response.body);
-      }
+        expect(response.body.message).toContain('Movie updated successfully to the database');
     });
 
     test('should update movie without new image', async () => {
@@ -476,12 +472,8 @@ describe('Movies Integration Tests - Employee Level', () => {
 
       const response = await request_builder.expect(201);
 
-      if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('Movie updated successfully');
-      } else {
-        console.warn('Movie update failed:', response.body);
-      }
+        expect(response.body.message).toContain('Movie updated successfully to the database');
     });
 
     test('should reject update by regular user', async () => {
@@ -534,11 +526,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         .field('description', 'Testing empty genres')
         .expect(201);
 
-      if (response.status === 200) {
         expect(response.body).toHaveProperty('message');
-      } else {
-        console.warn('Movie update failed:', response.body);
-      }
     });
   });
 
