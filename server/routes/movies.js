@@ -404,7 +404,7 @@ router.delete("/:id", verifyEmployeeJWT,
         const deleteResult = await deleteMovie(id) 
         
         //Delete the image
-        if (movie.poster_img_name && movie.poster_img_name !== "c6074c236342ced850b3a42d6c9eec462614c506952cc6134c29a369a9bbc6aa") { //default Image used
+        if (movie.poster_img_name) {
             try {
                 const deleteParams = {
                     Bucket: bucketName,
