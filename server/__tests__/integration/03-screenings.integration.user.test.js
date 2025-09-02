@@ -45,9 +45,6 @@ describe('Screenings Integration Tests - User Level', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('GET /api/v1/screenings/upcoming - Public Access', () => {
     test('should return upcoming screenings with complete details', async () => {

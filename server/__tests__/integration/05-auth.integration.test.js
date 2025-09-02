@@ -75,9 +75,6 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('User Registration Flow', () => {
     test('should successfully register a new user', async () => {

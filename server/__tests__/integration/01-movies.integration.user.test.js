@@ -50,9 +50,6 @@ describe('Movies Integration Tests - User Level', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection(); // Just refreshes connection, no data clearing
-  }, 30000);
 
   describe('GET /api/v1/movies - Public Access', () => {
     test('should return all movies with genres and image URLs', async () => {

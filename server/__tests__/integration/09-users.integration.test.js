@@ -63,9 +63,6 @@ describe('Users Integration Tests', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('GET /api/v1/users - Admin Authentication Required', () => {
     test('should reject request without authentication', async () => {

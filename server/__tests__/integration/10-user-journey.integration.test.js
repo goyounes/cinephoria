@@ -73,13 +73,11 @@ describe('Complete User Journey Integration Tests', () => {
       }
     }
 
-    await pool.end();
+    // Clean up database first, then close pool connection
     await cleanupTestDatabase();
+    await pool.end();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('Admin Capabilities Verification', () => {
     test('should authenticate existing admin user', async () => {

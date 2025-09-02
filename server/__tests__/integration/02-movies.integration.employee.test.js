@@ -68,9 +68,6 @@ describe('Movies Integration Tests - Employee Level', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('GET /api/v1/movies/upcoming/all - Employee/Admin Only', () => {
     test('should allow employee access to all upcoming movies', async () => {

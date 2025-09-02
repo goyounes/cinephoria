@@ -59,9 +59,6 @@ describe('Tickets Integration Tests', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('GET /api/v1/tickets/types - Public Access', () => {
     test('should execute route handler lines 19-24 on first request', async () => {

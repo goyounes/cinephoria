@@ -62,9 +62,6 @@ describe('Screenings Integration Tests - Employee Level', () => {
     await cleanupTestDatabase();
   }, 30000);
 
-  beforeEach(async () => {
-    await resetConnection();
-  }, 30000);
 
   describe('GET /api/v1/screenings - Employee/Admin Only', () => {
     test('should allow employee access to all screenings', async () => {
