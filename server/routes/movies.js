@@ -70,7 +70,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'),
     
     try {
 
-        imageName = randomImageName(); 
+        imageName = req.body.title + randomImageName(); 
         if (!req.file) {
             const copyParams = {
                 Bucket: bucketName,
@@ -117,6 +117,7 @@ router.post("/",verifyEmployeeJWT ,upload.single('poster_img_file'),
             movie: req.body,
             movieInsertResult: result,
         });
+        // Clear movie list caches (new movie added)
         invalidateCache('movies');
 
     } catch (error) {
@@ -305,13 +306,15 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),
         return next(err);
     }
 
-    const found = await checkMovieIdAdmin(id) // check movie exists in the db 
-    if (!found){
+    const currentMovie = await getOneMovieWithGenres(id) // get current movie data for old image cleanup 
+    if (!currentMovie){
         const err = new Error("No movie with this id was found");
         err.status = 404;
         return next(err);
     }
 
+    const oldImageName = currentMovie.poster_img_name; // Save old image name before any changes
+    console.log("Old image name:", oldImageName);
     let imageName
     let imageUploaded = false
     
@@ -330,7 +333,7 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),
             // await s3.send(copyCommand);
             // console.log(`Copied default image to S3 as "${imageName} successfully"`);
         }else{
-            imageName = randomImageName(); 
+            imageName =  req.body.title + randomImageName(); 
             const resizedImageBuffer = await sharp(req.file.buffer)
                 .resize(225, 300)
                 .toFormat('webp')
@@ -365,7 +368,26 @@ router.put("/:id", verifyEmployeeJWT ,upload.single('poster_img_file'),
             movie: req.body,
             movieInsertResult: result,
         });
+        
+        // Delete the old image after successful database update
+        if (imageUploaded && imageName) {
+            try {
+                const deleteOldParams = {
+                    Bucket: bucketName,
+                    Key: oldImageName,
+                };
+                const deleteOldCommand = new DeleteObjectCommand(deleteOldParams);
+                await s3.send(deleteOldCommand);
+                console.log(`Deleted old image: ${oldImageName}`);
+            } catch (deleteError) {
+                console.error("Failed to delete old image from S3:", deleteError);
+            }
+        }
+        
+        // Clear movie list caches and specific movie cache
         invalidateCache('movies');
+        invalidateCache(`movie:${id}:with_genres`);
+        console.log(`Invalidated movies list cache and specific movie cache for ID: ${id}`);
 
     } catch (error) {
         //delete the image if the add movie operation fails
@@ -420,7 +442,9 @@ router.delete("/:id", verifyEmployeeJWT,
         }
 
         res.status(200).json({message: "movie deleted succesfully"})
+        // Clear movie list caches and specific movie cache
         invalidateCache('movies');
+        invalidateCache(`movie:${id}:with_genres`);
     } catch (error) {
         return next(error) // network request or re-thrown error
     }

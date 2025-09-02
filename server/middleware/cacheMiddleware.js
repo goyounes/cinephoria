@@ -31,6 +31,7 @@ export async function invalidateCache(cacheGroup) {
     switch (cacheGroup) {
       case 'movies':
         await CacheInvalidation.onMovieChange();
+        await CacheInvalidation.onMoviesChange();
         break;
       case 'screenings':
         await CacheInvalidation.onScreeningChange();
@@ -45,7 +46,15 @@ export async function invalidateCache(cacheGroup) {
         await CacheInvalidation.onStaticDataChange();
         break;
       default:
-        console.warn(`Unknown cache group: ${cacheGroup}`);
+        // Handle specific cache keys that don't match predefined groups
+        if (cacheGroup.includes(':')) {
+          const cacheKey = `cache:${cacheGroup}`;
+          const { cacheDelPattern } = await import('./cacheUtils.js');
+          const deleted = await cacheDelPattern(cacheKey);
+          console.log(`Invalidated specific cache key: ${cacheKey} (${deleted} keys deleted)`);
+        } else {
+          console.warn(`Unknown cache group: ${cacheGroup}`);
+        }
     }
   } catch (err) {
     console.error(`Failed to invalidate cache group ${cacheGroup}:`, err);

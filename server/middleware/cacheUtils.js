@@ -55,6 +55,10 @@ export async function cacheDelPattern(pattern) {
 
 export const CacheInvalidation = {
   onMovieChange: async () => {
+    await cacheDelPattern('cache:movie:*');
+  },
+
+  onMoviesChange: async () => {
     await cacheDelPattern('cache:movies:*');
     await cacheDelPattern('cache:screenings:*');
   },
