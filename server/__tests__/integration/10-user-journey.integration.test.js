@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import dayjs from 'dayjs';
+import { s3, bucketName } from '../../api/awsS3Client.js';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
@@ -24,6 +26,7 @@ describe('Complete User Journey Integration Tests', () => {
   let newAdminId;
   let createdTicketIds = [];
   let newCinemaId, newMovieId, newScreeningId, newRoomId;
+  let createdMoviePosterName;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -55,6 +58,21 @@ describe('Complete User Journey Integration Tests', () => {
   }, 30000);
 
   afterAll(async () => {
+    // Clean up S3 image created during movie creation
+    if (createdMoviePosterName) {
+      try {
+        const deleteParams = {
+          Bucket: bucketName,
+          Key: createdMoviePosterName,
+        };
+        
+        const deleteCommand = new DeleteObjectCommand(deleteParams);
+        await s3.send(deleteCommand);
+      } catch (error) {
+        console.warn(`Failed to cleanup S3 image ${createdMoviePosterName}:`, error.message);
+      }
+    }
+
     await pool.end();
     await cleanupTestDatabase();
   }, 30000);
@@ -164,9 +182,13 @@ describe('Complete User Journey Integration Tests', () => {
 
       const createMovieResponse = await movieRequest;
 
-
       expect(createMovieResponse.body.message).toContain('Movie added successfully');
       newMovieId = createMovieResponse.body.movieInsertResult.insertId;
+      
+      // Capture the poster image name for cleanup from the response
+      if (createMovieResponse.body.imageName) {
+        createdMoviePosterName = createMovieResponse.body.imageName;
+      }
 
       // 4. Create screening
       const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
