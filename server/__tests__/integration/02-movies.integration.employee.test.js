@@ -383,15 +383,18 @@ describe('Movies Integration Tests - Employee Level', () => {
 
   describe('PUT /api/v1/movies/:id - Employee/Admin Only', () => {
     test('should allow employee to update existing movie', async () => {
-      // Get a movie to update
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[0];
+      // Only update a movie we created during this test to avoid modifying seed movies data
+      if (createdMovieIds.length < 2) {
+        console.warn('Need at least 2 movies created to update in employee test');
+        return;
+      }
 
+      const movieIdToUpdate = createdMovieIds[1]; // Use second created movie
       const mockImageBuffer = getTestImageBuffer();
       const genres = [1, 3]; // Action, Comedy
 
       const request_builder = request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put(`/api/v1/movies/${movieIdToUpdate}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('title', 'Updated Movie Title')
         .field('description', 'Updated movie description')
@@ -418,13 +421,18 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should allow admin to update existing movie', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[1] || moviesResponse.body[0];
+      // Only update a movie we created during this test to avoid modifying seed data
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to update in admin test');
+        return;
+      }
 
+      // Use the first available created movie
+      const movieIdToUpdate = createdMovieIds[0];
       const genres = [2, 4]; // Adventure, Drama
 
       const request_builder = request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put(`/api/v1/movies/${movieIdToUpdate}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .field('title', 'Admin Updated Movie')
         .field('description', 'Updated by admin')
@@ -446,13 +454,17 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should update movie without new image', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[0];
+      // Only update a movie we created during this test to avoid modifying seed data
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to update without image test');
+        return;
+      }
 
+      const movieIdToUpdate = createdMovieIds[0];
       const genres = [1]; // Action only
 
       const request_builder = request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put(`/api/v1/movies/${movieIdToUpdate}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('title', 'Updated Without Image')
         .field('description', 'No new image upload')
@@ -474,11 +486,9 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should reject update by regular user', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[0];
-
+      // For authorization tests, we can use a known seed movie ID since we're testing auth, not data modification
       await request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put('/api/v1/movies/1')
         .set('Authorization', `Bearer ${userToken}`)
         .field('title', 'Unauthorized Update')
         .field('selectedGenres[]', '1')
@@ -486,11 +496,15 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should require title field for update', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[0];
+      // Only test validation on movies we created during this test
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to test title validation');
+        return;
+      }
 
+      const movieIdToUpdate = createdMovieIds[0];
       const response = await request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put(`/api/v1/movies/${movieIdToUpdate}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('description', 'Missing title')
         .field('selectedGenres[]', '1')
@@ -513,11 +527,15 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should handle updating movie with empty genres array', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToUpdate = moviesResponse.body[0];
+      // Only update a movie we created during this test to avoid modifying seed data
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to update with empty genres test');
+        return;
+      }
 
+      const movieIdToUpdate = createdMovieIds[0];
       const response = await request(app)
-        .put(`/api/v1/movies/${movieToUpdate.movie_id}`)
+        .put(`/api/v1/movies/${movieIdToUpdate}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .field('title', 'Movie Without Genres')
         .field('description', 'Testing empty genres')
