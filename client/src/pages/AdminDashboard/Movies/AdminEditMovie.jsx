@@ -56,10 +56,12 @@ const EditMovie = () => {
 
         } catch (err) {
           console.error("Failed to fetch movie:", err);
+         navigate('/admin/movies/create',{replace:true });
         } 
       }
 
       fetchMovie();
+      // eslint-disable-next-line
     }, [id, genresList]);
 
   
