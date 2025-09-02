@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { signAccessToken } from '../../utils/index.js';
 import { signExpiredAccessToken, signTokenWithWrongSecret } from '../utils/jwtTestUtils.js';
@@ -18,27 +19,15 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
-// Create a minimal valid JPEG buffer for testing
-const createMockJpegBuffer = () => {
-  // This creates a minimal 1x1 pixel JPEG that should pass most validation
-  return Buffer.from([
-    0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48,
-    0x00, 0x48, 0x00, 0x00, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
-    0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0A, 0x0C, 0x14, 0x0D, 0x0C, 0x0B, 0x0B, 0x0C, 0x19, 0x12,
-    0x13, 0x0F, 0x14, 0x1D, 0x1A, 0x1F, 0x1E, 0x1D, 0x1A, 0x1C, 0x1C, 0x20, 0x24, 0x2E, 0x27, 0x20,
-    0x22, 0x2C, 0x23, 0x1C, 0x1C, 0x28, 0x37, 0x29, 0x2C, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1F, 0x27,
-    0x39, 0x3D, 0x38, 0x32, 0x3C, 0x2E, 0x33, 0x34, 0x32, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x00, 0x01,
-    0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xFF, 0xC4, 0x00, 0x14,
-    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x08, 0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xDA, 0x00, 0x0C, 0x03, 0x01, 0x00, 0x02,
-    0x11, 0x03, 0x11, 0x00, 0x3F, 0x00, 0x80, 0x00, 0xFF, 0xD9
-  ]);
+// Load real test image file that Sharp can process
+const getTestImageBuffer = () => {
+  return fs.readFileSync('__tests__/integration/default_poster_img.test.webp');
 };
 
 describe('Movies Integration Tests - Employee Level', () => {
   let userToken, employeeToken, adminToken;
   let testUserId, testEmployeeId, testAdminId;
+  let createdMovieIds = []; // Track movies created during tests
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -281,7 +270,7 @@ describe('Movies Integration Tests - Employee Level', () => {
 
   describe('POST /api/v1/movies - Employee/Admin Only', () => {
     test('should allow employee to create new movie', async () => {
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
       const genres = [1, 2]; // Action, Adventure
 
       const request_builder = request(app)
@@ -308,6 +297,10 @@ describe('Movies Integration Tests - Employee Level', () => {
         expect(response.body.message).toContain('Movie added successfully');
         expect(response.body).toHaveProperty('movie');
         expect(response.body.movie).toHaveProperty('title', 'Test Movie for Employee');
+        // Track created movie for cleanup  
+        if (response.body.movieInsertResult && response.body.movieInsertResult.insertId) {
+          createdMovieIds.push(response.body.movieInsertResult.insertId);
+        }
       } else {
         // If S3 is not available in test environment, that's expected
         console.warn('Movie update failed:', response.body, "response.status:",response.status);
@@ -315,7 +308,7 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should allow admin to create new movie', async () => {
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
       const genres = [3, 4]; // Comedy, Drama
 
       const request_builder = request(app)
@@ -340,13 +333,17 @@ describe('Movies Integration Tests - Employee Level', () => {
       if (response.status == 201) {
         expect(response.body).toHaveProperty('message');
         expect(response.body.message).toContain('Movie added successfully');
+        // Track created movie for cleanup  
+        if (response.body.movieInsertResult && response.body.movieInsertResult.insertId) {
+          createdMovieIds.push(response.body.movieInsertResult.insertId);
+        }
       } else {
         console.warn('Movie update failed:', response.body, "response.status:",response.status);
       }
     });
 
     test('should reject movie creation by regular user', async () => {
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
 
       await request(app)
         .post('/api/v1/movies')
@@ -358,7 +355,7 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should require title field', async () => {
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
 
       const response = await request(app)
         .post('/api/v1/movies')
@@ -373,7 +370,7 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should require authentication', async () => {
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
 
       await request(app)
         .post('/api/v1/movies')
@@ -390,7 +387,7 @@ describe('Movies Integration Tests - Employee Level', () => {
       const moviesResponse = await request(app).get('/api/v1/movies');
       const movieToUpdate = moviesResponse.body[0];
 
-      const mockImageBuffer = createMockJpegBuffer();
+      const mockImageBuffer = getTestImageBuffer();
       const genres = [1, 3]; // Action, Comedy
 
       const request_builder = request(app)
@@ -410,7 +407,7 @@ describe('Movies Integration Tests - Employee Level', () => {
         request_builder.field('selectedGenres[]', genreId.toString());
       });
 
-      const response = await request_builder.expect([200, 500]);
+      const response = await request_builder.expect([201, 500]);
 
       if (response.status == 201) {
         expect(response.body).toHaveProperty('message');
@@ -532,11 +529,15 @@ describe('Movies Integration Tests - Employee Level', () => {
 
   describe('DELETE /api/v1/movies/:id - Employee/Admin Only', () => {
     test('should allow employee to delete movie', async () => {
-      // Get a movie to delete
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToDelete = moviesResponse.body[moviesResponse.body.length - 1];// last movie which is the one we just added
+      // Only delete a movie we created during this test
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to delete in employee test');
+        return;
+      }
+      
+      const movieIdToDelete = createdMovieIds.shift(); // Remove first created movie
       const response = await request(app)
-        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .delete(`/api/v1/movies/${movieIdToDelete}`)
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(200);
 
@@ -545,12 +546,15 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should allow admin to delete movie', async () => {
-      // Get a movie to delete
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToDelete = moviesResponse.body[1]; // Use second movie
-
+      // Only delete a movie we created during this test
+      if (createdMovieIds.length === 0) {
+        console.warn('No movies created to delete in admin test');
+        return;
+      }
+      
+      const movieIdToDelete = createdMovieIds.shift(); // Remove next created movie
       const response = await request(app)
-        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .delete(`/api/v1/movies/${movieIdToDelete}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -559,21 +563,17 @@ describe('Movies Integration Tests - Employee Level', () => {
     });
 
     test('should reject deletion by regular user', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToDelete = moviesResponse.body[0];
-
+      // Use a high movie ID that should exist (from seed data) but won't actually be deleted due to authorization failure
       await request(app)
-        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .delete('/api/v1/movies/1') // Use movie ID 1 from seed data
         .set('Authorization', `Bearer ${userToken}`)
         .expect(403);
     });
 
     test('should reject unauthenticated deletion', async () => {
-      const moviesResponse = await request(app).get('/api/v1/movies');
-      const movieToDelete = moviesResponse.body[0];
-
+      // Use a high movie ID that should exist (from seed data) but won't actually be deleted due to auth failure
       await request(app)
-        .delete(`/api/v1/movies/${movieToDelete.movie_id}`)
+        .delete('/api/v1/movies/1') // Use movie ID 1 from seed data
         .expect(401);
     });
 

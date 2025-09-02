@@ -70,14 +70,6 @@ describe('Tickets Integration Tests', () => {
         .get('/api/v1/tickets/types')
         .set('x-bypass-cache', 'true') // Custom header to potentially bypass cache
         .expect(200);
-
-      // Verify the route handler executed lines 19-24:
-      // - Line 19: try {
-      // - Line 20: const ticketTypes = await getTicketTypes()
-      // - Line 21: res.status(200).json(ticketTypes)
-      // - Line 22: saveToCache(req, ticketTypes);
-      // - Line 23: } catch (error) {
-      // - Line 24: return next(error)
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
