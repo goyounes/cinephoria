@@ -35,6 +35,7 @@ export async function invalidateCache(cacheGroup) {
         break;
       case 'screenings':
         await CacheInvalidation.onScreeningChange();
+        await CacheInvalidation.onScreeningsChange();
         break;
       case 'cinemas':
         await CacheInvalidation.onCinemaChange();

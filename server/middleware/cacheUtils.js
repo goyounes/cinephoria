@@ -64,6 +64,10 @@ export const CacheInvalidation = {
   },
 
   onScreeningChange: async () => {
+    await cacheDelPattern('cache:screening:*');
+  },
+
+  onScreeningsChange: async () => {
     await cacheDelPattern('cache:screenings:*');
     await cacheDelPattern('cache:movies:upcoming:*');
   },
