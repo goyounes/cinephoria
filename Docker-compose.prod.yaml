@@ -1,102 +1,106 @@
+# CONFIGURATION DOCKER COMPOSE - PRODUCTION
+# Environnement de production avec SSL, sécurité renforcée,
+# optimisations performances et réseau isolé
 services:
   mysql:
     image: mysql:8.0                     # Image officielle de MySQL version 8
     command: --default-time-zone=SYSTEM  # Utiliser le fuseau horaire du système
-    container_name: mysql_db             # Nom du conteneur
+    container_name: mysql_db             # Nom du conteneur MySQL production
     restart: always                      # Redémarre automatiquement en cas d'arrêt
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
-      MYSQL_DATABASE: cinephoria         # Base de données créée au démarrage
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password  # Mdp sécurisé via secrets
+      MYSQL_DATABASE: cinephoria         # Base de données principale
     secrets:
-      - mysql_root_password
+      - mysql_root_password              # Référence au secret
     volumes:
-      - mysql_data:/var/lib/mysql        # Volume pour persister les données
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
+      - mysql_data:/var/lib/mysql        # Volume persistant pour les données
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script d'initialisation
     networks:
-      - cinephoria_network
+      - cinephoria_network               # Réseau interne sécurisé
 
   redis:
-    image: redis:7.0-alpine              # Image légère de Redis
-    container_name: redis_db          # Nom du conteneur Redis
+    image: redis:7.0-alpine              # Image légère de Redis pour performance
+    container_name: redis_db             # Nom du conteneur Redis production
     restart: always                      # Redémarre automatiquement
     ports:
-      - "6379:6379"                      # Expose le port Redis
+      - "6379:6379"                      # Port Redis (accès interne uniquement via réseau)
     volumes:
-      - redis_data:/data                 # Volume pour les données Redis
+      - redis_data:/data                 # Volume persistant pour le cache
     networks:
-      - cinephoria_network
+      - cinephoria_network               # Réseau interne sécurisé
 
   server:
     build:
-      context: ./server                  # Dossier contenant le backend Node.js
-    container_name: backend_server       # Nom du conteneur backend
-    restart: unless-stopped              # Redémarre sauf si on l'arrête manuellement
+      context: ./server                  # Contexte du backend Node.js
+    container_name: backend_server       # Nom du conteneur backend production
+    restart: unless-stopped              # Redémarre sauf arrêt manuel
     env_file:
-      - ./server/.env                    # Fichier d'environnement
+      - ./server/.env                    # Variables d'environnement de production
     environment:
-      MYSQL_HOST: mysql                 # Lien vers le service MySQL
-      REDIS_HOST: redis                 # Lien vers le service Redis
+      MYSQL_HOST: mysql                  # Référence vers MySQL via réseau interne
+      REDIS_HOST: redis                  # Référence vers Redis via réseau interne
     networks:
-      - cinephoria_network
+      - cinephoria_network               # Réseau interne sécurisé
     ports:
-      - "${PORT:-8080}:8080"             # Port d'écoute du backend
+      - "${PORT:-8080}:8080"             # Port backend (variable ou 8080 par défaut)
     depends_on:
-      - mysql                            # Attend que MySQL soit prêt
-      - redis                            # Attend que Redis soit prêt
-    working_dir: /app                    # Répertoire de travail dans le conteneur
-    command: npm start                   # Commande pour démarrer le serveur
+      - mysql                            # Attend la disponibilité de MySQL
+      - redis                            # Attend la disponibilité de Redis
+    working_dir: /app                    # Répertoire de travail
+    command: npm start                   # Commande de démarrage production
     volumes:
-      - ./db:/db
-    healthcheck:
+      - ./db:/db                         # Accès aux scripts de base de données
+    healthcheck:                         # Vérification de santé du service
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 10s                      # Vérification toutes les 10 secondes
+      timeout: 5s                        # Timeout de 5 secondes
+      retries: 5                         # 5 tentatives avant échec
+      start_period: 30s                  # Délai initial avant première vérification
 
   nginx-ssl:
     build:
-      context: ./nginx-ssl
-    container_name: nginx_ssl_proxy
+      context: ./nginx-ssl               # Contexte du proxy SSL
+    container_name: nginx_ssl_proxy      # Nom du conteneur proxy SSL
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80"                          # Port HTTP (redirection vers HTTPS)
+      - "443:443"                        # Port HTTPS sécurisé
     depends_on:
       nginx:
-        condition: service_started
+        condition: service_started       # Attend que nginx soit démarré
       server:
-        condition: service_healthy
-    restart: unless-stopped
+        condition: service_healthy       # Attend que le serveur soit en bonne santé
+    restart: unless-stopped              # Redémarrage automatique
     environment:
-      DOMAIN: ${DOMAIN:-localhost}
+      DOMAIN: ${DOMAIN:-localhost}       # Domaine (variable ou localhost par défaut)
     volumes:
-      - ssl_certificates:/etc/letsencrypt
-      - ssl_challenges:/var/www/certbot
+      - ssl_certificates:/etc/letsencrypt  # Certificats SSL Let's Encrypt
+      - ssl_challenges:/var/www/certbot    # Dossier pour les défis SSL
     networks:
-      - cinephoria_network
+      - cinephoria_network               # Réseau interne sécurisé
 
   nginx:
     build:
-      context: .           # project root (where both client and nginx folders exist)
-      dockerfile: ./nginx/Dockerfile.prod  # correct path to nginx Dockerfile
-    container_name: nginx_frontend
+      context: .                         # Racine du projet (accès client et nginx)
+      dockerfile: ./nginx/Dockerfile.prod # Dockerfile nginx optimisé pour production
+    container_name: nginx_frontend       # Nom du conteneur nginx frontend
     expose:
-      - "80"
+      - "80"                            # Port exposé uniquement au réseau interne
     depends_on:
-      - server
-    restart: unless-stopped
+      - server                           # Attend que le serveur backend soit prêt
+    restart: unless-stopped              # Redémarrage automatique
     networks:
-      - cinephoria_network
+      - cinephoria_network               # Réseau interne sécurisé
 
 volumes:
-  mysql_data:                           # Volume persistant pour MySQL
-  redis_data:                           # Volume persistant pour Redis
-  ssl_certificates:                     # Volume persistant pour les certificats SSL
-  ssl_challenges:                       # Volume pour les défis Let's Encrypt
+  mysql_data:                    # Volume persistant pour les données MySQL
+  redis_data:                    # Volume persistant pour le cache Redis
+  ssl_certificates:              # Volume persistant pour les certificats SSL Let's Encrypt
+  ssl_challenges:                # Volume pour les défis de validation SSL
 
 networks:
-  cinephoria_network:                   # Réseau interne pour les services
+  cinephoria_network:            # Réseau interne isolé pour tous les services
+    driver: bridge               # Driver réseau par défaut
 
 secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
+  mysql_root_password:           # Secret pour le mot de passe root MySQL
+    file: ./secrets/mysql_root_password.txt  # Fichier contenant le mot de passe sécurisé

@@ -1,50 +1,54 @@
+# CONFIGURATION DOCKER COMPOSE - TESTS
+# Environnement isolé pour l'exécution des tests automatisés
+# Utilise des ports différents pour éviter les conflits avec le développement
+
 services:
   mysql_test:
-    image: mysql:8.0
-    command: --default-time-zone=SYSTEM
-    container_name: mysql_test
-    restart: always
+    image: mysql:8.0                       # Image officielle MySQL version 8
+    command: --default-time-zone=SYSTEM    # Utilise le fuseau horaire système
+    container_name: mysql_test             # Nom du conteneur de test
+    restart: always                        # Redémarrage automatique
     environment:
-      MYSQL_ROOT_PASSWORD: 5599
-      MYSQL_DATABASE: cinephoria_test
+      MYSQL_ROOT_PASSWORD: 5599            # Mot de passe simple pour les tests
+      MYSQL_DATABASE: cinephoria_test      # Base de données dédiée aux tests
     ports:
-      - "3307:3306"                        # Different port to avoid conflicts
+      - "3307:3306"                        # Port différent pour éviter les conflits avec dev
     volumes:
-      - mysql_test_data:/var/lib/mysql     # Separate volume for test data
+      - mysql_test_data:/var/lib/mysql     # Volume séparé pour les données de test
 
   redis_test:
-    image: redis:7.0-alpine
-    container_name: redis_test
-    restart: always
+    image: redis:7.0-alpine                # Image légère Redis pour tests
+    container_name: redis_test             # Nom du conteneur Redis de test
+    restart: always                        # Redémarrage automatique
     ports:
-      - "6380:6379"                        # Different port to avoid conflicts
+      - "6380:6379"                        # Port différent pour éviter les conflits avec dev
     volumes:
-      - redis_test_data:/data
+      - redis_test_data:/data              # Volume séparé pour les données Redis de test
 
   test_runner:
     build:
-      context: ./server
-      dockerfile: Dockerfile.test
-    container_name: test_runner
-    restart: "no"
+      context: ./server                    # Contexte du serveur backend
+      dockerfile: Dockerfile.test          # Dockerfile spécialisé pour les tests
+    container_name: test_runner            # Nom du conteneur exécutant les tests
+    restart: "no"                      # Pas de redémarrage (container s'arrête après tests)
     env_file:
-      - ./server/.test.env
+      - ./server/.test.env                 # Variables d'environnement spécifiques aux tests
     environment:
-      MYSQL_HOST: mysql_test
-      REDIS_HOST: redis_test
+      MYSQL_HOST: mysql_test               # Référence vers la base MySQL de test
+      REDIS_HOST: redis_test               # Référence vers Redis de test
     depends_on:
-      - mysql_test
-      - redis_test
-    command: |
+      - mysql_test                         # Attend que MySQL soit prêt
+      - redis_test                         # Attend que Redis soit prêt
+    command: |                             # Script d'exécution des tests
       sh -c "
-        echo 'Waiting 30 seconds for services to be fully ready...'
+        echo 'Attente de 30 secondes pour que les services soient prêts...'
         sleep 30
-        echo 'Starting test suite...'
+        echo 'Démarrage de la suite de tests...'
         npm run test
-        echo 'Test suite completed!'
+        echo 'Suite de tests terminée!'
       "
 
 volumes:
-  mysql_test_data:    # Separate volume for test MySQL data
-  redis_test_data:    # Separate volume for test Redis data  
-  node_modules_test:  # Separate volume for test node_modules
+  mysql_test_data:    # Volume séparé pour les données MySQL de test
+  redis_test_data:    # Volume séparé pour les données Redis de test
+  node_modules_test:  # Volume séparé pour les dépendances node_modules de test

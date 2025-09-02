@@ -1,85 +1,90 @@
+# CONFIGURATION DOCKER COMPOSE - DÉVELOPPEMENT
+# Environnement optimisé pour le développement local avec hot-reload
+# et montage des volumes de code source pour les modifications en temps réel
+
 services:
   mysql_dev:
     image: mysql:8.0                     # Image officielle de MySQL version 8
     command: --default-time-zone=SYSTEM  # Utiliser le fuseau horaire du système
-    container_name: mysql_db_dev             # Nom du conteneur
+    container_name: mysql_db_dev         # Nom du conteneur
     restart: always                      # Redémarre automatiquement en cas d'arrêt
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password  # sécurisé /docker secrets
       MYSQL_DATABASE: cinephoria         # Base de données créée au démarrage
     secrets:
-      - mysql_root_password
+      - mysql_root_password              # Référence au fichier secret
     volumes:
-      - mysql_data_dev:/var/lib/mysql        # Volume pour persister les données
+      - mysql_data_dev:/var/lib/mysql    # Volume pour persister les données
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Script SQL d'initialisation
 
   redis_dev:
     image: redis:7.0-alpine              # Image légère de Redis
-    container_name: redis_db_dev          # Nom du conteneur Redis
+    container_name: redis_db_dev         # Nom du conteneur Redis
     restart: always                      # Redémarre automatiquement
     ports:
-      - "6379:6379"                      # Expose le port Redis
+      - "6379:6379"                      # Expose le port Redis pour accès externe
     volumes:
-      - redis_data_dev:/data                 # Volume pour les données Redis
+      - redis_data_dev:/data             # Volume pour les données Redis
 
   server_dev:
     build:
       context: ./server                  # Dossier contenant le backend Node.js
-    container_name: backend_server_dev       # Nom du conteneur backend
+    container_name: backend_server_dev   # Nom du conteneur backend
     restart: unless-stopped              # Redémarre sauf si on l'arrête manuellement
     env_file:
-      - ./server/.env                    # Fichier d'environnement
+      - ./server/.env                    # Fichier d'environnement de développement
     environment:
-      MYSQL_HOST: mysql_dev                 # Lien vers le service MySQL
-      REDIS_HOST: redis_dev                 # Lien vers le service Redis
+      MYSQL_HOST: mysql_dev              # Lien vers le service MySQL
+      REDIS_HOST: redis_dev              # Lien vers le service Redis
     ports:
-      - "${PORT:-8080}:8080"             # Port d'écoute du backend
+      - "${PORT:-8080}:8080"        # Port d'écoute du backend (variable ou 8080 par défaut)
     depends_on:
-      - mysql_dev                            # Attend que MySQL soit prêt
-      - redis_dev                            # Attend que Redis soit prêt
+      - mysql_dev                        # Attend que MySQL soit prêt
+      - redis_dev                        # Attend que Redis soit prêt
     volumes:
-      - ./server:/app                    # Montage du code backend
-      - ./db:/db
-      - node_modules_server_dev:/app/node_modules  # Named volume for node_modules
+      - ./server:/app                    # Montage du code backend (hot-reload)
+      - ./db:/db                         # Accès aux scripts de base de données
+      - node_modules_server_dev:/app/node_modules  # Volume nommé pour les dépendances
     working_dir: /app                    # Répertoire de travail dans le conteneur
-    command: npm run dev                 # Commande pour démarrer le serveur en mode dev (nodemon)
+    command: npm run dev            # Commande pour démarrer en mode développement (nodemon)
 
   client_dev:
     build:
-      context: ./client                 # Dossier contenant le frontend React
-    container_name: frontend_dev            # Nom du conteneur frontend
-    restart: unless-stopped             # Redémarre sauf arrêt manuel
+      context: ./client                  # Dossier contenant le frontend React
+    container_name: frontend_dev         # Nom du conteneur frontend
+    restart: unless-stopped              # Redémarre sauf arrêt manuel
     environment:
       REACT_APP_API_URL: "http://localhost:8080"  # URL de l'API côté client
-      WATCHPACK_POLLING: true     # This lets react actualy hot reload when files change
+      WATCHPACK_POLLING: true      # Active le hot-reload pour les changements de fichiers
     ports:
-      - "3001:3000"                     # Port d'écoute de React (développement) -si necessaire-    depends_on:
+      - "3001:3000"                      # Port d'écoute de React (développement)
     depends_on:
-      - server_dev                          # Attend que le serveur soit prêt
+      - server_dev                       # Attend que le serveur soit prêt
     volumes:
-      - ./client:/app                   # Montage du code client
-      - node_modules_client_dev:/app/node_modules
-    working_dir: /app                   # Répertoire de travail dans le conteneur
-    command: npm start                  # Démarre le serveur React
+      - ./client:/app                    # Montage du code client (hot-reload)
+      - node_modules_client_dev:/app/node_modules  # Volume nommé pour les dépendances
+    working_dir: /app                    # Répertoire de travail dans le conteneur
+    command: npm start                   # Démarre le serveur de développement React
 
   nginx_dev:
     build:
-      context: .
-      dockerfile: ./nginx/Dockerfile.dev   # Use dev Dockerfile here
-    container_name: nginx_frontend_dev
+      context: .                         # Contexte racine du projet
+      dockerfile: ./nginx/Dockerfile.dev # Dockerfile spécifique au développement
+    container_name: nginx_frontend_dev   # Nom du conteneur nginx
     ports:
-      - "3000:80"       # Map dev frontend port
+      - "3000:80"                        # Mappage du port frontend de développement
     depends_on:
-      - client_dev
-      - server_dev
-    restart: unless-stopped
+      - client_dev                       # Attend que le client soit prêt
+      - server_dev                       # Attend que le serveur soit prêt
+    restart: unless-stopped              # Redémarre automatiquement
+
 
 volumes:
-  mysql_data_dev:                           # Volume persistant pour MySQL
-  redis_data_dev:                           # Volume persistant pour Redis
-  node_modules_server_dev:                  # Add named volume for server node_modules
-  node_modules_client_dev:                  # Add named volume for client node_modules
+  mysql_data_dev:          # Volume persistant pour les données MySQL (développement)
+  redis_data_dev:          # Volume persistant pour les données Redis (développement)
+  node_modules_server_dev: # Volume nommé pour les dépendances du serveur (évite les conflits)
+  node_modules_client_dev: # Volume nommé pour les dépendances du client (évite les conflits)
 
 secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
+  mysql_root_password:               # Secret pour le mot de passe root MySQL
+    file: ./secrets/mysql_root_password.txt  # Chemin vers le fichier avec le mot de passe
