@@ -150,11 +150,20 @@ const Account = () => {
                     return (
                       <Accordion key={id}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Stack direction="row" justifyContent="space-between" width={'100%'}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center" width={'100%'}>
                             <Typography>
                               {title} @ {cinema} — {tickets.length} ticket
                               {tickets.length > 1 ? 's' : ''}
                             </Typography>
+                            
+                            <Button 
+                              component={Link}
+                              to={`/movies/${screening.movie_id}/review`}
+                              variant="outlined" 
+                              size="small"
+                            >
+                              Leave a Review
+                            </Button>
                           </Stack>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -163,11 +172,6 @@ const Account = () => {
                               <TicketCard key={ticket.QR_code} ticket={ticket} />
                             ))}
                           </TicketGroup>
-                            <Link to={`/movies/${screening.movie_id}/review`} >
-                              <Button variant="contained" size="small" sx={{ mt: 2,marginLeft:"30%", width:"40%",marginRight:"30%" }} >
-                                Leave a Review
-                              </Button>
-                            </Link>
                         </AccordionDetails>
                       </Accordion>
                     )
