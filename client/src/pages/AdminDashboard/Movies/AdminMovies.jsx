@@ -111,7 +111,6 @@ const AdminMovies = () => {
 
    const totalPages = Math.max(Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1);
 
-   console.log(paginatedMovies)
 
    const HandleDeleteButton = async (id) => {
       try {

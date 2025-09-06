@@ -111,7 +111,6 @@ const EditMovie = () => {
         } catch (error) {
           const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
           showSnackbar("Failed to update movie: " + customMessage, "error");
-          console.log(error)
         }
     };
 

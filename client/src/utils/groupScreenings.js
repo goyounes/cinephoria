@@ -32,7 +32,6 @@ function groupScreenings(screenings) {
 
     cinemaGroup[room_id].screenings.push(screening);
   }
-  // console.log(groupedByDateByLocation);
   return groupedByDateByLocation;
 }
 
