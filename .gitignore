@@ -3,6 +3,7 @@ deploy
 electron-app
 .vscode
 .secrets
+client/build/
 # Logs
 logs
 *.log
