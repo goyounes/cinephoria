@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 import usersRoutes from  './routes/users.js'
 import moviesRoutes from  './routes/movies.js'
@@ -16,6 +17,12 @@ export default function createApp(rateLimiters) {
 
   app.use(express.json());
   app.use(cookieParser());
+
+  // CORS configuration
+  app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
+  }));
 
   // Use injected rate limiters
   const { authLimiter, browsingLimiter, bookingLimiter } = rateLimiters;
