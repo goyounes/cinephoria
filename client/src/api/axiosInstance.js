@@ -3,10 +3,11 @@ import axios from 'axios';
 // Environment detection (battle-tested approach)
 const getBaseURL = () => {
   const isElectron = window?.navigator?.userAgent?.includes('Electron');
+  const isDev = process.env.NODE_ENV === 'development';
   
   if (isElectron) {
-    // Direct API calls to production server
-    return 'https://showcase.cinephoria.net';
+    // In development, use local server; in production, use remote server
+    return isDev ? 'http://localhost:8080' : 'https://showcase.cinephoria.net';
   }
   
   // Web app uses proxy (dev) or nginx (prod)
