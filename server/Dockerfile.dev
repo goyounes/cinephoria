@@ -1,0 +1,24 @@
+# DOCKERFILE SERVEUR NODE.JS - TESTS
+# Ce fichier construit un conteneur spécialement configuré pour
+# l'exécution des tests automatisés avec toutes les dépendances
+
+# Image Node.js complète version 22 (inclut les outils de développement)
+FROM node:22
+
+# Définit le répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copie le fichier de configuration des dépendances
+COPY package.json ./
+
+# Installation de toutes les dépendances (dev + production pour les tests)
+RUN npm install
+
+# Copie tout le code source du serveur (y compris les fichiers de test)
+COPY . .
+
+# Expose le port 8080 pour les tests d'intégration
+EXPOSE 8080
+
+# Commande par défaut (sera surchargée par le docker-compose test)
+CMD ["npm", "run" , "dev"]

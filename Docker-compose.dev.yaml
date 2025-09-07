@@ -28,7 +28,8 @@ services:
 
   server_dev:
     build:
-      context: ./server                  # Dossier contenant le backend Node.js
+      context: ./server                  # Contexte du serveur backend
+      dockerfile: Dockerfile.dev         # Dockerfile spécialisé pour le mode dev
     container_name: backend_server_dev   # Nom du conteneur backend
     restart: unless-stopped              # Redémarre sauf si on l'arrête manuellement
     env_file:
