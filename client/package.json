@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "proxy": "http://localhost:8080",
   "dependencies": {
     "@date-io/dayjs": "^3.2.0",
