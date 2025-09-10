@@ -68,3 +68,4 @@ jobs:
           # Optional Health check
           sleep 90
           curl -f http://localhost:8080 || echo "Service not ready yet"
+          docker image prune -f
