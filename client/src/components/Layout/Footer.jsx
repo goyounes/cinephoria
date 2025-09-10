@@ -1,4 +1,5 @@
-import { Box, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { useState } from 'react';
+import { Box, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, ClickAwayListener } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const cinemas = [
@@ -47,6 +48,8 @@ const cinemas = [
 ];
 
 const Footer = () => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <Stack 
       component="footer"
@@ -58,18 +61,21 @@ const Footer = () => {
         zIndex: 1300,
       }}
     >
-      <Accordion
-        sx={{
-          backgroundColor: '#2c3e50',
-          '& .MuiSvgIcon-root': {
-            color: 'white',
-          },
-          boxShadow: 'none',
-          '&:before': {
-            display: 'none',
-          },
-        }}
-      >
+      <ClickAwayListener onClickAway={() => setExpanded(false)}>
+        <Accordion
+          expanded={expanded}
+          onChange={(event, isExpanded) => setExpanded(isExpanded)}
+          sx={{
+            backgroundColor: '#2c3e50',
+            '& .MuiSvgIcon-root': {
+              color: 'white',
+            },
+            boxShadow: 'none',
+            '&:before': {
+              display: 'none',
+            },
+          }}
+        >
         <AccordionSummary 
           expandIcon={<ExpandMoreIcon />}
           sx={{
@@ -112,7 +118,8 @@ const Footer = () => {
             ))}
           </Grid>
         </AccordionDetails>
-      </Accordion>
+        </Accordion>
+      </ClickAwayListener>
 
       <Typography
         variant="caption"
