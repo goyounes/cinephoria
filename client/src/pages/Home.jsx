@@ -58,13 +58,17 @@ const Home = () => {
          <Typography variant="h5">Latest Releases </Typography>
 
          <Stack gap={2} justifyContent="flex-start" direction="row" flexWrap="wrap">
-         {movies.map((movie) => (
-            <MovieCard
-               to={`/movies/${movie.movie_id}`}
-               key={movie.movie_id}
-               movie={movie}
-            />
-         ))}
+         {movies.length === 0 ? (
+            <Typography>No movie added recently</Typography>
+         ) : (
+            movies.map((movie) => (
+               <MovieCard
+                  to={`/movies/${movie.movie_id}`}
+                  key={movie.movie_id}
+                  movie={movie}
+               />
+            ))
+         )}
          </Stack>
 
       </Container>
