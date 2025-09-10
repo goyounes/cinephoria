@@ -19,8 +19,16 @@ export default function createApp(rateLimiters) {
   app.use(cookieParser());
 
   // CORS configuration
+  const allowedOrigins = [
+    process?.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://localhost', // Capacitor Android apps
+    'capacitor://localhost', // Capacitor iOS apps
+    'ionic://localhost', // Ionic apps
+    'http://localhost', // Capacitor alternative
+  ];
+  
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true
   }));
 
