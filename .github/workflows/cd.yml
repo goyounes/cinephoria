@@ -66,5 +66,5 @@ jobs:
           docker compose up -d
           
           # Optional Health check
-          sleep 60
+          sleep 90
           curl -f http://localhost:8080 || echo "Service not ready yet"

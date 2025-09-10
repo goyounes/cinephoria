@@ -1,4 +1,5 @@
-import { Box, Stack, Typography, Grid } from '@mui/material';
+import { Box, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const cinemas = [
   {
@@ -57,36 +58,61 @@ const Footer = () => {
         zIndex: 1300,
       }}
     >
-      <Typography variant="h6" textAlign="center" gutterBottom>
-        Our Cinemas
-      </Typography>
-
-      <Grid container spacing={2} mt={2} justifyContent="space-between">
-        {cinemas.map((cinema) => (
-          <Grid
-            key={cinema.name}
-            size={{ xs: 12, sm: 6,md:4, xl:1.5 }}
-
-            sx={{ display: 'flex', justifyContent: 'start' }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                textAlign: 'left',
-                gap: 0.5,
-                ml:"25%"//neccesary hack to get the behaviour exactly like i wanted
-              }}
-            >
-              <Typography fontWeight="bold">{cinema.name}</Typography>
-              <Typography variant="body2">{cinema.address}</Typography>
-              <Typography variant="body2">📞 {cinema.phone}</Typography>
-              <Typography variant="body2">🕒 {cinema.hours}</Typography>
-            </Box>
+      <Accordion
+        sx={{
+          backgroundColor: '#2c3e50',
+          '& .MuiSvgIcon-root': {
+            color: 'white',
+          },
+          boxShadow: 'none',
+          '&:before': {
+            display: 'none',
+          },
+        }}
+      >
+        <AccordionSummary 
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            justifyContent: 'center',
+            '& .MuiAccordionSummary-content': {
+              justifyContent: 'center',
+              flexGrow: 0,
+            },
+            '& .MuiAccordionSummary-expandIconWrapper': {
+              marginLeft: 1,
+            },
+          }}
+        >
+          <Typography variant="h6" color="white">
+            Our Cinemas
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2} justifyContent="space-between">
+            {cinemas.map((cinema) => (
+              <Grid
+                key={cinema.name}
+                size={{ xs: 12, sm: 6, md: 4, xl: 1.5 }}
+                sx={{ justifyContent: 'start' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0.5,
+                    ml: "25%"
+                  }}
+                >
+                  <Typography fontWeight="bold" color="white">{cinema.name}</Typography>
+                  <Typography variant="body2" color="white">{cinema.address}</Typography>
+                  <Typography variant="body2" color="white">📞 {cinema.phone}</Typography>
+                  <Typography variant="body2" color="white">🕒 {cinema.hours}</Typography>
+                </Box>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        </AccordionDetails>
+      </Accordion>
 
       <Typography
         variant="caption"
