@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker-compose:*)",
+      "Bash(dir client)",
+      "WebSearch",
+      "Bash(node:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
