@@ -245,7 +245,7 @@ describe('Users Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send(userData);
 
-      expect(response.status).toBe(500); // This will still be 500 because it's a database error, not validation
+      expect(response.status).toBe(409); // ConflictError for duplicate username
       expect(response.body.message).toContain('Username already exists');
     });
 
