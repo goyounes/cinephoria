@@ -1,12 +1,14 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -15,13 +17,37 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
+interface UserData {
+  user_name: string;
+  user_email: string;
+  first_name: string;
+  last_name: string;
+  user_password: string;
+  role_id: number;
+}
+
+interface ScreeningData {
+  screening_id: number;
+  movie_id: number;
+  cinema_id: number;
+  room_id: number;
+  start_date: string;
+  start_time: string;
+}
+
+interface TicketType {
+  ticket_type_id: number;
+  ticket_type_name: string;
+  ticket_type_price: string;
+}
+
 describe('Checkout Integration Tests', () => {
-  let testUserData;
-  let testEmployeeData;
-  let testScreeningData;
-  let testTicketTypes;
-  let userToken;
-  let employeeToken;
+  let testUserData: UserData;
+  let testEmployeeData: UserData;
+  let testScreeningData: ScreeningData;
+  let testTicketTypes: TicketType[];
+  let userToken: string;
+  let employeeToken: string;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -51,12 +77,12 @@ describe('Checkout Integration Tests', () => {
     const userPasswordHash = await bcrypt.hash(testUserData.user_password, 10);
     const employeePasswordHash = await bcrypt.hash(testEmployeeData.user_password, 10);
 
-    const [userResult] = await pool.query(`
+    const [userResult] = await pool.query<ResultSetHeader>(`
       INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified, refresh_token_version)
       VALUES (?, ?, ?, ?, ?, TRUE, 1)
     `, [testUserData.user_name, testUserData.user_email, testUserData.first_name, testUserData.last_name, testUserData.role_id]);
 
-    const [employeeResult] = await pool.query(`
+    const [employeeResult] = await pool.query<ResultSetHeader>(`
       INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified, refresh_token_version)
       VALUES (?, ?, ?, ?, ?, TRUE, 1)
     `, [testEmployeeData.user_name, testEmployeeData.user_email, testEmployeeData.first_name, testEmployeeData.last_name, testEmployeeData.role_id]);
@@ -103,12 +129,12 @@ describe('Checkout Integration Tests', () => {
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
     // Get existing movie, cinema, and room from test database
-    const [movies] = await pool.query('SELECT movie_id FROM movies LIMIT 1');
-    const [cinemas] = await pool.query('SELECT cinema_id FROM cinemas LIMIT 1');
-    const [rooms] = await pool.query('SELECT room_id FROM rooms LIMIT 1');
+    const [movies] = await pool.query<RowDataPacket[]>('SELECT movie_id FROM movies LIMIT 1');
+    const [cinemas] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas LIMIT 1');
+    const [rooms] = await pool.query<RowDataPacket[]>('SELECT room_id FROM rooms LIMIT 1');
 
     // Insert a future screening
-    const [screeningResult] = await pool.query(`
+    const [screeningResult] = await pool.query<ResultSetHeader>(`
       INSERT INTO screenings (movie_id, cinema_id, room_id, start_date, start_time, end_time, isDeleted)
       VALUES (?, ?, ?, ?, '14:00:00', '16:00:00', FALSE)
     `, [movies[0].movie_id, cinemas[0].cinema_id, rooms[0].room_id, tomorrowStr]);
@@ -255,16 +281,16 @@ describe('Checkout Integration Tests', () => {
 
       test('should handle concurrent booking attempts gracefully', async () => {
         // Debug: Check available seats before concurrent booking test
-        const [roomInfo] = await pool.query(`
-          SELECT r.room_capacity 
-          FROM rooms r 
-          JOIN screenings s ON r.room_id = s.room_id 
+        const [roomInfo] = await pool.query<RowDataPacket[]>(`
+          SELECT r.room_capacity
+          FROM rooms r
+          JOIN screenings s ON r.room_id = s.room_id
           WHERE s.screening_id = ?
         `, [testScreeningData.screening_id]);
-        
-        const [bookedSeats] = await pool.query(`
-          SELECT COUNT(*) as count 
-          FROM tickets 
+
+        const [bookedSeats] = await pool.query<RowDataPacket[]>(`
+          SELECT COUNT(*) as count
+          FROM tickets
           WHERE screening_id = ?
         `, [testScreeningData.screening_id]);
         
@@ -309,11 +335,11 @@ describe('Checkout Integration Tests', () => {
         futureDate.setDate(futureDate.getDate() + 20); // 20 days from now
         const futureDateStr = futureDate.toISOString().split('T')[0];
 
-        const [movieRows] = await pool.query('SELECT movie_id FROM movies WHERE isDeleted = FALSE LIMIT 1');
-        const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
-        const [roomRows] = await pool.query('SELECT room_id FROM rooms WHERE isDeleted = FALSE LIMIT 1');
+        const [movieRows] = await pool.query<RowDataPacket[]>('SELECT movie_id FROM movies WHERE isDeleted = FALSE LIMIT 1');
+        const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+        const [roomRows] = await pool.query<RowDataPacket[]>('SELECT room_id FROM rooms WHERE isDeleted = FALSE LIMIT 1');
 
-        const [insertResult] = await pool.query(`
+        const [insertResult] = await pool.query<ResultSetHeader>(`
           INSERT INTO screenings (movie_id, cinema_id, room_id, start_date, start_time, end_time)
           VALUES (?, ?, ?, ?, '14:00:00', '16:00:00')
         `, [movieRows[0].movie_id, cinemaRows[0].cinema_id, roomRows[0].room_id, futureDateStr]);
@@ -429,10 +455,10 @@ describe('Checkout Integration Tests', () => {
     describe('Seat Availability', () => {
       test('should reject booking when not enough seats available', async () => {
         // Try to book more tickets than room capacity
-        const [roomRows] = await pool.query(`
-          SELECT r.room_capacity 
-          FROM rooms r 
-          JOIN screenings s ON r.room_id = s.room_id 
+        const [roomRows] = await pool.query<RowDataPacket[]>(`
+          SELECT r.room_capacity
+          FROM rooms r
+          JOIN screenings s ON r.room_id = s.room_id
           WHERE s.screening_id = ?
         `, [testScreeningData.screening_id]);
 
@@ -461,7 +487,7 @@ describe('Checkout Integration Tests', () => {
     describe('Database Transaction Integrity', () => {
       test('should maintain transaction integrity on booking failure', async () => {
         // Get initial ticket count
-        const [initialTickets] = await pool.query(
+        const [initialTickets] = await pool.query<RowDataPacket[]>(
           'SELECT COUNT(*) as count FROM tickets WHERE screening_id = ?',
           [testScreeningData.screening_id]
         );
@@ -487,7 +513,7 @@ describe('Checkout Integration Tests', () => {
         expect(response.status).toBe(400);
 
         // Verify no tickets were created
-        const [finalTickets] = await pool.query(
+        const [finalTickets] = await pool.query<RowDataPacket[]>(
           'SELECT COUNT(*) as count FROM tickets WHERE screening_id = ?',
           [testScreeningData.screening_id]
         );
@@ -518,7 +544,7 @@ describe('Checkout Integration Tests', () => {
         expect(response.status).toBe(200);
 
         // Check that QR codes are unique in database
-        const [tickets] = await pool.query(
+        const [tickets] = await pool.query<RowDataPacket[]>(
           'SELECT QR_code FROM tickets WHERE screening_id = ? AND seat_id IN (?)',
           [testScreeningData.screening_id, response.body.seat_ids]
         );

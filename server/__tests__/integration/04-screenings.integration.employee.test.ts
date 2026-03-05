@@ -1,6 +1,8 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import { RequestHandler } from 'express';
+import { ResultSetHeader } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import dayjs from 'dayjs';
 import { signAccessToken } from '../../utils/index.js';
@@ -10,7 +12,7 @@ import { signExpiredAccessToken, signTokenWithWrongSecret } from '../utils/jwtTe
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -20,8 +22,12 @@ const app = createApp({
 const { pool } = await import('../../config/mysqlConnect.js');
 
 describe('Screenings Integration Tests - Employee Level', () => {
-  let userToken, employeeToken, adminToken;
-  let testUserId, testEmployeeId, testAdminId;
+  let userToken: string;
+  let employeeToken: string;
+  let adminToken: string;
+  let testUserId: number;
+  let testEmployeeId: number;
+  let testAdminId: number;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -30,19 +36,19 @@ describe('Screenings Integration Tests - Employee Level', () => {
     const connection = await pool.getConnection();
     try {
       // Create test users
-      const [userResult] = await connection.execute(
+      const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
       testUserId = userResult.insertId;
 
-      const [employeeResult] = await connection.execute(
+      const [employeeResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testemployee', 'test@employee.com', 'Test', 'Employee', 2, 1]
       );
       testEmployeeId = employeeResult.insertId;
 
-      const [adminResult] = await connection.execute(
+      const [adminResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testadmin', 'test@admin.com', 'Test', 'Admin', 3, 1]
       );

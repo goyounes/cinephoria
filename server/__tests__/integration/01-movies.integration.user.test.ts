@@ -1,13 +1,15 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
+import { RequestHandler } from 'express';
+import { ResultSetHeader } from 'mysql2';
+import { setupTestDatabase, cleanupTestDatabase } from '../utils/dbTestUtils.js';
 import { signAccessToken } from '../../utils/index.js';
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -17,8 +19,8 @@ const app = createApp({
 const { pool } = await import('../../config/mysqlConnect.js');
 
 describe('Movies Integration Tests - User Level', () => {
-  let userToken;
-  let testUserId;
+  let userToken: string;
+  let testUserId: number;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -26,7 +28,7 @@ describe('Movies Integration Tests - User Level', () => {
     // Create test user
     const connection = await pool.getConnection();
     try {
-      const [userResult] = await connection.execute(
+      const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
@@ -74,7 +76,7 @@ describe('Movies Integration Tests - User Level', () => {
         .get('/api/v1/movies')
         .expect(200);
 
-      const movieWithGenres = response.body.find(m => m.genres && m.genres.length > 0);
+      const movieWithGenres = response.body.find((m: any) => m.genres && m.genres.length > 0);
       if (movieWithGenres) {
         expect(Array.isArray(movieWithGenres.genres)).toBe(true);
         expect(movieWithGenres.genres[0]).toHaveProperty('genre_id');
@@ -103,7 +105,7 @@ describe('Movies Integration Tests - User Level', () => {
         .get('/api/v1/movies/genres')
         .expect(200);
 
-      const genreNames = response.body.map(g => g.genre_name);
+      const genreNames = response.body.map((g: any) => g.genre_name);
       expect(genreNames).toContain('Action');
       expect(genreNames).toContain('Comedy');
       expect(genreNames).toContain('Drama');
@@ -122,17 +124,17 @@ describe('Movies Integration Tests - User Level', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to start of day
       
-      response.body.forEach(movie => {
+      response.body.forEach((movie: any) => {
         expect(movie).toHaveProperty('movie_id');
         expect(movie).toHaveProperty('title');
         expect(movie).toHaveProperty('imageUrl');
-        
+
         // Check that all screening dates are today or in the future
         if (movie.screenings && Array.isArray(movie.screenings)) {
-          movie.screenings.forEach(screening => {
+          movie.screenings.forEach((screening: any) => {
             const screeningDate = new Date(screening.start_date);
             screeningDate.setHours(0, 0, 0, 0); // Reset time for fair comparison
-            
+
             expect(screeningDate.getTime()).toBeGreaterThanOrEqual(today.getTime());
           });
         }
@@ -169,7 +171,7 @@ describe('Movies Integration Tests - User Level', () => {
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
-      response.body.forEach(movie => {
+      response.body.forEach((movie: any) => {
         expect(movie).toHaveProperty('movie_id');
         expect(movie).toHaveProperty('title');
         expect(movie).toHaveProperty('created_at');
@@ -223,7 +225,7 @@ describe('Movies Integration Tests - User Level', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
       // Screenings structure should include combined qualities
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         expect(screening).toHaveProperty('screening_id');
         expect(screening).toHaveProperty('start_date');
         expect(screening).toHaveProperty('start_time');
@@ -240,7 +242,7 @@ describe('Movies Integration Tests - User Level', () => {
       
       expect(Array.isArray(response.body)).toBe(true);
       // Verify all returned screenings are for cinema_id 1
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         expect(screening.cinema_id).toBe(1);
       });
     });
