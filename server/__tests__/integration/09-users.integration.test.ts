@@ -1,5 +1,7 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { signAccessToken } from '../../utils/index.js';
 import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
@@ -8,7 +10,7 @@ import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -18,8 +20,12 @@ const app = createApp({
 const { pool } = await import('../../config/mysqlConnect.js');
 
 describe('Users Integration Tests', () => {
-  let userToken, employeeToken, adminToken;
-  let testUserId, testEmployeeId, testAdminId;
+  let userToken: string;
+  let employeeToken: string;
+  let adminToken: string;
+  let testUserId: number;
+  let testEmployeeId: number;
+  let testAdminId: number;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -28,21 +34,21 @@ describe('Users Integration Tests', () => {
     const connection = await pool.getConnection();
     try {
       // Create regular user
-      const [userResult] = await connection.execute(
+      const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
       testUserId = userResult.insertId;
 
       // Create employee
-      const [employeeResult] = await connection.execute(
+      const [employeeResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testemployee', 'test@employee.com', 'Test', 'Employee', 2, 1]
       );
       testEmployeeId = employeeResult.insertId;
 
       // Create admin
-      const [adminResult] = await connection.execute(
+      const [adminResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testadmin', 'test@admin.com', 'Test', 'Admin', 3, 1]
       );
@@ -104,7 +110,7 @@ describe('Users Integration Tests', () => {
       expect(user).toHaveProperty('role_name');
       
       // Should only return users with role_id > 1 (employees and admins)
-      response.body.forEach(u => {
+      response.body.forEach((u: any) => {
         expect(u.role_id).toBeGreaterThan(1);
       });
     });
@@ -115,8 +121,8 @@ describe('Users Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const employee = response.body.find(u => u.role_id === 2);
-      const admin = response.body.find(u => u.role_id === 3);
+      const employee = response.body.find((u: any) => u.role_id === 2);
+      const admin = response.body.find((u: any) => u.role_id === 3);
       
       if (employee) {
         expect(employee.role_name).toBe('employee');
@@ -201,7 +207,7 @@ describe('Users Integration Tests', () => {
       // Verify user was created in database
       const connection = await pool.getConnection();
       try {
-        const [rows] = await connection.execute(
+        const [rows] = await connection.execute<RowDataPacket[]>(
           'SELECT * FROM users WHERE user_name = ?',
           [userData.username]
         );
@@ -266,7 +272,7 @@ describe('Users Integration Tests', () => {
 
       expect(response.status).toBe(400); // Now has validation
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('Role ID must be between 1 and 3'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('Role ID must be between 1 and 3'))).toBe(true);
     });
   });
 
@@ -377,7 +383,7 @@ describe('Users Integration Tests', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('valid email'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('valid email'))).toBe(true);
     });
 
     test('should reject user creation with weak password', async () => {
@@ -397,7 +403,7 @@ describe('Users Integration Tests', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.path === 'password')).toBe(true);
+      expect(response.body.errors.some((err: any) => err.path === 'password')).toBe(true);
     });
 
     test('should reject user creation with invalid role_id type', async () => {
@@ -487,16 +493,16 @@ describe('Users Integration Tests', () => {
         .expect(200);
 
       // Should not include regular users (role_id = 1)
-      const regularUsers = response.body.filter(u => u.role_id === 1);
+      const regularUsers = response.body.filter((u: any) => u.role_id === 1);
       expect(regularUsers.length).toBe(0);
 
       // Should include employees and admins
-      const authorizedUsers = response.body.filter(u => u.role_id > 1);
+      const authorizedUsers = response.body.filter((u: any) => u.role_id > 1);
       expect(authorizedUsers.length).toBeGreaterThan(0);
     });
 
     test('should enforce strict admin-only access', async () => {
-      const endpoints = [
+      const endpoints: Array<{ method: 'get' | 'post'; path: string }> = [
         { method: 'get', path: '/api/v1/users' },
         { method: 'post', path: '/api/v1/users' },
         { method: 'get', path: `/api/v1/users/${testEmployeeId}` }
@@ -504,13 +510,13 @@ describe('Users Integration Tests', () => {
 
       for (const endpoint of endpoints) {
         // Test with user token
-        await request(app)
+        await (request(app) as any)
           [endpoint.method](endpoint.path)
           .set('Authorization', `Bearer ${userToken}`)
           .expect(403);
 
         // Test with employee token
-        await request(app)
+        await (request(app) as any)
           [endpoint.method](endpoint.path)
           .set('Authorization', `Bearer ${employeeToken}`)
           .expect(403);
@@ -523,7 +529,7 @@ describe('Users Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      response.body.forEach(user => {
+      response.body.forEach((user: any) => {
         // Should not expose password hashes
         expect(user).not.toHaveProperty('user_password_hash');
         expect(user).not.toHaveProperty('password');

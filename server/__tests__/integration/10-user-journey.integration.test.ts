@@ -1,5 +1,7 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import dayjs from 'dayjs';
 import { s3, bucketName } from '../../api/awsS3Client.js';
@@ -9,7 +11,7 @@ import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -18,15 +20,26 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
+interface UserData {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
 describe('Complete User Journey Integration Tests', () => {
-  let adminToken;
-  let userToken;
-  let newAdminToken;
-  let testUserData;
-  let newAdminId;
-  let createdTicketIds = [];
-  let newCinemaId, newMovieId, newScreeningId, newRoomId;
-  let createdMoviePosterName;
+  let adminToken: string;
+  let userToken: string;
+  let newAdminToken: string;
+  let testUserData: UserData;
+  let newAdminId: number;
+  let createdTicketIds: number[] = [];
+  let newCinemaId: number;
+  let newMovieId: number;
+  let newScreeningId: number;
+  let newRoomId: number;
+  let createdMoviePosterName: string;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -68,7 +81,7 @@ describe('Complete User Journey Integration Tests', () => {
         
         const deleteCommand = new DeleteObjectCommand(deleteParams);
         await s3.send(deleteCommand);
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Failed to cleanup S3 image ${createdMoviePosterName}:`, error.message);
       }
     }
@@ -172,9 +185,9 @@ describe('Complete User Journey Integration Tests', () => {
         .field('length_minutes', movieData.length_minutes)
         .field('length_seconds', movieData.length_seconds);
 
-      // Add each genre as a separate field (this is how arrays work in multipart forms) 
+      // Add each genre as a separate field (this is how arrays work in multipart forms)
       // Check implementation in AdminAddCinema Component in client
-      movieData.selectedGenres.forEach(genreId => {
+      movieData.selectedGenres.forEach((genreId: number) => {
         movieRequest = movieRequest.field('selectedGenres', genreId);
       });
 
@@ -230,14 +243,14 @@ describe('Complete User Journey Integration Tests', () => {
       expect(registrationResponse.body).toHaveProperty('user_id');
 
       // 2. Verify user in database is unverified
-      const [userRows] = await pool.query(
+      const [userRows] = await pool.query<RowDataPacket[]>(
         'SELECT user_id, user_name, user_email, isVerified FROM users WHERE user_email = ?',
         [testUserData.email]
       );
-      
+
       expect(userRows).toHaveLength(1);
       expect(userRows[0].isVerified).toBe(0);
-      
+
       // 3. Generate verification token and simulate clicking the email link
       const { generateEmailVerificationLink } = await import('../../utils/index.js');
       const { link, token } = generateEmailVerificationLink(userRows[0].user_id);
@@ -273,7 +286,7 @@ describe('Complete User Journey Integration Tests', () => {
       expect(moviesResponse.body.length).toBeGreaterThan(0);
       
       // Find the movie created by the new admin
-      const targetMovie = moviesResponse.body.find(movie => movie.movie_id === newMovieId);
+      const targetMovie = moviesResponse.body.find((movie: any) => movie.movie_id === newMovieId);
       expect(targetMovie).toBeDefined();
       expect(targetMovie.title).toBe('New Admin Movie');
     });
@@ -296,7 +309,7 @@ describe('Complete User Journey Integration Tests', () => {
       expect(screeningsResponse.body).toBeInstanceOf(Array);
       expect(screeningsResponse.body.length).toBeGreaterThan(0);
       
-      const targetScreening = screeningsResponse.body.find(s => s.screening_id === newScreeningId);
+      const targetScreening = screeningsResponse.body.find((s: any) => s.screening_id === newScreeningId);
       expect(targetScreening).toBeDefined();
     });
 
@@ -359,8 +372,8 @@ describe('Complete User Journey Integration Tests', () => {
         .expect(200);
 
       expect(ticketsResponse.body).toBeInstanceOf(Array);
-      
-      const ourTickets = ticketsResponse.body.filter(t => t.screening_id === newScreeningId);
+
+      const ourTickets = ticketsResponse.body.filter((t: any) => t.screening_id === newScreeningId);
       expect(ourTickets.length).toBeGreaterThanOrEqual(2);
       
       const ticket = ourTickets[0];

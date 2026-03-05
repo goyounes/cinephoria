@@ -549,7 +549,7 @@ describe('Checkout Integration Tests', () => {
           [testScreeningData.screening_id, response.body.seat_ids]
         );
 
-        const qrCodes = tickets.map(t => t.QR_code);
+        const qrCodes = tickets.map((t: any) => t.QR_code);
         const uniqueQrCodes = [...new Set(qrCodes)];
         
         expect(qrCodes).toHaveLength(3);

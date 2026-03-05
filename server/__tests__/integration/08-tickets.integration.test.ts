@@ -1,6 +1,8 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import { RequestHandler } from 'express';
+import { ResultSetHeader } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { signAccessToken } from '../../utils/index.js';
 import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
@@ -9,7 +11,7 @@ import { signExpiredAccessToken } from '../utils/jwtTestUtils.js';
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -19,8 +21,8 @@ const app = createApp({
 const { pool } = await import('../../config/mysqlConnect.js');
 
 describe('Tickets Integration Tests', () => {
-  let userToken
-  let testUserId
+  let userToken: string;
+  let testUserId: number;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -29,7 +31,7 @@ describe('Tickets Integration Tests', () => {
     const connection = await pool.getConnection();
     try {
       // Create regular user
-      const [userResult] = await connection.execute(
+      const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
@@ -103,7 +105,7 @@ describe('Tickets Integration Tests', () => {
         .get('/api/v1/tickets/types')
         .expect(200);
 
-      const typeNames = response.body.map(t => t.ticket_type_name);
+      const typeNames = response.body.map((t: any) => t.ticket_type_name);
       expect(typeNames).toContain('Adult');
       expect(typeNames).toContain('Child');
       expect(typeNames).toContain('Student');
@@ -119,7 +121,7 @@ describe('Tickets Integration Tests', () => {
       expect(response.body.length).toBeGreaterThan(0);
       
       // Verify response structure from route handler
-      response.body.forEach(ticketType => {
+      response.body.forEach((ticketType: any) => {
         expect(ticketType).toHaveProperty('ticket_type_id');
         expect(ticketType).toHaveProperty('ticket_type_name');
         expect(ticketType).toHaveProperty('ticket_type_price');
@@ -140,7 +142,7 @@ describe('Tickets Integration Tests', () => {
         request(app).get('/api/v1/tickets/types')
       ]);
 
-      responses.forEach(response => {
+      responses.forEach((response: any) => {
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);
         expect(response.body.length).toBeGreaterThan(0);
@@ -198,9 +200,9 @@ describe('Tickets Integration Tests', () => {
     test('should return empty array for user with no tickets', async () => {
       // Create another user with no tickets
       const connection = await pool.getConnection();
-      let newUserToken;
+      let newUserToken: string;
       try {
-        const [userResult] = await connection.execute(
+        const [userResult] = await connection.execute<ResultSetHeader>(
           'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
           ['emptyuser', 'empty@user.com', 'Empty', 'User', 1, 1]
         );
@@ -252,9 +254,9 @@ describe('Tickets Integration Tests', () => {
     test('should only return tickets belonging to authenticated user', async () => {
       // Create another user with different tickets
       const connection = await pool.getConnection();
-      let otherUserToken;
+      let otherUserToken: string;
       try {
-        const [userResult] = await connection.execute(
+        const [userResult] = await connection.execute<ResultSetHeader>(
           'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
           ['otheruser', 'other@user.com', 'Other', 'User', 1, 1]
         );
@@ -288,15 +290,15 @@ describe('Tickets Integration Tests', () => {
       expect(otherResponse.body.length).toBe(1);
       
       // Verify QR codes are different
-      const originalQRCodes = originalResponse.body.map(t => t.QR_code);
-      const otherQRCodes = otherResponse.body.map(t => t.QR_code);
-      
+      const originalQRCodes = originalResponse.body.map((t: any) => t.QR_code);
+      const otherQRCodes = otherResponse.body.map((t: any) => t.QR_code);
+
       expect(originalQRCodes).toContain('test-qr-code-123');
       expect(originalQRCodes).toContain('test-qr-code-456');
       expect(otherQRCodes).toContain('other-user-ticket');
-      
+
       // No overlap between users' tickets
-      expect(originalQRCodes.some(qr => otherQRCodes.includes(qr))).toBe(false);
+      expect(originalQRCodes.some((qr: any) => otherQRCodes.includes(qr))).toBe(false);
     });
 
     test('should return complete ticket information with joins', async () => {
