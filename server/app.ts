@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction, RequestHandler } from 'express';
+import express, { Request, Response, RequestHandler } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -10,6 +10,8 @@ import checkoutRoutes from  './routes/checkout.js'
 import authRoutes from  './routes/auth.js'
 import cinemasRoutes from  './routes/cinemas.js'
 import { sendContactAcknowledgment, sendContactMessage } from './api/emailClient.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { respondWithJson } from './utils/responses.js';
 
 // App factory function with dependency injection for rate limiters
 interface RateLimiters {
@@ -52,34 +54,23 @@ export default function createApp(rateLimiters: RateLimiters) {
       res.send('Hello from the backend!');
   });
 
-  app.post("/api/v1/messages", async (req: Request, res: Response, next: NextFunction) => {
-      try {
-          await sendContactMessage({
-              name : req.body.message_sender_name,
-              email : req.body.message_sender_email,
-              subject : req.body.message_subject,
-              message : req.body.message_text, 
-          })
-          await sendContactAcknowledgment({
-              name : req.body.message_sender_name,
-              email : req.body.message_sender_email,
-              subject : req.body.message_subject,
-              message : req.body.message_text, 
-          }) 
-          res.status(200).json({message:"Message sent succesfully"})
-      } catch (error) {
-          return next(error)
-      }
+  app.post("/api/v1/messages", async (req: Request, res: Response) => {
+      await sendContactMessage({
+          name : req.body.message_sender_name,
+          email : req.body.message_sender_email,
+          subject : req.body.message_subject,
+          message : req.body.message_text,
+      })
+      await sendContactAcknowledgment({
+          name : req.body.message_sender_name,
+          email : req.body.message_sender_email,
+          subject : req.body.message_subject,
+          message : req.body.message_text,
+      })
+      respondWithJson(res, {message:"Message sent succesfully"});
   })
 
-  app.use((err: any, _, res: Response, __) => {
-    console.log("Server: Middleware logging error stack ...");
-    console.error(err.stack);
-    res.status(err.status || 500).json({
-        message: err.message || "Something broke in the web server !",
-        status: err.status || 500
-    });
-  });
+  app.use(errorHandler);
 
   return app;
 }
