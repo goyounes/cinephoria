@@ -1,6 +1,6 @@
 import { MovieRow, GenreRow } from '../types/database.js';
 
-interface MovieWithGenresArray extends Omit<MovieRow, 'genres_ids' | 'genres_names'> {
+export interface MovieWithGenresArray extends Omit<MovieRow, 'genres_ids' | 'genres_names'> {
   genres: GenreRow[] | null;
 }
 
