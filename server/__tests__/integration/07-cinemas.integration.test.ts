@@ -1,12 +1,14 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -15,13 +17,22 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
+interface UserData {
+  user_name: string;
+  user_email: string;
+  first_name: string;
+  last_name: string;
+  user_password: string;
+  role_id: number;
+}
+
 describe('Cinemas Integration Tests', () => {
-  let testUserData;
-  let testEmployeeData;
-  let testAdminData;
-  let userToken;
-  let employeeToken;
-  let adminToken;
+  let testUserData: UserData;
+  let testEmployeeData: UserData;
+  let testAdminData: UserData;
+  let userToken: string;
+  let employeeToken: string;
+  let adminToken: string;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -61,8 +72,8 @@ describe('Cinemas Integration Tests', () => {
     
     for (const userData of [testUserData, testEmployeeData, testAdminData]) {
       const passwordHash = await bcrypt.hash(userData.user_password, 10);
-      
-      const [userResult] = await pool.query(`
+
+      const [userResult] = await pool.query<ResultSetHeader>(`
         INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified, refresh_token_version)
         VALUES (?, ?, ?, ?, ?, TRUE, 1)
       `, [userData.user_name, userData.user_email, userData.first_name, userData.last_name, userData.role_id]);
@@ -118,7 +129,7 @@ describe('Cinemas Integration Tests', () => {
       expect(response.body.length).toBeGreaterThan(0);
       
       // Verify structure of cinema objects
-      response.body.forEach(cinema => {
+      response.body.forEach((cinema: any) => {
         expect(cinema).toHaveProperty('cinema_id');
         expect(cinema).toHaveProperty('cinema_name');
         expect(cinema).toHaveProperty('cinema_adresse');
@@ -288,7 +299,7 @@ describe('Cinemas Integration Tests', () => {
         const cinema_id = response.body.cinema_id;
 
         // Verify in database
-        const [rows] = await pool.query(
+        const [rows] = await pool.query<RowDataPacket[]>(
           'SELECT * FROM cinemas WHERE cinema_id = ?',
           [cinema_id]
         );
@@ -302,7 +313,7 @@ describe('Cinemas Integration Tests', () => {
   });
 
   describe('PUT /api/v1/cinemas/:id', () => {
-    let testCinemaId;
+    let testCinemaId: number;
 
     beforeAll(async () => {
       // Create a test cinema for update tests
@@ -419,7 +430,7 @@ describe('Cinemas Integration Tests', () => {
       expect(Array.isArray(response.body)).toBe(true);
       
       if (response.body.length > 0) {
-        response.body.forEach(room => {
+        response.body.forEach((room: any) => {
           expect(room).toHaveProperty('room_id');
           expect(room).toHaveProperty('room_name');
           expect(room).toHaveProperty('room_capacity');
@@ -440,7 +451,7 @@ describe('Cinemas Integration Tests', () => {
   });
 
   describe('POST /api/v1/cinemas/rooms', () => {
-    let testCinemaForRooms;
+    let testCinemaForRooms: number;
 
     beforeAll(async () => {
       // Create a test cinema for room tests
@@ -525,7 +536,7 @@ describe('Cinemas Integration Tests', () => {
         const room_id = response.body.room_id;
 
         // Verify seats were created
-        const [seatRows] = await pool.query(
+        const [seatRows] = await pool.query<RowDataPacket[]>(
           'SELECT COUNT(*) as count FROM seats WHERE room_id = ? AND isDeleted = FALSE',
           [room_id]
         );
@@ -533,7 +544,7 @@ describe('Cinemas Integration Tests', () => {
         expect(seatRows[0].count).toBe(25);
 
         // Verify seat numbering
-        const [seats] = await pool.query(
+        const [seats] = await pool.query<RowDataPacket[]>(
           'SELECT seat_number FROM seats WHERE room_id = ? ORDER BY seat_number',
           [room_id]
         );
@@ -560,7 +571,7 @@ describe('Cinemas Integration Tests', () => {
         expect(response.status).toBe(500);
 
         // Verify no room was created
-        const [roomRows] = await pool.query(
+        const [roomRows] = await pool.query<RowDataPacket[]>(
           'SELECT COUNT(*) as count FROM rooms WHERE room_name = ?',
           [roomData.room_name]
         );
@@ -571,11 +582,11 @@ describe('Cinemas Integration Tests', () => {
   });
 
   describe('PUT /api/v1/cinemas/rooms/:id', () => {
-    let testRoomId;
+    let testRoomId: number;
 
     beforeAll(async () => {
       // Create a test room for update tests
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const roomData = {
@@ -593,7 +604,7 @@ describe('Cinemas Integration Tests', () => {
     });
 
     test('should allow employee to update room', async () => {
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const updateData = {
@@ -628,7 +639,7 @@ describe('Cinemas Integration Tests', () => {
     });
 
     test('should handle non-existent room ID', async () => {
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const updateData = {
@@ -648,11 +659,11 @@ describe('Cinemas Integration Tests', () => {
   });
 
   describe('DELETE /api/v1/cinemas/rooms/:id', () => {
-    let testRoomToDelete;
+    let testRoomToDelete: number;
 
     beforeAll(async () => {
       // Create a test room for deletion tests
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const roomData = {
@@ -678,7 +689,7 @@ describe('Cinemas Integration Tests', () => {
       expect(response.body.message).toBe('room deleted succesfully');
 
       // Verify room is soft deleted in database
-      const [rows] = await pool.query(
+      const [rows] = await pool.query<RowDataPacket[]>(
         'SELECT isDeleted FROM rooms WHERE room_id = ?',
         [testRoomToDelete]
       );
@@ -768,7 +779,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should handle invalid room capacity constraints', async () => {
       // Get a valid cinema_id
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const roomData = {
@@ -788,7 +799,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should handle zero room capacity', async () => {
       // Get a valid cinema_id
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const roomData = {
@@ -808,7 +819,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should handle room update with invalid data', async () => {
       // Get a valid room_id
-      const [roomRows] = await pool.query('SELECT room_id FROM rooms WHERE isDeleted = FALSE LIMIT 1');
+      const [roomRows] = await pool.query<RowDataPacket[]>('SELECT room_id FROM rooms WHERE isDeleted = FALSE LIMIT 1');
       const room_id = roomRows[0].room_id;
 
       const invalidRoomData = {
@@ -828,7 +839,7 @@ describe('Cinemas Integration Tests', () => {
 
     test('should handle cinema update with invalid data', async () => {
       // Get a valid cinema_id
-      const [cinemaRows] = await pool.query('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
+      const [cinemaRows] = await pool.query<RowDataPacket[]>('SELECT cinema_id FROM cinemas WHERE isDeleted = FALSE LIMIT 1');
       const cinema_id = cinemaRows[0].cinema_id;
 
       const invalidCinemaData = {
@@ -852,7 +863,7 @@ describe('Cinemas Integration Tests', () => {
         request(app).get('/api/v1/cinemas/rooms')
       ]);
 
-      responses.forEach(response => {
+      responses.forEach((response: any) => {
         // Should either succeed or fail gracefully
         expect([200, 500]).toContain(response.status);
         if (response.status === 500) {

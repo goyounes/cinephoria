@@ -1,6 +1,8 @@
-import { jest } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { signAccessToken } from '../../utils/index.js';
 
@@ -8,7 +10,7 @@ import { signAccessToken } from '../../utils/index.js';
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -18,8 +20,8 @@ const app = createApp({
 const { pool } = await import('../../config/mysqlConnect.js');
 
 describe('Screenings Integration Tests - User Level', () => {
-  let userToken;
-  let testUserId;
+  let userToken: string;
+  let testUserId: number;
 
   beforeAll(async () => {
     await setupTestDatabase();
@@ -27,7 +29,7 @@ describe('Screenings Integration Tests - User Level', () => {
     // Create test user
     const connection = await pool.getConnection();
     try {
-      const [userResult] = await connection.execute(
+      const [userResult] = await connection.execute<ResultSetHeader>(
         'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
         ['testuser', 'test@user.com', 'Test', 'User', 1, 1]
       );
@@ -88,7 +90,7 @@ describe('Screenings Integration Tests - User Level', () => {
       const maxDate = new Date(today);
       maxDate.setDate(today.getDate() + 14);
 
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         const screeningDate = new Date(screening.start_date);
         expect(screeningDate).toBeInstanceOf(Date);
         expect(screeningDate.getTime()).toBeLessThanOrEqual(maxDate.getTime());
@@ -101,8 +103,8 @@ describe('Screenings Integration Tests - User Level', () => {
         .expect(200);
 
       const now = new Date();
-      
-      response.body.forEach(screening => {
+
+      response.body.forEach((screening: any) => {
         const screeningDateTime = new Date(`${screening.start_date} ${screening.start_time}`);
         expect(screeningDateTime.getTime()).toBeGreaterThan(now.getTime());
       });
@@ -114,7 +116,7 @@ describe('Screenings Integration Tests - User Level', () => {
         .expect(200);
 
       // All returned screenings should be active (not deleted)
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         expect(screening.isDeleted).toBe(0); // MySQL boolean false = 0
       });
     });
@@ -173,7 +175,7 @@ describe('Screenings Integration Tests - User Level', () => {
         // Genres should be combined properly
         if (response.body.genres) {
           expect(Array.isArray(response.body.genres)).toBe(true);
-          response.body.genres.forEach(genre => {
+          response.body.genres.forEach((genre: any) => {
             expect(genre).toHaveProperty('genre_id');
             expect(genre).toHaveProperty('genre_name');
           });
@@ -182,7 +184,7 @@ describe('Screenings Integration Tests - User Level', () => {
         // Qualities should be combined properly
         if (response.body.qualities) {
           expect(Array.isArray(response.body.qualities)).toBe(true);
-          response.body.qualities.forEach(quality => {
+          response.body.qualities.forEach((quality: any) => {
             expect(quality).toHaveProperty('quality_id');
             expect(quality).toHaveProperty('quality_name');
           });
@@ -258,7 +260,7 @@ describe('Screenings Integration Tests - User Level', () => {
         .get('/api/v1/screenings/upcoming')
         .expect(200);
 
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         // Should not include sensitive admin data
         expect(screening).not.toHaveProperty('created_at');
         expect(screening).not.toHaveProperty('updated_at');
@@ -272,10 +274,10 @@ describe('Screenings Integration Tests - User Level', () => {
         .get('/api/v1/screenings/upcoming')
         .expect(200);
 
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         // Validate date format (YYYY-MM-DD)
         expect(screening.start_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-        
+
         // Validate time format (HH:MM:SS)
         expect(screening.start_time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
         expect(screening.end_time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
@@ -287,7 +289,7 @@ describe('Screenings Integration Tests - User Level', () => {
         .get('/api/v1/screenings/upcoming')
         .expect(200);
 
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         if (screening.total_seats && screening.booked_seats && screening.seats_left !== undefined) {
           expect(screening.total_seats - screening.booked_seats).toBe(screening.seats_left);
           expect(screening.seats_left).toBeGreaterThanOrEqual(0);
@@ -331,7 +333,7 @@ describe('Screenings Integration Tests - User Level', () => {
         .expect(200);
 
       // Should not break when qualities are null/empty
-      response.body.forEach(screening => {
+      response.body.forEach((screening: any) => {
         if (!screening.qualities_ids) {
           expect(screening.qualities_names).toBeFalsy();
         }
@@ -348,7 +350,7 @@ describe('Screenings Integration Tests - User Level', () => {
         // Verify that qualities are properly combined
         if (response.body.qualities && response.body.qualities.length > 0) {
           expect(Array.isArray(response.body.qualities)).toBe(true);
-          response.body.qualities.forEach(quality => {
+          response.body.qualities.forEach((quality: any) => {
             expect(quality).toHaveProperty('quality_id');
             expect(quality).toHaveProperty('quality_name');
             expect(typeof quality.quality_id).toBe('number');
@@ -359,7 +361,7 @@ describe('Screenings Integration Tests - User Level', () => {
         // Verify that genres are properly combined
         if (response.body.genres && response.body.genres.length > 0) {
           expect(Array.isArray(response.body.genres)).toBe(true);
-          response.body.genres.forEach(genre => {
+          response.body.genres.forEach((genre: any) => {
             expect(genre).toHaveProperty('genre_id');
             expect(genre).toHaveProperty('genre_name');
             expect(typeof genre.genre_id).toBe('number');
