@@ -1,6 +1,8 @@
-import { jest } from '@jest/globals';
+import { jest, describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import { RequestHandler } from 'express';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { setupTestDatabase, cleanupTestDatabase, resetConnection } from '../utils/dbTestUtils.js';
 import { 
   generateEmailVerificationLink, 
@@ -16,33 +18,17 @@ import {
 
 // Mock the email client to prevent actual email sending during tests
 jest.mock('../../api/emailClient.js', () => ({
-  sendVerificationEmail: jest.fn().mockResolvedValue({
-    statusCode: 202,
-    body: { message: 'Mock verification email sent' },
-    headers: {}
-  }),
-  sendPasswordResetEmail: jest.fn().mockResolvedValue({
-    statusCode: 202,
-    body: { message: 'Mock password reset email sent' },
-    headers: {}
-  }),
-  sendContactMessage: jest.fn().mockResolvedValue({
-    statusCode: 202,
-    body: { message: 'Mock contact email sent' },
-    headers: {}
-  }),
-  sendContactAcknowledgment: jest.fn().mockResolvedValue({
-    statusCode: 202,
-    body: { message: 'Mock acknowledgment email sent' },
-    headers: {}
-  })
+  sendVerificationEmail: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+  sendContactMessage: jest.fn(),
+  sendContactAcknowledgment: jest.fn()
 }));
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
 
 // No-op middleware that bypasses rate limiting
-const noRateLimit = (req, res, next) => next();
+const noRateLimit: RequestHandler = (_req, _res, next) => next();
 
 const app = createApp({
   authLimiter: noRateLimit,
@@ -51,15 +37,23 @@ const app = createApp({
 });
 const { pool } = await import('../../config/mysqlConnect.js');
 
+interface TestUserData {
+  username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 describe('Auth Integration Tests - Complete User Flow', () => {
-  let testUserData;
-  let registeredUserId;
-  let emailVerificationToken;
-  let passwordResetToken;
+  let testUserData: TestUserData;
+  let registeredUserId: number;
+  let emailVerificationToken: string;
+  let passwordResetToken: string;
 
   beforeAll(async () => {
     await setupTestDatabase();
-    
+
     // Test user data for registration
     testUserData = {
       username: 'testuser123',
@@ -94,11 +88,11 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // Verify user was created in database but not verified
       const connection = await pool.getConnection();
       try {
-        const [users] = await connection.execute(
+        const [users] = await connection.execute<RowDataPacket[]>(
           'SELECT user_id, user_name, user_email, first_name, last_name, isVerified FROM users WHERE user_id = ?',
           [registeredUserId]
         );
-        
+
         expect(users).toHaveLength(1);
         const user = users[0];
         expect(user.user_name).toBe(testUserData.username);
@@ -108,11 +102,11 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         expect(user.isVerified).toBe(0); // Should be unverified initially
 
         // Verify password was hashed and stored
-        const [credentials] = await connection.execute(
+        const [credentials] = await connection.execute<RowDataPacket[]>(
           'SELECT user_password_hash FROM users_credentials WHERE user_id = ?',
           [registeredUserId]
         );
-        
+
         expect(credentials).toHaveLength(1);
         expect(credentials[0].user_password_hash).toBeDefined();
         expect(credentials[0].user_password_hash).not.toBe(testUserData.password);
@@ -145,7 +139,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('valid email'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('valid email'))).toBe(true);
     });
 
     test('should reject registration with weak password', async () => {
@@ -162,7 +156,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      const passwordErrors = response.body.errors.filter(err => err.path === 'password');
+      const passwordErrors = response.body.errors.filter((err: any) => err.path === 'password');
       expect(passwordErrors.length).toBeGreaterThan(0);
     });
 
@@ -179,7 +173,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      const errorMessages = response.body.errors.map(err => err.msg);
+      const errorMessages = response.body.errors.map((err: any) => err.msg);
       expect(errorMessages).toContain('Password is required');
       expect(errorMessages).toContain('First name is required');
       expect(errorMessages).toContain('Last name is required');
@@ -198,7 +192,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('not contain spaces'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('not contain spaces'))).toBe(true);
     });
   });
 
@@ -219,11 +213,11 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // Verify user is now verified in database
       const connection = await pool.getConnection();
       try {
-        const [users] = await connection.execute(
+        const [users] = await connection.execute<RowDataPacket[]>(
           'SELECT isVerified FROM users WHERE user_id = ?',
           [registeredUserId]
         );
-        
+
         expect(users).toHaveLength(1);
         expect(users[0].isVerified).toBe(1); // Should now be verified
       } finally {
@@ -272,7 +266,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject verification with wrong token type', async () => {
-      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
+      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET!);
 
       const response = await request(app)
         .get(`/api/v1/auth/verify-email?token=${wrongTypeToken}`)
@@ -317,7 +311,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(response.body).toHaveProperty('accessToken');
       
       // Access token should be a valid JWT
-      const decodedToken = jwt.verify(response.body.accessToken, process.env.ACCESS_JWT_SECRET);
+      const decodedToken = jwt.verify(response.body.accessToken, process.env.ACCESS_JWT_SECRET!);
       expect(decodedToken).toHaveProperty('user_id', registeredUserId);
       expect(decodedToken).toHaveProperty('role_id', 1);
       expect(decodedToken).toHaveProperty('role_name', 'user');
@@ -331,9 +325,9 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(Array.isArray(protectedResponse.body)).toBe(true);
 
       // Should set HTTP-only cookie for refresh token
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] as unknown as string[];
       expect(cookies).toBeDefined();
-      const refreshCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
+      const refreshCookie = cookies.find((cookie: string) => cookie.startsWith('refreshToken='));
       expect(refreshCookie).toBeDefined();
       expect(refreshCookie).toContain('HttpOnly');
     });
@@ -380,7 +374,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('valid email'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('valid email'))).toBe(true);
     });
 
     test('should reject login with missing credentials', async () => {
@@ -390,7 +384,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      const errorMessages = response.body.errors.map(err => err.msg);
+      const errorMessages = response.body.errors.map((err: any) => err.msg);
       expect(errorMessages).toContain('Email is required');
       expect(errorMessages).toContain('Password is required');
     });
@@ -454,7 +448,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('valid email'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('valid email'))).toBe(true);
     });
 
     test('should reject password reset request with missing email', async () => {
@@ -464,7 +458,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('Email is required'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('Email is required'))).toBe(true);
     });
 
     test.skip('should successfully reset password with valid token', async () => {
@@ -537,7 +531,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
 
     test('should reject password reset with wrong token type', async () => {
-      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
+      const wrongTypeToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET!);
 
       const response = await request(app)
         .post('/api/v1/auth/reset-password')
@@ -563,7 +557,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('at least 8 characters'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('at least 8 characters'))).toBe(true);
     });
 
     test('should reject password reset with missing fields', async () => {
@@ -573,15 +567,15 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      const errorMessages = response.body.errors.map(err => err.msg);
+      const errorMessages = response.body.errors.map((err: any) => err.msg);
       expect(errorMessages).toContain('Reset token is required');
       expect(errorMessages).toContain('Password is required');
     });
   });
 
   describe.skip('Token Refresh Flow', () => {
-    let validRefreshCookie;
-    let accessToken;
+    let validRefreshCookie: string;
+    let accessToken: string;
 
     beforeAll(async () => {
       // Login to get refresh token cookie
@@ -593,8 +587,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         });
 
       accessToken = loginResponse.body.accessToken;
-      const cookies = loginResponse.headers['set-cookie'];
-      validRefreshCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
+      const cookies = loginResponse.headers['set-cookie'] as unknown as string[];
+      validRefreshCookie = cookies.find((cookie: string) => cookie.startsWith('refreshToken='))!;
     });
 
     test('should successfully refresh access token with valid refresh token', async () => {
@@ -609,8 +603,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // New access token should be valid (might be same if refresh was immediate)
       expect(response.body.accessToken).toBeDefined();
-      
-      const decodedToken = jwt.verify(response.body.accessToken, process.env.ACCESS_JWT_SECRET);
+
+      const decodedToken = jwt.verify(response.body.accessToken, process.env.ACCESS_JWT_SECRET!);
       expect(decodedToken).toHaveProperty('user_id', registeredUserId);
 
       // Verify the refreshed token works with protected endpoints
@@ -643,7 +637,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   });
 
   describe.skip('Logout Flow', () => {
-    let refreshCookie;
+    let refreshCookie: string;
 
     beforeAll(async () => {
       // Login to get refresh token
@@ -654,8 +648,8 @@ describe('Auth Integration Tests - Complete User Flow', () => {
           password: 'NewTestPass123!'
         });
 
-      const cookies = loginResponse.headers['set-cookie'];
-      refreshCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
+      const cookies = loginResponse.headers['set-cookie'] as unknown as string[];
+      refreshCookie = cookies.find((cookie: string) => cookie.startsWith('refreshToken='))!;
     });
 
     test('should successfully logout with valid refresh token', async () => {
@@ -668,9 +662,9 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(response.body.message).toBe('Logged out successfully');
 
       // Should clear the refresh token cookie
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] as unknown as string[];
       expect(cookies).toBeDefined();
-      const clearedCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
+      const clearedCookie = cookies.find((cookie: string) => cookie.startsWith('refreshToken='));
       expect(clearedCookie).toMatch(/Expires=.*1970|Max-Age=0/); // Either expires in past or max-age 0
     });
 
@@ -700,9 +694,9 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     test('should simulate email verification flow with manual token creation', async () => {
       // Create an unverified user manually for this test
       const connection = await pool.getConnection();
-      let unverifiedUserId;
+      let unverifiedUserId: number;
       try {
-        const [userResult] = await connection.execute(
+        const [userResult] = await connection.execute<ResultSetHeader>(
           'INSERT INTO users (user_name, user_email, first_name, last_name, role_id, isVerified) VALUES (?, ?, ?, ?, ?, ?)',
           ['emailsimuser', 'emailsim@example.com', 'Email', 'Sim', 1, 0]
         );
@@ -724,7 +718,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // Verify user is now verified in database
       const connection2 = await pool.getConnection();
       try {
-        const [users] = await connection2.execute(
+        const [users] = await connection2.execute<RowDataPacket[]>(
           'SELECT isVerified FROM users WHERE user_id = ?',
           [unverifiedUserId]
         );
@@ -755,9 +749,9 @@ describe('Auth Integration Tests - Complete User Flow', () => {
 
       // Get user ID for token creation
       const connection = await pool.getConnection();
-      let userId;
+      let userId: number;
       try {
-        const [users] = await connection.execute(
+        const [users] = await connection.execute<RowDataPacket[]>(
           'SELECT user_id FROM users WHERE user_email = ?',
           [testEmail]
         );
@@ -805,7 +799,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(410);
 
       // Test invalid token type
-      const wrongTypeToken = signWrongTypeToken(999, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET);
+      const wrongTypeToken = signWrongTypeToken(999, 'password_reset', process.env.EMAIL_VERIFICATION_SECRET!);
 
       await request(app)
         .get(`/api/v1/auth/verify-email?token=${wrongTypeToken}`)
@@ -830,7 +824,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(410);
 
       // Test wrong token type
-      const wrongTypeResetToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET);
+      const wrongTypeResetToken = signWrongTypeToken(registeredUserId, 'email_verification', process.env.PASSWORD_RESET_SECRET!);
 
       await request(app)
         .post('/api/v1/auth/reset-password')
@@ -893,7 +887,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       // Verify database integrity - users table should still exist
       const connection = await pool.getConnection();
       try {
-        const [users] = await connection.execute('SELECT COUNT(*) as count FROM users');
+        const [users] = await connection.execute<RowDataPacket[]>('SELECT COUNT(*) as count FROM users');
         expect(users[0].count).toBeGreaterThan(0);
       } finally {
         connection.release();
@@ -950,7 +944,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(400);
 
       expect(response.body).toHaveProperty('errors');
-      expect(response.body.errors.some(err => err.msg.includes('domain must be at least 2 characters'))).toBe(true);
+      expect(response.body.errors.some((err: any) => err.msg.includes('domain must be at least 2 characters'))).toBe(true);
     });
 
     test('should handle database constraint violations gracefully', async () => {
