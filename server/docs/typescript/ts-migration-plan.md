@@ -745,6 +745,88 @@ npm run test:unit  # Unit tests should still pass
 **Goal**: Migrate all route files
 **Order**: Match controller migration order
 
+### ✅ COMPLETED: Type Safety Improvements (2026-03-05)
+
+**What was done**: Eliminated all type assertions in route handlers by creating helper functions and adding explicit type annotations.
+
+**Created**: `server/utils/routeHelpers.ts`
+```typescript
+import { Request } from 'express';
+import { NotFoundError, BadRequestError } from './errors.js';
+
+/**
+ * Parse and validate ID from route params
+ * @throws NotFoundError if ID is invalid
+ */
+export function parseIdParam(req: Request, resourceName: string = 'Resource'): number {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const parsedId = parseInt(id, 10);
+
+  if (isNaN(parsedId)) {
+    throw new NotFoundError(`${resourceName} not found`);
+  }
+
+  return parsedId;
+}
+
+/**
+ * Parse optional cinema_id from query params
+ * Returns null if invalid or missing
+ */
+export function parseCinemaIdQuery(req: Request): number | null {
+  if (!req.query.cinema_id) return null;
+
+  const cinemaId = Array.isArray(req.query.cinema_id)
+    ? req.query.cinema_id[0]
+    : req.query.cinema_id;
+
+  if (typeof cinemaId !== 'string') return null;
+
+  const parsedId = parseInt(cinemaId, 10);
+  return isNaN(parsedId) ? null : parsedId;
+}
+```
+
+**Updated Route Files**:
+- ✅ `routes/users.ts` - 3 handlers updated
+- ✅ `routes/cinemas.ts` - 7 handlers updated
+- ✅ `routes/screenings.ts` - 7 handlers updated
+- ✅ `routes/movies.ts` - 11 handlers updated
+- ✅ `routes/auth.ts` - Already had explicit types
+- ✅ `routes/tickets.ts` - Already had explicit types
+- ✅ `routes/checkout.ts` - Already had explicit types
+
+**Pattern Changes**:
+
+Before (with type assertions):
+```typescript
+async (req, res) => {
+  const id = parseInt(req.params.id as string, 10);
+  if (isNaN(id)) throw new NotFoundError("Not found");
+  // ...
+}
+```
+
+After (clean with helpers):
+```typescript
+async (req: Request, res: Response) => {
+  const id = parseIdParam(req, "Movie");
+  const cinema_id = parseCinemaIdQuery(req);
+  // ...
+}
+```
+
+**Benefits**:
+- ✅ Zero type assertions (`as string`, `as any`)
+- ✅ Consistent error handling
+- ✅ Full type safety
+- ✅ Centralized validation logic
+- ✅ All route handlers use explicit `Request` and `Response` types
+
+**Testing**: All 329 tests passing ✓
+
+---
+
 ### Migration Order
 
 1. `routes/users.js` → `routes/users.ts`

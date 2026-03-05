@@ -241,6 +241,37 @@ BACKEND_URL=http://localhost:8080
 - **Connection Management**: Always release database connections in finally blocks
 - **Input Validation**: Use express-validator for all user inputs
 - **HTTP Status Codes**: Use appropriate status codes (200, 201, 400, 401, 403, 404, 500)
+- **Type Annotations**: Always use explicit types in route handlers: `async (req: Request, res: Response) =>`
+- **Route Helpers**: Use `parseIdParam(req, "ResourceName")` instead of manual parsing with type assertions
+
+### Route Helper Functions
+
+**Location**: `server/utils/routeHelpers.ts`
+
+Type-safe helper functions for parsing and validating route parameters without type assertions:
+
+```typescript
+import { parseIdParam, parseCinemaIdQuery } from '../utils/routeHelpers.js';
+
+// Parse required ID from route params
+router.get("/:id", async (req: Request, res: Response) => {
+  const id = parseIdParam(req, "Movie"); // number, throws NotFoundError if invalid
+  // ...
+});
+
+// Parse optional query parameter
+router.get("/:id/screenings", async (req: Request, res: Response) => {
+  const movie_id = parseIdParam(req, "Movie");
+  const cinema_id = parseCinemaIdQuery(req); // number | null
+  // ...
+});
+```
+
+**Benefits**:
+- Zero type assertions (`as string`, `as any`)
+- Centralized validation logic
+- Consistent error messages
+- Full type safety
 
 ### Frontend Standards
 - Functional components with hooks
@@ -258,6 +289,7 @@ BACKEND_URL=http://localhost:8080
 - **API Routes**: `server/routes/` - Route definitions with validation
 - **Utilities**: `server/utils/` - Helper functions and middleware
 - **Database Init**: `db/init.sql` - Complete schema and seed data
+- **TypeScript Migration Docs**: `server/docs/typescript/` - Migration plan, exploration, and completed work
 
 ## Docker & Containerization
 
