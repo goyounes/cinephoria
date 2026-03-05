@@ -11,7 +11,15 @@ export function respondWithError(res: Response, error: Error): void {
     return;
   }
 
-  const statusCode = error instanceof AppError ? error.statusCode : 500;
+  // Check for status code in this order: AppError, .status, .statusCode, default 500
+  let statusCode: number;
+  if (error instanceof AppError) {
+    statusCode = error.statusCode;
+  } else {
+    // Express errors (like SyntaxError from JSON parsing) have .status property
+    statusCode = (error as any).status || (error as any).statusCode || 500;
+  }
+
   const message = error.message || "Something broke in the web server!";
 
   res.status(statusCode).json({ message, status: statusCode });

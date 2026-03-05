@@ -9,7 +9,12 @@
       "Bash(node:*)",
       "Bash(npm run typecheck:*)",
       "Bash(npm run dev:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)",
+      "Bash(npx jest:*)",
+      "Bash(cross-env NODE_ENV=test node:*)"
     ],
     "deny": [],
     "ask": []
