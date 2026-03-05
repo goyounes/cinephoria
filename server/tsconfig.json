@@ -43,7 +43,8 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.js"
+    "**/*.js",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
