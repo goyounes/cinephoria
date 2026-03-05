@@ -47,6 +47,8 @@ export interface ScreeningRow {
   start_time: string;
   end_time: string;
   isDeleted: boolean;
+  qualities_ids?: string | null;
+  qualities_names?: string | null;
 }
 
 export interface CinemaRow {
