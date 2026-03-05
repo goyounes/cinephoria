@@ -12,6 +12,7 @@ import {
 import { CACHE_TTL } from '../middleware/cacheUtils.js';
 import { BadRequestError, NotFoundError } from '../utils/errors.js';
 import { respondWithJson } from '../utils/responses.js';
+import { parseIdParam } from '../utils/routeHelpers.js';
 
 router.get("/",
     tryCache('cache:cinemas', CACHE_TTL.STATIC_DATA),
@@ -45,7 +46,7 @@ router.post("/rooms", verifyEmployeeJWT,
 
 router.put("/rooms/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Room");
         const { room_name, room_capacity, cinema_id } = req.body;
 
         if (!room_name || !room_capacity || !cinema_id) {
@@ -64,7 +65,7 @@ router.put("/rooms/:id", verifyEmployeeJWT,
 
 router.delete("/rooms/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Room");
         const deleteResult = await deleteRoomById(id);
         respondWithJson(res, { message: "room deleted succesfully" });
         invalidateCache('cinemas');
@@ -73,7 +74,7 @@ router.delete("/rooms/:id", verifyEmployeeJWT,
 //update cinema
 router.put("/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Cinema");
         const { cinema_name, cinema_adresse } = req.body;
 
         if (!cinema_name || !cinema_adresse) {

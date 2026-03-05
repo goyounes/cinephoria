@@ -7,6 +7,7 @@ import { addUserService } from '../controllers/auth.js';
 import { body, validationResult } from 'express-validator';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { respondWithJson } from '../utils/responses.js';
+import { parseIdParam } from '../utils/routeHelpers.js';
 
 router.get("/", verifyAdminJWT, async (req: Request, res: Response) => {
     const users = await getAuthorizedUsers();
@@ -52,7 +53,7 @@ router.post(
 );
 
 router.get("/:id", verifyAdminJWT, async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id as string, 10);
+    const id = parseIdParam(req, "User");
     console.log("accesing API for user with user_id =", id);
     const user = await getUser(id);
     if (!user) throw new NotFoundError("User not found");

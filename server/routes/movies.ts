@@ -34,6 +34,7 @@ import sharp from 'sharp'
 import { randomImageName, CombineGenresIdNames, CombineQualitiesIdNames } from '../utils/index.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
 import { respondWithJson } from '../utils/responses.js';
+import { parseIdParam, parseCinemaIdQuery } from '../utils/routeHelpers.js';
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -205,10 +206,10 @@ router.get("/genres",
     });
 
 router.get("/:id/screenings",
-    (req: Request, res: Response, next: NextFunction) => tryCache(`cache:screenings:upcoming:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
+    (req, res, next) => tryCache(`cache:screenings:upcoming:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
     async (req: Request, res: Response) => {
-        const movie_id = parseInt(req.params.id as string, 10);
-        const cinema_id = req.query.cinema_id ? parseInt(req.query.cinema_id as string, 10) : null;
+        const movie_id = parseIdParam(req, "Movie");
+        const cinema_id = parseCinemaIdQuery(req);
 
         const found = await checkMovieIdAdmin(movie_id); // check movie exists in the db
         if (!found) throw new NotFoundError("No movie with this id was found");
@@ -220,10 +221,10 @@ router.get("/:id/screenings",
     });
 
 router.get("/:id/screenings/all", verifyEmployeeJWT,
-    (req: Request, res: Response, next: NextFunction) => tryCache(`cache:screenings:all:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
+    (req, res, next) => tryCache(`cache:screenings:all:${req.query.cinema_id || 'all'}:${req.params.id}`, CACHE_TTL.SCREENINGS)(req, res, next),
     async (req: Request, res: Response) => {
-        const movie_id = parseInt(req.params.id as string, 10);
-        const cinema_id = req.query.cinema_id ? parseInt(req.query.cinema_id as string, 10) : null;
+        const movie_id = parseIdParam(req, "Movie");
+        const cinema_id = parseCinemaIdQuery(req);
 
         const found = await checkMovieIdAdmin(movie_id); // check movie exists in the db
         if (!found) throw new NotFoundError("No movie with this id was found");
@@ -236,9 +237,9 @@ router.get("/:id/screenings/all", verifyEmployeeJWT,
 
 // Movie resource managment links
 router.get("/:id",
-    (req: Request, res: Response, next: NextFunction) => tryCache(`cache:movie:${req.params.id}:with_genres`, CACHE_TTL.MOVIES)(req, res, next),
+    (req, res, next) => tryCache(`cache:movie:${req.params.id}:with_genres`, CACHE_TTL.MOVIES)(req, res, next),
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Movie");
         console.log("accesing DB for movie with movie_id =", id);
 
         const rawMovie = await getOneMovieWithGenres(id); // either a reosurce obj or err obj
@@ -260,7 +261,7 @@ router.get("/:id",
 
 router.put("/:id", verifyEmployeeJWT, upload.single('poster_img_file'),
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Movie");
         if (!req.body.title) {
             throw new BadRequestError("Missing movie title");
         }
@@ -355,7 +356,7 @@ router.put("/:id", verifyEmployeeJWT, upload.single('poster_img_file'),
 
 router.delete("/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Movie");
         console.log("Deleting movie with movie_id =", id);
 
         const movie = await getOneMovieWithGenres(id);
@@ -381,7 +382,7 @@ router.delete("/:id", verifyEmployeeJWT,
     });
 
 router.get("/:id/reviews/me", verifyUserJWT, async (req: Request, res: Response) => {
-    const movie_id = parseInt(req.params.id as string, 10);
+    const movie_id = parseIdParam(req, "Movie");
     const userId = req.user!.user_id; // Get from JWT token
 
     // Check if movie exists

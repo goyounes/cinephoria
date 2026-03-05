@@ -15,6 +15,7 @@ import {
 import { CACHE_TTL } from '../middleware/cacheUtils.js';
 import { BadRequestError, NotFoundError } from '../utils/errors.js';
 import { respondWithJson } from '../utils/responses.js';
+import { parseIdParam } from '../utils/routeHelpers.js';
 
 router.get("/", verifyEmployeeJWT,
     tryCache('cache:screenings:all:admin', CACHE_TTL.SCREENINGS),
@@ -63,9 +64,9 @@ router.get("/upcoming",
     });
 
 router.get("/upcoming/:id",
-    (req: Request, res: Response, next: NextFunction) => tryCache(`cache:screening:${req.params.id}:details`, CACHE_TTL.SCREENINGS)(req, res, next),
+    (req, res, next) => tryCache(`cache:screening:${req.params.id}:details`, CACHE_TTL.SCREENINGS)(req, res, next),
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Screening");
         console.log("accesing API for upcoming screening with screening_id =", id);
 
         const rawwscreenings = await getUpcomingScreeningDetailsById(id);
@@ -78,9 +79,9 @@ router.get("/upcoming/:id",
     });
 
 router.get("/:id", verifyEmployeeJWT,
-    (req: Request, res: Response, next: NextFunction) => tryCache(`cache:screening:${req.params.id}:details`, CACHE_TTL.SCREENINGS)(req, res, next),
+    (req, res, next) => tryCache(`cache:screening:${req.params.id}:details`, CACHE_TTL.SCREENINGS)(req, res, next),
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Screening");
         console.log("accesing API for screening with screening_id =", id);
 
         const rawwscreenings = await getScreeningDetailsByIdAdmin(id);
@@ -95,7 +96,7 @@ router.get("/:id", verifyEmployeeJWT,
 
 router.put("/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Screening");
         const { movie_id, cinema_id, room_id, start_date, start_time, end_time } = req.body;
         if (!movie_id || !cinema_id || !room_id || !start_date || !start_time || !end_time) {
             throw new BadRequestError("Missing screening data");
@@ -123,7 +124,7 @@ router.put("/:id", verifyEmployeeJWT,
 
 router.delete("/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
-        const id = parseInt(req.params.id as string, 10);
+        const id = parseIdParam(req, "Screening");
         console.log("Deleting screening id =", id);
         const deleteResult = await deleteScreeningById(id);
         respondWithJson(res, { message: "screening deleted succesfully" });
