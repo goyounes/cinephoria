@@ -1,5 +1,5 @@
 import { pool } from "../config/mysqlConnect.js";
-import { getAuthRedis } from '../config/redisConnect.js';
+import { authRedis } from '../config/redisConnect.js';
 import bycrpt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {sendPasswordResetEmail, sendVerificationEmail } from "../api/emailClient.js";
@@ -178,7 +178,7 @@ export async function logoutService(req, res, next) {
   
   try {
     // Add refreshToken to revoked list (blacklist)
-    const client = await getAuthRedis();
+    const client = authRedis;
 
     const nowInSeconds = Math.floor(Date.now() / 1000);
     const expiresIn = decodedRefreshToken.exp - nowInSeconds;
@@ -275,7 +275,7 @@ export async function refreshService(req, res, next) {
     if (!refreshToken) return res.status(401).json({message: "Refresh token required"});
 
     // Check if refresh token is revoked (blacklisted)
-    const client = await getAuthRedis();
+    const client = authRedis;
     const isRevoked = await client.exists(refreshToken);
 
     if (isRevoked) {

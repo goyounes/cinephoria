@@ -1,25 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-import { getRateLimitRedis } from '../config/redisConnect.js';
+import { rateLimitRedis } from '../config/redisConnect.js';
 
 // Custom rate limiter factory because of compatibility issues with express-rate-limit and rate-limit-redis
 // This allows us to use Redis for rate limiting without the need for a separate package
 export const createRateLimit = (windowMs: number, max: number, prefix: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const redis = await getRateLimitRedis();
-      if (!redis) {
-        next(); // Graceful fallback if Redis unavailable
-        return;
-      }
-
       const key = `${prefix}:${req.user?.user_id || req.ip}`;
 
-      const currentResult = await redis.incr(key);
+      const currentResult = await rateLimitRedis.incr(key);
       const current = typeof currentResult === 'number' ? currentResult : parseInt(currentResult, 10);
 
       if (current === 1) {
         // First request, set expiration
-        await redis.expire(key, Math.ceil(windowMs / 1000));
+        await rateLimitRedis.expire(key, Math.ceil(windowMs / 1000));
       }
 
       if (current > max) {

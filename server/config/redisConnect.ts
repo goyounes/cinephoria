@@ -6,20 +6,18 @@ const baseConfig = { url: `redis://${redisHost}:6379` };
 const MAX_RETRIES = 10;   // Max retries before giving up
 const RETRY_DELAY = 5000; // 5 seconds
 
-// Rate Limiting Redis Client (Database 0)
-const rateLimitRedis = createClient({
+// Export clients directly (like MySQL pool) - connected at startup via connectRedis()
+export const rateLimitRedis = createClient({
   ...baseConfig,
   database: 0,
 });
 
-// Auth Redis Client (Database 1)
-const authRedis = createClient({
+export const authRedis = createClient({
   ...baseConfig,
   database: 1,
 });
 
-// Cache Redis Client (Database 2)
-const cacheRedis = createClient({
+export const cacheRedis = createClient({
   ...baseConfig,
   database: 2,
 });
@@ -36,20 +34,6 @@ export async function connectRedis(): Promise<void> {
   ]);
 }
 
-export async function getRateLimitRedis() {
-  if (!rateLimitRedis.isOpen) await rateLimitRedis.connect();
-  return rateLimitRedis;
-}
-
-export async function getAuthRedis() {
-  if (!authRedis.isOpen) await authRedis.connect();
-  return authRedis;
-}
-
-export async function getCacheRedis() {
-  if (!cacheRedis.isOpen) await cacheRedis.connect();
-  return cacheRedis;
-}
 
 async function testRedisConnectionWithRetry(retries: number = 0): Promise<void> {
   try {

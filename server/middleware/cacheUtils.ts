@@ -1,4 +1,4 @@
-import { getCacheRedis } from '../config/redisConnect.js';
+import { cacheRedis } from '../config/redisConnect.js';
 
 // Cache TTL constants (in seconds)
 export const CACHE_TTL = {
@@ -11,8 +11,8 @@ export const CACHE_TTL = {
 
 export async function cacheGet(key: string): Promise<any | null> {
   try {
-    const redis = await getCacheRedis();
-    const data = await redis.get(key);
+
+    const data = await cacheRedis.get(key);
     if (data) {
       console.log(`Cache HIT: ${key}`);
       // Convert Buffer to string if needed
@@ -29,8 +29,8 @@ export async function cacheGet(key: string): Promise<any | null> {
 
 export async function cacheSet(key: string, data: any, ttl: number = CACHE_TTL.MOVIES): Promise<boolean> {
   try {
-    const redis = await getCacheRedis();
-    await redis.setEx(key, ttl, JSON.stringify(data));
+
+    await cacheRedis.setEx(key, ttl, JSON.stringify(data));
     console.log(`Cache SET: ${key} (TTL: ${ttl}s)`);
     return true;
   } catch (error) {
@@ -41,10 +41,10 @@ export async function cacheSet(key: string, data: any, ttl: number = CACHE_TTL.M
 
 export async function cacheDelPattern(pattern: string): Promise<number> {
   try {
-    const redis = await getCacheRedis();
-    const keys = await redis.keys(pattern);
+
+    const keys = await cacheRedis.keys(pattern);
     if (keys.length > 0) {
-      const deleted = await redis.del(keys);
+      const deleted = await cacheRedis.del(keys);
       const deletedCount = typeof deleted === 'number' ? deleted : parseInt(deleted, 10);
       console.log(`Cache DEL PATTERN: ${pattern} (${deletedCount} keys deleted)`);
       return deletedCount;
