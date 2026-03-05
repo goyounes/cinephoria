@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:verbose": "cross-env NODE_ENV=test VERBOSE_TESTS=1 node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:unit": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js --testPathIgnorePatterns=/__tests__/",
     "test:integration": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js __tests__/integration/",
     "test:ratelimiting": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js __tests__/ratelimiting/",

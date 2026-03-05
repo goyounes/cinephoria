@@ -14,7 +14,8 @@
       "Bash(npm ls:*)",
       "Bash(npm install:*)",
       "Bash(npx jest:*)",
-      "Bash(cross-env NODE_ENV=test node:*)"
+      "Bash(cross-env NODE_ENV=test node:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

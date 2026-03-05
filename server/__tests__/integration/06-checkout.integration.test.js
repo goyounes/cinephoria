@@ -97,21 +97,30 @@ describe('Checkout Integration Tests', () => {
     expect(ticketTypesResponse.status).toBe(200);
     testTicketTypes = ticketTypesResponse.body;
 
-    // Get existing screening data that meets 14-day booking criteria
-    const [screeningRows] = await pool.query(`
-      SELECT screening_id, movie_id, cinema_id, room_id, start_date, start_time 
-      FROM screenings 
-      WHERE isDeleted = FALSE 
-        AND (
-          start_date > CURDATE()
-          OR (start_date = CURDATE() AND start_time > CURTIME())
-        )
-        AND start_date <= CURDATE() + INTERVAL 14 DAY
-      LIMIT 1
-    `);
-    
-    expect(screeningRows.length).toBeGreaterThan(0);
-    testScreeningData = screeningRows[0];
+    // Create a future screening for testing (14-day booking criteria)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Get existing movie, cinema, and room from test database
+    const [movies] = await pool.query('SELECT movie_id FROM movies LIMIT 1');
+    const [cinemas] = await pool.query('SELECT cinema_id FROM cinemas LIMIT 1');
+    const [rooms] = await pool.query('SELECT room_id FROM rooms LIMIT 1');
+
+    // Insert a future screening
+    const [screeningResult] = await pool.query(`
+      INSERT INTO screenings (movie_id, cinema_id, room_id, start_date, start_time, end_time, isDeleted)
+      VALUES (?, ?, ?, ?, '14:00:00', '16:00:00', FALSE)
+    `, [movies[0].movie_id, cinemas[0].cinema_id, rooms[0].room_id, tomorrowStr]);
+
+    testScreeningData = {
+      screening_id: screeningResult.insertId,
+      movie_id: movies[0].movie_id,
+      cinema_id: cinemas[0].cinema_id,
+      room_id: rooms[0].room_id,
+      start_date: tomorrowStr,
+      start_time: '14:00:00'
+    };
   });
 
   afterAll(async () => {

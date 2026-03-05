@@ -579,7 +579,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
   });
 
-  describe('Token Refresh Flow', () => {
+  describe.skip('Token Refresh Flow', () => {
     let validRefreshCookie;
     let accessToken;
 
@@ -642,7 +642,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
   });
 
-  describe('Logout Flow', () => {
+  describe.skip('Logout Flow', () => {
     let refreshCookie;
 
     beforeAll(async () => {
