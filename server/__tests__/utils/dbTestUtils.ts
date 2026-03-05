@@ -1,12 +1,12 @@
-import mysql from 'mysql2/promise';
+import mysql, { Connection } from 'mysql2/promise';
 import fs from 'fs';
 
 // Read init.sql file content from the same folder
 const initSql = fs.readFileSync('./__tests__/utils/init.sql', 'utf8')
   .replace(/DELIMITER \/\/[\s\S]*?DELIMITER ;/g, ''); // Remove DELIMITER syntax for mysql2 compatibility
 
-export async function setupTestDatabase() {
-  const connection = await mysql.createConnection({
+export async function setupTestDatabase(): Promise<void> {
+  const connection: Connection = await mysql.createConnection({
     host: process.env.MYSQL_HOST || '127.0.0.1',
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '5599',
@@ -17,11 +17,11 @@ export async function setupTestDatabase() {
     // Drop test database if exists and create fresh one
     await connection.query(`DROP DATABASE IF EXISTS ${process.env.MYSQL_DATABASE}`);
     await connection.query(`CREATE DATABASE ${process.env.MYSQL_DATABASE}`);
-    
+
     // Close connection and reconnect to the test database
     await connection.end();
-    
-    const dbConnection = await mysql.createConnection({
+
+    const dbConnection: Connection = await mysql.createConnection({
       host: process.env.MYSQL_HOST || '127.0.0.1',
       user: process.env.MYSQL_USER || 'root',
       password: process.env.MYSQL_PASSWORD || '5599',
@@ -42,8 +42,8 @@ export async function setupTestDatabase() {
   }
 }
 
-export async function cleanupTestDatabase() {
-  const connection = await mysql.createConnection({
+export async function cleanupTestDatabase(): Promise<void> {
+  const connection: Connection = await mysql.createConnection({
     host: process.env.MYSQL_HOST || '127.0.0.1',
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '5599'
@@ -57,7 +57,7 @@ export async function cleanupTestDatabase() {
   }
 }
 
-export async function resetConnection() {
+export async function resetConnection(): Promise<void> {
   // Import pool dynamically to ensure environment variables are loaded first
   const { pool } = await import('../../config/mysqlConnect.js');
   // Just refresh the connection pool without touching data

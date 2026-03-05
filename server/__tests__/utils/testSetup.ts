@@ -15,8 +15,8 @@ const originalConsoleError = console.error;
 beforeAll(async () => {
   // Suppress console.log during tests unless needed
   if (!process.env.VERBOSE_TESTS) {
-    console.log = jest.fn();
-    console.error = jest.fn();
+    console.log = jest.fn() as unknown as typeof console.log;
+    console.error = jest.fn() as unknown as typeof console.error;
   }
 
   // Clear Redis databases to avoid interference from previous test runs
@@ -32,7 +32,8 @@ beforeAll(async () => {
     ]);
   } catch (error) {
     // Continue if Redis is not available
-    console.warn('Could not clear Redis databases:', error.message);
+    const err = error as Error;
+    console.warn('Could not clear Redis databases:', err.message);
   }
 });
 
