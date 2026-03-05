@@ -1,59 +1,45 @@
 import { Router } from 'express';
 const router = Router();
-import {addCinema, getCinemas, getRooms, addRoom, getSeats, deleteRoomById, updateRoom, updateCinema} from '../controllers/cinemas.js'; 
+import {addCinema, getCinemas, getRooms, addRoom, getSeats, deleteRoomById, updateRoom, updateCinema} from '../controllers/cinemas.js';
 import { verifyAdminJWT, verifyEmployeeJWT } from '../middleware/authMiddleware.js';
 
 // Cache middleware imports
-import { 
+import {
     tryCache,
     saveToCache,
     invalidateCache
 } from '../middleware/cacheMiddleware.js';
 import { CACHE_TTL } from '../middleware/cacheUtils.js';
+import { BadRequestError, NotFoundError } from '../utils/errors.js';
+import { respondWithJson } from '../utils/responses.js';
 
 router.get("/",
     tryCache('cache:cinemas', CACHE_TTL.STATIC_DATA),
-    async (req,res,next) => {
-    try {
-      const cinemas = await getCinemas()
-      res.status(200).json(cinemas)
-      saveToCache(req, cinemas);
-    } catch (error) {
-        return next(error)
-    }
+    async (req, res) => {
+    const cinemas = await getCinemas()
+    respondWithJson(res, cinemas);
+    saveToCache(req, cinemas);
 })
 router.post("/", verifyEmployeeJWT,
-    async (req, res, next) => {
-  try {
+    async (req, res) => {
     const newCinema = await addCinema(req.body);
-    res.status(201).json(newCinema);
+    respondWithJson(res, newCinema, 201);
     invalidateCache('cinemas');
-  } catch (err) {
-    return next(err);
-  }
 });
 
 router.get("/rooms",
     tryCache('cache:rooms', CACHE_TTL.STATIC_DATA),
-    async (req,res,next) => {
-    try {
-        const rooms = await getRooms()
-        res.status(200).json(rooms)
-        saveToCache(req, rooms);
-    } catch (error) {
-        return next(error)
-    }
+    async (req, res) => {
+    const rooms = await getRooms()
+    respondWithJson(res, rooms);
+    saveToCache(req, rooms);
 })
 
 router.post("/rooms", verifyEmployeeJWT,
-    async (req, res, next) => {
-  try {
+    async (req, res) => {
     const newRoom = await addRoom(req.body);
-    res.status(201).json(newRoom);
+    respondWithJson(res, newRoom, 201);
     invalidateCache('cinemas');
-  } catch (err) {
-    return next(err);
-  }
 });
 router.put("/rooms/:id", verifyEmployeeJWT,
     async (req, res) => {
@@ -61,32 +47,24 @@ router.put("/rooms/:id", verifyEmployeeJWT,
   const { room_name, room_capacity, cinema_id } = req.body;
 
   if (!room_name || !room_capacity || !cinema_id) {
-    return res.status(400).json({ message: "room_name, room_capacity, and cinema_id are required" });
+    throw new BadRequestError("room_name, room_capacity, and cinema_id are required");
   }
-  try {
-    const { result, updatedRoom } = await updateRoom(id, req.body);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: `Room with ID ${id} not found` });
-    }
+  const { result, updatedRoom } = await updateRoom(id, req.body);
 
-    res.status(200).json(updatedRoom);
-    invalidateCache('cinemas');
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to update room" });
+  if (result.affectedRows === 0) {
+    throw new NotFoundError(`Room with ID ${id} not found`);
   }
+
+  respondWithJson(res, updatedRoom);
+  invalidateCache('cinemas');
 });
 router.delete("/rooms/:id", verifyEmployeeJWT,
-    async (req, res, next) => {
+    async (req, res) => {
   const id = req.params.id
-  try {
-    const deleteResult = await deleteRoomById(id);
-    res.status(200).json({message: "room deleted succesfully"})
-    invalidateCache('cinemas');
-  } catch (err) {
-    return next(err);
-  }
+  const deleteResult = await deleteRoomById(id);
+  respondWithJson(res, {message: "room deleted succesfully"});
+  invalidateCache('cinemas');
 });
 
 //update cinema
@@ -96,22 +74,17 @@ router.put("/:id", verifyEmployeeJWT,
   const { cinema_name, cinema_adresse } = req.body;
 
   if (!cinema_name || !cinema_adresse) {
-    return res.status(400).json({ message: "cinema_name and cinema_adresse are required" });
+    throw new BadRequestError("cinema_name and cinema_adresse are required");
   }
 
-  try {
-    const { result, updatedCinema } = await updateCinema(id, req.body);
+  const { result, updatedCinema } = await updateCinema(id, req.body);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: `Cinema with ID ${id} not found` });
-    }
-
-    res.status(200).json(updatedCinema);
-    invalidateCache('cinemas');
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to update cinema" });
+  if (result.affectedRows === 0) {
+    throw new NotFoundError(`Cinema with ID ${id} not found`);
   }
+
+  respondWithJson(res, updatedCinema);
+  invalidateCache('cinemas');
 });
 
 export default router;

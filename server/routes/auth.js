@@ -1,11 +1,12 @@
 import { Router } from 'express';
 const router = Router();
 
-import { verifyEmailService, resetPasswordReqService, resetPasswordService, 
+import { verifyEmailService, resetPasswordReqService, resetPasswordService,
   registerService, loginService, logoutService,
   refreshService} from '../controllers/auth.js';
 import { verifyUserJWT, verifyEmployeeJWT, verifyAdminJWT } from '../middleware/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
+import { ValidationError } from '../utils/errors.js';
 
 // uses refresh token for the route
 router.post('/refresh', refreshService);
@@ -28,12 +29,10 @@ router.post(
       return true;
     }),
   ],
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    return resetPasswordReqService(req, res, next);
+    if (!errors.isEmpty()) throw new ValidationError(errors.array());
+    return resetPasswordReqService(req, res);
   }
 );
 
@@ -50,12 +49,10 @@ router.post(
       .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 
   ],
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    return resetPasswordService(req, res, next);
+    if (!errors.isEmpty()) throw new ValidationError(errors.array());
+    return resetPasswordService(req, res);
   }
 );
 
@@ -77,12 +74,10 @@ router.post(
       .bail()
       .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   ],
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    return loginService(req, res, next);
+    if (!errors.isEmpty()) throw new ValidationError(errors.array());
+    return loginService(req, res);
   }
 );
 
@@ -113,18 +108,11 @@ router.post(
     body('firstName').notEmpty().withMessage('First name is required'),
     body('lastName').notEmpty().withMessage('Last name is required'),
   ],
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    return registerService(req, res, next);
+    if (!errors.isEmpty()) throw new ValidationError(errors.array());
+    return registerService(req, res);
   }
 );
-
-
-// router.delete('/user/:id', (req, res) => {
-//   res.send(`Deleted user ${req.params.id}`);
-// });
 
 export default router;

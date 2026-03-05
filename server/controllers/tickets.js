@@ -1,20 +1,23 @@
 import { pool } from "../config/mysqlConnect.js";
 import crypto from "crypto"
+import { BadRequestError, ForbiddenError } from "../utils/errors.js";
+import { respondWithJson } from "../utils/responses.js";
+
 export async function getMyTickets(user_id){
     const q = `
-    SELECT 
-        tickets.QR_code , 
+    SELECT
+        tickets.QR_code ,
         ticket_types.ticket_type_name,
         movies.movie_id,
         movies.title,
-        movies.length,  
-        cinemas.cinema_name, 
+        movies.length,
+        cinemas.cinema_name,
         screenings.screening_id,
-        screenings.start_date, 
+        screenings.start_date,
         screenings.start_time,
         screenings.end_time,
         seats.seat_number
-    FROM tickets 
+    FROM tickets
     JOIN ticket_types ON tickets.ticket_type_id = ticket_types.ticket_type_id
     JOIN screenings ON tickets.screening_id = screenings.screening_id
     JOIN movies on screenings.movie_id = movies.movie_id
@@ -32,7 +35,7 @@ export async function getTicketTypes(){
     return result_rows;
 }
 
-export async function bookingService(req, res, next,options = {}) {
+export async function bookingService(req, res, options = {}) {
     const { screening_id, ticket_types, total_price, card } = req.body;
     const user_id = req.user.user_id;
 
@@ -41,9 +44,7 @@ export async function bookingService(req, res, next,options = {}) {
 
     // Validate total price
     if (total_price !== computedTotalPrice) {
-        const err = new Error("Total price mismatch")
-        err.status = 400
-        return next(err)
+        throw new BadRequestError("Total price mismatch");
     }
 
     const connection = await pool.getConnection();
@@ -70,9 +71,7 @@ export async function bookingService(req, res, next,options = {}) {
         const [seats] = await connection.query(getAvailableSeatsQuery, [screening_id,screening_id,nbrOfTickets]);
 
         if (seats.length < nbrOfTickets) {
-            const err = new Error("Not enough seats available")
-            err.status = 400
-            return next(err)
+            throw new BadRequestError("Not enough seats available");
         }
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 50)); //50ms for now
@@ -103,7 +102,7 @@ export async function bookingService(req, res, next,options = {}) {
         }
 
         await connection.commit();
-        res.status(200).json({
+        respondWithJson(res, {
             message: "Booking successful",
             tickets_booked: nbrOfTickets,
             seat_ids: seats.map(s => s.seat_id)
@@ -112,7 +111,7 @@ export async function bookingService(req, res, next,options = {}) {
     } catch (error) {
         await connection.rollback();
         console.error("Booking error:", error);
-        return next(error);
+        throw error;
     } finally {
         connection.release();
     }
@@ -131,13 +130,11 @@ async function validateScreeningDate(screening_id, connection) {
   `;
   const [rows] = await connection.query(query, [screening_id]);
   if (rows.length === 0) {
-    const err = new Error("Booking allowed only within 14 days for regular users");
-    err.status = 403;
-    throw err;
+    throw new ForbiddenError("Booking allowed only within 14 days for regular users");
   }
 }
 
-export async function bookingServiceAdmin(req, res, next) {
+export async function bookingServiceAdmin(req, res) {
   // Just call bookingService with the admin bypass flag
-  return bookingService(req, res, next, { skipDateCheck: true });
+  return bookingService(req, res, { skipDateCheck: true });
 }

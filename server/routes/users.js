@@ -5,14 +5,12 @@ import { verifyAdminJWT, verifyEmployeeJWT } from '../middleware/authMiddleware.
 import { getUser, getAuthorizedUsers} from '../controllers/users.js'; // assuming you have a controller to fetch users
 import { addUserService } from '../controllers/auth.js'; // assuming you have a controller to add users
 import { body, validationResult } from 'express-validator';
+import { NotFoundError, ValidationError } from '../utils/errors.js';
+import { respondWithJson } from '../utils/responses.js';
 
-router.get("/",verifyAdminJWT,async (req,res,next) => {
-    try {
-        const users = await getAuthorizedUsers() // this is a controller function that fetches users from the database
-        res.status(200).json(users)
-    } catch (error) {
-        return next(error)
-    }
+router.get("/",verifyAdminJWT,async (req, res) => {
+    const users = await getAuthorizedUsers() // this is a controller function that fetches users from the database
+    respondWithJson(res, users);
 })
 
 router.post(
@@ -46,30 +44,20 @@ router.post(
     body('role_id').notEmpty().withMessage('Role ID is required'),
     body('role_id').isInt({ min: 1, max: 3 }).withMessage('Role ID must be between 1 and 3 (user, employee, or admin)'),
   ],
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    return addUserService(req, res, next);
+    if (!errors.isEmpty()) throw new ValidationError(errors.array());
+    return addUserService(req, res);
   }
 )
 
 
-router.get("/:id", verifyAdminJWT ,async (req,res,next) => {
+router.get("/:id", verifyAdminJWT ,async (req, res) => {
     const id = req.params.id
     console.log("accesing API for user with user_id =",id)
-    try {
-        const user = await getUser(id)
-        if (!user) {
-            const err = new Error("User not found");
-            err.status = 404;
-            return next(err);
-        }
-        res.status(200).json(user)
-    } catch (error) {
-        return next(error) // network request or re-thrown error
-    }
+    const user = await getUser(id)
+    if (!user) throw new NotFoundError("User not found");
+    respondWithJson(res, user);
 })
 
 export default router;
