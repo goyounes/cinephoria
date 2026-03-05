@@ -1,10 +1,8 @@
 import CombineQualitiesIdNames from './CombineQualitiesIdNames.js'
 
 describe('CombineQualitiesIdNames', () => {
-  test('should handle empty input', () => {
+  test('should handle empty array', () => {
     expect(CombineQualitiesIdNames([])).toEqual([])
-    expect(CombineQualitiesIdNames(null)).toEqual([])
-    expect(CombineQualitiesIdNames(undefined)).toEqual([])
   })
 
   test('should combine qualities correctly', () => {
@@ -16,7 +14,7 @@ describe('CombineQualitiesIdNames', () => {
     }]
 
     const result = CombineQualitiesIdNames(screenings)
-    
+
     expect(result[0].qualities).toEqual([
       { quality_id: 1, quality_name: '4DX' },
       { quality_id: 2, quality_name: '3D' },

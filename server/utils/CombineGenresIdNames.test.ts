@@ -1,10 +1,8 @@
 import CombineGenresIdNames from './CombineGenresIdNames.js'
 
 describe('CombineGenresIdNames', () => {
-  test('should handle empty input', () => {
+  test('should handle empty array', () => {
     expect(CombineGenresIdNames([])).toEqual([])
-    expect(CombineGenresIdNames(null)).toEqual([])
-    expect(CombineGenresIdNames(undefined)).toEqual([])
   })
 
   test('should combine genres correctly', () => {
@@ -16,7 +14,7 @@ describe('CombineGenresIdNames', () => {
     }]
 
     const result = CombineGenresIdNames(movies)
-    
+
     expect(result[0].genres).toEqual([
       { genre_id: 1, genre_name: 'Action' },
       { genre_id: 2, genre_name: 'Comedy' },

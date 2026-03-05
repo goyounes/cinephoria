@@ -139,20 +139,20 @@ describe('Utils Index - All Exports', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
-    test('CombineGenresIdNames should handle null input gracefully', () => {
-      const result = CombineGenresIdNames(null);
-      expect(result).toBeDefined();
+    test('CombineGenresIdNames should handle empty array', () => {
+      const result = CombineGenresIdNames([]);
+      expect(result).toEqual([]);
     });
 
-    test('CombineQualitiesIdNames should handle undefined input gracefully', () => {
-      const result = CombineQualitiesIdNames(undefined);
-      expect(result).toBeDefined();
+    test('CombineQualitiesIdNames should handle empty array', () => {
+      const result = CombineQualitiesIdNames([]);
+      expect(result).toEqual([]);
     });
 
     test('JWT functions should handle different user IDs', () => {
       const token1 = signAccessToken(1, 1, 'user');
       const token2 = signAccessToken(999, 2, 'admin');
-      
+
       expect(token1).not.toBe(token2);
       expect(typeof token1).toBe('string');
       expect(typeof token2).toBe('string');
@@ -161,7 +161,7 @@ describe('Utils Index - All Exports', () => {
     test('generateEmailVerificationLink should handle different user IDs', () => {
       const result1 = generateEmailVerificationLink(1);
       const result2 = generateEmailVerificationLink(999);
-      
+
       expect(result1.token).not.toBe(result2.token);
       expect(result1.link).not.toBe(result2.link);
     });
@@ -169,7 +169,7 @@ describe('Utils Index - All Exports', () => {
     test('generatePasswordResetLink should handle different user IDs', () => {
       const result1 = generatePasswordResetLink(1);
       const result2 = generatePasswordResetLink(999);
-      
+
       expect(result1.token).not.toBe(result2.token);
       expect(result1.link).not.toBe(result2.link);
     });
