@@ -1,4 +1,4 @@
-import { PoolConnection, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
+import { PoolConnection, RowDataPacket } from 'mysql2/promise';
 import { pool } from "../config/mysqlConnect.js";
 import crypto from "crypto";
 import { BadRequestError, ForbiddenError } from "../utils/errors.js";
@@ -67,7 +67,7 @@ export async function getTicketTypes(): Promise<TicketTypeRow[]> {
 }
 
 export async function bookingService(req: Request, res: Response, options: BookingOptions = {}): Promise<void> {
-    const { screening_id, ticket_types, total_price, card } = req.body;
+    const { screening_id, ticket_types, total_price } = req.body;
     const user_id = req.user!.user_id;
 
     const nbrOfTickets = ticket_types.reduce((sum: number, t: TicketTypeRequest) => sum + t.count, 0);

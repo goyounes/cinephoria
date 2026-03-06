@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 const router = Router();
 
-import { verifyAdminJWT, verifyEmployeeJWT } from '../middleware/authMiddleware.js';
+import { verifyAdminJWT } from '../middleware/authMiddleware.js';
 import { getUser, getAuthorizedUsers } from '../controllers/users.js';
 import { addUserService } from '../controllers/auth.js';
 import { body, validationResult } from 'express-validator';

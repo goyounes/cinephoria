@@ -15,9 +15,7 @@ export async function cacheGet(key: string): Promise<any | null> {
     const data = await cacheRedis.get(key);
     if (data) {
       console.log(`Cache HIT: ${key}`);
-      // Convert Buffer to string if needed
-      const dataStr = typeof data === 'string' ? data : data.toString();
-      return JSON.parse(dataStr);
+      return JSON.parse(data);
     }
     console.log(`Cache MISS: ${key}`);
     return null;

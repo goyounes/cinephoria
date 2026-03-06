@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { NotFoundError, BadRequestError } from './errors.js';
+import { NotFoundError } from './errors.js';
 
 /**
  * Parse and validate ID from route params

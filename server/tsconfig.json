@@ -6,13 +6,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
 
-    /* Type Checking - Start Permissive, Gradually Strict */
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "noUnusedLocals": false,
+    /* Type Checking - Full Strict Mode */
+    "strict": true,
+    "noUnusedLocals": true,
     "noUnusedParameters": false,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,

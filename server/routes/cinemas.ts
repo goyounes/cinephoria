@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 const router = Router();
-import { addCinema, getCinemas, getRooms, addRoom, getSeats, deleteRoomById, updateRoom, updateCinema } from '../controllers/cinemas.js';
-import { verifyAdminJWT, verifyEmployeeJWT } from '../middleware/authMiddleware.js';
+import { addCinema, getCinemas, getRooms, addRoom, deleteRoomById, updateRoom, updateCinema } from '../controllers/cinemas.js';
+import { verifyEmployeeJWT } from '../middleware/authMiddleware.js';
 
 // Cache middleware imports
 import {
@@ -66,7 +66,7 @@ router.put("/rooms/:id", verifyEmployeeJWT,
 router.delete("/rooms/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
         const id = parseIdParam(req, "Room");
-        const deleteResult = await deleteRoomById(id);
+        await deleteRoomById(id);
         respondWithJson(res, { message: "room deleted succesfully" });
         invalidateCache('cinemas');
     });

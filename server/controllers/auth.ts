@@ -71,7 +71,7 @@ export async function verifyEmailService(req: Request, res: Response) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET);
+    const decoded = jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET!);
     if (typeof decoded === "string" || !decoded.user_id) {
       throw new BadRequestError("Invalid token");
     }
@@ -129,7 +129,7 @@ export async function resetPasswordService(req: Request, res: Response) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.PASSWORD_RESET_SECRET);
+    const decoded = jwt.verify(token, process.env.PASSWORD_RESET_SECRET!);
 
     if (typeof decoded === "string" || !decoded.user_id) {
       throw new BadRequestError("Invalid token");
@@ -177,7 +177,7 @@ export async function logoutService(req: Request, res: Response) {
 
   let decodedRefreshToken: JwtPayload | string;
   try {
-    decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
+    decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET!);
   } catch (error) {
     throw new UnauthorizedError("Invalid or expired refresh token");
   }
@@ -273,7 +273,7 @@ export async function refreshService(req: Request, res: Response) {
 
   let decodedRefresh: JwtPayload;
   try {
-    decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET) as JwtPayload;
+    decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET!) as JwtPayload;
   } catch (err) {
     throw new BadRequestError("Invalid refresh token");
   }

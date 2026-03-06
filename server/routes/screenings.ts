@@ -1,8 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 export const router = Router();
 
 import { getAllScreeningsAdmin, getUpcomingScreenings, getUpcomingScreeningDetailsById, getScreeningDetailsByIdAdmin, deleteScreeningById, addManyScreenings, updateScreening } from '../controllers/screenings.js';
-import { verifyAdminJWT, verifyEmployeeJWT } from '../middleware/authMiddleware.js';
+import { verifyEmployeeJWT } from '../middleware/authMiddleware.js';
 import { CombineGenresIdNames, CombineQualitiesIdNames } from '../utils/index.js';
 import dayjs from 'dayjs';
 
@@ -126,7 +126,7 @@ router.delete("/:id", verifyEmployeeJWT,
     async (req: Request, res: Response) => {
         const id = parseIdParam(req, "Screening");
         console.log("Deleting screening id =", id);
-        const deleteResult = await deleteScreeningById(id);
+        await deleteScreeningById(id);
         respondWithJson(res, { message: "screening deleted succesfully" });
         invalidateCache('screenings');
     });

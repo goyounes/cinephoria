@@ -1,6 +1,6 @@
 import { PoolConnection, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import { pool } from "../config/mysqlConnect.js";
-import { MovieRow, GenreRow, ReviewRow } from '../types/database.js';
+import { MovieRow, GenreRow } from '../types/database.js';
 
 interface MovieInput {
     title: string;

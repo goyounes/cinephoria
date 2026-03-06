@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 // Import all exports from utils/index.js
 import {
   randomImageName,

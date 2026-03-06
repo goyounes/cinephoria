@@ -4,7 +4,6 @@ const router = Router();
 import { verifyEmailService, resetPasswordReqService, resetPasswordService,
   registerService, loginService, logoutService,
   refreshService } from '../controllers/auth.js';
-import { verifyUserJWT, verifyEmployeeJWT, verifyAdminJWT } from '../middleware/authMiddleware.js';
 import { body, validationResult } from 'express-validator';
 import { ValidationError } from '../utils/errors.js';
 

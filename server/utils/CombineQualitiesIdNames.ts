@@ -1,8 +1,4 @@
-import { ScreeningRow, QualityRow } from '../types/database.js';
-
-interface ScreeningWithQualitiesArray extends Omit<ScreeningRow, 'qualities_ids' | 'qualities_names'> {
-  qualities: QualityRow[] | null;
-}
+import { QualityRow } from '../types/database.js';
 
 // Minimal type for what the function actually needs
 interface HasQualityFields {

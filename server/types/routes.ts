@@ -1,7 +1,6 @@
 // Common route parameter and query interfaces
-import { ParamsDictionary } from 'express-serve-static-core';
 
-// Route parameters - must extend ParamsDictionary for middleware compatibility
+// Route parameters
 export interface IdParam extends Record<string, string> {
   id: string;
 }

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 const router = Router();
-import { verifyAdminJWT, verifyEmployeeJWT, verifyUserJWT } from '../middleware/authMiddleware.js';
+import { verifyUserJWT } from '../middleware/authMiddleware.js';
 import { getTicketTypes, getMyTickets } from '../controllers/tickets.js';
 
 // Cache middleware imports
