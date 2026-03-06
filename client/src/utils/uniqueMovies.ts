@@ -1,5 +1,7 @@
-const uniqueMovies = (movies) => {
-  const result = new Set();
+import type { Movie } from "../types";
+
+const uniqueMovies = (movies: Movie[]): Movie[] => {
+  const result = new Set<number>();
 
   return movies.filter((movie) => {
     if (result.has(movie.movie_id)) return false;

@@ -1,4 +1,6 @@
-function validateCardExpiryDate(value) {
+import type { CardExpiryValidation } from '../types';
+
+function validateCardExpiryDate(value: string): CardExpiryValidation {
   if (!/^\d{2}\/\d{2}$/.test(value)) {
     return { valid: false, reason: "invalid_format" };
   }

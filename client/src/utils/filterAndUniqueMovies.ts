@@ -1,7 +1,8 @@
 import { hasAnyGenre } from "../utils";
+import type { Movie, MovieFilterOptions } from "../types";
 
-const filterAndUniqueMovies = (movies, { selectedCinema = null, selectedGenres = []}) => {
-  const alreadyIncludedInFinalList = new Set();
+const filterAndUniqueMovies = (movies: Movie[], { selectedCinema = null, selectedGenres = [] }: MovieFilterOptions): Movie[] => {
+  const alreadyIncludedInFinalList = new Set<number>();
 
   return movies.filter((movie) => {
     if (alreadyIncludedInFinalList.has(movie.movie_id)) return false;
@@ -10,7 +11,7 @@ const filterAndUniqueMovies = (movies, { selectedCinema = null, selectedGenres =
       return false;
     }
     if (selectedGenres.length > 0) {
-      if (!movie.genres.length > 0) return false; //if movie doesnt have any genre, it's discarded directly
+      if (movie.genres.length === 0) return false; //if movie doesnt have any genre, it's discarded directly
 
       const genreFound = hasAnyGenre(movie, selectedGenres);
       if (!genreFound) return false;

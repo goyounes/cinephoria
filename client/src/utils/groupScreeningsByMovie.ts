@@ -1,5 +1,7 @@
-function groupScreeningsByMovie(screenings) {
-  const grouped = {};
+import type { Screening, GroupedScreeningsByMovie } from "../types";
+
+function groupScreeningsByMovie(screenings: Screening[]): GroupedScreeningsByMovie {
+  const grouped: GroupedScreeningsByMovie = {};
 
   for (const screening of screenings) {
     const { movie_id } = screening;

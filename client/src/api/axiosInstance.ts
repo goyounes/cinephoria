@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Environment detection (battle-tested approach)
-const getBaseURL = () => {
+const getBaseURL = (): string => {
   const isElectron = window?.navigator?.userAgent?.includes('Electron');
   const isCapacitor = window?.location?.protocol === 'file:' || window?.location?.hostname === 'localhost';
   const isDev = process.env.NODE_ENV === 'development';

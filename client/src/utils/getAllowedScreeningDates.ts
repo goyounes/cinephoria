@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
+import type { Movie } from "../types";
 
-const getAllowedScreeningDates = (movies) => {
-  const dateSet = new Set();
+const getAllowedScreeningDates = (movies: Movie[]): string[] => {
+  const dateSet = new Set<string>();
 
   for (const movie of movies) {
     if (movie.start_date) {
