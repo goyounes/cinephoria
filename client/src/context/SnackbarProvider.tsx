@@ -1,22 +1,33 @@
-import {createContext,useContext,useState,useCallback,useEffect} from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { Snackbar, Alert } from "@mui/material";
+import type { SnackbarSeverity } from "../types";
 
+interface SnackbarItem {
+  key: number;
+  message: string;
+  severity: SnackbarSeverity;
+  onClose: () => void;
+}
 
-const SnackbarContext = createContext();
+interface SnackbarContextType {
+  showSnackbar: (message: string, severity?: SnackbarSeverity) => void;
+}
 
-const SNACKBARS_TIMEOUT = 4000
+const SnackbarContext = createContext<SnackbarContextType | null>(null);
 
-export const SnackbarProvider = ({ children }) => {
-  const [snackbars, setSnackbars] = useState([]);
+const SNACKBARS_TIMEOUT = 4000;
 
-  const showSnackbar = useCallback((message, severity = "info") => {
+export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
+  const [snackbars, setSnackbars] = useState<SnackbarItem[]>([]);
+
+  const showSnackbar = useCallback((message: string, severity: SnackbarSeverity = "info") => {
     const key = Date.now();
 
     const handleClose = () => {
       setSnackbars((prev) => prev.filter((snack) => snack.key !== key));
     };
 
-    const snackbar = {
+    const snackbar: SnackbarItem = {
       key,
       message,
       severity,
@@ -42,8 +53,7 @@ export const SnackbarProvider = ({ children }) => {
   );
 };
 
-// Hook to use snackbar trigger
-export const useSnackbar = () => {
+export const useSnackbar = (): ((message: string, severity?: SnackbarSeverity) => void) => {
   const context = useContext(SnackbarContext);
   if (!context) {
     throw new Error("useSnackbar must be used within a SnackbarProvider");
@@ -51,8 +61,13 @@ export const useSnackbar = () => {
   return context.showSnackbar;
 };
 
-// Snackbar Component
-const CustomSnackbar = ({ message, severity = "info", onClose }) => {
+interface CustomSnackbarProps {
+  message: string;
+  severity?: SnackbarSeverity;
+  onClose?: () => void;
+}
+
+const CustomSnackbar = ({ message, severity = "info", onClose }: CustomSnackbarProps) => {
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
@@ -63,7 +78,7 @@ const CustomSnackbar = ({ message, severity = "info", onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const handleClose = (_, reason) => {
+  const handleClose = (_: React.SyntheticEvent | Event, reason?: string) => {
     if (reason !== "clickaway") {
       setOpen(false);
       onClose?.();

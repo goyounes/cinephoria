@@ -1,9 +1,22 @@
-import { useState, useEffect, createContext, useContext, useLayoutEffect } from 'react';
-import axios from '../api/axiosInstance.js';
+import { useState, useEffect, createContext, useContext, useLayoutEffect, type ReactNode } from 'react';
+import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios from '../api/axiosInstance';
+import type { CurrentUser, LoginInputs, LoginResponse } from '../types';
 
-export const AuthContext = createContext();
+interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
-export const useAuth = () => {
+interface AuthContextType {
+  currentUser: CurrentUser | null;
+  login: (inputs: LoginInputs) => Promise<CurrentUser>;
+  logout: () => Promise<void>;
+  resetPasswordReq: (email: string) => Promise<unknown>;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+export const useAuth = (): AuthContextType => {
   const authContext = useContext(AuthContext);
   if (!authContext) {
     throw new Error("useAuth must be used within an AuthProvider");
@@ -11,22 +24,21 @@ export const useAuth = () => {
   return authContext;
 };
 
-export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(() => {
+export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(() => {
     const storedUser = localStorage.getItem("currentUser");
-    return storedUser ? JSON.parse(storedUser) : null;
+    return storedUser ? JSON.parse(storedUser) as CurrentUser : null;
   });
 
-  const [accessTokenState, setAccessTokenState] = useState(null)
-  const login = async (inputs) => {
-    try {
-      const res = await axios.post('/api/v1/auth/login', inputs, { withCredentials: false });
-      const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data;
-      // first_name,// last_name,// isVerified,
+  const [accessTokenState, setAccessTokenState] = useState<string | null>(null);
 
-      // Save access token in state (refresh token is now in HTTP-only cookie)
+  const login = async (inputs: LoginInputs): Promise<CurrentUser> => {
+    try {
+      const res = await axios.post<LoginResponse>('/api/v1/auth/login', inputs, { withCredentials: false });
+      const { user_id, user_name, user_email, role_id, role_name, accessToken } = res.data;
+
       setAccessTokenState(accessToken);
-      const user = {
+      const user: CurrentUser = {
         user_id,
         user_name,
         user_email,
@@ -38,24 +50,24 @@ export const AuthContextProvider = ({ children }) => {
 
       return user;
     } catch (error) {
-      const backendErrors = error.response?.data?.errors;
-      let formattedMessage;
+      const axiosError = error as AxiosError<{ errors?: { msg: string }[]; message?: string; error?: { message: string } }>;
+      const backendErrors = axiosError.response?.data?.errors;
+      let formattedMessage: string;
       if (Array.isArray(backendErrors) && backendErrors.length > 0) {
         formattedMessage = backendErrors.map(e => e.msg).join(", ");
-      } else if (error.response?.data?.message) {
-        formattedMessage = error.response.data.message;
-      } else if (error.response?.data?.error?.message) {
-        formattedMessage = error.response.data.error.message
+      } else if (axiosError.response?.data?.message) {
+        formattedMessage = axiosError.response.data.message;
+      } else if (axiosError.response?.data?.error?.message) {
+        formattedMessage = axiosError.response.data.error.message;
       } else {
-        formattedMessage = error.message || "Unknown error occurred";
+        formattedMessage = axiosError.message || "Unknown error occurred";
       }
       throw new Error(formattedMessage);
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
-      // No need to send refresh token in body - it's in HTTP-only cookie
       await axios.post("/api/v1/auth/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("Logout failed:", error);
@@ -67,12 +79,10 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   useLayoutEffect(() => {
-    // Request interceptor - attach token from current state (or localStorage)
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
-        if (config.headers.Authorization) return config; //do not override already set Authorization header
+        if (config.headers.Authorization) return config;
 
-        // const accessToken = localStorage.getItem('accessToken');
         if (accessTokenState) {
           config.headers.Authorization = `Bearer ${accessTokenState}`;
         }
@@ -81,13 +91,12 @@ export const AuthContextProvider = ({ children }) => {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor - handle 401, refresh token and logout on failure
     const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
+      async (error: AxiosError) => {
+        const originalRequest = error.config as RetryableAxiosRequestConfig;
 
-        if (originalRequest.url.includes('/api/v1/auth/refresh')) {
+        if (originalRequest.url?.includes('/api/v1/auth/refresh')) {
           return Promise.reject(error);
         }
 
@@ -95,13 +104,12 @@ export const AuthContextProvider = ({ children }) => {
           originalRequest._retry = true;
 
           try {
-            // Attempt to refresh token
-            const res =  await axios.post('/api/v1/auth/refresh', {}, { withCredentials: true });
-            const {user_id,user_name,user_email,role_id,role_name,accessToken} = res.data
+            const res = await axios.post<LoginResponse>('/api/v1/auth/refresh', {}, { withCredentials: true });
+            const { user_id, user_name, user_email, role_id, role_name, accessToken } = res.data;
             const newAccessToken = accessToken;
 
             setAccessTokenState(newAccessToken);
-            const user = {
+            const user: CurrentUser = {
               user_id,
               user_name,
               user_email,
@@ -115,7 +123,6 @@ export const AuthContextProvider = ({ children }) => {
 
             return axios(originalRequest);
           } catch (refreshError) {
-            // Refresh failed - clear user and tokens
             setCurrentUser(null);
             localStorage.removeItem('currentUser');
             setAccessTokenState(null);
@@ -127,15 +134,14 @@ export const AuthContextProvider = ({ children }) => {
       }
     );
 
-    // Cleanup on unmount or dependency change
     return () => {
       axios.interceptors.request.eject(requestInterceptor);
       axios.interceptors.response.eject(responseInterceptor);
     };
-  }, [accessTokenState, currentUser]); // rerun when token changes or setCurrentUser fn changes
+  }, [accessTokenState, currentUser]);
 
 
-  const resetPasswordReq = async (email) => {
+  const resetPasswordReq = async (email: string): Promise<unknown> => {
     try {
       const res = await axios.post("/api/v1/auth/reset-password-req", { email });
       return res.data;
@@ -144,15 +150,10 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => { //sync across many browser windows
-    const syncAuthAcrossTabs = (e) => {
-      // if (e.key === 'accessToken') {
-      //   if (!e.newValue) {
-      //     setCurrentUser(null);
-      //   }
-      // }
+  useEffect(() => {
+    const syncAuthAcrossTabs = (e: StorageEvent) => {
       if (e.key === 'currentUser') {
-        setCurrentUser(e.newValue ? JSON.parse(e.newValue) : null);
+        setCurrentUser(e.newValue ? JSON.parse(e.newValue) as CurrentUser : null);
       }
     };
 
@@ -161,8 +162,8 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, resetPasswordReq}}>
+    <AuthContext.Provider value={{ currentUser, login, logout, resetPasswordReq }}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
