@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { Box, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, ClickAwayListener } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const cinemas = [
+interface CinemaInfo {
+  name: string;
+  address: string;
+  phone: string;
+  hours: string;
+}
+
+const cinemas: CinemaInfo[] = [
   {
     name: 'Nantes',
     address: '12 Rue de la Loire, 44000 Nantes',
@@ -48,7 +55,7 @@ const cinemas = [
 ];
 
 const Footer = () => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   return (
     <Stack 

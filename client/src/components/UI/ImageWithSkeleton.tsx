@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Skeleton, Box } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
 
-const ImageWithSkeleton = ({ src, alt, width = 100, height = 150, sx }) => {
+interface ImageWithSkeletonProps {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  sx?: SxProps<Theme>;
+}
+
+const ImageWithSkeleton = ({ src, alt, width = 100, height = 150, sx }: ImageWithSkeletonProps) => {
   const [loaded, setLoaded] = useState(false);
   const [hideSkeleton, setHideSkeleton] = useState(false);
 

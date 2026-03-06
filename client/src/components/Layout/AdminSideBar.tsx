@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Drawer,
@@ -135,7 +135,7 @@ const AdminSideBar = () => {
           </Tooltip>
         </ListItemButton>
 
-        { currentUser?.role_id >= 3 && (<ListItemButton
+        { (currentUser?.role_id ?? 0) >= 3 && (<ListItemButton
           component={Link}
           to="/admin/users"
           selected={location.pathname === '/admin/users'}

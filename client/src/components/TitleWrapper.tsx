@@ -1,8 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 const SITE_NAME = 'Cinephoria';
 
-const TitleWrapper = ({ title, children }) => {
+interface TitleWrapperProps {
+  title?: string;
+  children: ReactNode;
+}
+
+const TitleWrapper = ({ title, children }: TitleWrapperProps) => {
   useEffect(() => {
     // Set the document title
     if (title) {

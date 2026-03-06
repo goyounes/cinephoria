@@ -1,4 +1,4 @@
-import { AppBar,  Box, Container, Button,Typography, Stack, Toolbar, Menu, MenuItem, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Divider, Collapse } from "@mui/material";
+import { AppBar, Box, Container, Button, Typography, Stack, Toolbar, Menu, MenuItem, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Divider, Collapse } from "@mui/material";
 import {
   Home as HomeIcon,
   AccountCircle as AccountCircleIcon,
@@ -17,9 +17,17 @@ import black_logo_3 from '../../assets/black_logo_3.png';
 // import white_logo_3 from '../assets/white_logo_3.png';
 // import cinephoriaSm from '../assets/cinephoria-sm.png';
 import { useState, useEffect } from "react";
+import type { SvgIconComponent } from "@mui/icons-material";
 import { useAuth } from "../../context/AuthProvider";
 
-const NavButton = ({ label, Icon, to, onClick }) => {
+interface NavButtonProps {
+  label: string;
+  Icon: SvgIconComponent;
+  to?: string;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+const NavButton = ({ label, Icon, to, onClick }: NavButtonProps) => {
   const buttonProps = to
     ? { component: Link, to }
     : { onClick };
@@ -47,12 +55,12 @@ const RealNavBar = () => {
   const {currentUser} = useAuth()
   const isLoggedIn = currentUser && currentUser.user_id !== undefined && currentUser.user_id !== null;
   const isAdmin = isLoggedIn && currentUser.role_id >= 2
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountExpanded, setAccountExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const open = Boolean(anchorEl);
-  const handleMenuOpen = (event) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleMenuClose = () => {
@@ -177,56 +185,56 @@ const RealNavBar = () => {
             <Divider />
             <List>
               {isAdmin && (
-                <ListItem button component={Link} to="/admin/dashboard" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+                <ListItemButton component={Link} to="/admin/dashboard" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                   <ListItemIcon><DashboardIcon /></ListItemIcon>
                   <ListItemText primary="Dashboard" />
-                </ListItem>
+                </ListItemButton>
               )}
-              <ListItem button component={Link} to="/" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+              <ListItemButton component={Link} to="/" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
-              </ListItem>
-              <ListItem button component={Link} to="/reservation" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+              </ListItemButton>
+              <ListItemButton component={Link} to="/reservation" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><EventSeatIcon /></ListItemIcon>
                 <ListItemText primary="Reservation" />
-              </ListItem>
-              <ListItem button component={Link} to="/movies" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+              </ListItemButton>
+              <ListItemButton component={Link} to="/movies" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><MovieIcon /></ListItemIcon>
                 <ListItemText primary="Movies" />
-              </ListItem>
-              <ListItem button component={Link} to="/contactus" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+              </ListItemButton>
+              <ListItemButton component={Link} to="/contactus" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                 <ListItemIcon><ContactMailIcon /></ListItemIcon>
                 <ListItemText primary="Contact" />
-              </ListItem>
+              </ListItemButton>
             </List>
             <Divider />
             <List>
-              <ListItem button onClick={handleAccountToggle}>
+              <ListItemButton onClick={handleAccountToggle}>
                 <ListItemIcon><AccountCircleIcon /></ListItemIcon>
                 <ListItemText primary="Account" />
                 {accountExpanded ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
+              </ListItemButton>
               <Collapse in={accountExpanded} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   { !isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/login" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+                    <ListItemButton component={Link} to="/auth/login" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Login" sx={{ pl: 4 }} />
-                    </ListItem>
+                    </ListItemButton>
                   )}
                   { !isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/register" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+                    <ListItemButton component={Link} to="/auth/register" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Register" sx={{ pl: 4 }} />
-                    </ListItem>
+                    </ListItemButton>
                   )}
                   { isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/account" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+                    <ListItemButton component={Link} to="/auth/account" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Profile" sx={{ pl: 4 }} />
-                    </ListItem>
+                    </ListItemButton>
                   )}
                   { isLoggedIn && (
-                    <ListItem button component={Link} to="/auth/logout" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
+                    <ListItemButton component={Link} to="/auth/logout" onClick={handleMobileMenuClose} sx={{ '& *': { color: 'text.primary' }, textDecoration: 'none' }}>
                       <ListItemText primary="Logout" sx={{ pl: 4 }} />
-                    </ListItem>
+                    </ListItemButton>
                   )}
                 </List>
               </Collapse>

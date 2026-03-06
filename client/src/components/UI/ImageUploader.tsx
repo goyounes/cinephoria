@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Stack } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
-function ImageUploader({ onFileSelect }) {
-  const [imagePreview, setImagePreview] = useState(null);
+interface ImageUploaderProps {
+  onFileSelect: (file: File) => void;
+}
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+function ImageUploader({ onFileSelect }: ImageUploaderProps) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       onFileSelect(file); // Pass file to parent
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }

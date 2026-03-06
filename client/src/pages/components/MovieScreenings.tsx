@@ -1,19 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
-import axios from '../../api/axiosInstance.js';
+import axios from '../../api/axiosInstance';
 
-
+import type { Screening, GroupedScreeningsByDate } from "../../types";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
 import { groupScreenings } from "../../utils";
 
-import {Stack,Button,Typography,IconButton,Card,CardContent,} from "@mui/material";
+import { Stack, Button, Typography, IconButton, Card, CardContent } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-import ScreeningsTable from "./ScreeningsTable.jsx";
+import ScreeningsTable from "./ScreeningsTable";
 import { useAuth } from "../../context/AuthProvider";
 
 dayjs.extend(customParseFormat)
@@ -22,12 +22,18 @@ dayjs.extend(isSameOrAfter);
 const DAYS_PER_PAGE = 7;
 const LIMITED_TOTAL_DAYS = 14;
 
-const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
+interface MovieScreeningsProps {
+  movieId: number | null;
+  cinema_id?: number | null;
+  nbrOfTickets?: number;
+}
+
+const MovieScreenings = ({ movieId, cinema_id, nbrOfTickets = 0 }: MovieScreeningsProps) => {
    // const navigate = useNavigate();
    const {currentUser} = useAuth();
-   const isAdmin = currentUser?.role_id >= 2;
+   const isAdmin = (currentUser?.role_id ?? 0) >= 2;
 
-   const [screenings, setScreenings] = useState([]);
+   const [screenings, setScreenings] = useState<Screening[]>([]);
    const [page, setPage] = useState(0);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const [hasAutoSelected, setHasAutoSelected] = useState(false);
@@ -54,7 +60,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
             let url = `/api/v1/movies/${movieId}/screenings`;
             if (isAdmin) url += `/all`;
             if (cinema_id) {
-               const query = new URLSearchParams({ cinema_id});
+               const query = new URLSearchParams({ cinema_id: String(cinema_id) });
                url += `?${query.toString()}`;
             }
             const { data } = await axios.get(url);
@@ -69,7 +75,7 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
    }, [movieId, cinema_id, isAdmin]);
 
   // Auto-select the first available screening
-   const screeningsByDay = useMemo(() => groupScreenings(screenings), [screenings]);
+   const screeningsByDay: GroupedScreeningsByDate = useMemo(() => groupScreenings(screenings), [screenings]);
    const screeningDates = useMemo(() => //sort them for later use sorted
       Object.keys(screeningsByDay)
       .sort((a, b) => dayjs(a, "DD/MM/YYYY").diff(dayjs(b, "DD/MM/YYYY")))
@@ -178,13 +184,14 @@ const MovieScreenings = ({ movieId, cinema_id ,nbrOfTickets = 0 }) => {
 
           {Object.keys(screeningsByDay || {}).length !== 0 && selectedIndex !== -1 && (() => {
             const selectedDate = days[selectedIndex]?.date;
-            const screeningsForDate = screeningsMap[selectedDate] || [];
+            const screeningsForDate = selectedDate ? screeningsMap[selectedDate] : undefined;
+            const hasScreeningsForDate = screeningsForDate && Object.keys(screeningsForDate).length > 0;
 
             return (
               <>
                 <Typography variant="h6" gutterBottom> Screenings for {selectedDate}</Typography>
 
-                {screeningsForDate.length === 0 ? (
+                {!hasScreeningsForDate ? (
                   <Typography>No screenings available.</Typography>
                 ) : (
                   <ScreeningsTable screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { Modal, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -26,7 +26,15 @@ const baseStyle = {
   p: 4,
 };
 
-const ModalWrapper = ({ open, onClose, children, width = 700, fullScreen = false  }) => {
+interface ModalWrapperProps {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+  width?: number;
+  fullScreen?: boolean;
+}
+
+const ModalWrapper = ({ open, onClose, children, width = 700, fullScreen = false }: ModalWrapperProps) => {
   const appliedStyle = fullScreen  ? fullScreenStyle : { ...baseStyle, width, position: 'relative' };
 return (
   <Modal open={open} onClose={onClose}>

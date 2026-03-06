@@ -1,8 +1,34 @@
+import type { ReactNode } from 'react';
 import { Stack, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import ScreeningButton from './ScreeningButton';
+import type { Screening } from '../../types';
 
-const ScreeningsTable = ({ screeningsByLocation, nbrOfTickets }) => {
+interface ScreeningWithSeats extends Screening {
+  seats_left: number;
+}
+
+interface RoomData {
+  room_id: number;
+  room_name: string;
+  screenings: ScreeningWithSeats[];
+}
+
+interface CinemaData {
+  cinema_id: number;
+  cinema_name: string;
+  [key: string]: RoomData | number | string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ScreeningsByLocation = Record<string | number, any>;
+
+interface ScreeningsTableProps {
+  screeningsByLocation: ScreeningsByLocation;
+  nbrOfTickets: number;
+}
+
+const ScreeningsTable = ({ screeningsByLocation, nbrOfTickets }: ScreeningsTableProps) => {
   if (!screeningsByLocation) return null;
 
   const cinemasArray = Object.entries(screeningsByLocation);
@@ -18,7 +44,12 @@ const ScreeningsTable = ({ screeningsByLocation, nbrOfTickets }) => {
   );
 };
 
-const CinemaBlock = ({ cinemaData, children }) => {
+interface CinemaBlockProps {
+  cinemaData: CinemaData;
+  children: ReactNode;
+}
+
+const CinemaBlock = ({ cinemaData, children }: CinemaBlockProps) => {
   if (!cinemaData?.cinema_id) return null;
 
   return (
@@ -31,10 +62,16 @@ const CinemaBlock = ({ cinemaData, children }) => {
   );
 };
 
-const RoomsBlock = ({ cinemaData, nbrOfTickets }) => {
+interface RoomsBlockProps {
+  cinemaData: CinemaData;
+  nbrOfTickets: number;
+}
+
+const RoomsBlock = ({ cinemaData, nbrOfTickets }: RoomsBlockProps) => {
   const roomsWithValidScreenings = Object.entries(cinemaData).filter(
     ([, roomData]) =>
-      roomData?.screenings?.some(screening => screening.seats_left >= nbrOfTickets)
+      typeof roomData === 'object' && roomData !== null && 'screenings' in roomData &&
+      (roomData as RoomData).screenings?.some((screening: ScreeningWithSeats) => screening.seats_left >= nbrOfTickets)
   );
 
   if (roomsWithValidScreenings.length === 0) {
@@ -47,9 +84,10 @@ const RoomsBlock = ({ cinemaData, nbrOfTickets }) => {
 
   return (
     <Stack spacing={2}>
-      {roomsWithValidScreenings.map(([roomId, roomData]) => {
+      {roomsWithValidScreenings.map(([roomId, roomValue]) => {
+        const roomData = roomValue as RoomData;
         const visibleScreenings = roomData.screenings.filter(
-          screening => screening.seats_left >= nbrOfTickets
+          (screening: ScreeningWithSeats) => screening.seats_left >= nbrOfTickets
         );
 
         return (

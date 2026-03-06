@@ -1,7 +1,12 @@
 import { Box, Stack, Typography } from '@mui/material'
 import QRCode from 'react-qr-code'
+import type { Ticket } from '../../types'
 
-const TicketCard = ({ ticket }) => (
+interface TicketCardProps {
+  ticket: Ticket;
+}
+
+const TicketCard = ({ ticket }: TicketCardProps) => (
   <Box
     key={ticket.QR_code}
     p={2}
@@ -16,7 +21,7 @@ const TicketCard = ({ ticket }) => (
       <Box> 
         <Typography variant="body2">{ticket.cinema_name}</Typography>
         <Typography variant="body2" mt={0.5}>Seat #{ticket.seat_number} - {ticket.ticket_type_name}</Typography>
-        <Typography variant="body2">{ticket.start_date} at {ticket.start_time.substring(0, 5)}</Typography>
+        <Typography variant="body2">{ticket.start_date} at {ticket.start_time?.substring(0, 5)}</Typography>
       </Box>   
       <Box mt={1}>
         {ticket.QR_code ? 

@@ -1,17 +1,26 @@
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Stack, TextField, CircularProgress } from '@mui/material';
-import {useState } from 'react'
+import { useState } from 'react';
 import { validateCardExpiryDate } from '../../utils';
-import axios from '../../api/axiosInstance.js';
+import axios from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from '../../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../../context/SnackbarProvider';
+import type { CardInfo, Order } from '../../types';
 
-const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }) => {
+interface PaymentDialogProps {
+  open: boolean;
+  onClose: () => void;
+  cardInfo: CardInfo;
+  setCardInfo: React.Dispatch<React.SetStateAction<CardInfo>>;
+  order: Order;
+}
+
+const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }: PaymentDialogProps) => {
    const showSnackbar = useSnackbar();
    
    const navigate = useNavigate()
    const [isProcessing, setIsProcessing] = useState(false);
 
-   const handleInputChange = (field) => (event) => {
+   const handleInputChange = (field: keyof CardInfo) => (event: React.ChangeEvent<HTMLInputElement>) => {
       let value = event.target.value;
       if (field === "number") {
          value = value.replace(/\D/g, "").slice(0, 16);
@@ -48,8 +57,9 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }) => {
          throw new Error(expiryValidation.reason === "expired" ? "Card expired" : "Expiration date is invalid");
          }
       } catch (error) {
+         const err = error as Error;
          showSnackbar(
-            `Failed during validating payment information: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            `Failed during validating payment information: ${err.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
          return;
@@ -58,8 +68,9 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }) => {
       try {
          await axios.post("/api/v1/checkout/complete", {...order,card: cardInfo});
       } catch (error) {
+         const axiosErr = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
          showSnackbar(
-            `Failed during Backend Processing: ${error.response?.data?.error?.message || error.message || "Something went wrong"}`,
+            `Failed during Backend Processing: ${axiosErr.response?.data?.error?.message || axiosErr.message || "Something went wrong"}`,
             "error");
          setIsProcessing(false);
          return;

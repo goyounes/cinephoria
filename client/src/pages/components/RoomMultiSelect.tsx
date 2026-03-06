@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Select,
   MenuItem,
@@ -7,10 +6,18 @@ import {
   Checkbox,
   ListItemText,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
+import type { Room } from "../../types";
 
-const RoomMultiSelect = ({ rooms, selectedRooms, setSelectedRooms }) => {
-  const handleChange = (event) => {
-    setSelectedRooms(event.target.value);
+interface RoomMultiSelectProps {
+  rooms: Room[];
+  selectedRooms: number[];
+  setSelectedRooms: (value: number[]) => void;
+}
+
+const RoomMultiSelect = ({ rooms, selectedRooms, setSelectedRooms }: RoomMultiSelectProps) => {
+  const handleChange = (event: SelectChangeEvent<number[]>) => {
+    setSelectedRooms(event.target.value as number[]);
   };
 
   return (

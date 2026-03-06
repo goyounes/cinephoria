@@ -1,9 +1,14 @@
 import AccessibleIcon from "@mui/icons-material/Accessible";
 import { Button, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import type { Screening } from "../../types";
 
+interface ScreeningButtonProps {
+  screening: Screening;
+  room_name: string;
+}
 
-const ScreeningButton = ({screening, room_name}) => {
+const ScreeningButton = ({ screening, room_name }: ScreeningButtonProps) => {
   return (
     <Button variant="contained" sx={{ p: 0}}>
         <Stack direction="row">

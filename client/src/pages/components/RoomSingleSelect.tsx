@@ -4,9 +4,17 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
+import type { Room } from "../../types";
 
-const RoomSingleSelect = ({ rooms, selectedRoom, setSelectedRoom }) => {
-  const handleChange = (event) => {
+interface RoomSingleSelectProps {
+  rooms: Room[];
+  selectedRoom: number | string;
+  setSelectedRoom: (value: number | string) => void;
+}
+
+const RoomSingleSelect = ({ rooms, selectedRoom, setSelectedRoom }: RoomSingleSelectProps) => {
+  const handleChange = (event: SelectChangeEvent<number | string>) => {
     setSelectedRoom(event.target.value);
   };
 

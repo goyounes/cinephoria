@@ -1,7 +1,15 @@
 import { Link } from "react-router-dom";
 import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
+import type { Movie } from "../../types";
 
-const MovieCard = ({ movie, to, state, onClick }) => {
+interface MovieCardProps {
+  movie: Movie;
+  to?: string;
+  state?: unknown;
+  onClick?: () => void;
+}
+
+const MovieCard = ({ movie, to, state, onClick }: MovieCardProps) => {
   const Component = to ? Link : "div";
 
   return (

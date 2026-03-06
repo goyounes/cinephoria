@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
 import dayjs from "dayjs";
+import type { Movie } from "../../types";
 
 const MovieSkeleton = () => (
   <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
@@ -50,11 +51,16 @@ const MovieSkeleton = () => (
   </Stack>
 );
 
-const MovieDetails = ({ movie, loadingMovie }) => {
+interface MovieDetailsProps {
+  movie: Movie | null;
+  loadingMovie: boolean;
+}
+
+const MovieDetails = ({ movie, loadingMovie }: MovieDetailsProps) => {
   return (
     <Card elevation={4}> 
       <CardContent sx={{ p: 4}}>
-        {loadingMovie ? (
+        {loadingMovie || !movie ? (
           <MovieSkeleton />
         ) : (
           <Stack direction={{xs: "column",md: "row"}} spacing={4}>

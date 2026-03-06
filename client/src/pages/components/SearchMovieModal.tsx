@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import {Modal,Box,Container,Stack,Button,TextField,Autocomplete,Divider} from '@mui/material';
+import { Modal, Box, Container, Stack, Button, TextField, Autocomplete, Divider } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import axios from '../../api/axiosInstance.js';
+import axios from '../../api/axiosInstance';
 import MovieCard from './MovieCard';
+import type { Movie } from '../../types';
 
 const fullScreenStyle = {
   position: 'fixed',
@@ -16,9 +17,14 @@ const fullScreenStyle = {
   zIndex: 1400,
 };
 
-const SearchMovieModal = ({ modalOpen, setModalOpen }) => {
-  const [movies, setMovies] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+interface SearchMovieModalProps {
+  modalOpen: boolean;
+  setModalOpen: (open: boolean) => void;
+}
+
+const SearchMovieModal = ({ modalOpen, setModalOpen }: SearchMovieModalProps) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
 
   useEffect(() => {
     const fetchMovies = async () => {

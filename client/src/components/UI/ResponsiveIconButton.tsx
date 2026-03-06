@@ -1,6 +1,12 @@
-import { Box, Button } from "@mui/material"
+import type { ReactNode } from "react";
+import { Box, Button, type ButtonProps } from "@mui/material"
 
-const ResponsiveIconButton = ({ icon, children, ...props }) => {
+interface ResponsiveIconButtonProps extends ButtonProps {
+  icon: ReactNode;
+  children?: ReactNode;
+}
+
+const ResponsiveIconButton = ({ icon, children, ...props }: ResponsiveIconButtonProps) => {
     return (
         <Button
             startIcon={icon}

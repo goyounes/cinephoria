@@ -1,9 +1,16 @@
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 
-const BasicDatePicker = ({ value, onChange, allowedDates, format}) => {
+interface BasicDatePickerProps {
+  value: Dayjs | null;
+  onChange: (value: Dayjs | null) => void;
+  allowedDates?: string[];
+  format?: string;
+}
+
+const BasicDatePicker = ({ value, onChange, allowedDates, format }: BasicDatePickerProps) => {
   // Format allowed dates only if they exist and have length
   const allowedDatesFormatted = Array.isArray(allowedDates) && allowedDates.length > 0
     ? allowedDates.map(dateStr => dayjs(dateStr).format('YYYY-MM-DD'))

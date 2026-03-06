@@ -1,8 +1,12 @@
-import React from "react";
 import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
+import type { Movie } from "../types";
 
-const HorizontalMovieScroller = ({ movies }) => {
+interface HorizontalMovieScrollerProps {
+  movies: Movie[];
+}
+
+const HorizontalMovieScroller = ({ movies }: HorizontalMovieScrollerProps) => {
   return (
     <Box
       sx={{
