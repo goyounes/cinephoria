@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
@@ -12,8 +12,27 @@ import {
 import LockResetIcon from '@mui/icons-material/LockReset';
 import axios from '../../api/axiosInstance';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import type { AxiosError } from 'axios';
 
-const validatePassword = (value) => ({
+interface PasswordValidation {
+  length: boolean;
+  uppercase: boolean;
+  lowercase: boolean;
+  number: boolean;
+  specialChar: boolean;
+}
+
+interface ResetFormData {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface ResetFormErrors {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+const validatePassword = (value: string): PasswordValidation => ({
   length: value.length >= 8,
   uppercase: /[A-Z]/.test(value),
   lowercase: /[a-z]/.test(value),
@@ -27,22 +46,22 @@ const ResetPasswordForm = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ResetFormData>({
     newPassword: '',
     confirmPassword: '',
   });
 
-  const [formErrors, setFormErrors] = useState({ newPassword: '', confirmPassword: '' });
-  const [passwordValidation, setPasswordValidation] = useState({
+  const [formErrors, setFormErrors] = useState<ResetFormErrors>({ newPassword: '', confirmPassword: '' });
+  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
     length: false,
     uppercase: false,
     lowercase: false,
     number: false,
     specialChar: false,
   });
-  const [displayPasswordErrors, setDisplayPasswordErrors] = useState(false);
+  const [displayPasswordErrors, setDisplayPasswordErrors] = useState<boolean>(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     if (name === 'newPassword') {
@@ -66,7 +85,7 @@ const ResetPasswordForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleResetPassword = async (e) => {
+  const handleResetPassword = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     // Final validation
@@ -91,11 +110,12 @@ const ResetPasswordForm = () => {
 
       showSnackbar("Password reset successful", "success");
       navigate('/auth/login');
-    } catch (err) {
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ error?: { message?: string }; message?: string }>;
       const message =
-        err.response?.data?.error?.message ||
-        err.response?.data?.message ||
-        err.message ||
+        axiosError.response?.data?.error?.message ||
+        axiosError.response?.data?.message ||
+        axiosError.message ||
         'Reset failed';
       showSnackbar(message, 'error');
     }

@@ -1,18 +1,19 @@
+import React, { useEffect, useState } from 'react';
 import LoginIcon from '@mui/icons-material/Login';
-import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button,  Card, CardContent} from '@mui/material';
 import { useAuth } from "../../context/AuthProvider";
 import { useSnackbar } from '../../context/SnackbarProvider';
+import type { LoginInputs } from '../../types';
 
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/'
+  const from = (location.state as { from?: string })?.from || '/';
   const showSnackbar = useSnackbar();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginInputs>({
     email: '',
     password: '',
     // username: '',
@@ -28,7 +29,7 @@ const Login = () => {
   // eslint-disable-next-line
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -38,16 +39,17 @@ const Login = () => {
 
 
   const {login} = useAuth()
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
       await login(formData)
      	showSnackbar( "Login successful! \nWelcome " + formData.email, "success");
       navigate(from, { replace: true })
 
-    } catch (err) {
+    } catch (err: unknown) {
       // showSnackbar("Failed to login: " + err.response?.data?.error?.message || "Server error", "error");
-      showSnackbar("Failed to login: " + err.message || "Server error", "error");
+      const message = err instanceof Error ? err.message : "Server error";
+      showSnackbar("Failed to login: " + message, "error");
     }
   };
 
@@ -95,7 +97,7 @@ const Login = () => {
             value={formData.password}
           />
           <Typography>
-            <Link to={'/auth/reset-password-req'} underline="hover">
+            <Link to={'/auth/reset-password-req'}>
               Forgot password?
             </Link>
           </Typography>
@@ -106,7 +108,7 @@ const Login = () => {
 
           <Typography>
             Don't have an account?{' '}
-            <Link to={'/auth/register'} underline="hover" >
+            <Link to={'/auth/register'}>
               Signup now
             </Link>
           </Typography>

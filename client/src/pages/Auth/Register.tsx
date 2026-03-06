@@ -1,15 +1,38 @@
-import axios from '../../api/axiosInstance.js';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import {
   Container, Typography, Stack, TextField, Button, Card, CardContent
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import type { AxiosError } from 'axios';
 
 import { useAuth } from '../../context/AuthProvider';
-import { useSnackbar } from '../../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
-const validatePassword = (value) => ({
+interface PasswordValidation {
+  length: boolean;
+  uppercase: boolean;
+  lowercase: boolean;
+  number: boolean;
+  specialChar: boolean;
+}
+
+interface RegisterFormData {
+  email: string;
+  password: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface RegisterFormErrors {
+  password: string;
+  email: string;
+  username: string;
+}
+
+const validatePassword = (value: string): PasswordValidation => ({
   length: value.length >= 8,
   uppercase: /[A-Z]/.test(value),
   lowercase: /[a-z]/.test(value),
@@ -17,7 +40,7 @@ const validatePassword = (value) => ({
   specialChar: /[^A-Za-z0-9]/.test(value),
 });
 
-const isValidEmail = (email) => {
+const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 };
 
@@ -33,21 +56,21 @@ const Register = () => {
   }, [isLoggedIn, navigate]);
 
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
     username: '',
     firstName: '',
     lastName: '',
   });
-  const [formErrors, setFormErrors] = useState({
+  const [formErrors, setFormErrors] = useState<RegisterFormErrors>({
     password:'',
     email: '',
     username:'',
   });
 
-  const [displayPasswordErrors, setDisplayPasswordErrors] = useState(false);
-  const [passwordValidation, setPasswordValidation] = useState({
+  const [displayPasswordErrors, setDisplayPasswordErrors] = useState<boolean>(false);
+  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
     length: false,
     uppercase: false,
     lowercase: false,
@@ -55,7 +78,7 @@ const Register = () => {
     specialChar: false,
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     if (name === 'password') {
@@ -77,7 +100,7 @@ const Register = () => {
     }
 
     if (name === 'username') {
-      const errors = [];
+      const errors: string[] = [];
       if (value.length < 4) {
         errors.push('Username must be at least 4 characters long.');
       }
@@ -97,16 +120,17 @@ const Register = () => {
     }));
   };
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     try {
       await axios.post(`/api/v1/auth/register`, formData);
       showSnackbar("Registered successfully!", "success");
       navigate('/home');
-    } catch (err) {
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ error?: { message?: string } }>;
       showSnackbar(
-        "Failed to register: " + (err.response?.data?.error?.message || "Server error"),
+        "Failed to register: " + (axiosError.response?.data?.error?.message || "Server error"),
         "error"
       );
     }

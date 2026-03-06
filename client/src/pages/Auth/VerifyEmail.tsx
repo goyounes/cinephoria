@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import axios from '../../api/axiosInstance';
+import type { AxiosError } from 'axios';
+
+type VerifyStatus = 'verifying' | 'success' | 'failure';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState('verifying');
-  const [message, setMessage] = useState('Verifying your email...');
+  const [status, setStatus] = useState<VerifyStatus>('verifying');
+  const [message, setMessage] = useState<string>('Verifying your email...');
 
   const token = searchParams.get('token');
 
@@ -22,13 +25,14 @@ const VerifyEmail = () => {
         const response = await axios.get(`/api/v1/auth/verify-email?token=${token}`);
         setStatus('success');
         setMessage(response.data.message || 'Email successfully verified!');
-      } catch (error) {
-        if (error.response?.status === 409) {
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        if (axiosError.response?.status === 409) {
           setStatus('success');
           setMessage('Your email is already verified!');
         } else {
           setStatus('failure');
-          const errorMessage = error.response?.data?.message || error.message || 'Verification failed';
+          const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Verification failed';
           setMessage(errorMessage);
         }
       }

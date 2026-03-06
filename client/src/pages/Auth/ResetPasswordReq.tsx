@@ -1,13 +1,14 @@
+import React, { useState } from 'react';
 import LockResetIcon from '@mui/icons-material/LockReset';
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent } from '@mui/material';
+import type { AxiosError } from 'axios';
 
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
 
 // Email validation helper
-const isValidEmail = (email) => {
+const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 };
 
@@ -17,13 +18,13 @@ const ResetPasswordReq = () => {
   const [emailError, setEmailError] = useState('');
   const { resetPasswordReq } = useAuth(); // Assuming this exists
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
     setEmailError(isValidEmail(value) ? '' : 'Please enter a valid email address.');
   };
 
-  const handlePasswordReset = async (e) => {
+  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!email) {
@@ -40,12 +41,13 @@ const ResetPasswordReq = () => {
     try {
       await resetPasswordReq(email);
       showSnackbar(`Password reset link sent to ${email}`, 'success');
-    } catch (err) {
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ error?: { message?: string }; message?: string }>;
       const errorMessage =
         'Failed to send reset email: ' +
-        (err.response?.data?.error?.message ||
-          err?.response?.data?.message ||
-          err.message ||
+        (axiosError.response?.data?.error?.message ||
+          axiosError.response?.data?.message ||
+          axiosError.message ||
           'Server error');
       showSnackbar(errorMessage, 'error');
     }
@@ -85,7 +87,7 @@ const ResetPasswordReq = () => {
 
             <Typography align="center">
               Remembered your password?{' '}
-              <Link to="/auth/login" underline="hover">
+              <Link to="/auth/login">
                 Login here
               </Link>
             </Typography>

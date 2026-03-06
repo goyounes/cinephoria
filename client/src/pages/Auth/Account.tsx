@@ -1,18 +1,32 @@
-import { useEffect, useState, useMemo } from 'react'
-import axios from '../../api/axiosInstance.js';
+import { useEffect, useState, useMemo, type ReactNode } from 'react'
+import axios from '../../api/axiosInstance';
 import {Container,Typography,Card,CardContent,Accordion,AccordionSummary,AccordionDetails,Box,CircularProgress,Button, Stack} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import TicketCard from '../components/TicketCard.jsx';
+import TicketCard from '../components/TicketCard';
 import { useAuth } from '../../context/AuthProvider';
 import { Link } from 'react-router-dom'
+import type { Ticket } from '../../types';
 
+interface ScreeningSummary {
+  movie_id: number | undefined;
+  title: string | undefined;
+  cinema: string | undefined;
+  date: string | undefined;
+  time: string | undefined;
+}
+
+interface GroupedScreening {
+  id: string;
+  screening: ScreeningSummary;
+  tickets: Ticket[];
+}
 
 const Account = () => {
   const { currentUser} = useAuth();
 
-  const [tickets, setTickets] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchTickets() {
@@ -31,24 +45,24 @@ const Account = () => {
   const now = new Date()
   // const now = new Date("2025-10-26")
 
-  const getScreeningTime = (ticket) => new Date(`${ticket.start_date}T${ticket.start_time}`)
+  const getScreeningTime = (ticket: Ticket): Date => new Date(`${ticket.start_date}T${ticket.start_time}`)
 
   const upcomingTickets = useMemo(() => {
     return tickets
       .filter((t) => getScreeningTime(t) > now)
-      .sort((a, b) => getScreeningTime(a) - getScreeningTime(b))
+      .sort((a, b) => getScreeningTime(a).getTime() - getScreeningTime(b).getTime())
       // eslint-disable-next-line
   }, [tickets])
 
   const passedTickets = useMemo(() => {
     return tickets
       .filter((t) => getScreeningTime(t) <= now)
-      .sort((a, b) => getScreeningTime(b) - getScreeningTime(a))
+      .sort((a, b) => getScreeningTime(b).getTime() - getScreeningTime(a).getTime())
       // eslint-disable-next-line
   }, [tickets])
 
-  const groupedUpcoming = useMemo(() => {
-    const grouped = {}
+  const groupedUpcoming = useMemo((): GroupedScreening[] => {
+    const grouped: Record<number, { screening: ScreeningSummary; tickets: Ticket[] }> = {}
     for (const ticket of upcomingTickets) {
       const id = ticket.screening_id
       if (!grouped[id]) {
@@ -68,8 +82,8 @@ const Account = () => {
     return Object.entries(grouped).map(([id, data]) => ({id,...data}))
   }, [upcomingTickets])
 
-  const groupedPast = useMemo(() => {
-    const grouped = {}
+  const groupedPast = useMemo((): GroupedScreening[] => {
+    const grouped: Record<number, { screening: ScreeningSummary; tickets: Ticket[] }> = {}
     for (const ticket of passedTickets) {
       const id = ticket.screening_id
       if (!grouped[id]) {
@@ -92,7 +106,7 @@ const Account = () => {
   return (
     <Container  sx={{ py: 4 }}>
       <Typography variant="h4" align="center" gutterBottom>
-        Hello {currentUser.user_email}
+        Hello {currentUser?.user_email}
       </Typography>
 
       <Card elevation={4}>
@@ -187,7 +201,7 @@ const Account = () => {
   )
 }
 
-const TicketGroup = ({ children }) => {
+const TicketGroup = ({ children }: { children: ReactNode }) => {
   return (
     <Box display="flex" flexWrap="wrap" gap={1}>
       {children}
