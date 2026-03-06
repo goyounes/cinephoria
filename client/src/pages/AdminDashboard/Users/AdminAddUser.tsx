@@ -1,9 +1,9 @@
-import axios from '../../../api/axiosInstance.js';
+import axios from '../../../api/axiosInstance';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem, type SelectChangeEvent} from '@mui/material';
 
-import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../../../context/SnackbarProvider';
 
 const AddUser = () => {
   const showSnackbar = useSnackbar();
@@ -17,15 +17,15 @@ const AddUser = () => {
     role_id: '',
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number | string>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name as string]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
 
@@ -42,7 +42,8 @@ const AddUser = () => {
       });
       navigate('/admin/users'); // Redirect to the admin users page
     } catch (err) {
-      showSnackbar("Failed to add User: " + err.message, "error");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      showSnackbar("Failed to add User: " + message, "error");
     }
   };
 

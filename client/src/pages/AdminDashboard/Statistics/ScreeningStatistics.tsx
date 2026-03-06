@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from '../../../api/axiosInstance.js';
-import { Container, Stack, Typography, TextField, Autocomplete, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import MovieScreeningsCalendar from './MovieScreeningsCalendar.jsx';
+import axios from '../../../api/axiosInstance';
+import { Container, Stack, Typography, TextField, Autocomplete, FormControl, InputLabel, Select, MenuItem, type SelectChangeEvent } from "@mui/material";
+import MovieScreeningsCalendar from './MovieScreeningsCalendar';
+import type { Movie, Cinema } from '../../../types/models';
 
+interface MovieOption {
+	movie_id: number;
+	label: string;
+}
 
 const ScreeningStatistics = () => {
-	const [allMovies, setAllMovies] = useState([]);
-	const [allCinemas, setAllCinemas] = useState([]);
-	const [selectedMovieId, setSelectedMovieId] = useState(-1); 
-   	const [selectedCinema, setSelectedCinema] = useState(null);
+	const [allMovies, setAllMovies] = useState<Movie[]>([]);
+	const [allCinemas, setAllCinemas] = useState<Cinema[]>([]);
+	const [selectedMovieId, setSelectedMovieId] = useState<number>(-1);
+   	const [selectedCinema, setSelectedCinema] = useState<Cinema | null>(null);
 	
 	useEffect(() => {
 		const fetchInitialData = async () => {
@@ -24,7 +29,7 @@ const ScreeningStatistics = () => {
 	}, []);
 
 
-	const movieOptions = useMemo(() => {
+	const movieOptions = useMemo((): MovieOption[] => {
 		return allMovies.map(movie => ({
 			movie_id: movie.movie_id,
 			label: movie.title
@@ -50,7 +55,7 @@ const ScreeningStatistics = () => {
 							? movieOptions.find(option => option.movie_id === selectedMovieId) || null
 							: null
 					}
-					onChange={(event, newValue) => {
+					onChange={(_event: React.SyntheticEvent, newValue: MovieOption | null) => {
 						setSelectedMovieId(newValue ? newValue.movie_id : -1);
 					}}
 					renderInput={(params) => (
@@ -66,9 +71,9 @@ const ScreeningStatistics = () => {
 					labelId="cinema-select-label"
 					value={selectedCinema?.cinema_id || ""}
 					label="Cinema"
-					onChange={(e) => {
+					onChange={(e: SelectChangeEvent<number | string>) => {
 						const selected = allCinemas.find(c => c.cinema_id === e.target.value);
-						setSelectedCinema(selected || null);
+						setSelectedCinema(selected ?? null);
 					}}
 					>
 					<MenuItem value="">All</MenuItem>

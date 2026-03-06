@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from '../../../api/axiosInstance.js';
+import axios from '../../../api/axiosInstance';
 import { Link } from 'react-router-dom';
 import {
 Container, Stack, Button, Table, TableBody, TableCell,
-TableContainer, TableHead, TableRow, Paper, Typography, 
+TableContainer, TableHead, TableRow, Paper, Typography,
 Select, MenuItem, TextField, Autocomplete } from "@mui/material";
-import { Delete as DeleteIcon, 
-EditNote as EditNoteIcon, 
-Add as AddIcon, 
-ArrowDropUp as ArrowDropUpIcon, 
-ArrowDropDown as ArrowDropDownIcon } 
+import { Delete as DeleteIcon,
+EditNote as EditNoteIcon,
+Add as AddIcon,
+ArrowDropUp as ArrowDropUpIcon,
+ArrowDropDown as ArrowDropDownIcon }
 from '@mui/icons-material';
-import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
-import ImageWithSkeleton from '../../../components/UI/ImageWithSkeleton.jsx';
+import { useSnackbar } from '../../../context/SnackbarProvider';
+import ImageWithSkeleton from '../../../components/UI/ImageWithSkeleton';
+import type { Movie, SortConfig } from '../../../types';
+import type { SelectChangeEvent } from '@mui/material';
 
 
 
@@ -21,11 +23,11 @@ const ROWS_PER_PAGE = 10;
 const AdminMovies = () => {
    
    const showSnackbar = useSnackbar();
-   const [movies, setMovies] = useState([]);
-   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-   const [filters, setFilters] = useState({
+   const [movies, setMovies] = useState<Movie[]>([]);
+   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
+   const [filters, setFilters] = useState<{ is_team_pick: string; movie_id: number | '' }>({
       is_team_pick: '',
-      movie_id: ''  
+      movie_id: ''
    });
 
    // Pagination states
@@ -44,7 +46,7 @@ const AdminMovies = () => {
       fetchMovies();
    }, []);
 
-   const movieOptions = useMemo(() => {
+   const movieOptions = useMemo((): { movie_id: number; label: string }[] => {
       // movie obj Maps to { movie_id, label: title }
       return movies.map(movie => ({
          movie_id: movie.movie_id,
@@ -53,7 +55,7 @@ const AdminMovies = () => {
    }, [movies]);
 
 
-   const handleSort = (key) => {
+   const handleSort = (key: string) => {
       setSortConfig((prev) => {
          if (prev.key === key) {
          if (prev.direction === 'asc') {
@@ -67,7 +69,7 @@ const AdminMovies = () => {
       setCurrentPage(1); // Reset to first page on sort change
    };
 
-   const renderSortIcon = (key) => {
+   const renderSortIcon = (key: string) => {
       if (sortConfig.key !== key) return null;
       if (sortConfig.direction === 'asc') return <ArrowDropUpIcon fontSize="small" />;
       if (sortConfig.direction === 'desc') return <ArrowDropDownIcon fontSize="small" />;
@@ -88,16 +90,16 @@ const AdminMovies = () => {
       if (!sortConfig.key) return filteredMovies;
 
       const sorted = [...filteredMovies].sort((a, b) => {
-         const a_value = a[sortConfig.key];
-         const b_value = b[sortConfig.key];
+         const a_value = (a as unknown as Record<string, unknown>)[sortConfig.key!];
+         const b_value = (b as unknown as Record<string, unknown>)[sortConfig.key!];
 
-         if (typeof a_value === 'string') {
+         if (typeof a_value === 'string' && typeof b_value === 'string') {
          return sortConfig.direction === 'asc'
             ? a_value.localeCompare(b_value)
             : b_value.localeCompare(a_value);
          }
 
-         return sortConfig.direction === 'asc' ? a_value - b_value : b_value - a_value;
+         return sortConfig.direction === 'asc' ? Number(a_value) - Number(b_value) : Number(b_value) - Number(a_value);
       });
 
       return sorted;
@@ -112,13 +114,14 @@ const AdminMovies = () => {
    const totalPages = Math.max(Math.ceil(sortedMovies.length / ROWS_PER_PAGE), 1);
 
 
-   const HandleDeleteButton = async (id) => {
+   const HandleDeleteButton = async (id: number) => {
       try {
          await axios.delete(`/api/v1/movies/${id}`);
          await fetchMovies();
-      } catch (error) {
+      } catch (error: unknown) {
          console.error("Error deleting movie with id: " + id, error);
-         const errorMessage = "Error deleting movie with id: " + id + "\n" + error?.response?.data?.error?.message;
+         const axiosErr = error as { response?: { data?: { error?: { message?: string } } } };
+         const errorMessage = "Error deleting movie with id: " + id + "\n" + (axiosErr?.response?.data?.error?.message ?? "");
          showSnackbar(errorMessage, "error");
       }
    };
@@ -142,7 +145,7 @@ const AdminMovies = () => {
          {/* Team Pick filter select */}
          <Select
          value={filters.is_team_pick}
-         onChange={(e) => {
+         onChange={(e: SelectChangeEvent<string>) => {
             setFilters({ ...filters, is_team_pick: e.target.value });
             setCurrentPage(1); // reset page on filter change
          }}

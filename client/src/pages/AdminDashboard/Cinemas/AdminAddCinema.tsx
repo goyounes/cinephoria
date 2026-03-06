@@ -11,11 +11,17 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import axios from "../../../api/axiosInstance.js";
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import axios from "../../../api/axiosInstance";
+import { useSnackbar } from "../../../context/SnackbarProvider";
 
 const AdminAddCinema = () => {
   const showSnackbar = useSnackbar();
+
+  interface RoomInput {
+    room_name: string;
+    room_capacity: string;
+    [key: string]: string;
+  }
 
   // Cinema basic info
   const [cinemaData, setCinemaData] = useState({
@@ -24,18 +30,18 @@ const AdminAddCinema = () => {
   });
 
   // Rooms array, each with room_name and room_capacity
-  const [rooms, setRooms] = useState([
+  const [rooms, setRooms] = useState<RoomInput[]>([
     { room_name: "", room_capacity: "" },
   ]);
 
   // Handle cinema inputs
-  const handleCinemaChange = (e) => {
+  const handleCinemaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCinemaData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle room inputs
-  const handleRoomChange = (index, e) => {
+  const handleRoomChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setRooms((prev) => {
       const newRooms = [...prev];
@@ -50,7 +56,7 @@ const AdminAddCinema = () => {
   };
 
   // Remove a room input by index
-  const removeRoom = (index) => {
+  const removeRoom = (index: number) => {
     setRooms((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -66,7 +72,7 @@ const AdminAddCinema = () => {
       return;
     }
     for (const [i, room] of rooms.entries()) {
-      if (!room.room_name.trim() || !room.room_capacity || isNaN(room.room_capacity)) {
+      if (!room.room_name.trim() || !room.room_capacity || isNaN(Number(room.room_capacity))) {
         showSnackbar(`Room #${i + 1} requires a valid name and numeric capacity`, "error");
         return;
       }

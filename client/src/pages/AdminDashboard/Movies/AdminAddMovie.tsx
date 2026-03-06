@@ -1,13 +1,15 @@
-import {useEffect, useState} from "react";    
+import {useEffect, useState} from "react";
 import {
-  Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel, 
+  Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel,
    FormControl,  Stack,  FormHelperText,  CardContent,
    Autocomplete
   } from "@mui/material";
-import axios from '../../../api/axiosInstance.js';
+import type { SelectChangeEvent } from "@mui/material";
+import axios from '../../../api/axiosInstance';
 import ImageUploader from "../../../components/UI/ImageUploader";
 import AddIcon from '@mui/icons-material/Add';
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import { useSnackbar } from "../../../context/SnackbarProvider";
+import type { Genre } from '../../../types';
 
 
 const AddMovie = () => {
@@ -19,24 +21,24 @@ const AddMovie = () => {
     length_minutes: "",
     length_seconds: "",
     age_rating: "",
-    is_team_pick: "",
+    is_team_pick: "" as string | number,
   })
-  const [imageFile, setImageFile] = useState(null);
-  const [genresList, setGenresList] = useState([]); // Assuming genres are fetched from an API
-  const [selectedGenres, setSelectedGenres] = useState([])
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [genresList, setGenresList] = useState<Genre[]>([]); // Assuming genres are fetched from an API
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | number>) => {
     const { name, value } = e.target;
-    setMovieData( (prev)=>({...prev, [name]: value}) )
+    setMovieData( (prev)=>({...prev, [name as string]: value}) )
 
   };
 
 
-  const handleNumberChange = (e) => {
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMovieData((prev) => {
       let newValue = parseInt(e.target.value);
-      if (newValue > parseInt(e.target.max)) newValue = e.target.max
-      if (newValue < parseInt(e.target.min)) newValue = e.target.min
+      if (newValue > parseInt(e.target.max)) newValue = parseInt(e.target.max);
+      if (newValue < parseInt(e.target.min)) newValue = parseInt(e.target.min);
       return {
       ...prev,
       [e.target.name]: newValue,
@@ -49,7 +51,7 @@ const AddMovie = () => {
     const formData = new FormData();
 
     Object.entries(movieData).forEach(([key, value]) => {
-      formData.append(key, value);
+      formData.append(key, String(value));
     });
 
     if (imageFile) {
@@ -60,15 +62,16 @@ const AddMovie = () => {
       const selectedGenresArray = selectedGenres.map(genre => genre.genre_id);
 
       selectedGenresArray.forEach(genre => {
-        formData.append('selectedGenres[]', genre);
+        formData.append('selectedGenres[]', String(genre));
       });
     }
 
     try {
       await axios.post('/api/v1/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       showSnackbar("Movie added successfully!", "success");
-    } catch (error) {
-      const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
+    } catch (error: unknown) {
+      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+      const customMessage = "\nAxios : " + (axiosErr.message ?? "") +"\nServer : "+ (axiosErr.response?.data?.error?.message || "Server error");
       showSnackbar("Failed to add movie: " + customMessage, "error");
     }
   };

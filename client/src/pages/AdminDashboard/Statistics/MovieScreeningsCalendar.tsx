@@ -1,27 +1,39 @@
 import { useState, useMemo, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
-import axios from '../../../api/axiosInstance.js';
+import axios from '../../../api/axiosInstance';
 
+import type { Screening, GroupedScreeningsByDate } from '../../../types/models';
 
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
-import { groupScreenings } from "../../../utils/index.js";
+import { groupScreenings } from "../../../utils/index";
 
 import {Stack,Button,Typography,IconButton,Card,CardContent,} from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import ScreeningsStatsTable from "./ScreeningsStatsTable.jsx";
+import ScreeningsStatsTable from "./ScreeningsStatsTable";
 
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter);
 
 const DAYS_PER_PAGE = 7;
 
-const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
+interface DayInfo {
+   dayjsDate: dayjs.Dayjs;
+   date: string;
+}
+
+interface MovieScreeningsCalendarProps {
+   movieId: number;
+   cinema_id: number | null;
+   nbrOfTickets?: number;
+}
+
+const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }: MovieScreeningsCalendarProps) => {
    // const navigate = useNavigate();
-   const [screenings, setScreenings] = useState([]);
+   const [screenings, setScreenings] = useState<Screening[]>([]);
    const [page, setPage] = useState(0);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const today = dayjs().startOf("day");
@@ -39,7 +51,7 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
          try {
             let url = `/api/v1/movies/${movieId}/screenings/all`;
             if (cinema_id) {
-               const query = new URLSearchParams({ cinema_id});
+               const query = new URLSearchParams({ cinema_id: String(cinema_id) });
                url += `?${query.toString()}`;
             }
             const { data } = await axios.get(url);
@@ -64,7 +76,7 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
 
    const startDate = today.add(page * DAYS_PER_PAGE, "day");
 
-   const days = useMemo(() => {
+   const days = useMemo((): DayInfo[] => {
       return [...Array(DAYS_PER_PAGE)].map((_, i) => {
          const date = startDate.add(i, "day");
          return {
@@ -74,7 +86,7 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
       });
    }, [startDate]);
 
-   const screeningsMap = screeningsByDay;
+   const screeningsMap: GroupedScreeningsByDate = screeningsByDay;
 
    const handleNext = async () => {
       const newPage = page + 1;
@@ -136,13 +148,13 @@ const MovieScreeningsCalendar = ({ movieId, cinema_id , nbrOfTickets = 0 }) => {
 
           {Object.keys(screeningsByDay || {}).length !== 0 && selectedIndex !== -1 && (() => {
             const selectedDate = days[selectedIndex]?.date;
-            const screeningsForDate = screeningsMap[selectedDate] || [];
+            const screeningsForDate = screeningsMap[selectedDate] || null;
 
             return (
               <>
                 <Typography variant="h6" gutterBottom> Screenings for {selectedDate}</Typography>
 
-                {screeningsForDate.length === 0 ? (
+                {!screeningsForDate || Object.keys(screeningsForDate).length === 0 ? (
                   <Typography>No screenings available.</Typography>
                 ) : (
                   <ScreeningsStatsTable screeningsByLocation={screeningsForDate} nbrOfTickets={nbrOfTickets} />

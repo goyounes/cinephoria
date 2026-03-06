@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import {
   Container, Card, Typography, Stack, TextField,
   Button, CardContent, IconButton,
@@ -8,22 +8,37 @@ import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreIcon from "@mui/icons-material/Restore";
-import axios from "../../../api/axiosInstance.js";
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import axios from "../../../api/axiosInstance";
+import { useSnackbar } from "../../../context/SnackbarProvider";
 import { useParams, useNavigate } from "react-router-dom";
+
+interface EditableRoom {
+  room_id?: number;
+  room_name: string;
+  room_capacity: number | string;
+  cinema_id?: number;
+  isNew?: boolean;
+  isDeleted?: boolean;
+  isRestored?: boolean;
+}
+
+interface CinemaFormData {
+  cinema_name: string;
+  cinema_adresse: string;
+}
 
 const AdminEditCinema = () => {
   const { id } = useParams(); // cinema_id from URL
   const navigate = useNavigate();
-  const cinemaId = parseInt(id);
+  const cinemaId = parseInt(id ?? "");
   const showSnackbar = useSnackbar();
 
-  const [cinemaData, setCinemaData] = useState({ cinema_name: "", cinema_adresse: "" });
-  const [rooms, setRooms] = useState([]);
-  const [deletedRoomIds, setDeletedRoomIds] = useState([]);
-  const [restoredRoomIds, setRestoredRoomIds] = useState([]);
+  const [cinemaData, setCinemaData] = useState<CinemaFormData>({ cinema_name: "", cinema_adresse: "" });
+  const [rooms, setRooms] = useState<EditableRoom[]>([]);
+  const [deletedRoomIds, setDeletedRoomIds] = useState<number[]>([]);
+  const [restoredRoomIds, setRestoredRoomIds] = useState<number[]>([]);
   const [showDeletedRooms, setShowDeletedRooms] = useState(false);
-  const [roomNameErrors, setRoomNameErrors] = useState({});
+  const [roomNameErrors, setRoomNameErrors] = useState<Record<number, string>>({});
 
   // Fetch all data and isolate target cinema
   useEffect(() => {
@@ -34,14 +49,14 @@ const AdminEditCinema = () => {
           axios.get("/api/v1/cinemas/rooms")
         ]);
 
-        const selectedCinema = cinemasRes.data.find(c => c.cinema_id === cinemaId);
+        const selectedCinema = cinemasRes.data.find((c: CinemaFormData & { cinema_id: number }) => c.cinema_id === cinemaId);
         if (!selectedCinema) {
           showSnackbar("Cinema not found", "error");
           navigate("/admin/cinemas");
           return;
         }
 
-        const matchingRooms = roomsRes.data.filter(r => r.cinema_id === cinemaId);
+        const matchingRooms = roomsRes.data.filter((r: EditableRoom) => r.cinema_id === cinemaId);
 
         setCinemaData({
           cinema_name: selectedCinema.cinema_name,
@@ -58,16 +73,16 @@ const AdminEditCinema = () => {
   }, [cinemaId, showSnackbar, navigate]);
 
   // Handlers
-  const handleCinemaChange = (e) => {
+  const handleCinemaChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCinemaData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRoomChange = (index, e) => {
+  const handleRoomChange = (index: number, e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setRooms(prev => {
       const updated = [...prev];
-      updated[index][name] = value;
+      updated[index] = { ...updated[index], [name]: value };
       return updated;
     });
 
@@ -84,15 +99,16 @@ const AdminEditCinema = () => {
     ]);
   };
 
-  const removeRoom = (index) => {
+  const removeRoom = (index: number) => {
     setRooms(prev => {
       const updated = [...prev];
       const room = updated[index];
 
       // Mark existing rooms for deletion, remove new rooms entirely
       if (!room.isNew && room.room_id) {
+        const roomId = room.room_id;
         updated[index] = { ...room, isDeleted: true };
-        setDeletedRoomIds(ids => [...ids, room.room_id]);
+        setDeletedRoomIds(ids => [...ids, roomId]);
       } else {
         updated.splice(index, 1);
       }
@@ -101,13 +117,14 @@ const AdminEditCinema = () => {
     });
   };
 
-  const restoreRoom = (index) => {
+  const restoreRoom = (index: number) => {
     const room = rooms[index];
 
     if (room.room_id) {
+      const roomId = room.room_id;
       // Remove from deleted list and add to restored list
-      setDeletedRoomIds(prev => prev.filter(id => id !== room.room_id));
-      setRestoredRoomIds(prev => [...prev, room.room_id]);
+      setDeletedRoomIds(prev => prev.filter(id => id !== roomId));
+      setRestoredRoomIds(prev => [...prev, roomId]);
     }
     
     // Mark as not deleted in local state
@@ -124,7 +141,7 @@ const AdminEditCinema = () => {
   const validateRoomNames = () => {
     // Check all rooms (including deleted ones) for duplicates
     const allRoomNames = rooms.map(room => room.room_name.trim().toLowerCase());
-    const errors = {};
+    const errors: Record<number, string> = {};
     let hasErrors = false;
     let hasHiddenDuplicate = false;
 
@@ -171,7 +188,7 @@ const AdminEditCinema = () => {
       const roomRequests = activeRooms.map(room => {
         const payload = {
           room_name: room.room_name,
-          room_capacity: parseInt(room.room_capacity),
+          room_capacity: parseInt(String(room.room_capacity)),
           cinema_id: cinemaId,
         };
         return room.isNew

@@ -1,38 +1,50 @@
 import { useEffect, useState } from "react";
 import {
-  Container, Card, Typography, Stack, 
+  Container, Card, Typography, Stack,
   MenuItem, Select, InputLabel, FormControl, Button, CardContent
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
-import axios from '../../../api/axiosInstance.js';
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import axios from '../../../api/axiosInstance';
+import { useSnackbar } from "../../../context/SnackbarProvider";
 
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 
 // Import your custom BasicDatePicker
-import BasicDatePicker from './../../../components/UI/BasicDatePicker.jsx';
-import RoomMultiSelect from "../../components/RoomMultiSelect.jsx";
+import BasicDatePicker from './../../../components/UI/BasicDatePicker';
+import RoomMultiSelect from "../../components/RoomMultiSelect";
+import type { Cinema, Movie, Room } from '../../../types';
 
 const AdminAddScreening = () => {
     const showSnackbar = useSnackbar();
-    const [formData, setFormData] = useState({
+    interface ScreeningFormData {
+        cinema_id: string;
+        movie_id: string;
+        start_date: Dayjs | null;
+        start_time: Dayjs | null;
+        end_time: Dayjs | null;
+    }
+
+    type CinemaWithRooms = Cinema & { rooms: Room[] };
+
+    const [formData, setFormData] = useState<ScreeningFormData>({
         cinema_id: "",
         movie_id: "",
         start_date: null,
         start_time: null,
         end_time: null,
     });
-    
-    const [cinemas, setCinemas] = useState([]); // list of all cinemas with their rooms as an array
-    const [movies, setMovies] = useState([]);
+
+    const [cinemas, setCinemas] = useState<CinemaWithRooms[]>([]); // list of all cinemas with their rooms as an array
+    const [movies, setMovies] = useState<Movie[]>([]);
     // eslint-disable-next-line
-    const [allRooms, setAllRooms] = useState([]); 
-    
+    const [_allRooms, setAllRooms] = useState<Room[]>([]);
+
     // For multi-select rooms
-    const [roomOptions, setRoomOptions] = useState([]);
-    const [selectedRooms, setSelectedRooms] = useState([]);
+    const [roomOptions, setRoomOptions] = useState<Room[]>([]);
+    const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -43,17 +55,20 @@ const AdminAddScreening = () => {
             axios.get("/api/v1/movies")
             ]);
 
-            const CinemasWithRoomsArr = cinemasRes?.data?.map(cinema => {
-                const result = []
-                roomsRes?.data?.forEach(room => {
+            const cinemasData = cinemasRes.data as Cinema[];
+            const roomsData = roomsRes.data as Room[];
+
+            const CinemasWithRoomsArr: CinemaWithRooms[] = cinemasData.map((cinema: Cinema) => {
+                const result: Room[] = [];
+                roomsData.forEach((room: Room) => {
                 if (room.cinema_id === cinema.cinema_id) result.push(room)
                 })
                 return {...cinema, rooms: result}
-            }); 
+            });
 
-            setAllRooms(roomsRes.data);
+            setAllRooms(roomsData);
             setCinemas(CinemasWithRoomsArr);
-            setMovies(moviesRes.data);
+            setMovies(moviesRes.data as Movie[]);
         } catch (err) {
             console.error("Error loading data: ", err);
         }
@@ -62,32 +77,32 @@ const AdminAddScreening = () => {
         fetchData();
     }, []);
 
-    const handleChange = (e) => {
+    const handleChange = (e: SelectChangeEvent<string>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
         if (name === "cinema_id") {
             const selectedId = parseInt(value);
             const cinemaObj = cinemas.find(cinema => cinema.cinema_id === selectedId);
-            setRoomOptions(cinemaObj.rooms);
+            setRoomOptions(cinemaObj?.rooms ?? []);
             setSelectedRooms([]); // reset room selection on cinema change
         }
     };
 
   // Helpers to convert Dayjs or Date to "HH:mm"
-  const timeToString = (time) => {
+  const timeToString = (time: Dayjs | Date | null): string => {
     if (!time) return "";
     // time can be Date or Dayjs, convert accordingly
     if (dayjs.isDayjs(time)) {
       return time.format("HH:mm");
     }
-    const hours = time.getHours().toString().padStart(2, "0");
-    const minutes = time.getMinutes().toString().padStart(2, "0");
+    const hours = (time as Date).getHours().toString().padStart(2, "0");
+    const minutes = (time as Date).getMinutes().toString().padStart(2, "0");
     return `${hours}:${minutes}`;
   };
 
   // Convert Dayjs start_date to string YYYY-MM-DD before submitting
-  const dateToString = (date) => {
+  const dateToString = (date: Dayjs | string | null): string => {
     if (!date) return "";
     return dayjs.isDayjs(date) ? date.format('YYYY-MM-DD') : date;
   };
@@ -105,14 +120,15 @@ const AdminAddScreening = () => {
     try {
       await axios.post("/api/v1/screenings", payload);
       showSnackbar("Screening added successfully! You can continue to add other screenings", "success");
-    } catch (error) {
-      const customMessage = "\nAxios: " + error.message + "\nServer: " + (error.response?.data?.error?.message || "Server error");
+    } catch (error: unknown) {
+      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+      const customMessage = "\nAxios: " + (axiosErr.message ?? "") + "\nServer: " + (axiosErr.response?.data?.error?.message || "Server error");
       showSnackbar("Failed to add screening: " + customMessage, "error");
       console.error(error);
     }
   };
 
-  const allowedDates = []; // allowed dates format"YYYY-MM-DD" if needed
+  const allowedDates: string[] = []; // allowed dates format"YYYY-MM-DD" if needed
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

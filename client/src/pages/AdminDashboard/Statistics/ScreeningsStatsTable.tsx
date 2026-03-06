@@ -1,9 +1,15 @@
 import { Stack, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import ScreeningStatButton from './ScreeningStatButton';
+import ScreeningStatButton, { type ScreeningWithStats } from './ScreeningStatButton';
+import type { CinemaGroup, RoomGroup } from '../../../types/models';
+import type { ReactNode } from 'react';
 
+interface ScreeningsStatsTableProps {
+  screeningsByLocation: Record<number, CinemaGroup> | null;
+  nbrOfTickets?: number;
+}
 
-const ScreeningsStatsTable = ({ screeningsByLocation }) => {
+const ScreeningsStatsTable = ({ screeningsByLocation }: ScreeningsStatsTableProps) => {
   if (!screeningsByLocation) return null;
 
   const cinemasArray = Object.entries(screeningsByLocation);
@@ -11,17 +17,21 @@ const ScreeningsStatsTable = ({ screeningsByLocation }) => {
   return (
     <Stack spacing={1}>
       {cinemasArray.map(([cinemaId, cinemaData]) => (
-        <CinemaBlock key={cinemaId} cinemaData={cinemaData}>
-          <RoomsBlock cinemaData={cinemaData} />
+        <CinemaBlock key={cinemaId} cinemaData={cinemaData as CinemaGroup}>
+          <RoomsBlock cinemaData={cinemaData as CinemaGroup} />
         </CinemaBlock>
       ))}
     </Stack>
   );
 };
 
+interface CinemaBlockProps {
+  cinemaData: CinemaGroup;
+  children: ReactNode;
+}
 
 // CinemaBlock
-const CinemaBlock = ({ cinemaData, children }) => {
+const CinemaBlock = ({ cinemaData, children }: CinemaBlockProps) => {
   if (!cinemaData?.cinema_id) return null;
 
   return (
@@ -34,10 +44,14 @@ const CinemaBlock = ({ cinemaData, children }) => {
   );
 };
 
+interface RoomsBlockProps {
+  cinemaData: CinemaGroup;
+}
+
 // RoomsBlock
-const RoomsBlock = ({ cinemaData }) => {
+const RoomsBlock = ({ cinemaData }: RoomsBlockProps) => {
   const roomsWithScreenings = Object.entries(cinemaData).filter(
-    ([, roomData]) => roomData?.screenings?.length > 0
+    ([, roomData]) => (roomData as RoomGroup)?.screenings?.length > 0
   );
 
   if (roomsWithScreenings.length === 0) {
@@ -50,7 +64,9 @@ const RoomsBlock = ({ cinemaData }) => {
 
   return (
     <Stack spacing={2}>
-      {roomsWithScreenings.map(([roomId, roomData]) => (
+      {roomsWithScreenings.map(([roomId, roomDataRaw]) => {
+        const roomData = roomDataRaw as RoomGroup;
+        return (
         <Stack
           id="Room_Screenings"
           key={roomId}
@@ -63,13 +79,14 @@ const RoomsBlock = ({ cinemaData }) => {
               to={`/admin/screenings/${screening.screening_id}/edit`}
             >
               <ScreeningStatButton
-                screening={screening}
+                screening={screening as ScreeningWithStats}
                 room_name={roomData.room_name}
               />
             </Link>
           ))}
         </Stack>
-      ))}
+        );
+      })}
     </Stack>
   );
 };

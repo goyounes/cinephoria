@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import axios from "../../../api/axiosInstance.js";
+import { useEffect, useState } from "react";
+import axios from "../../../api/axiosInstance";
 import { Link } from "react-router-dom";
+import type { User } from "../../../types/models";
 
 import {Container,Typography,Table,TableHead,TableBody,TableRow,TableCell,Button,Stack,Paper,CircularProgress} from "@mui/material";
 
 const Users = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

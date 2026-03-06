@@ -1,5 +1,3 @@
-import React from 'react'
-
 const AdminTickets = () => {
   return (
     <div>Admin Tickets</div>

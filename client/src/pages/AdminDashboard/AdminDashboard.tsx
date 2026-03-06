@@ -8,11 +8,18 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import axios from '../../api/axiosInstance.js';
+import axios from '../../api/axiosInstance';
 
+interface Message {
+  isRead: boolean;
+  message_sender_name: string;
+  message_sender_email: string;
+  message_subject: string;
+  message_text: string;
+}
 
 const AdminDashboard = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {

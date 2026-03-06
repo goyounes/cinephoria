@@ -1,16 +1,18 @@
-import {useEffect, useState} from "react";    
+import {useEffect, useState} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel, 
+  Container,  Card,  Typography,  TextField,  Button,  MenuItem,  Select,  InputLabel,
    FormControl,  Stack,  FormHelperText,  CardContent,
    Autocomplete
   } from "@mui/material";
-import axios from '../../../api/axiosInstance.js';
+import type { SelectChangeEvent } from "@mui/material";
+import axios from '../../../api/axiosInstance';
 
 import ImageUploader from "../../../components/UI/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import { useSnackbar } from "../../../context/SnackbarProvider";
+import type { Genre, Movie } from '../../../types';
 
 const EditMovie = () => {
     const showSnackbar = useSnackbar();
@@ -18,28 +20,28 @@ const EditMovie = () => {
     //Load movie with id = 
     const { id } = useParams();
     // eslint-disable-next-line
-    const [movie, setMovie] = useState(null);
-    
+    const [_movie, setMovie] = useState<Movie | null>(null);
+
     const [movieData, setMovieData] = useState({
         title: "",
         description: "",
-        length_hours: "",
-        length_minutes: "",
-        length_seconds: "",
-        age_rating: "",
-        is_team_pick: "",
+        length_hours: "" as string | number,
+        length_minutes: "" as string | number,
+        length_seconds: "" as string | number,
+        age_rating: "" as string | number,
+        is_team_pick: "" as string | number,
     })
     // eslint-disable-next-line
-    const [imageFile, setImageFile] = useState(null);
-    const [genresList, setGenresList] = useState([]); // Assuming genres are fetched from an API
-    const [selectedGenres, setSelectedGenres] = useState([])
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [genresList, setGenresList] = useState<Genre[]>([]); // Assuming genres are fetched from an API
+    const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
 
     useEffect(() => {
       async function fetchMovie() {
         try {
             const res = await axios.get(`/api/v1/movies/${id}`);
-            const data = res.data
-            setMovie(data);
+            const data = res.data as Omit<Movie, 'length'> & { length: string };
+            setMovie(data as unknown as Movie);
             const [hours,minutes,seconds]= data.length.split(":")
             setMovieData({
                 title: data.title,
@@ -66,17 +68,17 @@ const EditMovie = () => {
 
   
     //----------------Form logic------------
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | number>) => {
         const { name, value } = e.target;
-        setMovieData( (prev)=>({...prev, [name]: value}) )
+        setMovieData( (prev)=>({...prev, [name as string]: value}) )
 
     };
 
-    const handleNumberChange = (e) => {
+    const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setMovieData((prev) => {
         let newValue = parseInt(e.target.value);
-        if (newValue > parseInt(e.target.max)) newValue = e.target.max
-        if (newValue < parseInt(e.target.min)) newValue = e.target.min
+        if (newValue > parseInt(e.target.max)) newValue = parseInt(e.target.max);
+        if (newValue < parseInt(e.target.min)) newValue = parseInt(e.target.min);
         return {
         ...prev,
         [e.target.name]: newValue,
@@ -89,7 +91,7 @@ const EditMovie = () => {
         const formData = new FormData();
 
         Object.entries(movieData).forEach(([key, value]) => {
-          formData.append(key, value);
+          formData.append(key, String(value));
         });
 
         if (imageFile) {
@@ -100,7 +102,7 @@ const EditMovie = () => {
           const selectedGenresArray = selectedGenres.map(genre => genre.genre_id);
 
           selectedGenresArray.forEach(genre => {
-            formData.append('selectedGenres[]', genre);
+            formData.append('selectedGenres[]', String(genre));
           });
         }
 
@@ -108,8 +110,9 @@ const EditMovie = () => {
           await axios.put(`/api/v1/movies/${id}`, formData,{headers: {'Content-Type': 'multipart/form-data'}});
           showSnackbar("Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
-        } catch (error) {
-          const customMessage = "\nAxios : " + error.message +"\nServer : "+ error.response?.data?.error?.message || "Server error";
+        } catch (error: unknown) {
+          const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+          const customMessage = "\nAxios : " + (axiosErr.message ?? "") +"\nServer : "+ (axiosErr.response?.data?.error?.message || "Server error");
           showSnackbar("Failed to update movie: " + customMessage, "error");
         }
     };
@@ -203,8 +206,8 @@ const EditMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 23}}}
               onChange={handleNumberChange}
-              value={parseInt(movieData.length_hours) || ""}
-              
+              value={parseInt(String(movieData.length_hours)) || ""}
+
             />
             <TextField
               fullWidth
@@ -214,7 +217,7 @@ const EditMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
-              value={parseInt(movieData.length_minutes) || ""}
+              value={parseInt(String(movieData.length_minutes)) || ""}
             />
             <TextField
               fullWidth
@@ -224,7 +227,7 @@ const EditMovie = () => {
               type="number"
               slotProps={{htmlInput: {min: 0, max: 59}}}
               onChange={handleNumberChange}
-              value={parseInt(movieData.length_seconds) || ""}
+              value={parseInt(String(movieData.length_seconds)) || ""}
             />
           </Stack>
           <FormHelperText>Movie length HH:MM:SS</FormHelperText>

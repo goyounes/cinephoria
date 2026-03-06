@@ -1,8 +1,20 @@
 import AccessibleIcon from "@mui/icons-material/Accessible";
 import { Button, Stack, Typography, Box } from "@mui/material";
 import { grey, green, orange } from "@mui/material/colors";
+import type { Screening } from '../../../types/models';
 
-const ScreeningStatButton = ({ screening, room_name }) => {
+export interface ScreeningWithStats extends Screening {
+  booked_seats: number;
+  total_seats: number;
+  room_capacity: number;
+}
+
+interface ScreeningStatButtonProps {
+  screening: ScreeningWithStats;
+  room_name: string;
+}
+
+const ScreeningStatButton = ({ screening, room_name }: ScreeningStatButtonProps) => {
   const {
     booked_seats,
     total_seats,

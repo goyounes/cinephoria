@@ -3,25 +3,37 @@ import {
   Container, Card, Typography, Stack,
   MenuItem, Select, InputLabel, FormControl, Button, CardContent
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 // import SaveIcon from '@mui/icons-material/Save';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
-import axios from '../../../api/axiosInstance.js';
-import { useSnackbar } from "../../../context/SnackbarProvider.jsx";
+import axios from '../../../api/axiosInstance';
+import { useSnackbar } from "../../../context/SnackbarProvider";
 import { useParams } from "react-router-dom";
 
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 
-import BasicDatePicker from './../../../components/UI/BasicDatePicker.jsx';
-import RoomSingleSelect from "../../components/RoomSingleSelect.jsx";
+import BasicDatePicker from './../../../components/UI/BasicDatePicker';
+import RoomSingleSelect from "../../components/RoomSingleSelect";
+import type { Cinema, Movie, Room } from '../../../types';
 
 const AdminEditScreening = () => {
   const { id } = useParams();
   const showSnackbar = useSnackbar();
 
-  const [formData, setFormData] = useState({
+  interface ScreeningEditFormData {
+    cinema_id: string;
+    movie_id: string;
+    start_date: Dayjs | null;
+    start_time: Dayjs | null;
+    end_time: Dayjs | null;
+  }
+
+  type CinemaWithRooms = Cinema & { rooms: Room[] };
+
+  const [formData, setFormData] = useState<ScreeningEditFormData>({
     cinema_id: "",
     movie_id: "",
     start_date: null,
@@ -29,10 +41,10 @@ const AdminEditScreening = () => {
     end_time: null,
   });
 
-  const [cinemas, setCinemas] = useState([]);
-  const [movies, setMovies] = useState([]);
-  const [roomOptions, setRoomOptions] = useState([]);
-  const [selectedRoom, setSelectedRoom] = useState([]);
+  const [cinemas, setCinemas] = useState<CinemaWithRooms[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [roomOptions, setRoomOptions] = useState<Room[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<number | string>("");
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -44,19 +56,19 @@ const AdminEditScreening = () => {
           axios.get(`/api/v1/screenings/${id}`)
         ]);
 
-        const cinemaRoomMap = cinemasRes.data.map(cinema => {
-          const rooms = roomsRes.data.filter(room => room.cinema_id === cinema.cinema_id);
+        const cinemaRoomMap: CinemaWithRooms[] = (cinemasRes.data as Cinema[]).map(cinema => {
+          const rooms = (roomsRes.data as Room[]).filter(room => room.cinema_id === cinema.cinema_id);
           return { ...cinema, rooms };
         });
 
-        const screening = screeningRes.data;
+        const screening = screeningRes.data as { cinema_id: number; movie_id: number; room_id: number; start_date: string; start_time: string; end_time: string };
 
         setCinemas(cinemaRoomMap);
-        setMovies(moviesRes.data);
+        setMovies(moviesRes.data as Movie[]);
 
         const matchedCinema = cinemaRoomMap.find(c => c.cinema_id === screening.cinema_id);
         setRoomOptions(matchedCinema?.rooms || []);
-        setSelectedRoom([screening.room_id] || []);
+        setSelectedRoom(screening.room_id ?? "");
 
         setFormData({
           cinema_id: screening.cinema_id.toString(),
@@ -75,7 +87,7 @@ const AdminEditScreening = () => {
     fetchInitialData();
   }, [id, showSnackbar]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -83,12 +95,12 @@ const AdminEditScreening = () => {
       const selectedId = parseInt(value);
       const cinemaObj = cinemas.find(c => c.cinema_id === selectedId);
       setRoomOptions(cinemaObj?.rooms || []);
-      setSelectedRoom([]); // Reset room selection
+      setSelectedRoom(""); // Reset room selection
     }
   };
 
-  const timeToString = (time) => time ? dayjs(time).format("HH:mm") : "";
-  const dateToString = (date) => date ? dayjs(date).format("YYYY-MM-DD") : "";
+  const timeToString = (time: Dayjs | null): string => time ? dayjs(time).format("HH:mm") : "";
+  const dateToString = (date: Dayjs | null): string => date ? dayjs(date).format("YYYY-MM-DD") : "";
 
   const handleSubmit = async () => {
     const payload = {
@@ -103,14 +115,15 @@ const AdminEditScreening = () => {
     try {
       await axios.put(`/api/v1/screenings/${id}`, payload);
       showSnackbar("Screening updated successfully!", "success");
-    } catch (error) {
-      const msg = error.response?.data?.error?.message || error.message;
+    } catch (error: unknown) {
+      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+      const msg = axiosErr.response?.data?.error?.message || axiosErr.message;
       showSnackbar("Failed to update screening: " + msg, "error");
       console.error(error);
     }
   };
 
-  const allowedDates = []; // allowed dates format"YYYY-MM-DD" if needed
+  const allowedDates: string[] = []; // allowed dates format"YYYY-MM-DD" if needed
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

@@ -17,11 +17,12 @@ import {
   Add as AddIcon
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import axios from "../../../api/axiosInstance.js";
+import axios from "../../../api/axiosInstance";
+import type { Cinema, Room } from '../../../types';
 
 const AdminCinemas = () => {
-  const [cinemas, setCinemas] = useState([]);
-  const [rooms, setRooms] = useState([]);
+  const [cinemas, setCinemas] = useState<Cinema[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
 

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from '../../../api/axiosInstance.js';
+import axios from '../../../api/axiosInstance';
 import { Link } from 'react-router-dom';
 import {
 Container, Stack, Button,  Paper, Typography,  Select,  MenuItem, Autocomplete, TextField,
 Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 Checkbox,
 FormControlLabel} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import {
 Add as AddIcon,
 EditNote as EditNoteIcon,
@@ -13,13 +14,14 @@ Delete as DeleteIcon,
 ArrowDropUp as ArrowDropUpIcon,
 ArrowDropDown as ArrowDropDownIcon,
 } from '@mui/icons-material';
-import { useSnackbar } from '../../../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../../../context/SnackbarProvider';
+import type { Screening, SortConfig } from '../../../types';
 
 const AdminScreenings = () => {
    const showSnackbar = useSnackbar();
 
-   const [screenings, setScreenings] = useState([]);
-   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+   const [screenings, setScreenings] = useState<Screening[]>([]);
+   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
    const [currentPage, setCurrentPage] = useState(1);
 
    const ROWS_PER_PAGE = 20;
@@ -38,18 +40,18 @@ const AdminScreenings = () => {
    }, []);
 
    const [showPastScreenings, setShowPastScreenings] = useState(false);
-   const [filters, setFilters] = useState({
+   const [filters, setFilters] = useState<{ screening_id: number | ''; movie_id: number | ''; cinema_id: number | ''; room_id: number | '' }>({
       screening_id: '',
       movie_id: '',
       cinema_id: '',
       room_id: ''
    });
-   const populateFields = (screenings) => {
-      const getUnique = (key) => {
-         const values = screenings.map(screening => screening[key]).filter(Boolean);
+   const populateFields = (screenings: Screening[]) => {
+      const getUnique = (key: string): (string | number)[] => {
+         const values = screenings.map(screening => (screening as unknown as Record<string, unknown>)[key]).filter(Boolean) as (string | number)[];
          const unique = [...new Set(values)];
          return unique.sort((a, b) => {
-            if (!isNaN(a) && !isNaN(b)) return Number(a) - Number(b);
+            if (!isNaN(Number(a)) && !isNaN(Number(b))) return Number(a) - Number(b);
             return String(a).localeCompare(String(b));
          });
       };
@@ -87,7 +89,7 @@ const AdminScreenings = () => {
 
    const {screening_ids,movie_ids,movies,cinema_ids,cinemas,room_ids,rooms} = populateFields(screenings);
 
-   const handleSort = (key) => {
+   const handleSort = (key: string) => {
       setSortConfig((prev) => {
          if (prev.key === key) {
          if (prev.direction === 'asc') return { key, direction: 'desc' };
@@ -98,7 +100,7 @@ const AdminScreenings = () => {
       setCurrentPage(1);
    };
 
-   const renderSortIcon = (key) => {
+   const renderSortIcon = (key: string) => {
       if (sortConfig.key !== key) return null;
       return sortConfig.direction === 'asc' ? <ArrowDropUpIcon fontSize="small" /> : <ArrowDropDownIcon fontSize="small" />;
    };
@@ -106,18 +108,18 @@ const AdminScreenings = () => {
    const sortedScreenings = useMemo(() => {
       if (!sortConfig.key) return screenings;
       return [...screenings].sort((a, b) => {
-         const aVal = a[sortConfig.key];
-         const bVal = b[sortConfig.key];
+         const aVal = (a as unknown as Record<string, unknown>)[sortConfig.key!];
+         const bVal = (b as unknown as Record<string, unknown>)[sortConfig.key!];
 
          if (aVal == null || bVal == null) return 0;
 
-         if (typeof aVal === 'string') {
+         if (typeof aVal === 'string' && typeof bVal === 'string') {
          return sortConfig.direction === 'asc'
             ? aVal.localeCompare(bVal)
             : bVal.localeCompare(aVal);
          }
 
-         return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+         return sortConfig.direction === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
       });
    }, [screenings, sortConfig]);
 
@@ -143,13 +145,14 @@ const AdminScreenings = () => {
 
    const totalPages = Math.max ( Math.ceil(filteredScreenings.length / ROWS_PER_PAGE), 1 )
 
-   const handleDelete = async (id) => {
+   const handleDelete = async (id: number) => {
       try {
          await axios.delete(`/api/v1/screenings/${id}`);
          await fetchScreenings();
-      } catch (error) {
+      } catch (error: unknown) {
          console.error("Error deleting screening with id: " + id, error);
-         const errorMessage = "Error deleting screening with id: " + id + "\n" + error?.response?.data?.error?.message;
+         const axiosErr = error as { response?: { data?: { error?: { message?: string } } } };
+         const errorMessage = "Error deleting screening with id: " + id + "\n" + (axiosErr?.response?.data?.error?.message ?? "");
          showSnackbar( errorMessage, "error");
       }
    };
@@ -173,7 +176,7 @@ const AdminScreenings = () => {
             <Select
                displayEmpty
                value={filters.screening_id}
-               onChange={(e) => setFilters({ ...filters, screening_id: e.target.value })}
+               onChange={(e: SelectChangeEvent<number | ''>) => setFilters({ ...filters, screening_id: e.target.value as number | '' })}
                size="small"
                sx={{ width: 100 }}
                MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
@@ -198,7 +201,7 @@ const AdminScreenings = () => {
                   null
                }
                onChange={(event, newValue) => {
-                  setFilters({ ...filters, movie_id: newValue ? newValue.movie_id : '' });
+                  setFilters({ ...filters, movie_id: newValue ? Number(newValue.movie_id) : '' });
                }}
                renderInput={(params) => (
                   <TextField {...params} label="Movie" placeholder="Search by movie title" />
@@ -210,7 +213,7 @@ const AdminScreenings = () => {
             <Select
                displayEmpty
                value={filters.cinema_id}
-               onChange={(e) => setFilters({ ...filters, cinema_id: e.target.value })}
+               onChange={(e: SelectChangeEvent<number | ''>) => setFilters({ ...filters, cinema_id: e.target.value as number | '' })}
                size="small"
                sx={{ width: 200 }}
                MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
@@ -224,7 +227,7 @@ const AdminScreenings = () => {
             <Select
                displayEmpty
                value={filters.room_id}
-               onChange={(e) => setFilters({ ...filters, room_id: e.target.value })}
+               onChange={(e: SelectChangeEvent<number | ''>) => setFilters({ ...filters, room_id: e.target.value as number | '' })}
                size="small"
                sx={{ width: 200 }}
                MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
