@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 
 process.env.NODE_ENV = 'test';
-dotenv.config({ path: '.test.env' });
+dotenv.config({ path: '.test.env', quiet: true });
 
 import { jest, beforeAll, afterAll } from '@jest/globals';
 import { rateLimitRedis, authRedis, cacheRedis, connectRedis } from '../../config/redisConnect.js';
