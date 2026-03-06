@@ -1,7 +1,16 @@
 import { createClient } from 'redis';
 
 const redisHost: string = process.env.REDIS_HOST || 'localhost';
-const baseConfig = { url: `redis://${redisHost}:6379` };
+const isTest = process.env.NODE_ENV === 'test';
+const baseConfig = {
+  url: `redis://${redisHost}:6379`,
+  ...(isTest && {
+    socket: {
+      connectTimeout: 2000,
+      reconnectStrategy: false as const,
+    }
+  })
+};
 
 const MAX_RETRIES = 10;   // Max retries before giving up
 const RETRY_DELAY = 5000; // 5 seconds

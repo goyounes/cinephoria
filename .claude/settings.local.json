@@ -22,7 +22,11 @@
       "Bash(grep:*)",
       "Bash(npm run test:unit:*)",
       "Bash(echo:*)",
-      "Bash(\"c:\\\\Users\\\\Younes\\\\Projects\\\\cinephoria\\\\server\\\\types\\\\express.d.ts\" << 'EOF'\nimport { JwtPayload } from 'jsonwebtoken';\n\ndeclare global {\n  namespace Express {\n    interface Request {\n      user?: {\n        userId: number;\n        roleId: number;\n        roleName: string;\n      };\n    }\n  }\n}\n\nexport {};\nEOF)"
+      "Bash(\"c:\\\\Users\\\\Younes\\\\Projects\\\\cinephoria\\\\server\\\\types\\\\express.d.ts\" << 'EOF'\nimport { JwtPayload } from 'jsonwebtoken';\n\ndeclare global {\n  namespace Express {\n    interface Request {\n      user?: {\n        userId: number;\n        roleId: number;\n        roleName: string;\n      };\n    }\n  }\n}\n\nexport {};\nEOF)",
+      "Bash(npx cross-env:*)",
+      "Bash(findstr:*)",
+      "Bash(docker run:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

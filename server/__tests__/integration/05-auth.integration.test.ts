@@ -1,4 +1,4 @@
-import { jest, describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { RequestHandler } from 'express';
@@ -16,13 +16,6 @@ import {
   signWrongTypeToken
 } from '../utils/jwtTestUtils.js';
 
-// Mock the email client to prevent actual email sending during tests
-jest.mock('../../api/emailClient.js', () => ({
-  sendVerificationEmail: jest.fn(),
-  sendPasswordResetEmail: jest.fn(),
-  sendContactMessage: jest.fn(),
-  sendContactAcknowledgment: jest.fn()
-}));
 
 // Import createApp function and create app with no rate limiting
 const { default: createApp } = await import('../../app.js');
@@ -421,7 +414,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
   });
 
   describe('Password Reset Flow', () => {
-    test.skip('should successfully request password reset for existing user', async () => {
+    test('should successfully request password reset for existing user', async () => {
       const response = await request(app)
         .post('/api/v1/auth/reset-password-req')
         .send({ email: testUserData.email })
@@ -461,7 +454,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
       expect(response.body.errors.some((err: any) => err.msg.includes('Email is required'))).toBe(true);
     });
 
-    test.skip('should successfully reset password with valid token', async () => {
+    test('should successfully reset password with valid token', async () => {
       // Generate password reset token
       // passwordResetToken = jwt.sign(
       //   { user_id: registeredUserId, type: 'password_reset' },
@@ -573,7 +566,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
   });
 
-  describe.skip('Token Refresh Flow', () => {
+  describe('Token Refresh Flow', () => {
     let validRefreshCookie: string;
     let accessToken: string;
 
@@ -636,7 +629,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
     });
   });
 
-  describe.skip('Logout Flow', () => {
+  describe('Logout Flow', () => {
     let refreshCookie: string;
 
     beforeAll(async () => {
@@ -737,7 +730,7 @@ describe('Auth Integration Tests - Complete User Flow', () => {
         .expect(404); // Expected to fail since no password was set
     });
 
-    test.skip('should reset password (with manual token creation using same function as production)', async () => {
+    test('should reset password (with manual token creation using same function as production)', async () => {
       // Use the existing verified user
       const testEmail = testUserData.email;
 
