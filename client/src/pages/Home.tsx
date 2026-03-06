@@ -1,5 +1,6 @@
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
 import { useEffect, useState } from "react";
+import type { Movie } from '../types';
 import {
 Container, Stack, Card, Typography,
 Box
@@ -13,7 +14,7 @@ import Home_page_image from '../assets/Home_page_image.webp';
 
 
 const Home = () => {
-   const [movies, setMovies] = useState([]);
+   const [movies, setMovies] = useState<Movie[]>([]);
    const [modalOpen, setModalOpen] = useState(false);
 
    // Initial fetch
@@ -48,7 +49,7 @@ const Home = () => {
                size="large"
                variant="text"
                onClick={() => setModalOpen(true)}
-               startIcon={<SearchIcon />}
+               icon={<SearchIcon />}
             >
                Find movie
             </ResponsiveIconButton>

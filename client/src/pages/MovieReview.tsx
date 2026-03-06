@@ -7,49 +7,52 @@ import SendIcon from "@mui/icons-material/Send";
 import axios from "../api/axiosInstance";
 import { useAuth } from "../context/AuthProvider";
 import { useSnackbar } from "../context/SnackbarProvider";
+import type { Movie, Review } from "../types";
+import type { AxiosError } from 'axios';
 
 const MovieReview = () => {
   const { id } = useParams();
   const { currentUser } = useAuth();
   const showSnackbar = useSnackbar();
 
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [existingReview, setExistingReview] = useState(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [existingReview, setExistingReview] = useState<Review | null>(null);
 
-  const [reviewData, setReviewData] = useState({
+  const [reviewData, setReviewData] = useState<{ score: number; review: string }>({
     score: 0,
     review: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setReviewData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleRatingChange = (e, newValue) => {
+  const handleRatingChange = (_e: React.SyntheticEvent, newValue: number | null) => {
     setReviewData((prev) => ({
       ...prev,
-      score: newValue,
+      score: newValue ?? 0,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await axios.post(`/api/v1/movies/reviews`, {
         movie_id: id,
-        user_id: currentUser.user_id,
+        user_id: currentUser!.user_id,
         score: reviewData.score,
         review: reviewData.review,
       });
 
       setReviewData({ score: 0, review: "" });
       showSnackbar("Review submitted!", "success");
-    } catch (err) {
-      const message = err.response?.data?.error?.message || err.message || "Submission failed";
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ error?: { message?: string } }>;
+      const message = axiosError.response?.data?.error?.message || axiosError.message || "Submission failed";
       showSnackbar(`Error: ${message}`, "error");
     }
   };
@@ -74,8 +77,8 @@ const MovieReview = () => {
             review: res.data.review || "",
           });
         }
-      } catch (err) {
-        if (err.response?.status !== 404) {
+      } catch (err: unknown) {
+        if ((err as AxiosError).response?.status !== 404) {
           console.error("Failed to load existing review:", err);
         }
         // 404 is expected if no review exists
@@ -170,7 +173,7 @@ const MovieReview = () => {
               value={reviewData.score}
               precision={1}
               onChange={handleRatingChange}
-              readOnly={existingReview}
+              readOnly={!!existingReview}
             />
             <TextField
               name="review"
@@ -180,7 +183,7 @@ const MovieReview = () => {
               value={reviewData.review}
               onChange={handleChange}
               placeholder="Your thoughts about the movie..."
-              disabled={existingReview}
+              disabled={!!existingReview}
             />
             {!existingReview && (
               <Button

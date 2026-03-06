@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 // import { Container, Typography, Stack, TextField, Button, Card, CardContent} from '@mui/material';
 import { useParams, useLocation } from "react-router-dom";
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
+import type { Movie as MovieType } from '../types';
 
 import {  Container, Typography, Button} from "@mui/material";
 import {  KeyboardDoubleArrowDown as DownArrow,  KeyboardDoubleArrowUp as UpArrow,} from "@mui/icons-material";
@@ -14,7 +15,7 @@ const Movie = () => {
    const { id } = useParams();
    const location = useLocation();
 
-   const [movie, setMovie] = useState(null);
+   const [movie, setMovie] = useState<MovieType | null>(null);
    const [loadingMovie, setLoadingMovie] = useState(true);
    const [showScreenings, setShowScreenings] = useState(false);
 
@@ -65,7 +66,7 @@ const Movie = () => {
                </Button>
 
                {showScreenings && (
-               <MovieScreenings movieId={id}/>
+               <MovieScreenings movieId={id ? Number(id) : null}/>
                )}
             </>
          )}

@@ -1,27 +1,35 @@
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
 import { useState } from "react";
 import {Container,Typography,TextField,Button,Card,CardContent,Stack} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from '../context/AuthProvider';
-import { useSnackbar } from '../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../context/SnackbarProvider';
+import type { AxiosError } from 'axios';
+
+interface ContactFormData {
+  message_sender_name: string;
+  message_sender_email: string;
+  message_subject: string;
+  message_text: string;
+}
 
 const ContactUs = () => {
   const {currentUser} = useAuth()
   const showSnackbar = useSnackbar();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     message_sender_name: "",
     message_sender_email: currentUser?.user_email || "",
     message_subject: "",
     message_text: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     try {
@@ -35,8 +43,9 @@ const ContactUs = () => {
       });
 
       showSnackbar("Message sent!", "success");
-    } catch (error) {
-      const serverMessage = error.response?.data?.error?.message || error.message || "Something went wrong";
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ error?: { message?: string } }>;
+      const serverMessage = axiosError.response?.data?.error?.message || axiosError.message || "Something went wrong";
       showSnackbar(`Failed to send message: ${serverMessage}`, "error");
     }
   };

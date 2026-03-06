@@ -1,7 +1,11 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 
-const ProtectedRoutes = ({ requiredRoleId }) => {
+interface ProtectedRoutesProps {
+  requiredRoleId: number;
+}
+
+const ProtectedRoutes = ({ requiredRoleId }: ProtectedRoutesProps) => {
   const location = useLocation();
   const { currentUser } = useAuth();
 

@@ -1,4 +1,4 @@
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
 import dayjs from "dayjs";
 import { useEffect, useState, useMemo } from "react";
 
@@ -17,20 +17,21 @@ import MovieCard from "./components/MovieCard";
 import {filterMoviesForSelectedDate, getAllowedScreeningDates, filterMovies, uniqueMovies} from "../utils"
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from '../context/AuthProvider';
+import type { Movie, Cinema, Genre } from '../types';
 
 
 const Movies = () => {
   const { currentUser } = useAuth();
-   const isAdmin = currentUser?.role_id >= 2;
+   const isAdmin = (currentUser?.role_id ?? 0) >= 2;
 
-   const [moviesScreenings, setMoviesScreenings] = useState([]);
-   const [cinemas, setCinemas] = useState([]);
-   const [genresList, setGenresList] = useState([]);
-   const [allMovies, setAllMovies] = useState([]);
+   const [moviesScreenings, setMoviesScreenings] = useState<Movie[]>([]);
+   const [cinemas, setCinemas] = useState<Cinema[]>([]);
+   const [genresList, setGenresList] = useState<Genre[]>([]);
+   const [allMovies, setAllMovies] = useState<Movie[]>([]);
 
-   const [selectedCinema, setSelectedCinema] = useState(null);
-   const [selectedGenres, setSelectedGenres] = useState([]);
-   const [selectedDate, setSelectedDate] = useState(null);
+   const [selectedCinema, setSelectedCinema] = useState<Cinema | null>(null);
+   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
+   const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
 
    const [showPicker, setShowPicker] = useState(false);
    const intilizePicker = () => {
@@ -130,7 +131,7 @@ const Movies = () => {
                 value={selectedCinema ? selectedCinema.cinema_id : ""}
                 label="Cinema"
                 onChange={(e) => {
-                  const selected = cinemas.find((c) => c.cinema_id === e.target.value);
+                  const selected = cinemas.find((c) => c.cinema_id === Number(e.target.value));
                   setSelectedCinema(selected || null);
                 }}
                 sx={{ height: "100%" }}
@@ -144,13 +145,13 @@ const Movies = () => {
               </Select>
             </FormControl>
 
-            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)} startIcon={<SearchIcon />}>
+            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_1_Open(true)} icon={<SearchIcon />}>
               Find movie
             </ResponsiveIconButton>
 
             <SearchMovieModal modalOpen={m_1_Open} setModalOpen={setM_1_Open} />
 
-            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)} startIcon={<TuneIcon />}>
+            <ResponsiveIconButton size="large" variant="outlined" onClick={() => setM_2_Open(true)} icon={<TuneIcon />}>
               Filter by genres
             </ResponsiveIconButton>
             <ModalWrapper width={500} open={m_2_Open} onClose={handleM2Exit}>
@@ -165,7 +166,7 @@ const Movies = () => {
                   options={genresList}
                   getOptionLabel={(option) => option.genre_name}
                   value={selectedGenres}
-                  onChange={(event, newValue) => setSelectedGenres(newValue)}
+                  onChange={(_event, newValue) => setSelectedGenres(newValue)}
                   renderInput={(params) => (
                     <TextField {...params} placeholder="Add genres" />
                   )}
@@ -183,7 +184,7 @@ const Movies = () => {
               <ResponsiveIconButton
                 size="large"
                 variant="outlined"
-                startIcon={<EventIcon />}
+                icon={<EventIcon />}
                 onClick={intilizePicker}
                 sx={{ width: '100%' }}
               >
@@ -197,7 +198,6 @@ const Movies = () => {
                     format={"ddd DD-MM-YYYY"}
                     value={selectedDate}
                     onChange={setSelectedDate}
-                    sx={{ height: "100%", width: "100%" }}
                   />
                 </Box>
                 <IconButton aria-label="Clear date" onClick={clearPicker}>

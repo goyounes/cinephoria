@@ -2,17 +2,18 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Container,Card,CardContent,Typography,Button,Stack,CircularProgress,Box,Chip,Rating} from "@mui/material";
 import { Stars as StarsIcon } from "@mui/icons-material";
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
 
 import PaymentDialog from "./components/PaymentDialog";
 import { useAuth } from "../context/AuthProvider";
-import { useSnackbar } from '../context/SnackbarProvider.jsx';
+import { useSnackbar } from '../context/SnackbarProvider';
+import type { Movie, Screening, TicketType, CardInfo, Order } from '../types';
 
 const MAX_NUMBER_OF_TICKETS_PER_ORDER = 10;
 
 const Checkout = () => {
    const { currentUser } = useAuth();
-   const isAdmin = currentUser?.role_id >= 2;
+   const isAdmin = (currentUser?.role_id ?? 0) >= 2;
    const showSnackbar = useSnackbar();
 
    const [searchParams] = useSearchParams();
@@ -20,11 +21,11 @@ const Checkout = () => {
    const screening_id = searchParams.get("screening_id");
    const movie_id = searchParams.get("movie_id");
 
-   const [loading, setLoading] = useState(true);
-   const [movie, setMovie] = useState(null);
-   const [screening, setScreening] = useState(null);
-   const [ticketTypes, setTicketTypes] = useState([])
-   const [ticketCounts, setTicketCounts] = useState([]);
+   const [loading, setLoading] = useState<boolean>(true);
+   const [movie, setMovie] = useState<Movie | null>(null);
+   const [screening, setScreening] = useState<Screening | null>(null);
+   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+   const [ticketCounts, setTicketCounts] = useState<number[]>([]);
 
    useEffect(() => {
       const fetchData = async () => {
@@ -41,7 +42,7 @@ const Checkout = () => {
             setScreening(screeningsRes.data);
             setTicketTypes(ticketTypesRes.data);
             setTicketCounts(new Array(ticketTypesRes.data.length).fill(0));
-         } catch (err) {
+         } catch (err: unknown) {
             showSnackbar("Failed to load screening or movie info", "error");
          } finally {
             setLoading(false);
@@ -54,7 +55,7 @@ const Checkout = () => {
       // eslint-disable-next-line
    }, [movie_id, screening_id]); 
 
-   const handleTicketChange = (index, delta) => {
+   const handleTicketChange = (index: number, delta: number) => {
       const currentTotal = ticketCounts.reduce((sum, count) => sum + count, 0);
       const currentCount = ticketCounts[index];
       const newCount = currentCount + delta;
@@ -73,13 +74,13 @@ const Checkout = () => {
    const calculateTotal = () => ticketCounts.reduce((sum, count, i) => sum + count * (ticketTypes[i]?.ticket_type_price || 0), 0);
 
    const [cardDialogOpen, setCardDialogOpen] = useState(false);
-   const [cardInfo, setCardInfo] = useState({
+   const [cardInfo, setCardInfo] = useState<CardInfo>({
       number: "",
       expiry: "",
       cvv: ""
    });
 
-   const orderObject = {
+   const orderObject: Order = {
       screening_id,
       ticket_types: ticketTypes.map((type, index) => ({
          type_id: type.ticket_type_id,

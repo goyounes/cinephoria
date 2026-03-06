@@ -1,4 +1,4 @@
-import axios from '../api/axiosInstance.js';
+import axios from '../api/axiosInstance';
 import { useEffect, useState, useMemo } from "react";
 import { Container, Stack, Card, Typography, FormControl, InputLabel, Select, MenuItem,Box} from "@mui/material";
 
@@ -12,16 +12,17 @@ import MovieDetails from "./components/MovieDetails";
 import {filterAndUniqueMovies, groupScreeningsByMovie} from "../utils";
 import Home_page_image from '../assets/Home_page_image.webp';
 import { useAuth } from '../context/AuthProvider';
+import type { Movie, Cinema, Screening } from '../types';
 
 
 const Reservation = () => {
    const { currentUser } = useAuth()
-   const isAdmin = currentUser?.role_id >= 2;
+   const isAdmin = (currentUser?.role_id ?? 0) >= 2;
 
-   const [movies, setMovies] = useState([]);
-   const [cinemas, setCinemas] = useState([]);
-   
-   const [selectedCinema, setSelectedCinema] = useState(null);
+   const [movies, setMovies] = useState<Movie[]>([]);
+   const [cinemas, setCinemas] = useState<Cinema[]>([]);
+
+   const [selectedCinema, setSelectedCinema] = useState<Cinema | null>(null);
    const [selectedMovieId, setSelectedMovieId] = useState(-1);
 
    const [nbrOfTickets, setNbrOfTickets] = useState(1);
@@ -50,7 +51,7 @@ const Reservation = () => {
       [movies, selectedCinema]
    );
 
-   const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(movies), [movies]);
+   const screeningsToDisplay = useMemo(() => groupScreeningsByMovie(movies as unknown as Screening[]), [movies]);
 
 
    useEffect(() => {
@@ -87,7 +88,7 @@ const Reservation = () => {
                   value={selectedCinema?.cinema_id || ""}
                   label="Cinema"
                   onChange={(e) => {
-                     const selected = cinemas.find(c => c.cinema_id === e.target.value);
+                     const selected = cinemas.find(c => c.cinema_id === Number(e.target.value));
                      setSelectedCinema(selected || null);
                      setSelectedMovieId(-1)
                   }}
@@ -105,7 +106,7 @@ const Reservation = () => {
                   size="large"
                   variant="outlined"
                   onClick={() => setModalOpen(true)}
-                  startIcon={<SearchIcon />}
+                  icon={<SearchIcon />}
                >
                   Find movie
                </ResponsiveIconButton>
@@ -120,7 +121,7 @@ const Reservation = () => {
                labelId="number-of-tickets-select-label"
                value={nbrOfTickets}
                label="Tickets"
-               onChange={(e) => setNbrOfTickets(e.target.value)}
+               onChange={(e) => setNbrOfTickets(Number(e.target.value))}
                >
                {[...Array(10)].map((_, i) => (
                   <MenuItem key={i + 1} value={i + 1}>
@@ -144,7 +145,7 @@ const Reservation = () => {
 
          {selectedMovieId !== -1 && screeningsToDisplay[selectedMovieId] && (
          <>
-            <MovieDetails movie={screeningsToDisplay[selectedMovieId][0]} loadingMovie={false} />
+            <MovieDetails movie={screeningsToDisplay[selectedMovieId][0] as unknown as Movie} loadingMovie={false} />
             <MovieScreenings movieId={selectedMovieId} cinema_id={selectedCinema?.cinema_id || null} nbrOfTickets={nbrOfTickets} />
          </>
          )}
