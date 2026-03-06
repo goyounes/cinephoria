@@ -47,7 +47,7 @@ import MovieReview from './pages/MovieReview';
 function App() {
   const location = useLocation();
   const {currentUser} = useAuth()
-  const isAdminUser = currentUser?.role_id >= 2;
+  const isAdminUser = (currentUser?.role_id ?? 0) >= 2;
   const showSidebar = isAdminUser && location.pathname.startsWith('/admin');
 
   return (

@@ -1,9 +1,13 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 
+interface NavLink {
+  to: string;
+  icon: string;
+  label: string;
+}
 
-const navLinks = {
+const navLinks: { middle: NavLink[]; right: NavLink[] } = {
   middle: [
     { to: '/admin/movies', icon: '🎞️', label: 'Movies' },
     { to: '/cinemas', icon: '🏛️', label: 'Cinemas' },
@@ -14,7 +18,7 @@ const navLinks = {
   ],
 };
 
-function NavItem({ to, icon, label }) {
+function NavItem({ to, icon, label }: NavLink) {
   return (
     <Box
       component={Link}
@@ -43,7 +47,7 @@ function NavItem({ to, icon, label }) {
   );
 }
 
-function NavGroup({ items, flexGrow }) {
+function NavGroup({ items, flexGrow }: { items: NavLink[]; flexGrow?: number }) {
   return (
     <Box
       sx={{

@@ -10,7 +10,7 @@ import { SnackbarProvider } from './context/SnackbarProvider';
 const isElectron = window.navigator.userAgent.includes('Electron');
 const Router = isElectron ? HashRouter : BrowserRouter;
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
     <AuthContextProvider>
