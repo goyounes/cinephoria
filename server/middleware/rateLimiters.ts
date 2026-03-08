@@ -17,7 +17,7 @@ export const createRateLimit = (windowMs: number, max: number, prefix: string) =
       }
 
       if (current > max) {
-        res.status(429).json({ error: 'Rate limit exceeded' });
+        res.status(429).json({ message: 'Rate limit exceeded', status: 429 });
         return;
       }
 
