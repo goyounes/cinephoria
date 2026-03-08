@@ -9,6 +9,7 @@ import axios from '../../../api/axiosInstance';
 import ImageUploader from "../../../components/UI/ImageUploader";
 import AddIcon from '@mui/icons-material/Add';
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import type { Genre } from '../../../types';
 
 
@@ -70,9 +71,7 @@ const AddMovie = () => {
       await axios.post('/api/v1/movies', formData,{headers: {'Content-Type': 'multipart/form-data'}});
       showSnackbar("Movie added successfully!", "success");
     } catch (error: unknown) {
-      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
-      const customMessage = "\nAxios : " + (axiosErr.message ?? "") +"\nServer : "+ (axiosErr.response?.data?.error?.message || "Server error");
-      showSnackbar("Failed to add movie: " + customMessage, "error");
+      showSnackbar("Failed to add movie: " + extractErrorMessage(error), "error");
     }
   };
 

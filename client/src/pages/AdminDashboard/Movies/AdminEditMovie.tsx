@@ -12,6 +12,7 @@ import ImageUploader from "../../../components/UI/ImageUploader";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import type { Genre, Movie } from '../../../types';
 
 const EditMovie = () => {
@@ -111,9 +112,7 @@ const EditMovie = () => {
           showSnackbar("Movie updated successfully!", "success");
           navigate(`/movies/${id}`)
         } catch (error: unknown) {
-          const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
-          const customMessage = "\nAxios : " + (axiosErr.message ?? "") +"\nServer : "+ (axiosErr.response?.data?.error?.message || "Server error");
-          showSnackbar("Failed to update movie: " + customMessage, "error");
+          showSnackbar("Failed to update movie: " + extractErrorMessage(error), "error");
         }
     };
 

@@ -4,6 +4,7 @@ import { validateCardExpiryDate } from '../../utils';
 import axios from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 import type { CardInfo, Order } from '../../types';
 
 interface PaymentDialogProps {
@@ -67,10 +68,9 @@ const PaymentDialog = ({ open, onClose, cardInfo, setCardInfo, order }: PaymentD
       // call backend to process the chekout
       try {
          await axios.post("/api/v1/checkout/complete", {...order,card: cardInfo});
-      } catch (error) {
-         const axiosErr = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      } catch (error: unknown) {
          showSnackbar(
-            `Failed during Backend Processing: ${axiosErr.response?.data?.error?.message || axiosErr.message || "Something went wrong"}`,
+            `Failed during Backend Processing: ${extractErrorMessage(error)}`,
             "error");
          setIsProcessing(false);
          return;

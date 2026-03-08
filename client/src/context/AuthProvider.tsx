@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, useLayoutEffect, type ReactNode } from 'react';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import axios from '../api/axiosInstance';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 import type { CurrentUser, LoginInputs, LoginResponse } from '../types';
 
 interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -49,20 +50,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('currentUser', JSON.stringify(user));
 
       return user;
-    } catch (error) {
-      const axiosError = error as AxiosError<{ errors?: { msg: string }[]; message?: string; error?: { message: string } }>;
-      const backendErrors = axiosError.response?.data?.errors;
-      let formattedMessage: string;
-      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
-        formattedMessage = backendErrors.map(e => e.msg).join(", ");
-      } else if (axiosError.response?.data?.message) {
-        formattedMessage = axiosError.response.data.message;
-      } else if (axiosError.response?.data?.error?.message) {
-        formattedMessage = axiosError.response.data.error.message;
-      } else {
-        formattedMessage = axiosError.message || "Unknown error occurred";
-      }
-      throw new Error(formattedMessage);
+    } catch (error: unknown) {
+      throw new Error(extractErrorMessage(error));
     }
   };
 

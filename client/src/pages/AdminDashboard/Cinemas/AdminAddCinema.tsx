@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "../../../api/axiosInstance";
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 
 const AdminAddCinema = () => {
   const showSnackbar = useSnackbar();
@@ -102,9 +103,9 @@ const AdminAddCinema = () => {
       // Reset form
       setCinemaData({ cinema_name: "", cinema_adresse: "" });
       setRooms([{ room_name: "", room_capacity: "" }]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      showSnackbar("Error adding cinema and rooms", "error");
+      showSnackbar("Error adding cinema and rooms: " + extractErrorMessage(error), "error");
     }
   };
 

@@ -5,10 +5,9 @@ import {
   Container, Typography, Stack, TextField, Button, Card, CardContent
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import type { AxiosError } from 'axios';
-
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 
 interface PasswordValidation {
   length: boolean;
@@ -128,11 +127,7 @@ const Register = () => {
       showSnackbar("Registered successfully!", "success");
       navigate('/home');
     } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ error?: { message?: string } }>;
-      showSnackbar(
-        "Failed to register: " + (axiosError.response?.data?.error?.message || "Server error"),
-        "error"
-      );
+      showSnackbar("Failed to register: " + extractErrorMessage(err), "error");
     }
   };
 

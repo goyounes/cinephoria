@@ -4,7 +4,7 @@ import {Container,Typography,TextField,Button,Card,CardContent,Stack} from "@mui
 import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from '../context/AuthProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
-import type { AxiosError } from 'axios';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 
 interface ContactFormData {
   message_sender_name: string;
@@ -44,9 +44,7 @@ const ContactUs = () => {
 
       showSnackbar("Message sent!", "success");
     } catch (error: unknown) {
-      const axiosError = error as AxiosError<{ error?: { message?: string } }>;
-      const serverMessage = axiosError.response?.data?.error?.message || axiosError.message || "Something went wrong";
-      showSnackbar(`Failed to send message: ${serverMessage}`, "error");
+      showSnackbar(`Failed to send message: ${extractErrorMessage(error)}`, "error");
     }
   };
 

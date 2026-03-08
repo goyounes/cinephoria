@@ -10,6 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreIcon from "@mui/icons-material/Restore";
 import axios from "../../../api/axiosInstance";
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import { useParams, useNavigate } from "react-router-dom";
 
 interface EditableRoom {
@@ -208,8 +209,8 @@ const AdminEditCinema = () => {
 
       // Navigate back to cinema list or refresh current route
       navigate(0);
-    } catch (err) {
-      showSnackbar("Failed to update cinema", "error");
+    } catch (err: unknown) {
+      showSnackbar("Failed to update cinema: " + extractErrorMessage(err), "error");
       console.error(err);
     }
   };

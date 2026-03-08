@@ -12,6 +12,7 @@ ArrowDropUp as ArrowDropUpIcon,
 ArrowDropDown as ArrowDropDownIcon }
 from '@mui/icons-material';
 import { useSnackbar } from '../../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import ImageWithSkeleton from '../../../components/UI/ImageWithSkeleton';
 import type { Movie, SortConfig } from '../../../types';
 import type { SelectChangeEvent } from '@mui/material';
@@ -120,9 +121,7 @@ const AdminMovies = () => {
          await fetchMovies();
       } catch (error: unknown) {
          console.error("Error deleting movie with id: " + id, error);
-         const axiosErr = error as { response?: { data?: { error?: { message?: string } } } };
-         const errorMessage = "Error deleting movie with id: " + id + "\n" + (axiosErr?.response?.data?.error?.message ?? "");
-         showSnackbar(errorMessage, "error");
+         showSnackbar("Error deleting movie with id: " + id + "\n" + extractErrorMessage(error), "error");
       }
    };
 

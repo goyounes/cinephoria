@@ -15,6 +15,7 @@ ArrowDropUp as ArrowDropUpIcon,
 ArrowDropDown as ArrowDropDownIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import type { Screening, SortConfig } from '../../../types';
 
 const AdminScreenings = () => {
@@ -151,9 +152,7 @@ const AdminScreenings = () => {
          await fetchScreenings();
       } catch (error: unknown) {
          console.error("Error deleting screening with id: " + id, error);
-         const axiosErr = error as { response?: { data?: { error?: { message?: string } } } };
-         const errorMessage = "Error deleting screening with id: " + id + "\n" + (axiosErr?.response?.data?.error?.message ?? "");
-         showSnackbar( errorMessage, "error");
+         showSnackbar("Error deleting screening with id: " + id + "\n" + extractErrorMessage(error), "error");
       }
    };
 

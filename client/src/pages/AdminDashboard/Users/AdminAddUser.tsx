@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent, FormControl, InputLabel, Select, MenuItem, type SelectChangeEvent} from '@mui/material';
 
 import { useSnackbar } from '../../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 
 const AddUser = () => {
   const showSnackbar = useSnackbar();
@@ -41,9 +42,8 @@ const AddUser = () => {
         role_id: '',
       });
       navigate('/admin/users'); // Redirect to the admin users page
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      showSnackbar("Failed to add User: " + message, "error");
+    } catch (err: unknown) {
+      showSnackbar("Failed to add User: " + extractErrorMessage(err), "error");
     }
   };
 

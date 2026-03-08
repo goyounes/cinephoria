@@ -12,7 +12,7 @@ import {
 import LockResetIcon from '@mui/icons-material/LockReset';
 import axios from '../../api/axiosInstance';
 import { useSnackbar } from '../../context/SnackbarProvider';
-import type { AxiosError } from 'axios';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 
 interface PasswordValidation {
   length: boolean;
@@ -111,13 +111,7 @@ const ResetPasswordForm = () => {
       showSnackbar("Password reset successful", "success");
       navigate('/auth/login');
     } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ error?: { message?: string }; message?: string }>;
-      const message =
-        axiosError.response?.data?.error?.message ||
-        axiosError.response?.data?.message ||
-        axiosError.message ||
-        'Reset failed';
-      showSnackbar(message, 'error');
+      showSnackbar(extractErrorMessage(err, 'Reset failed'), 'error');
     }
   };
 

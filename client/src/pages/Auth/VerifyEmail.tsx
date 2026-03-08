@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import axios from '../../api/axiosInstance';
 import type { AxiosError } from 'axios';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 
 type VerifyStatus = 'verifying' | 'success' | 'failure';
 
@@ -26,14 +27,13 @@ const VerifyEmail = () => {
         setStatus('success');
         setMessage(response.data.message || 'Email successfully verified!');
       } catch (error: unknown) {
-        const axiosError = error as AxiosError<{ message?: string }>;
+        const axiosError = error as AxiosError;
         if (axiosError.response?.status === 409) {
           setStatus('success');
           setMessage('Your email is already verified!');
         } else {
           setStatus('failure');
-          const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Verification failed';
-          setMessage(errorMessage);
+          setMessage(extractErrorMessage(error, 'Verification failed'));
         }
       }
     };

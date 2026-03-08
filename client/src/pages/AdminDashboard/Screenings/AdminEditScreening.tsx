@@ -9,6 +9,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 
 import axios from '../../../api/axiosInstance';
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 import { useParams } from "react-router-dom";
 
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
@@ -116,9 +117,7 @@ const AdminEditScreening = () => {
       await axios.put(`/api/v1/screenings/${id}`, payload);
       showSnackbar("Screening updated successfully!", "success");
     } catch (error: unknown) {
-      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
-      const msg = axiosErr.response?.data?.error?.message || axiosErr.message;
-      showSnackbar("Failed to update screening: " + msg, "error");
+      showSnackbar("Failed to update screening: " + extractErrorMessage(error), "error");
       console.error(error);
     }
   };

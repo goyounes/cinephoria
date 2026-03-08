@@ -2,10 +2,9 @@ import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Stack,Button, Card, CardContent} from '@mui/material';
-import type { AxiosError } from 'axios';
-
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 
 const Logout = () => {
   const { currentUser} = useAuth();
@@ -24,11 +23,7 @@ const Logout = () => {
       showSnackbar( "Logout successful! Goodbye", "success");
       navigate('/home');
     } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ error?: { message?: string } }>;
-      showSnackbar(
-        "Logout error: " + (axiosError.response?.data?.error?.message || "Server error"),
-        "error"
-      );
+      showSnackbar("Logout error: " + extractErrorMessage(err), "error");
     }
   };
 

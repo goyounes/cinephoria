@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Stack, TextField, Button, Card, CardContent } from '@mui/material';
-import type { AxiosError } from 'axios';
-
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { extractErrorMessage } from '../../utils/extractErrorMessage';
 
 // Email validation helper
 const isValidEmail = (email: string): boolean => {
@@ -42,14 +41,7 @@ const ResetPasswordReq = () => {
       await resetPasswordReq(email);
       showSnackbar(`Password reset link sent to ${email}`, 'success');
     } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ error?: { message?: string }; message?: string }>;
-      const errorMessage =
-        'Failed to send reset email: ' +
-        (axiosError.response?.data?.error?.message ||
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          'Server error');
-      showSnackbar(errorMessage, 'error');
+      showSnackbar('Failed to send reset email: ' + extractErrorMessage(err), 'error');
     }
   };
 

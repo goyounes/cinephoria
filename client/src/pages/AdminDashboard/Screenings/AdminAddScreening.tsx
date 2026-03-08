@@ -7,6 +7,7 @@ import type { SelectChangeEvent } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import axios from '../../../api/axiosInstance';
 import { useSnackbar } from "../../../context/SnackbarProvider";
+import { extractErrorMessage } from '../../../utils/extractErrorMessage';
 
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -121,9 +122,7 @@ const AdminAddScreening = () => {
       await axios.post("/api/v1/screenings", payload);
       showSnackbar("Screening added successfully! You can continue to add other screenings", "success");
     } catch (error: unknown) {
-      const axiosErr = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
-      const customMessage = "\nAxios: " + (axiosErr.message ?? "") + "\nServer: " + (axiosErr.response?.data?.error?.message || "Server error");
-      showSnackbar("Failed to add screening: " + customMessage, "error");
+      showSnackbar("Failed to add screening: " + extractErrorMessage(error), "error");
       console.error(error);
     }
   };

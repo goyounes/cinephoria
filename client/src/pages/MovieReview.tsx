@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthProvider";
 import { useSnackbar } from "../context/SnackbarProvider";
 import type { Movie, Review } from "../types";
 import type { AxiosError } from 'axios';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 
 const MovieReview = () => {
   const { id } = useParams();
@@ -51,9 +52,7 @@ const MovieReview = () => {
       setReviewData({ score: 0, review: "" });
       showSnackbar("Review submitted!", "success");
     } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ error?: { message?: string } }>;
-      const message = axiosError.response?.data?.error?.message || axiosError.message || "Submission failed";
-      showSnackbar(`Error: ${message}`, "error");
+      showSnackbar(`Error: ${extractErrorMessage(err, "Submission failed")}`, "error");
     }
   };
 
