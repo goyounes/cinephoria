@@ -786,3 +786,144 @@ VALUES
 (33,17,92,4),
 (33,18,93,4);
 SELECT * FROM tickets;
+
+-- ====================================================================================================================
+-- DYNAMIC SCHEDULE GENERATION
+-- Generates a realistic cinema schedule relative to CURDATE(): from 90 days in the past to 180 days in the future.
+-- Each day: 1-3 "featured" movies, each with 4-5 sessions in one dedicated room and real reservations
+-- (evening shows fill up more), plus a handful of lighter "background" shows across other cinemas.
+-- Runs on top of the static data above (auto-increment IDs continue via LAST_INSERT_ID()).
+-- NOTE: kept separate from server/__tests__/utils/init.sql (test loader strips DELIMITER blocks).
+-- ====================================================================================================================
+
+DELIMITER //
+CREATE PROCEDURE seed_dynamic_schedule()
+BEGIN
+    DECLARE v_offset   INT DEFAULT -90;
+    DECLARE v_date     DATE;
+    DECLARE v_featured INT;
+    DECLARE f          INT;
+    DECLARE v_movie    INT;
+    DECLARE v_room     INT;
+    DECLARE v_cinema   INT;
+    DECLARE v_cap      INT;
+    DECLARE v_len      TIME;
+    DECLARE v_slots    INT;
+    DECLARE s          INT;
+    DECLARE v_start    TIME;
+    DECLARE v_screening INT;
+    DECLARE v_take     INT;
+    DECLARE v_q        INT;
+    DECLARE v_bg       INT;
+    DECLARE b          INT;
+
+    WHILE v_offset <= 180 DO
+        SET v_date = CURDATE() + INTERVAL v_offset DAY;
+
+        -- -------- A. Featured movies: full day's run (4-5 sessions, one room) + reservations --------
+        SET v_featured = 1 + FLOOR(RAND() * 3);   -- 1..3
+        SET f = 0;
+        WHILE f < v_featured DO
+            SET v_movie  = 1 + FLOOR(RAND() * 12);
+            SET v_room   = 1 + FLOOR(RAND() * 10);
+            SET v_cinema = (SELECT cinema_id     FROM rooms  WHERE room_id  = v_room);
+            SET v_cap    = (SELECT room_capacity FROM rooms  WHERE room_id  = v_room);
+            SET v_len    = (SELECT length        FROM movies WHERE movie_id = v_movie);
+            SET v_slots  = 4 + FLOOR(RAND() * 2);  -- 4..5
+
+            SET s = 0;
+            WHILE s < v_slots DO
+                SET v_start = CASE s
+                    WHEN 0 THEN '10:00:00'
+                    WHEN 1 THEN '13:00:00'
+                    WHEN 2 THEN '16:00:00'
+                    WHEN 3 THEN '19:00:00'
+                    ELSE        '22:00:00'
+                END;
+
+                INSERT INTO screenings(movie_id, cinema_id, room_id, start_date, start_time, end_time)
+                VALUES (v_movie, v_cinema, v_room, v_date, v_start, ADDTIME(v_start, v_len));
+                SET v_screening = LAST_INSERT_ID();
+
+                -- 1-2 random qualities
+                SET v_q = 1 + FLOOR(RAND() * 2);
+                INSERT INTO screening_qualities(screening_id, quality_id)
+                SELECT v_screening, quality_id FROM qualities ORDER BY RAND() LIMIT v_q;
+
+                -- reservations: evening shows busier than mornings
+                SET v_take = CASE
+                    WHEN s >= 3 THEN FLOOR(v_cap * (0.5 + RAND() * 0.4))   -- 50-90%
+                    WHEN s  = 2 THEN FLOOR(v_cap * (0.3 + RAND() * 0.3))   -- 30-60%
+                    ELSE             FLOOR(v_cap * (0.1 + RAND() * 0.3))   -- 10-40%
+                END;
+                IF v_take > 0 THEN
+                    INSERT INTO tickets(screening_id, user_id, seat_id, ticket_type_id, created_at)
+                    SELECT v_screening,
+                           1 + FLOOR(RAND() * 18),
+                           seat_id,
+                           1 + FLOOR(RAND() * 4),
+                           LEAST(NOW(), TIMESTAMP(v_date)) - INTERVAL FLOOR(RAND() * 5) DAY
+                    FROM seats
+                    WHERE room_id = v_room AND isDeleted = FALSE
+                    ORDER BY RAND()
+                    LIMIT v_take;
+                END IF;
+
+                SET s = s + 1;
+            END WHILE;
+            SET f = f + 1;
+        END WHILE;
+
+        -- -------- B. Background shows: single sessions for variety, occasional light bookings --------
+        SET v_bg = 2 + FLOOR(RAND() * 4);   -- 2..5
+        SET b = 0;
+        WHILE b < v_bg DO
+            SET v_movie  = 1 + FLOOR(RAND() * 12);
+            SET v_room   = 1 + FLOOR(RAND() * 10);
+            SET v_cinema = (SELECT cinema_id     FROM rooms  WHERE room_id  = v_room);
+            SET v_cap    = (SELECT room_capacity FROM rooms  WHERE room_id  = v_room);
+            SET v_len    = (SELECT length        FROM movies WHERE movie_id = v_movie);
+            SET v_start  = CASE FLOOR(RAND() * 5)
+                WHEN 0 THEN '10:00:00'
+                WHEN 1 THEN '13:00:00'
+                WHEN 2 THEN '16:00:00'
+                WHEN 3 THEN '19:00:00'
+                ELSE        '22:00:00'
+            END;
+
+            INSERT INTO screenings(movie_id, cinema_id, room_id, start_date, start_time, end_time)
+            VALUES (v_movie, v_cinema, v_room, v_date, v_start, ADDTIME(v_start, v_len));
+            SET v_screening = LAST_INSERT_ID();
+
+            SET v_q = 1 + FLOOR(RAND() * 2);
+            INSERT INTO screening_qualities(screening_id, quality_id)
+            SELECT v_screening, quality_id FROM qualities ORDER BY RAND() LIMIT v_q;
+
+            -- ~50% chance of a light booking (5-25% of capacity)
+            IF RAND() < 0.5 THEN
+                SET v_take = FLOOR(v_cap * (0.05 + RAND() * 0.2));
+                IF v_take > 0 THEN
+                    INSERT INTO tickets(screening_id, user_id, seat_id, ticket_type_id, created_at)
+                    SELECT v_screening,
+                           1 + FLOOR(RAND() * 18),
+                           seat_id,
+                           1 + FLOOR(RAND() * 4),
+                           LEAST(NOW(), TIMESTAMP(v_date)) - INTERVAL FLOOR(RAND() * 5) DAY
+                    FROM seats
+                    WHERE room_id = v_room AND isDeleted = FALSE
+                    ORDER BY RAND()
+                    LIMIT v_take;
+                END IF;
+            END IF;
+
+            SET b = b + 1;
+        END WHILE;
+
+        SET v_offset = v_offset + 1;
+    END WHILE;
+END;
+//
+DELIMITER ;
+
+CALL seed_dynamic_schedule();
+DROP PROCEDURE seed_dynamic_schedule;
