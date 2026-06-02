@@ -1,28 +1,34 @@
 # DOCKERFILE SERVEUR NODE.JS - PRODUCTION
-# Ce fichier construit un conteneur optimisé pour la production
-# avec une image légère et sans les dépendances de développement
+# Multi-stage build: compile TypeScript then run with minimal image
 
-# Image Node.js slim (allégée) version 22 pour optimiser la taille
-FROM node:22-slim
+# ── Stage 1: Build ──────────────────────────────────────────────
+FROM node:22-slim AS builder
 
-# Définit le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copie uniquement le fichier package.json pour optimiser le cache Docker
+# Install all dependencies (dev included, needed for tsc)
 COPY package.json ./
+RUN npm install
 
-# Installation des dépendances de production uniquement (exclut devDependencies)
+# Copy source code and compile TypeScript
+COPY . .
+RUN npx tsc
+
+# ── Stage 2: Production ────────────────────────────────────────
+FROM node:22-slim
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package.json ./
 RUN npm install --omit=dev
 
-# Copie tout le code source du serveur
-COPY . .
-
-# Nettoyage des fichiers de test
-RUN rm -rf __tests__ && \
-    find utils -name "*.test.js" -delete
+# Copy compiled JavaScript from builder stage
+COPY --from=builder /app/dist ./dist
 
 # Expose le port 8080 pour l'API backend
 EXPOSE 8080
 
 # Commande pour démarrer le serveur en mode production
-CMD ["npm", "start"]
+ENV NODE_ENV=production
+CMD ["node", "dist/server.js"]

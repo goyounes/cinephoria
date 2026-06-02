@@ -11,11 +11,9 @@
     "test:ratelimiting": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js __tests__/ratelimiting/",
     "test:watch": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "cross-env NODE_ENV=test node --no-deprecation --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
-    "start": "NODE_ENV=production node server.js",
-    "start:dist": "NODE_ENV=production node dist/server.js",
+    "start": "NODE_ENV=production node dist/server.js",
     "start:ts": "NODE_ENV=production tsx server.ts",
-    "dev": "cross-env NODE_ENV=development tsx --watch server.js",
-    "dev:ts": "cross-env NODE_ENV=development tsx --watch server.ts",
+    "dev": "cross-env NODE_ENV=development tsx --watch server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },

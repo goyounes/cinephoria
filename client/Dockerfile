@@ -12,7 +12,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Installation de toutes les dépendances (dev + production)
-RUN npm install
+# --legacy-peer-deps: react-scripts@5 expects typescript@^4 but we use typescript@^5
+RUN npm install --legacy-peer-deps
 
 # Copie tout le code source de l'application React
 COPY . .
