@@ -54,8 +54,8 @@ describe('Rate Limiting Integration Tests', () => {
       // Check rate limit response format
       const rateLimitedResponse = responses.find(r => r.status === 429);
       if (rateLimitedResponse) {
-        expect(rateLimitedResponse.body).toHaveProperty('error');
-        expect(rateLimitedResponse.body.error).toBe('Rate limit exceeded');
+        expect(rateLimitedResponse.body).toHaveProperty('message');
+        expect(rateLimitedResponse.body.message).toBe('Rate limit exceeded');
       }
 
       console.log(`Rate limiting test: ${successCount} successful, ${rateLimitedCount} rate limited`);
