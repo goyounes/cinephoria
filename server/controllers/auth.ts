@@ -35,7 +35,10 @@ export async function registerService(req: Request, res: Response) {
 
     await connection.beginTransaction();
 
-    const q2 = "INSERT INTO users (user_name, user_email, first_name, last_name) VALUES (?,?,?,?)";
+    // BYPASS: SendGrid free tier ended, so email delivery is dead. Mark new users
+    // as verified on registration so they can log in immediately. Revert (set back
+    // to the isVerified DEFAULT FALSE + send flow) once email delivery is restored.
+    const q2 = "INSERT INTO users (user_name, user_email, first_name, last_name, isVerified) VALUES (?,?,?,?,TRUE)";
     const values2 = [
       req.body.username,
       req.body.email,
@@ -51,10 +54,11 @@ export async function registerService(req: Request, res: Response) {
 
     await connection.commit();
 
-    const { link: verificationLink } = generateEmailVerificationLink(user_id);
-    await sendVerificationEmail(req.body.email, verificationLink);
+    // BYPASS (SendGrid free tier ended): skip sending the verification email.
+    // const { link: verificationLink } = generateEmailVerificationLink(user_id);
+    // await sendVerificationEmail(req.body.email, verificationLink);
 
-    respondWithJson(res, { message: "User registered successfully. Please verify your email. The link will expire in 1h", user_id }, 201);
+    respondWithJson(res, { message: "User registered successfully. Your account is ready to use.", user_id }, 201);
   } catch (error) {
     await connection.rollback();
     throw error;
